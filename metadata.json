@@ -1,0 +1,6 @@
+{
+  "name": "Sengoku Soldier",
+  "description": "A persistent strategy-RPG simulation set in 1540 Sengoku Japan. Rise from a low-ranking soldier to a legendary commander through combat, politics, economy, and NPC relationship building, masterfully narrated by Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
