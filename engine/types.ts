@@ -93,7 +93,8 @@ export type EventType =
   | 'alert'
   | 'money'
   | 'flag'
-  | 'heard';
+  | 'heard'
+  | 'duel';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {
@@ -127,6 +128,8 @@ export interface GameState {
   seasonKey: string;
   events: GameEvent[];
   nextSeq: number;
+  /** Active duel, if any (ch. 6a). */
+  duel?: import('./duel').DuelState | null;
 }
 
 /** Canonical action (ch. 12b #1): what the engine resolves, stored with the event log. */
@@ -142,7 +145,8 @@ export interface Action {
     | 'rest'
     | 'sleep'
     | 'train'
-    | 'meet';
+    | 'meet'
+    | 'duel';
   target?: string; // npc id, or training focus
 }
 

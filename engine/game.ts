@@ -21,6 +21,17 @@ export function newGame(worldNumber = 1): { state: GameState; text: string } {
 export function parseFreeText(s: GameState, input: string): { action?: Action; ask?: string } {
   const t = input.toLowerCase();
   const part = s.date.part;
+  if (s.duel && !s.duel.over) {
+    const map: [RegExp, string][] = [
+      [/\b(simulate|auto|play out)\b/, 'auto'], [/\b(run|flee|escape)\b/, 'flee'], [/\b(yield|surrender|give up)\b/, 'yield'],
+      [/\b(feint|fake|trick)\b/, 'feint'], [/\b(counter|defend|block|parry|guard)\b/, 'counter'],
+      [/\b(observe|watch|read|wait|study)\b/, 'observe'], [/\b(attack|strike|stab|slash|charge|hit)\b/, 'attack'],
+    ];
+    const hit = map.filter(([re]) => re.test(t));
+    if (hit.length === 1) return { action: { kind: 'duel', target: hit[0][1] } };
+    if (hit.length > 1) return { ask: `Do you mean: ${hit.map((h) => h[1]).join(' or ')}?` };
+    return { ask: 'You are in a fight! Attack, counter, feint, observe, simulate, run or yield?' };
+  }
   const who = (words: string) => findPerson(s, words);
   const m = t.match(/(?:talk|speak|ask|chat)(?: to| with)?\s+(.+)/);
   if (m) {

@@ -65,6 +65,26 @@ export const BEATS: Beat[] = [
   { id: 'z1', npc: 'ishizue', minOpinion: -100, text: 'Commander Ishizue does not answer slaves. A guard pushes you back.' },
 ];
 
+export interface DuelTemplate {
+  id: string;
+  place: string;
+  intro: string;
+  foe: { id: string; name: string; val: number; mastery: number; wound: 0 | 1 | 2 | 3; fatigue: number; estimate: string };
+  prefs: { attack: number; counter: number; feint: number; observe: number };
+  surprise: boolean;
+}
+
+export const DUELS: Record<string, DuelTemplate> = {
+  raid: {
+    id: 'raid',
+    place: 'Sasabe village, burning',
+    intro: 'In the smoke behind a burning barn a Suiren raider has Kaname pinned against the wall. She has cut his thigh, but her naginata is broken. He has not seen you. There is a dropped short sword in the mud at your feet.',
+    foe: { id: 'suiren_levy', name: 'the Suiren raider', val: 22, mastery: 20, wound: 2, fatigue: 1, estimate: 'Suiren levy with a spear · Warrior E? · bleeding from the thigh' },
+    prefs: { attack: 3, counter: 1, feint: 1, observe: 0 },
+    surprise: true,
+  },
+};
+
 export interface StoryEvent {
   id: string;
   day: number; // day index (Year 100, Month 1, Day 1 = 0)
@@ -72,6 +92,7 @@ export interface StoryEvent {
   text: string;
   journal: string;
   meet?: string[];
+  duel?: string;
 }
 
 export const STORY: StoryEvent[] = [
@@ -97,6 +118,12 @@ export const STORY: StoryEvent[] = [
     text: 'A small party rides into the camp: the Hagiwara steward and a girl of about thirteen in a fine riding coat, Lord Hagiwara\'s daughter Sayo. She asks more questions than the steward likes.',
     journal: 'Lord Hagiwara\'s daughter Sayo visited the camp. She asks a lot of questions.',
     meet: ['sayo'],
+  },
+  {
+    id: 'raid', day: 35, part: 'night',
+    text: 'Bells in the dark. Fire on the river: Suiren raiders have crossed the Kurose and hit Sasabe. Raizen\'s band runs for the village; you run behind with a bundle of arrows. Sasabe is smoke, screams and burning thatch.',
+    journal: 'Month 2, night: Suiren raiders crossed the Kurose and attacked Sasabe. The band ran to help.',
+    duel: 'raid',
   },
 ];
 

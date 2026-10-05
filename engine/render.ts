@@ -11,7 +11,11 @@ const i = (x: number) => Math.floor(x);
 
 export function shortDashboard(s: GameState): string {
   const c = li(s);
-  return `📅 ${formatDate(s.date)}\n📍 ${PLACES[c.location]} | ❤ ${WOUND_LABEL[c.wound]} · Fatigue ${c.fatigue}/3 | 💰 ${s.money} mon`;
+  const place = s.duel && !s.duel.over && s.duel.place ? s.duel.place : PLACES[c.location];
+  const inDuel = s.duel && !s.duel.over;
+  const wound = inDuel ? s.duel!.li.wound : c.wound;
+  const fat = inDuel ? s.duel!.li.fatigue : c.fatigue;
+  return `📅 ${formatDate(s.date)}\n📍 ${place} | ❤ ${WOUND_LABEL[wound]} · Fatigue ${fat}/3 | 💰 ${s.money} mon`;
 }
 
 /** Snapshot of what Li can notice, for the ▲▼ changes line. */
@@ -36,13 +40,26 @@ export function changesLine(before: Record<string, number>, after: Record<string
   return parts.length ? `Changes: ${parts.join(' · ')}` : '';
 }
 
+export function duelPanel(s: GameState): string {
+  const d = s.duel;
+  if (!d || d.over) return '';
+  const lines = [
+    `⚔ DUEL — round ${d.round + 1}/10`,
+    `You: ${WOUND_LABEL[d.li.wound]} · fatigue ${d.li.fatigue}/3${d.li.observed ? ` · read him ${Math.min(3, d.li.observed)}/3` : ''}`,
+    `${d.foe.name}: ${WOUND_LABEL[d.foe.wound]} · fatigue ${d.foe.fatigue}/3 · ${d.estimate ?? ''}`,
+  ];
+  if (d.hint) lines.push(`What you have read: ${d.hint}`);
+  return lines.join('\n');
+}
+
 export function optionsText(s: GameState): string {
+  const panel = duelPanel(s);
   const lines = options(s).map((o) => {
     const extra = [o.test, o.risk ? `⚠ ${o.risk}` : ''].filter(Boolean).join(' · ');
     return `${o.key}. ${o.label}${extra ? `  (${extra})` : ''}`;
   });
-  lines.push('Or type freely, "wait 7" to skip a week, or HELP for commands.');
-  return lines.join('\n');
+  lines.push(panel ? 'Or type freely: attack, counter, feint, observe, simulate, run, yield.' : 'Or type freely, "wait 7" to skip a week, or HELP for commands.');
+  return (panel ? panel + '\n\n' : '') + lines.join('\n');
 }
 
 export function status(s: GameState): string {
