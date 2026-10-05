@@ -324,7 +324,7 @@ Li's personal money · his unit's supplies · later his domain's treasury (famil
 The normal 200–250 per 10,000 koku are mostly standing troops; total war adds levies. Slaves and peasants are often thrown in as levies.
 
 ### Families and the Crown ✅
-- Families send ~**10–20% of their tax income** to the Crown and provide a **troop quota** when the king calls.
+- Families send ~**10–20% of their tax income** to the Crown and provide a **troop quota** when the king calls. ⚠️ Default only: the real share per kingdom scales with Crown Authority (ch. 13c rule 6).
 - Paying less is possible, but the governor notices and Crown trust drops.
 
 ### Social barrier ✅
