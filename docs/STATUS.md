@@ -10,6 +10,9 @@
   4. Court, kingdoms, full world
 
 ## Next step
+- In progress: the 7 kingdoms' internal power structure (who really rules, factions, crises). Then names, rulers, great families.
+- Open: crossbows in the Smiths' Kingdom (yes/no).
+
 Big worldbuilding round:
 1. The 7 kingdoms (names, map, rulers, size, cultures, relations).
 2. Families per kingdom, branches, key characters.
@@ -21,7 +24,7 @@ Big worldbuilding round:
    - Decided: old real-world names (Imagawa, Anegakoji, Shiina, Takeda, Kawanakajima) get invented names.
    - Decided: Li starts at **age 12**.
    - Decided: the **Southern Giant** kingdom murdered Li's father.
-   - Open: where Li starts as a slave.
+   - Decided: Li starts as the slave of a famous rōnin's mercenary band in the Iron West (World Bible ch. 13).
 - Decided: **no firearms** in this world.
 Then: numbers sheet → build stage 1.
 

@@ -527,3 +527,21 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 
 ### Build plan
 - Build in stages; each stage must be playable before the next starts (see chat decision).
+
+## Chapter 13 – The Seven Kingdoms (base ✅, names ⏳)
+Sizes follow the ch. 7 rule (~200–250 standing soldiers per 10,000 koku). Every kingdom has a real strength and a real weakness.
+
+| # | Type | Inspiration | Size | Strength | Weakness |
+|---|---|---|---|---|---|
+| 1 | Iron West (great) | Qin | ~7M koku, ~150k | merit system (enemy officer heads → rank + land; several heads can free enslaved family), best administration and supply lines, low-born can rise (highest posts stay with officials) | feared and hated by neighbours, brutal to its own people, old nobles resent the merit system |
+| 2 | Southern Giant (great) | Chu / Imagawa | ~10M koku, ~220k on paper | biggest and richest (rice, silk, culture) | three great families control the court; reformers get murdered; only part of the army answers quickly. **Murdered Li's father.** |
+| 3 | War Kingdom (middle) | Zhao / Takeda | ~4M, ~90k | best cavalry (mounted archery), famous great generals, war culture | borders almost everyone, never rests, smaller economy |
+| 4 | Eastern Sea Kingdom (middle) | Qi | ~5M, ~100k | richest coast, salt-and-iron monopoly, biggest city, scholars' academy, navy; pays others to fight | army out of practice, soft quarrelling rulers |
+| 5 | Mountain Kingdom (middle) | Anegakoji | ~2.5M, ~55k | controls the mountain passes, fortresses, archers, kingmaker position | poor soil, small population, a side family wants to betray it |
+| 6 | Smiths' Kingdom (small) | Han | ~1.2M, ~25k | best steel and weapons, strong bows | no room to grow, surrounded, prey for everyone |
+| 7 | Northern Frontier (small) | Yan | ~2M, ~45k | hardened soldiers, horse archers, winter endurance | poor economy, also fights the northern tribes |
+
+Free territories: the **Merchant City** (inspired by Sakai: council of merchants, walled, independent), the **Monk Mountain**, the **northern border tribes**.
+
+### Li's start ✅
+- Li (12) is the **slave of a famous rōnin who leads a mercenary band**, hired by a border family in the **Iron West**. He carries gear, sees real fights, learns by watching. Later he can choose to enlist in the Iron West army, where merit can free him and his family.
