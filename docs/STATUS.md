@@ -2,6 +2,7 @@
 
 ## Where we are
 - Ch. 10 Li's background ✅ approved. Kingdom names are now used everywhere (epithets only as nicknames). Elite titles: Six Pillars (Kurogane), Three Storms (Hayate). Family Mibu renamed Tsurumaki (real clan name).
+- Numbers sheet `docs/NUMBERS_SHEET.md` v0.1: 📝 draft, waiting for owner approval. After that: build stage 1.
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)
 - Previously: World Bible v0.3: chapters 1–9, 11, 12 approved. Chapter 10 (Li's start) is open.
 - Language of the simulation: **English**.

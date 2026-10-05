@@ -587,7 +587,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Slave: survival, people, training · Soldier: unit, battles · Landholder: economy, domain · Court: politics. The game grows with Li.
 
 ### Numbers sheet & balance tests
-- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses.
+- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (📝 v0.1).
 - Automatic tests: the engine simulates thousands of careers/duels to check e.g. how long slave → general takes and how often a C-rank beats a B-rank; also watches for dominant strategies.
 
 ### Name registry
