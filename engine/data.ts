@@ -26,7 +26,7 @@ const SEEDS: CharSeed[] = [
     id: 'raizen', name: 'Mikumo Raizen', born: { year: 53, month: 4, day: 18 }, role: 'rōnin, leader of the Red Crane band', status: 'ronin',
     stats: st(52, 88, 60, 35), potential: st(60, 99, 70, 45), styles: { sword: 90 }, skills: { tactics: 55 },
     traits: ['hard', 'keeps his contracts', 'drinks'], location: 'kori_camp',
-    desc: '"The Red Crane". A famous rōnin with a stiff left knee. He owns you.', publicRank: 'Warrior A? (famous)',
+    desc: '"The Red Crane". A famous rōnin with a stiff left knee. He owns Li.', publicRank: 'Warrior A? (famous)',
   },
   {
     id: 'gonza', name: 'Gonza "One-Ear"', born: { year: 60, month: 7, day: 2 }, role: "Raizen's second", status: 'free',
@@ -46,12 +46,12 @@ const SEEDS: CharSeed[] = [
   {
     id: 'sukezo', name: 'Old Sukezō', born: { year: 37, month: 1, day: 15 }, role: 'slave cook and medic', status: 'slave',
     stats: st(10, 10, 45, 25), potential: st(10, 10, 50, 30), styles: {}, skills: { medicine: 55, reading: 60, cooking: 60 },
-    traits: ['kind', 'patient'], location: 'kori_camp', desc: 'The old slave cook. He taught you your first letters.', publicRank: '–',
+    traits: ['kind', 'patient'], location: 'kori_camp', desc: 'The old slave cook. He taught Li his first letters.', publicRank: '–',
   },
   {
     id: 'hachi', name: 'Hachi', born: { year: 88, month: 6, day: 1 }, role: 'slave boy', status: 'slave',
     stats: st(8, 8, 22, 12), potential: st(40, 35, 70, 55), styles: {}, skills: { stealth: 25 },
-    traits: ['small', 'clever', 'scared of Gonza'], location: 'kori_camp', desc: 'Eleven, small and clever. Your friend.', publicRank: '–',
+    traits: ['small', 'clever', 'scared of Gonza'], location: 'kori_camp', desc: 'Eleven, small and clever. Li\'s friend.', publicRank: '–',
   },
   {
     id: 'sayo', name: 'Hagiwara Sayo', born: { year: 87, month: 3, day: 25 }, role: "the border lord's daughter", status: 'noble',

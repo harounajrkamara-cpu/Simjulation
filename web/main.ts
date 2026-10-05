@@ -29,7 +29,7 @@ function show(text: string, you?: string) {
     turn.appendChild(y);
   }
   // Options and the duel panel are rendered separately, so drop them from the text.
-  const kept = text.split('\n').filter((l) => !/^\d\. /.test(l) && !l.startsWith('Or type freely'));
+  const kept = text.split('\n').filter((l) => !/^\d\. /.test(l) && !/^Or (type freely|write what Li does)/.test(l));
   const blocks = kept.join('\n').split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean)
     .filter((b) => !b.startsWith('⚔ DUEL') && !b.startsWith('What you have read'));
   // Keep dashboard lines together as one block.

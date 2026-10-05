@@ -44,13 +44,13 @@ export function loyalty(rel: Relation, day: number): number {
 }
 
 export function opinionLabel(op: number): string {
-  if (op >= 60) return 'would stand by you';
-  if (op >= 30) return 'likes you';
+  if (op >= 60) return 'would stand by Li';
+  if (op >= 30) return 'likes Li';
   if (op >= 10) return 'friendly';
   if (op > -10) return 'indifferent';
-  if (op > -30) return 'cold toward you';
-  if (op > -60) return 'dislikes you';
-  return 'hates you';
+  if (op > -30) return 'cold toward Li';
+  if (op > -60) return 'dislikes Li';
+  return 'hates Li';
 }
 
 /** What Li can read: exact-ish for people close to him, a rough estimate otherwise (ch. 8). */
@@ -61,9 +61,9 @@ export function visibleOpinion(state: GameState, npcId: string): string {
   const v = relSnapshot(rel, day);
   const close = v.affection >= 70;
   const parts = [opinionLabel(op)];
-  if (v.respect >= 60) parts.push('respects you');
-  if (v.rivalry >= 40) parts.push('sees you as a rival');
-  if (v.fear >= 40) parts.push('is wary of you');
+  if (v.respect >= 60) parts.push('respects Li');
+  if (v.rivalry >= 40) parts.push('sees Li as a rival');
+  if (v.fear >= 40) parts.push('is wary of Li');
   const num = close ? `${op >= 0 ? '+' : ''}${op}` : `~${op >= 0 ? '+' : ''}${Math.round(op / 10) * 10}`;
   return `${parts.join(', ')} (${num})`;
 }

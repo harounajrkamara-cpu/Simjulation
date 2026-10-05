@@ -7,12 +7,11 @@ import { hashValue } from './hash';
 import { opinion } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, growthGain, r3 } from './rules';
 import { ageOn } from './calendar';
-import { Action, GameEvent, GameState, Option, Part, StatKey, Wound } from './types';
+import { spreadDrafts } from './rumours';
+import { Action, Draft, GameEvent, GameState, Option, Part, StatKey, Wound } from './types';
 
 // The deterministic core: resolve(state, action) → events; apply(state, event) → state.
 // No randomness anywhere (World Bible ch. 12b). Hidden causes are fixed rules.
-
-type Draft = Omit<GameEvent, 'seq' | 'day' | 'part'>;
 
 // ---------- apply (reducer) ----------
 
@@ -54,7 +53,7 @@ export function apply(state: GameState, ev: GameEvent): void {
       state.relations[d.npc].mods.push({ id: ev.seq, field: d.field, value: d.value, reason: d.reason, startDay: ev.day, fadeDays: d.fade });
       break;
     case 'memory':
-      state.memories.push({ id: ev.seq, npc: d.npc, day: ev.day, what: d.what, source: d.source, certainty: d.certainty, weight: d.weight });
+      state.memories.push({ id: ev.seq, npc: d.npc, day: ev.day, what: d.what, source: d.source, certainty: d.certainty, weight: d.weight, key: d.key, from: d.from, rel: d.rel, sign: d.sign });
       break;
     case 'knowledge':
       if (!state.knowledge.includes(d.key)) state.knowledge.push(d.key);
@@ -161,9 +160,9 @@ export function options(s: GameState): Option[] {
   const opts: Omit<Option, 'key'>[] = [];
   const knowsPatrol = s.knowledge.includes('gonza_patrol');
   if (part === 'morning' || part === 'afternoon') {
-    opts.push({ label: 'Do your chores in the camp', action: { kind: 'chores' }, test: 'camp work' });
+    opts.push({ label: 'Do the chores in the camp', action: { kind: 'chores' }, test: 'camp work' });
     opts.push({ label: 'Help Old Sukezō with cooking and the wounded', action: { kind: 'help_sukezo' }, test: 'medicine' });
-    opts.push({ label: 'Work near the drill ground and watch Raizen train the men', action: { kind: 'watch_drill' }, test: '👁 observation', risk: 'Gonza may catch you idling' });
+    opts.push({ label: 'Work near the drill ground and watch Raizen train the men', action: { kind: 'watch_drill' }, test: '👁 observation', risk: 'Gonza may catch Li idling' });
   } else if (part === 'evening') {
     if (has(s, 'lessons_open')) opts.push({ label: 'Letters with Old Sukezō', action: { kind: 'lesson' }, test: '📖 INT' });
     opts.push({ label: 'Eat with Hachi', action: { kind: 'eat_with', target: 'hachi' } });
@@ -174,7 +173,7 @@ export function options(s: GameState): Option[] {
     opts.push({ label: 'Sleep', action: { kind: 'sleep' } });
     const risk = knowsPatrol ? (gonzaPatrols(s) ? 'Gonza patrols tonight!' : 'Gonza does not patrol tonight') : 'Gonza sometimes walks the camp at night';
     opts.push({ label: 'Train in secret with two sticks', action: { kind: 'train', target: 'two_swords' }, test: '⚔️ two swords', risk });
-    opts.push({ label: 'Train your body in secret (strength, endurance)', action: { kind: 'train', target: 'VAL' }, test: '⚔️ VAL', risk });
+    opts.push({ label: 'Train the body in secret (strength, endurance)', action: { kind: 'train', target: 'VAL' }, test: '⚔️ VAL', risk });
   }
   for (const id of ['sayo', 'kaname', 'daisuke']) {
     if (isVisitingToday(s, id) && s.relations[id].lastTalkDay !== today(s)) opts.unshift({ label: `Talk to ${s.characters[id].name} (visiting today)`, action: { kind: 'talk', target: id } });
@@ -209,14 +208,14 @@ function nextBeat(s: GameState, npc: string) {
 function talk(s: GameState, npc: string): Draft[] {
   const c = s.characters[npc];
   if (!c || npc === s.liId) return [{ type: 'alert', fact: 'There is nobody by that name here.', visible: true, data: {} }];
-  if (!met(s, npc)) return [{ type: 'alert', fact: `You do not know anyone called ${c.name} yet.`, visible: true, data: {} }];
+  if (!met(s, npc)) return [{ type: 'alert', fact: `Li does not know anyone called ${c.name} yet.`, visible: true, data: {} }];
   const here = c.location === 'kori_camp' || isVisitingToday(s, npc);
   if (!here) return [{ type: 'alert', fact: `${c.name} is not in the camp.`, visible: true, data: {} }];
   const r = s.relations[npc];
-  if (r.lastTalkDay === today(s)) return [{ type: 'work', fact: `${c.name} has no more to say to you today.`, visible: true, data: { npc } }];
+  if (r.lastTalkDay === today(s)) return [{ type: 'work', fact: `${c.name} has no more to say to Li today.`, visible: true, data: { npc } }];
   const b = nextBeat(s, npc);
   const warm: Draft[] = npc === 'gonza' || npc === 'ishizue' ? [] : [rel(npc, 'trust', 1, 'Spent time together', 60), rel(npc, 'affection', 1, 'Spent time together', 60)];
-  if (!b) return [{ type: 'work', fact: `You talk with ${c.name} a while, but nothing new comes of it.`, visible: true, data: { npc } }, { type: 'heard', fact: 'talked', visible: false, data: { npc, beat: `chat_${today(s)}` } }, ...warm];
+  if (!b) return [{ type: 'work', fact: `Li talks with ${c.name} a while, but nothing new comes of it.`, visible: true, data: { npc } }, { type: 'heard', fact: 'talked', visible: false, data: { npc, beat: `chat_${today(s)}` } }, ...warm];
   return [
     { type: 'work', fact: b.text, visible: true, journal: b.journal, data: { npc, beat: b.id } },
     { type: 'heard', fact: `heard ${b.id}`, visible: false, data: { npc, beat: b.id } },
@@ -257,14 +256,14 @@ export function resolve(s: GameState, a: Action): Draft[] {
       out.push(...skill(s, 'observation', 0.1));
       out.push({ type: 'flag', fact: 'watched drill', visible: false, data: { key: 'watched_drill', value: has(s, 'watched_drill') + 1 } });
       if (gonzaWatchesDrill(s)) {
-        out.push({ type: 'alert', fact: 'Gonza catches you standing still and cuffs you hard across the head. "Work, rat!"', visible: true, journal: 'Gonza caught me watching the drill and hit me.', data: {} });
+        out.push({ type: 'alert', fact: 'Gonza catches Li standing still and cuffs him hard across the head. "Work, rat!"', visible: true, journal: 'Gonza caught me watching the drill and hit me.', data: {} });
         out.push(...fatigue(s, c.fatigue + 1));
         out.push({ type: 'memory', fact: 'Gonza remembers: the slave boy watches the drills instead of working.', visible: false, data: { npc: 'gonza', what: 'The slave boy idles at the drill ground.', source: 'saw', certainty: 100, weight: 20 } });
       }
       break;
     }
     case 'lesson': {
-      if (!has(s, 'lessons_open')) return [{ type: 'alert', fact: 'Sukezō has not offered you lessons yet. Talk to him first.', visible: true, data: {} }];
+      if (!has(s, 'lessons_open')) return [{ type: 'alert', fact: 'Sukezō has not offered Li lessons yet. Talk to him first.', visible: true, data: {} }];
       out.push({ type: 'work', fact: 'By the cooking fire Old Sukezō draws characters in the ash, and Li copies them.', visible: true, data: {} });
       out.push(...skill(s, 'reading', 0.3), ...growth(s, 'stat', 'INT', 0.02, true, 'study'));
       out.push({ type: 'flag', fact: 'lesson', visible: false, data: { key: 'lessons', value: has(s, 'lessons') + 1 } });
@@ -306,14 +305,14 @@ export function resolve(s: GameState, a: Action): Draft[] {
       break;
     }
     case 'train': {
-      if (c.fatigue >= 3) return [{ type: 'alert', fact: 'You are too exhausted to train. Sleep first.', visible: true, data: {} }];
-      if (c.wound >= 2) return [{ type: 'alert', fact: 'Your wound will not let you train.', visible: true, data: {} }];
+      if (c.fatigue >= 3) return [{ type: 'alert', fact: 'Li is too exhausted to train. Sleep first.', visible: true, data: {} }];
+      if (c.wound >= 2) return [{ type: 'alert', fact: 'Li\'s wound will not let him train.', visible: true, data: {} }];
       const target = a.target === 'VAL' ? 'VAL' : 'two_swords';
       if (gonzaPatrols(s)) {
-        out.push({ type: 'alert', fact: 'Halfway through, a torch comes around the horse lines. Gonza. He drags you up by the hair and beats you with the butt of his spear.', visible: true, journal: 'Gonza caught me training at night and beat me.', data: {} });
+        out.push({ type: 'alert', fact: 'Halfway through, a torch comes around the horse lines. Gonza. He drags Li up by the hair and beats him with the butt of his spear.', visible: true, journal: 'Gonza caught me training at night and beat me.', data: {} });
         out.push({ type: 'wound', fact: 'Li is Hurt', visible: true, data: { char: c.id, wound: Math.max(c.wound, 1) as Wound, healDays: HEAL_DAYS[1] } });
         out.push(...fatigue(s, c.fatigue + 1));
-        out.push({ type: 'memory', fact: 'Gonza remembers: the slave boy trains with sticks at night.', visible: false, data: { npc: 'gonza', what: 'Caught the slave boy training at night.', source: 'saw', certainty: 100, weight: 40 } });
+        out.push({ type: 'memory', fact: 'Gonza remembers: the slave boy trains with sticks at night.', visible: false, data: { npc: 'gonza', what: 'Caught the slave boy training [with two sticks] at night.', source: 'saw', certainty: 100, weight: 40, key: 'li_trains_at_night' } });
         out.push(rel('gonza', 'rivalry', 5, 'A slave who wants to be a soldier', 270));
         break;
       }
@@ -350,7 +349,7 @@ function startDuel(s: GameState, id: string): Draft[] {
     foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: t.foe.wound, fatigue: t.foe.fatigue, observed: 0, history: [] },
   };
   return [
-    { type: 'story', fact: `${t.intro}\n\nOpponent (your estimate): ${t.foe.estimate}.\nFight it yourself, or let it play out (option 5)?`, visible: true, data: { duel: id } },
+    { type: 'story', fact: `${t.intro}\n\nOpponent (Li\'s estimate): ${t.foe.estimate}.\nFight it yourself, or let it play out (option 5)?`, visible: true, data: { duel: id } },
     { type: 'duel', fact: `duel ${id} begins`, visible: false, data: { state } },
   ];
 }
@@ -361,10 +360,10 @@ function duelTurn(s: GameState, choice: string): Draft[] {
   const out: Draft[] = [];
   if (choice === 'flee') {
     d = { ...structuredClone(d), over: true, result: 'fled' };
-    out.push({ type: 'work', fact: 'You drop the sword and run into the smoke.', visible: true, data: {} });
+    out.push({ type: 'work', fact: 'Li drops the sword and runs into the smoke.', visible: true, data: {} });
   } else if (choice === 'yield') {
     d = { ...structuredClone(d), over: true, result: 'yielded' };
-    out.push({ type: 'work', fact: 'You throw down the sword and raise your hands.', visible: true, data: {} });
+    out.push({ type: 'work', fact: 'Li throws down the sword and raises his hands.', visible: true, data: {} });
   } else {
     const auto = choice === 'auto';
     let guard = 0;
@@ -403,34 +402,34 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   if (d.li.wound >= 3) out.push({ type: 'flag', fact: 'near-death', visible: false, data: { key: 'near_death', value: has(s, 'near_death') + 1 } });
   switch (d.result) {
     case 'won':
-      out.push({ type: 'story', fact: 'The raider goes down in the mud and does not get up. Kaname stares at you, chest heaving. Across the square, Hisame lowers her bow: she saw all of it.', visible: true, journal: 'In the raid on Sasabe I brought down a Suiren raider who had Kaname trapped. Kaname and Hisame saw it.', data: {} });
+      out.push({ type: 'story', fact: 'The raider goes down in the mud and does not get up. Kaname stares at Li, chest heaving. Across the square, Hisame lowers her bow: she saw all of it.', visible: true, journal: 'In the raid on Sasabe I brought down a Suiren raider who had Kaname trapped. Kaname and Hisame saw it.', data: {} });
       out.push(...grow(1.0));
       out.push({ type: 'flag', fact: 'combat merit +1 (witnessed kill of an enemy ashigaru)', visible: true, data: { key: 'merit_combat', value: has(s, 'merit_combat') + 1 } });
       out.push(rel('kaname', 'respect', 15, 'Saved me in the raid', null), rel('kaname', 'affection', 10, 'Saved me in the raid', null), rel('kaname', 'trust', 10, 'Saved me in the raid', null));
       out.push(rel('hisame', 'respect', 8, 'Fought like a soldier at Sasabe', 1095));
       out.push(rel('raizen', 'respect', 5, 'Heard he brought down a raider', 1095));
-      out.push({ type: 'memory', fact: 'Hisame remembers the raid', visible: false, data: { npc: 'hisame', what: 'The slave boy brought down a Suiren raider at Sasabe with a dropped sword.', source: 'saw', certainty: 100, weight: 60 } });
-      out.push({ type: 'memory', fact: 'Raizen hears of the raid', visible: false, data: { npc: 'raizen', what: 'Hisame says the slave boy killed a Suiren raider at Sasabe.', source: 'told', certainty: 80, weight: 50 } });
+      out.push({ type: 'memory', fact: 'Hisame remembers the raid', visible: false, data: { npc: 'hisame', what: 'The slave boy brought down a Suiren raider [at Sasabe] [with a dropped sword].', source: 'saw', certainty: 100, weight: 60, key: 'li_raid_sasabe' } });
+      out.push({ type: 'memory', fact: 'Raizen hears of the raid', visible: false, data: { npc: 'raizen', what: 'Hisame says the slave boy killed a Suiren raider [at Sasabe].', source: 'told', certainty: 80, weight: 50, key: 'li_raid_sasabe', rel: { field: 'respect', value: 8 }, sign: '{name} has heard what Li did at Sasabe.' } });
       out.push({ type: 'flag', fact: 'met kaname', visible: false, data: { key: 'met_kaname', value: 1 } });
       break;
     case 'lost':
-      out.push({ type: 'story', fact: 'The spear takes you in the side and the world tilts. As you fall, an arrow hums out of the smoke and the raider drops beside you. The last thing you see is Hisame lowering her bow.', visible: true, journal: "In the raid on Sasabe a Suiren raider beat me. Hisame's arrow killed him before he could finish me.", data: {} });
+      out.push({ type: 'story', fact: 'The spear takes Li in the side and the world tilts. As he falls, an arrow hums out of the smoke and the raider drops beside him. The last thing Li sees is Hisame lowering her bow.', visible: true, journal: "In the raid on Sasabe a Suiren raider beat me. Hisame's arrow killed him before he could finish me.", data: {} });
       out.push(...grow(0.5));
       out.push(rel('kaname', 'affection', 6, 'Tried to save me', null), rel('kaname', 'respect', 5, 'Tried to save me', null));
-      out.push({ type: 'memory', fact: 'Hisame remembers saving the boy', visible: false, data: { npc: 'hisame', what: 'The slave boy attacked a raider to save the Sasabe girl. He lost, but he did not run.', source: 'saw', certainty: 100, weight: 50 } });
+      out.push({ type: 'memory', fact: 'Hisame remembers saving the boy', visible: false, data: { npc: 'hisame', what: 'The slave boy attacked a raider to save the Sasabe girl. He lost, but he did not run.', source: 'saw', certainty: 100, weight: 50, key: 'li_raid_sasabe' } });
       break;
     case 'draw':
-      out.push({ type: 'story', fact: 'Neither of you can finish it. An arrow from the smoke ends the fight: Hisame.', visible: true, journal: 'In the raid on Sasabe I held off a raider until Hisame shot him.', data: {} });
+      out.push({ type: 'story', fact: 'Neither of them can finish it. An arrow from the smoke ends the fight: Hisame.', visible: true, journal: 'In the raid on Sasabe I held off a raider until Hisame shot him.', data: {} });
       out.push(...grow(0.5));
       out.push(rel('kaname', 'respect', 8, 'Stood his ground', null));
       break;
     case 'fled':
-      out.push({ type: 'story', fact: 'Behind you Kaname screams, then curses. Later you hear that Hisame\'s arrow saved her. Kaname will not look at you.', visible: true, journal: 'In the raid on Sasabe I ran. Hisame saved Kaname, not me.', data: {} });
+      out.push({ type: 'story', fact: 'Behind him Kaname screams, then curses. Later Li hears that Hisame\'s arrow saved her. Kaname will not look at him.', visible: true, journal: 'In the raid on Sasabe I ran. Hisame saved Kaname, not me.', data: {} });
       out.push(rel('kaname', 'respect', -15, 'Ran when I needed help', 270), rel('kaname', 'affection', -15, 'Ran when I needed help', 270));
-      out.push({ type: 'memory', fact: 'Kaname remembers', visible: false, data: { npc: 'kaname', what: 'The mercenaries\' slave boy ran when the raider had me.', source: 'saw', certainty: 100, weight: 60 } });
+      out.push({ type: 'memory', fact: 'Kaname remembers', visible: false, data: { npc: 'kaname', what: 'The mercenaries\' slave boy ran when a raider had Kaname trapped [in the burning barn].', source: 'saw', certainty: 100, weight: 60, key: 'li_ran_at_sasabe', rel: { field: 'respect', value: -10 }, sign: '{name} has heard that Li ran at Sasabe.' } });
       break;
     case 'yielded':
-      out.push({ type: 'story', fact: 'The raider laughs and kicks you down. Then Hisame\'s arrow takes him in the throat.', visible: true, journal: 'In the raid on Sasabe I gave up. Hisame killed the raider.', data: {} });
+      out.push({ type: 'story', fact: 'The raider laughs and kicks Li down. Then Hisame\'s arrow takes him in the throat.', visible: true, journal: 'In the raid on Sasabe I gave up. Hisame killed the raider.', data: {} });
       out.push(rel('kaname', 'respect', -8, 'Gave up', 270));
       break;
   }
@@ -459,6 +458,8 @@ export interface TurnResult {
 function advance(s: GameState): GameEvent[] {
   const to = nextPart(s.date);
   const evs = commit(s, [{ type: 'time', fact: `time → ${to.year}/${to.month}/${to.day} ${to.part}`, visible: false, data: { to } }]);
+  // Night falls: what was said at the fire moves one step further (rumours, ch. 8).
+  if (to.part === 'night') evs.push(...commit(s, spreadDrafts(s, (id) => met(s, id))));
   return evs.concat(commit(s, storyDrafts(s)));
 }
 
@@ -489,16 +490,32 @@ export function routineAction(s: GameState, plan: { night: 'sleep' | 'train' }):
   return { kind: 'sleep' };
 }
 
-/** Skip whole days with a routine; stops early when a story event is about to happen. */
+/**
+ * Longest skip per life stage (Game Experience ch. 9 §6): slave 1 month · soldier 1 season.
+ * Officer and up (1 year) arrives with ranks in stage 2.
+ */
+export function maxSkipDays(s: GameState): number {
+  return li(s).status === 'slave' ? 30 : 90;
+}
+
+/**
+ * Skip whole days with a routine (World Bible ch. 9). Same result as playing those days with the same routine.
+ * Stops early for a story event, a fight, or the turn of a season.
+ */
 export function skipDays(s: GameState, days: number, plan: { night: 'sleep' | 'train' }): { events: GameEvent[]; interrupted?: string } {
   const all: GameEvent[] = [];
-  const endDay = today(s) + days;
+  const endDay = today(s) + Math.min(days, maxSkipDays(s));
   while (today(s) < endDay) {
     if (s.duel) return { events: all, interrupted: 'A fight is going on.' };
+    const season = s.seasonKey;
     const r = takeAction(s, routineAction(s, plan));
     all.push(...r.events);
     const stories = r.events.filter((e) => e.type === 'story');
     if (stories.length) return { events: all, interrupted: stories.map((e) => e.fact).join('\n\n') };
+    if (s.seasonKey !== season) {
+      const [year, name] = s.seasonKey.split('-');
+      return { events: all, interrupted: `The season turns: ${name}, Year ${year}.` };
+    }
   }
   return { events: all };
 }
@@ -518,7 +535,7 @@ export function replay(worldNumber: number, events: GameEvent[]): GameState {
 }
 
 /** Bump when start data or rules change in a way that breaks old saves (ch. 12b #12). */
-export const DATA_VERSION = 3;
+export const DATA_VERSION = 4;
 
 export interface SaveFile {
   game: 'sengoku-soldier';

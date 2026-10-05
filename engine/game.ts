@@ -1,4 +1,4 @@
-import { has, li, options, skipDays, startGame, takeAction, today } from './engine';
+import { has, li, maxSkipDays, options, skipDays, startGame, takeAction, today } from './engine';
 import { HELP, changesLine, findPerson, infochar, logText, noticeable, optionsText, recap, relationsText, shortDashboard, status, visibleFacts } from './render';
 import { Action, GameState } from './types';
 
@@ -30,13 +30,13 @@ export function parseFreeText(s: GameState, input: string): { action?: Action; a
     const hit = map.filter(([re]) => re.test(t));
     if (hit.length === 1) return { action: { kind: 'duel', target: hit[0][1] } };
     if (hit.length > 1) return { ask: `Do you mean: ${hit.map((h) => h[1]).join(' or ')}?` };
-    return { ask: 'You are in a fight! Attack, counter, feint, observe, simulate, run or yield?' };
+    return { ask: 'Li is in a fight! Attack, counter, feint, observe, simulate, run or yield?' };
   }
   const who = (words: string) => findPerson(s, words);
   const m = t.match(/(?:talk|speak|ask|chat)(?: to| with)?\s+(.+)/);
   if (m) {
     const id = who(m[1]);
-    return id ? { action: { kind: 'talk', target: id } } : { ask: `Talk to whom? You know: ${Object.keys(s.relations).filter((id) => has(s, `met_${id}`)).join(', ')}.` };
+    return id ? { action: { kind: 'talk', target: id } } : { ask: `Talk to whom? Li knows: ${Object.keys(s.relations).filter((id) => has(s, `met_${id}`)).join(', ')}.` };
   }
   const want = (re: RegExp) => re.test(t);
   const matches: Action[] = [];
@@ -58,9 +58,9 @@ export function parseFreeText(s: GameState, input: string): { action?: Action; a
 }
 
 function partHint(part: string): string {
-  if (part === 'night') return 'At night you can sleep or train in secret.';
-  if (part === 'evening') return 'In the evening you can study, eat, talk, listen or rest.';
-  return 'By day you work: chores, help Sukezō, or watch the drill.';
+  if (part === 'night') return 'At night Li can sleep or train in secret.';
+  if (part === 'evening') return 'In the evening Li can study, eat, talk, listen or rest.';
+  return 'By day Li works: chores, help Sukezō, or watch the drill.';
 }
 
 export function handleInput(s: GameState, raw: string): Reply {
@@ -80,10 +80,14 @@ export function handleInput(s: GameState, raw: string): Reply {
   const before = noticeable(s);
   const w = upper.match(/^(WAIT|SKIP)\s+(\d+)(\s+TRAIN)?$/);
   if (w) {
-    const days = Math.min(90, Number(w[2]));
+    const asked = Number(w[2]);
+    const days = Math.min(asked, maxSkipDays(s));
+    const capped = asked > days ? `(Li can plan at most ${days} days ahead${li(s).status === 'slave' ? ' as a slave' : ''}: skipping ${days} days.)\n` : '';
+    const dayBefore = today(s);
     const r = skipDays(s, days, { night: w[3] ? 'train' : 'sleep' });
-    const head = r.interrupted ? `⏸ The days pass… until something happens:\n\n${r.interrupted}` : `⏩ ${days} days pass in the usual routine.`;
-    const alerts = r.events.filter((e) => e.type === 'alert').map((e) => `⚠ ${e.fact}`);
+    const passed = today(s) - dayBefore;
+    const head = capped + (r.interrupted ? `⏸ The days pass… until something happens:\n\n${r.interrupted}` : `⏩ ${passed} days pass in the usual routine.`);
+    const alerts = r.events.filter((e) => e.type === 'alert' || e.type === 'rumour').map((e) => `${e.type === 'rumour' ? '◆' : '⚠'} ${e.fact}`);
     return { text: [head, ...alerts.slice(-3), '', shortDashboard(s), changesLine(before, noticeable(s)), '', optionsText(s)].filter((x) => x !== undefined).join('\n') };
   }
 

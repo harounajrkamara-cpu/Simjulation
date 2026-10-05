@@ -100,11 +100,11 @@ export function habitHint(d: DuelState): string {
   const top = order[0];
   const txt: Record<DuelMove, string> = {
     attack: 'He likes to strike first and hard.',
-    counter: 'He waits for you to come to him.',
+    counter: 'He waits for Li to come to him.',
     feint: 'He fakes before he strikes.',
     observe: 'He watches more than he fights.',
   };
-  return `${txt[top]} He also changes his answer when you repeat yourself.`;
+  return `${txt[top]} He also changes his answer when Li repeats himself.`;
 }
 
 export interface RoundResult {
@@ -120,7 +120,7 @@ export function duelRound(prev: DuelState, liMove: DuelMove): RoundResult {
   d.round += 1;
   d.li.history.push(liMove);
   d.foe.history.push(fm);
-  lines.push(`Round ${d.round}: you ${verb(liMove)}; ${d.foe.name} ${verb3(fm)}.`);
+  lines.push(`Round ${d.round}: Li ${verb3(liMove)}; ${d.foe.name} ${verb3(fm)}.`);
 
   const win = clashWinner(liMove, fm);
   const strike = ['attack', 'feint'].includes(liMove) || ['attack', 'feint'].includes(fm);
@@ -132,14 +132,14 @@ export function duelRound(prev: DuelState, liMove: DuelMove): RoundResult {
   foeSit += Math.min(3, d.foe.observed) * 0.05;
   if (liMove === 'observe') {
     d.li.observed += 1;
-    if (d.li.observed >= 1 && !d.hint) { d.hint = habitHint(d); lines.push(`You read him: ${d.hint}`); }
+    if (d.li.observed >= 1 && !d.hint) { d.hint = habitHint(d); lines.push(`Li reads him: ${d.hint}`); }
   }
   if (fm === 'observe') d.foe.observed += 1;
-  if (win === 'a') lines.push('Your choice beats his.');
-  if (win === 'b') lines.push('His choice beats yours.');
+  if (win === 'a') lines.push('Li\'s choice beats his.');
+  if (win === 'b') lines.push('His choice beats Li\'s.');
 
   if (!strike) {
-    lines.push('Nobody commits. You circle each other.');
+    lines.push('Nobody commits. They circle each other.');
     return finish(d, lines);
   }
   const liCP = combatPower(d.li, liSit);
@@ -147,7 +147,7 @@ export function duelRound(prev: DuelState, liMove: DuelMove): RoundResult {
   if (liCP === foeCP) {
     d.li.fatigue = Math.min(3, d.li.fatigue + 1);
     d.foe.fatigue = Math.min(3, d.foe.fatigue + 1);
-    lines.push('Blade meets blade; neither gives. Both of you are tiring.');
+    lines.push('Blade meets blade; neither gives. Both are tiring.');
     return finish(d, lines);
   }
   const liWins = liCP > foeCP;
@@ -159,9 +159,9 @@ export function duelRound(prev: DuelState, liMove: DuelMove): RoundResult {
   else if (g < 0.6) steps = 2;
   else steps = 4;
   loser.wound = Math.min(4, loser.wound + steps) as Wound;
-  const who = liWins ? d.foe.name : 'You';
-  if (steps === 0) lines.push(`${who} ${liWins ? 'is' : 'are'} pushed back and ${liWins ? 'tires' : 'tire'}.`);
-  else lines.push(`${who} ${liWins ? 'is' : 'are'} hit → ${WOUND_LABEL[loser.wound]}.`);
+  const who = liWins ? d.foe.name : 'Li';
+  if (steps === 0) lines.push(`${who} is pushed back and tires.`);
+  else lines.push(`${who} is hit → ${WOUND_LABEL[loser.wound]}.`);
   return finish(d, lines);
 }
 
@@ -174,10 +174,6 @@ function finish(d: DuelState, lines: string[]): RoundResult {
 
 function verb3(m: DuelMove): string {
   return { attack: 'attacks', counter: 'waits to counter', feint: 'feints', observe: 'holds back and watches' }[m];
-}
-
-function verb(m: DuelMove): string {
-  return { attack: 'attack', counter: 'wait to counter', feint: 'feint', observe: 'hold back and watch' }[m];
 }
 
 /** "Simulate" choice (ch. 11): a simple, fixed policy for Li. */

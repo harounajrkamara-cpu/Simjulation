@@ -45,10 +45,10 @@ export function duelPanel(s: GameState): string {
   if (!d || d.over) return '';
   const lines = [
     `⚔ DUEL — round ${d.round + 1}/10`,
-    `You: ${WOUND_LABEL[d.li.wound]} · fatigue ${d.li.fatigue}/3${d.li.observed ? ` · read him ${Math.min(3, d.li.observed)}/3` : ''}`,
+    `Li: ${WOUND_LABEL[d.li.wound]} · fatigue ${d.li.fatigue}/3${d.li.observed ? ` · read him ${Math.min(3, d.li.observed)}/3` : ''}`,
     `${d.foe.name}: ${WOUND_LABEL[d.foe.wound]} · fatigue ${d.foe.fatigue}/3 · ${d.estimate ?? ''}`,
   ];
-  if (d.hint) lines.push(`What you have read: ${d.hint}`);
+  if (d.hint) lines.push(`What Li has read: ${d.hint}`);
   return lines.join('\n');
 }
 
@@ -58,7 +58,7 @@ export function optionsText(s: GameState): string {
     const extra = [o.test, o.risk ? `⚠ ${o.risk}` : ''].filter(Boolean).join(' · ');
     return `${o.key}. ${o.label}${extra ? `  (${extra})` : ''}`;
   });
-  lines.push(panel ? 'Or type freely: attack, counter, feint, observe, simulate, run, yield.' : 'Or type freely, "wait 7" to skip a week, or HELP for commands.');
+  lines.push(panel ? 'Or write what Li does: attack, counter, feint, observe, simulate, run, yield.' : 'Or write what Li does ("I…"), "wait 7" to skip a week, or HELP for commands.');
   return (panel ? panel + '\n\n' : '') + lines.join('\n');
 }
 
@@ -77,14 +77,14 @@ export function status(s: GameState): string {
     `Scores: Warrior ${r.warrior.toFixed(1)} · Commander ${r.commander.toFixed(1)} · Statesman ${r.statesman.toFixed(1)}`,
     `Traits: ${c.traits.join(', ')}`,
     `Training this season: ${Object.entries(s.seasonGains).map(([k, v]) => `${k.split(':')[1]} +${v.toFixed(2)}/2`).join(' · ') || 'none yet'}`,
-    'Goals: survive · win your freedom · find your mother and sisters · learn why your father died',
+    'Goals: survive · win his freedom · find his mother and sisters · learn why his father died',
   ];
   return lines.join('\n');
 }
 
 export function infochar(s: GameState, query: string): string {
   const id = findPerson(s, query);
-  if (!id) return `You do not know anyone called "${query}".`;
+  if (!id) return `Li does not know anyone called "${query}".`;
   if (id === s.liId) return status(s);
   const c = s.characters[id];
   const age = ageOn(c.born, s.date);
@@ -92,17 +92,17 @@ export function infochar(s: GameState, query: string): string {
     `== ${c.name} · about ${age} · ${c.role} ==`,
     c.desc,
     `Estimated strength: ${c.publicRank ?? '?'}`,
-    `Toward you: ${visibleOpinion(s, id)}`,
+    `Toward Li: ${visibleOpinion(s, id)}`,
   ].join('\n');
 }
 
 export function relationsText(s: GameState): string {
   const ids = Object.keys(s.relations).filter((id) => met(s, id));
-  return ['== PEOPLE YOU KNOW ==', ...ids.map((id) => `${s.characters[id].name}: ${visibleOpinion(s, id)}`)].join('\n');
+  return ['== PEOPLE LI KNOWS ==', ...ids.map((id) => `${s.characters[id].name}: ${visibleOpinion(s, id)}`)].join('\n');
 }
 
 export function recap(s: GameState): string {
-  if (!s.journal.length) return 'Your journal is empty.';
+  if (!s.journal.length) return 'Li\'s journal is empty.';
   let lastDay = -1;
   const lines = ['== LI\'S JOURNAL =='];
   for (const j of s.journal) {
@@ -129,8 +129,9 @@ export function findPerson(s: GameState, query: string): string | undefined {
 }
 
 export const HELP = [
-  'Commands: STATUS · INFOCHAR <name> · RELATIONS · RECAP · LOG · WAIT <days> [train] · SAVE · LOAD · HELP',
-  'Pick an option by number, or type freely: "train with the sticks", "talk to hisame", "listen at the fire", "sleep".',
+  'Pick an option by number, or write what Li does, as "I…": "I train with the sticks", "I talk to Hisame", "I listen at the fire".',
+  'Commands: STATUS · INFOCHAR <name> · RELATIONS · RECAP · LOG · WAIT <days> [train] (a slave plans at most 30 days; stops when something happens or the season turns) · SAVE · LOAD · HELP',
+  'More commands (TROPHIES, WORLD, THREATS, REWRITE, CORRECT) come with later builds.',
 ].join('\n');
 
 /** Facts the narrator may use for this turn (ch. 11 step 6). */

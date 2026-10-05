@@ -71,6 +71,14 @@ export interface Memory {
   source: 'saw' | 'told' | 'rumour';
   certainty: number; // 0–100
   weight: number; // 0–100
+  /** Story this memory is about. Only memories with a key can spread as rumours. */
+  key?: string;
+  /** Who told it (for told / rumour). */
+  from?: string;
+  /** How hearing it changes the hearer's view of Li (scaled by certainty, fades like a rumour). */
+  rel?: { field: RelField; value: number };
+  /** What Li can notice when it reaches someone he knows; {name} = the hearer. */
+  sign?: string;
 }
 
 export interface JournalEntry {
@@ -94,6 +102,7 @@ export type EventType =
   | 'money'
   | 'flag'
   | 'heard'
+  | 'rumour'
   | 'duel';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
@@ -110,6 +119,9 @@ export interface GameEvent {
   journal?: string;
   data: Record<string, unknown>;
 }
+
+/** An event before it gets its number and time (engine commit adds them). */
+export type Draft = Omit<GameEvent, 'seq' | 'day' | 'part'>;
 
 export interface GameState {
   version: 1;
