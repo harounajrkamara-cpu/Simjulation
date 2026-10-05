@@ -306,3 +306,60 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 - Not a law, just how the world is: **low-born people do not climb easily.** Nobles look down on them, promotions come slower, they need more merit for the same step, and some people will try to block them.
 - Some individuals (mentors, open-minded lords) judge by deeds instead.
 - Historical echo: Toyotomi Hideyoshi rose from peasant's son to ruler.
+
+## Chapter 8 – Relationships, loyalty & NPC memory ✅
+
+### How one person sees another (one direction)
+- Engine values (0–100): **Trust** · **Respect** (ability) · **Affection** (warmth) · **Fear** (dominance) · **Rivalry** (competition). Based on psychology: warmth & competence (Fiske/Cuddy), interpersonal circumplex (warmth & dominance), trust = ability + benevolence + integrity (Mayer, Davis & Schoorman).
+- **Romance** value only between people where it is possible.
+- Special bonds: family · sworn brother · mentor/student · lord/retainer · rival · enemy · lover/spouse.
+- **The player sees one summary opinion (−100 … +100) plus a short label** ("Respects you, fears you a little"); the 5 values stay in the engine.
+- **Trust is driven mostly by promises** (integrity): kept promises raise it a lot, broken ones destroy it fast.
+- **Dread** (global, from reputation for cruelty or ruthless acts) is separate from personal fear.
+- Social barrier (ch. 7): nobles get a "low-born" opinion modifier toward commoners/ex-slaves; deeds can outweigh it.
+
+### Reasons, not just numbers
+- Every change is an **opinion modifier with a reason**; many fade over time, big events stay ("Saved my life" permanent; "Punished me in front of the men" fades after 1 year).
+
+### Loyalty (to a lord, family or kingdom)
+| Loyalty | Behaviour |
+|---|---|
+| 90–100 | would die for his lord |
+| 70–89 | loyal and reliable |
+| 60–69 | neutral, watching |
+| 40–59 | suspicious, could switch with a good offer |
+| 0–39 | will betray or rebel |
+- Up: victories, rewards, fair treatment, kept promises. Down: defeats, broken promises, being passed over, favouritism to rivals.
+- **Betrayal needs three things together**: low loyalty + an **opportunity** (enough power, a better offer, the lord looks weak, own land threatened) + **not too much fear** of the lord.
+- Personality shifts the limits (honourable stays longer, greedy switches faster); blood ties to the lord's family make betrayal less likely.
+- Rebel groups act only with enough combined power (CK3-style threshold).
+- **Family level**: a family's loyalty follows its head; family **cohesion** (ch. 3) = how the branch heads see the main-branch head.
+- **Unit level**: each unit has a **unit loyalty/morale toward its commander**; named soldiers (e.g. close followers) have individual relationships.
+
+### NPC memory
+- Memory record: what happened · date · how known (saw it / told / rumour) · certainty · emotional weight.
+- **An NPC only knows what he saw or was told**; secrets stay secret.
+- **Rumours spread** person to person and lose accuracy (sometimes exaggerated).
+- The engine selects the **most relevant memories** per scene (recent, important, fitting — Stanford Generative Agents).
+
+### Personality & goals
+- Traits (proud, cautious, greedy, honourable, cruel…), goals (short / medium / long-term), general type (ch. 5).
+- NPCs act on their own goals, also when the player is absent; big events can change personality.
+
+### Relationship layers (Dunbar)
+- Per person ~5 inner circle · ~15 close · ~50 known · up to ~150 tracked contacts; beyond that = faces in the crowd.
+- Bonds fade without contact (deep bonds slowly, weak ones fast).
+- Only a few active real rivals/enemies at the same time.
+- **NPC tiers**: major characters get full relationship webs; minor characters only track their view of the player and their own group.
+
+### Nemesis system
+- Named enemies who survive keep a memory of Li, can grow (promotion, new ability, new trait such as fear of fire) and come back.
+
+### Reputation
+- Separate per group: soldiers · nobles · peasants · enemies. Titles/nicknames come from deeds and spread as rumours.
+
+### What the player sees
+- Close friends: fairly accurate. Others: estimates ("seems to respect you, trust unclear"). Spies, conversations, POL/INT make it sharper.
+
+### Romance & marriage
+- Marriage for love, alliance, or both (links ch. 2 extra 3). Status matters: low-born + noble is very hard. Jealousy and rivals in love possible.
