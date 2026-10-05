@@ -487,6 +487,8 @@ Lives in **`docs/MASTER_BUILD_PROMPT.md`** (one page). It holds: who the builder
 
 **Phase 5 – Stage 4: court & kingdoms** (general): factions, fuses (Numbers §11), the full world, epilogue (GE ch. 9 decision 2).
 
+**Always playable locally (owner, Oct 5):** after every milestone the game must still run in chat mode with Claude on the owner's computer (`npm run turn` + the `play` skill), with the newest features reachable there.
+
 Each phase starts with its own detailed milestone table, written at the start of that phase (spec → plan → tasks), so plans never go stale.
 
 ### Part C – Testing (all phases)

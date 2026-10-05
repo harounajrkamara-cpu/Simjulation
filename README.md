@@ -21,6 +21,8 @@ npm run web        # open the address it prints, e.g. http://localhost:5173
 npm run play       # autosaves to saves/autosave.json
 ```
 
+**With Claude on your own computer** (Claude Code, terminal or the desktop app's Code tab): open this repo on the branch `design/world-bible`, run `npm install`, then just say **"let's play"**. The `play` skill (`.claude/skills/play/SKILL.md`) runs the engine for each of your inputs and narrates only what the engine returns.
+
 **In a chat with Claude** (one input per call):
 ```bash
 npm run turn -- new          # new game

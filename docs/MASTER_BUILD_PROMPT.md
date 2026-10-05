@@ -29,6 +29,7 @@ Read STATUS and the milestone in BUILD_PLAN first, then **only the chapters that
 - `engine/` pure TypeScript, no UI, no AI, no I/O. `resolve(state, action) → events`; append-only event log; saves = event log + world number + version.
 - `ai/` one interface: `interpret(text, context) → intent` and `narrate(factPacket) → text`; adapters: claude.ai page · own key (`.env`) · none. Fact check before showing (Game Experience ch. 7).
 - `web/` Vite + plain TypeScript, the war chronicle (ch. 3, 6); `cli/` terminal and chat runners.
+- **Local play with Claude must keep working after every milestone:** `npm run turn` (chat mode) + the `play` skill in `.claude/skills/play/`. The owner plays this way.
 - `content/` hand-written beats, story events, prologue, hints as data, each with its window (ch. 9).
 - Style tokens from Game Experience ch. 6 only (ink `#0E1014`, ink 2 `#171A20`, line `#2C3038`, paper `#E9E0CA`, faded `#A79F8C`, seal red `#A8361F`, gold `#C9A55E`; Shippori Mincho + Spectral). Reference screens: https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK
 

@@ -2,7 +2,10 @@
 
 This repo holds **Sengoku Soldier**, a deterministic text simulation (slave → great general) in a fictional Sengoku-inspired world, designed together with the owner (Harouna).
 
-## Read first, every session
+## Playing the game (not building)
+If the owner wants to **play** ("let's play", a game action), use the `play` skill and **do not read `docs/` or the engine's data files**: they hold hidden truths and future story. Narrate only from the engine's output.
+
+## Read first, every design or build session
 1. `docs/STATUS.md` – where we are, decisions, next step.
 2. `docs/WORLD_BIBLE.md` – the canon design. **The World Bible wins over memory, chat history and old documents.**
 
