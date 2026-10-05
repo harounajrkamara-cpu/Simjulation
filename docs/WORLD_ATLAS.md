@@ -73,7 +73,7 @@ Rank notation: `W` Warrior · `C` Commander · `S` Statesman (ch. 5), as F–S l
 | 7 | **Kitakaze** (Northern Frontier) | north wind | Shirotori | cold forest and steppe edge, long winters | Kurogane, Hayate, Takane, Ushio, tribes |
 
 **Free places:**
-- **Kinza**, the Merchant City: a walled harbour run by the **Council of 36**.
+- **Kinza**, the Merchant City: a walled harbour run by the **Council of 36** (historical echo: Sakai's 36-merchant egōshū).
 - **Mount Shōgen**, the Monk Mountain: headquarters of the temples. 8,000 warrior monks. It overlooks the ruins.
 - **The Mist Valley** (inside Takane, neutral): the shinobi village. It sells its services to every kingdom.
 - **The Horo clans**: northern horse tribes.
@@ -94,7 +94,7 @@ Every family entry gives **koku / troops**. The sums match the ch. 13 sizes and 
 | **King Asagiri Tokinari** | 19 | S B · C C · W D | the Young King; cold, patient, believes in merit | rule alone at 20, then unite the land | suspects his mother is hiding something |
 | **Queen Mother Asagiri Kaede** | 37 | S C | proud, lonely, reckless | keep her power after her son comes of age | two secret sons with Gōda Ensai |
 | **Chancellor Ebisawa Rokusai** | 56 | S A | former Kinza merchant who bought power by backing the old king; brilliant administrator; compiled the great *Ebisawa Annals* | stay the real ruler | was Kaede's lover; brought Gōda to court to get rid of her; terrified of exposure |
-| **Gōda Ensai** | 32 | S C · W C | the Queen Mother's "eunuch" favourite, now a marquis with 2 provinces | power, and protecting his sons | not a eunuch. **Coup fuse:** plans to strike before the king turns 20 and put his own son on the throne. |
+| **Gōda Ensai** | 32 | S C · W C | the Queen Mother's "eunuch" favourite, now lord of 2 provinces | power, and protecting his sons | not a eunuch. **Coup fuse:** plans to strike before the king turns 20 and put his own son on the throne. |
 | **Ōtori Gensai** | 58 | **C S−** · W B+ | **Pillar seat 1**. "The Walking Mountain". Defensive genius; serves the Crown, not factions. | keep the kingdom standing | has quietly started choosing successors |
 | **Kirishima Hyōe** | 44 | W A · C B | **Pillar seat 2**. Born a peasant, rose on enemy heads. Savage, instinctual, the King's man. | prove commoners can lead | can barely read; a scribe hides it |
 | **Tsurumaki Sanetaka** | 51 | C B+ · S B | **Pillar seat 3**. Head of the Old Blood. | abolish the merit law | would back Gōda's coup if it brings down the Chancellor |
@@ -153,7 +153,7 @@ Tier B: 1.9M / 44k.
 | **King Shinonome Haruyuki** | 41 | C C · S C− | proud, insecure, jealous of his generals | – |
 | Heir Shinonome Akitoshi | 15 | – | sheltered | – |
 | **Ugaki Jōan** | 48 | S B | the king's favourite minister; greedy, charming | **Slander fuse:** a foreign power (Kurogane's spy office, but the engine decides who pays first) is ready to buy him to call Kagami a traitor |
-| **Kagami Sōun** | 53 | **C S** · W B · S B | **Storm 1**, "the Silent Heaven". The best general alive. Intellectual, loyal to the people, not the king. | refuses to flatter the king |
+| **Kagami Sōun** | 53 | **C S** · W B · S B | **Storm 1**, "the Silent Storm". The best general alive. Intellectual, loyal to the people, not the king. | refuses to flatter the king |
 | **Homura Tetsuzan** | 46 | W A · C B+ | **Storm 2**. A berserker (Instinctual); his men worship him. | hates Ugaki |
 | **Tobita Kojūrō** | 35 | C A− · S B | **Storm 3**, "the Waiting Snake": makes you think you're winning, then strikes with reserves | ambitious; secretly gathering support |
 
@@ -257,7 +257,7 @@ Families: royal; **Kanemori** (120k / 2.5k, sword forges); **Hibiki** (120k / 2.
 
 | Character | Age | Rank | Who | Toward Li | 🔒 Secret |
 |---|---|---|---|---|---|
-| **Mikumo Raizen** "the Red Crane" | 47 | W A+ (was **S** at his peak, VAL declining with age) · C C+ | famous rōnin, leader of the **Red Crane band** (~120 men); hard, keeps contracts, drinks | Li is his property: useful, nothing more (yet) | served in Suiren and left in disgust after Takeshi's murder. Bought Li at Kinza's slave market in Year 96 without knowing who he is. Sees something in how the boy moves. |
+| **Mikumo Raizen** "the Red Crane" | 47 | W A+ (was **S** at his peak; an old knee wound from Year 95 and drink cost him the edge) · C C+ | famous rōnin, leader of the **Red Crane band** (~120 men); hard, keeps contracts, drinks | Li is his property: useful, nothing more (yet) | served in Suiren and left in disgust after Takeshi's murder. Bought Li at Kinza's slave market in Year 96 without knowing who he is. Sees something in how the boy moves. |
 | **Gonza "One-Ear"** | 40 | W C | Raizen's second; cruel to slaves | dislikes Li | sells band supplies on the side |
 | **Matsukaze Rokubei** | 35 | S D | quartermaster; keeps the money and the slave papers | – | – |
 | **Hisame** | 28 | W B− (bow) | silent archer of the band | ignores Li at first | a deserter from the Mist Valley |
@@ -267,11 +267,11 @@ Families: royal; **Kanemori** (120k / 2.5k, sword forges); **Hibiki** (120k / 2.
 | **Kaname** | 15 | W D (naginata) | the headman's daughter in a nearby border village; fierce. The renamed "warrior girl" from the old canon; a future recruit. | – | – |
 | **Ōno Daisuke** | 13 | W D | strong farm boy; will enlist when Li does. The renamed "rival recruit" from the old canon. | rival | – |
 
-**Li's family** (📝 to finalise in ch. 10):
+**Li's family** (✅ ch. 10):
 
 | Person | Age / years | Notes |
 |---|---|---|
-| Father **Hattori Takeshi** "the Twin Demon" | †95 | blades **Kage** (Shadow) and **Hikari** (Light); called Li "Little Dragon" |
+| Father **Hattori Takeshi** "the Twin Demon" (W S · C A+) | †95 | blades **Kage** (Shadow) and **Hikari** (Light); called Li "Little Dragon" |
 | Mother **Yuki** | 38 | |
 | Older sister **Mei** | 15 | |
 | Younger sister **Kenjiko** | 5 | born just before the murder; Yuki carried her as a baby over the mountains |
@@ -286,12 +286,12 @@ Ch. 5 said "S: 0–2 in the whole land". With 7 kingdoms and **three** sub-ranks
 
 | Living S | Sub-rank | Kingdom | Known as |
 |---|---|---|---|
-| Kagami Sōun | Commander S | Hayate | the Silent Heaven |
+| Kagami Sōun | Commander S | Hayate | the Silent Storm |
 | Ōtori Gensai | Commander S− | Kurogane | the Walking Mountain |
 | Garyū Tessai | Warrior S | Kitakaze | the Northern Bear |
 | Lady Kinugasa Ayane | Statesman S− | Suiren | the Silk Spider (behind her back) |
 
-- Fallen or faded legends: **Hattori Takeshi** (Warrior S / Commander A, †95) · **Mikumo Raizen** (was Warrior S, now A+ through age).
+- Fallen or faded legends: **Hattori Takeshi** (Warrior S / Commander A+, †95) · **Mikumo Raizen** (was Warrior S, now A+ through age).
 - Two "slots" stay open on purpose for the next generation (§10), Li included. Nothing guarantees Li one: he must earn it.
 
 ## 6. Peoples & cultures

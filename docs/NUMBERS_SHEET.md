@@ -119,9 +119,9 @@ Split of casualties during fighting: 40% dead · 45% wounded · 15% captured or 
 
 **Battle report** (always this format, never a loose %):
 ```
-Battle: 5 phases · Starting strength 1,000
-Dead 42 · Wounded 81 · Captured 19 · Missing 6 · Deserted 11
-Permanent losses 78 · Recoverable (wounded) 81
+Battle: 5 phases (no rout) · Starting strength 1,000
+Dead 22 · Wounded 24 · Captured 5 · Missing 3 · Deserted 6
+Permanent losses 36 · Recoverable (wounded) 24 · Total 60 (6%)
 ```
 
 **Morale points** (0–100):
@@ -183,7 +183,7 @@ Three kinds of merit, confirmed after the battle by witnesses, reports or the he
 | Dai-Shōgun | 0.05 | 0.45 | 0.5 |
 Result: a pure fighter reaches Kogashira fast, but cannot become a general on heads alone (e.g. Sanbyakunin-shō → Sennin-shō needs a score of 900; with weight 0.15, heads alone would need 6,000 combat merit).
 
-**Promotion thresholds** (promotion score):
+**Promotion thresholds** (promotion score, counted over the whole career, not reset after a promotion):
 
 | From → To | Merit needed |
 |---|---|

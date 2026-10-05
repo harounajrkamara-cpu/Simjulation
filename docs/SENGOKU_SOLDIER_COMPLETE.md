@@ -12,7 +12,6 @@ Generated from the repo: STATUS + WORLD BIBLE (rules) + WORLD ATLAS (world) + NU
 - Ch. 10 Li's background ✅ approved. Kingdom names are now used everywhere (epithets only as nicknames). Elite titles: Six Pillars (Kurogane), Three Storms (Hayate). Family Mibu renamed Tsurumaki (real clan name).
 - Numbers sheet `docs/NUMBERS_SHEET.md` **v0.2 ✅ approved** (owner kept fast progression and the Kurogane head-for-freedom law). Next: **build stage 1** (Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels).
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)
-- Previously: World Bible v0.3: chapters 1–9, 11, 12 approved. Chapter 10 (Li's start) is open.
 - Language of the simulation: **English**.
 - Build plan: 4 stages, each playable.
   1. Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels
@@ -21,7 +20,8 @@ Generated from the repo: STATUS + WORLD BIBLE (rules) + WORLD ATLAS (world) + NU
   4. Court, kingdoms, full world
 
 ## Next step
-- Done: ch. 13b power inside the kingdoms (engine, factions, fuses, profiles). Done: big check (v0.4), ch. 13c extra rules, family tiers. Draft: `docs/WORLD_ATLAS.md` v0.2 (history, map, kingdoms, families, characters, S-tier proposal, cultures, armies, trade, relations, Li's generation, places, law, legends, rumours) waiting for owner approval.
+- Done: ch. 10, 12b, 13, 13b, 13c, numbers sheet v0.2. `docs/WORLD_ATLAS.md` v0.3 (S-tier, no magic and names approved; the atlas as a whole still waits for the owner's final check).
+- Done (Oct 5): full read + fact check of all files; consistency fixes applied; open decisions: duel balance fix, army delegation rule.
 - Decided: crossbows exist (Tatara, the Smiths' Kingdom). The two giants stay close in size and both are internally divided.
 
 Big worldbuilding round:
@@ -58,7 +58,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - **Deterministic wherever the player acts**: duels, battles, conversations, promotions — same situation, same outcome.
 - **The world runs on hidden causes, not luck**: weather, harvests, disease, disasters follow seasons and conditions (neglect, war, overpopulation). Causes are not shown in advance, so events still feel surprising, but nothing is pure chance.
 
-### ⏳ To design later (kingdoms & families worldbuilding)
+### ✅ Done (was "to design later"): see ch. 10, 13, 13b and `WORLD_ATLAS.md`
 - The 7 kingdoms: names, map, rulers, armies, relations.
 - The great and lesser families per kingdom, with branches and key characters.
 - The imperial bloodline: who, where, what they want, how it ties to the Imperial treasures.
@@ -72,7 +72,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - Setting: a **fictional land inspired by Sengoku Japan**. Japanese culture, armor, weapons, names and rank terms; our own map, kingdoms, families and history.
 - **The Empire** ruled the whole land for centuries.
 - **100 years ago** the Empire collapsed and split into **7 kingdoms**.
-- The imperial bloodline **still exists**: powerless, possibly hidden. ⏳ Designed together later, in the worldbuilding of the kingdoms and families.
+- The imperial bloodline **still exists**: powerless, partly hidden (details in `WORLD_ATLAS.md` §1).
 - The great goal of the world: whoever reunites the 7 kingdoms becomes the new Empire.
 - All families have **invented names** (no real clans like Takeda/Oda). **One exception ✅:** Li's own family name **Hattori** (the owner's character across all simulations).
 - **No magic** ✅: gods are believed in but never act visibly. Abilities (ch. 5) are extreme human skill, will and training, never sorcery.
@@ -286,7 +286,7 @@ Rules:
 - Flow: size up → exchanges → decision → aftermath.
 - Choices per round (numbered + free text): attack · defend/counter · feint · observe · use ability · use environment · talk/taunt.
 - **Choice clash**: counter beats reckless attack · attack beats observing · feint beats defense · observing gives info and a later bonus. Combined with stats, so the stronger fighter usually still wins.
-- **Combat Power** per round = VAL × style-mastery factor (0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0) ± condition ± ability ± terrain/weather ± matchup (reach, style) ± choice clash ± knowledge (observation) ± surprise (aura: morale/hesitation only, ch. 12b).
+- **Combat Power** per round = VAL × style-mastery factor (0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0) ± condition ± ability ± terrain/weather ± matchup (reach, style) ± choice clash ± knowledge (observation) ± surprise (aura: morale/hesitation only, ch. 12b). ⚠️ Exact formula, caps and thresholds: `NUMBERS_SHEET.md` §4.
 - Round winner = higher Combat Power; the gap decides the effect on the loser: small = pushed back/tired · medium = wounded · large = badly wounded · huge = down.
 - **Wound track** instead of HP: Fresh → Hurt → Wounded → Badly wounded → Down; each step lowers Combat Power for the rest of the duel.
 - **Upset rule**: same rank = better choices win · 1 rank = possible with good play + 1–2 factors · 2 ranks = 3–4 factors stacked · 3+ = practically impossible (survival is victory).
@@ -301,7 +301,7 @@ Rules:
 - Three sizes: **skirmish** (dozens–hundreds, mostly your own unit) · **battle** (thousands+, in phases with sectors/flanks) · **campaign** (several battles over weeks/months: marches, sieges, supply, timeskips).
 - **You command only your own unit** (size = your rank) and follow orders. Other units are run by their own commanders (AI characters, by personality and general type). You may propose things or ask permission; acceptance depends on status and relationship.
 - **Disobeying orders is allowed**: can bring glory or punishment.
-- **Battle overview every phase**: all sectors for both sides, numbers, changes since last phase, your unit (men, morale, kills). **Information depends on position**: own sector exact · other allied sectors as reports (roughly right, sometimes late) · **enemy numbers are estimates (~)**. Higher rank = better information (messengers, scouts). The overview is still shown every phase. A quiet phase may change only position, fatigue or information (ch. 12b).
+- **Battle overview every phase**: all sectors for both sides, numbers, changes since last phase, your unit (men, morale, kills). **Information depends on position**: own sector exact · other allied sectors as reports (roughly right, sometimes late) · **enemy numbers are estimates (~)**. Higher rank = better information (messengers, scouts). The overview is still shown every phase, but outside Li's sector as reports with source, age and confidence (ch. 12b #6). A quiet phase may change only position, fatigue or information (ch. 12b).
 - Each unit: men · type (spear, bow, samurai, cavalry) · quality (training, gear) · morale · fatigue · formation · commander (LEA, INT, command abilities).
 - **Unit strength** = men × quality × commander factor (LEA) × morale × formation ± terrain ± matchup (spears vs cavalry, archers at range) ± surprise/ambush ± flank/rear ± command abilities.
 - Each phase, units in contact fight; losses follow the strength ratio. **Morale breaks before men run out**: below a limit a unit wavers, then routs. A collapsing flank exposes its neighbours (chain reaction).
@@ -311,9 +311,9 @@ Rules:
 - **INT in battle**: spotting ambushes and traps, how much your tactics add, accuracy of enemy estimates.
 - **Maneuver phase** (during deployment): no losses; INT, terrain and scouting decide who starts with the advantage.
 - **Morale states**: Steady → Wavering → Routing → Shattered (ch. 12b: only if their general died **and** the unit was already wavering, cut off, or has no stand-in commander). **Chain rout**: a routing unit lowers the morale of its neighbours. Flank/rear attacks give big morale hits; attacked from three sides a unit breaks fast.
-- **Taking the general's head**: killing or capturing the enemy commander shatters his troops' morale (duels decide battles).
+- **Taking the general's head**: killing or capturing the enemy commander is a heavy morale shock (−30) to the units under him; they only **shatter** if already wavering, cut off or without a stand-in commander (ch. 12b #5). Duels can turn battles, but do not decide them alone.
 - **Local superiority**: what counts is how many men you bring to one spot (soft Lanchester for melee); cutting the enemy into pieces lets a smaller army win.
-- **Realistic losses**: during the fight ~3–10% dead on both sides; most deaths come after a rout (20–30%+, more if the winner has cavalry); an orderly retreat keeps losses ~10–20%.
+- **Realistic losses** (per battle, % of starting strength, all casualty kinds): ~3–10% in the fight itself; most losses come after a rout (20–30%+, more if the winner has cavalry); an orderly retreat keeps losses ~10–20%. Formulas: `NUMBERS_SHEET.md` §5.
 - **Pursuit phase** after every battle: cavalry chases routers; good commanders limit the damage.
 - **Losses split into four kinds**: dead · wounded (return after healing) · captured (can be ransomed) · deserted.
 - **Sieges** are their own battle type: starve (slow, defenders' morale drops over time) or assault (fast, very bloody); supply decides how long both sides last.
@@ -322,7 +322,7 @@ Rules:
 
 ### Money ✅
 - **Mon** (copper coin, daily things) · **Ryō** (gold coin, big purchases, pay, rewards) · **Koku** (rice to feed 1 person for 1 year; measures land and family wealth).
-- Game rule: **1 koku ≈ 1 ryō ≈ 1,000 mon** (rounded from historical 400–540 mon per koku).
+- Game rule: **1 koku ≈ 1 ryō ≈ 1,000 mon**. Fact check: in the Sengoku period 1 koku of rice was worth about **1 kanmon (1,000 mon)** on average, swinging roughly 500–1,300 mon with harvests; the Edo-era official rate (1609) was **1 ryō = 4,000 mon**. So koku = 1,000 mon is close to history; ryō = 1,000 mon is a **game simplification**.
 - Feel: 1 ryō ≈ a month's wages for a normal worker today.
 - Example prices: meal 5–20 mon · simple spear ~1 ryō · decent sword 3–10 ryō · master katana 30–100+ ryō · warhorse 10–30 ryō · buying a slave free 5–20 ryō.
 
@@ -344,6 +344,7 @@ Slaves receive no pay.
 ### Army comes from land ✅
 - Normal: **200–250 soldiers per 10,000 koku**. Total war: up to ~2×, but fields go unworked and next year's harvest drops.
 - Every family's and kingdom's army size follows from its land (fixes the old 380 vs 85,000 contradiction).
+- Fact check: Japan's 1649 Keian levy table asked ~235 **people** per 10,000 koku, of whom only ~80 were fighters (the rest servants and porters). Our world is deliberately **more militarised** (closer to Warring States China's mass armies): the 200–250 count as men under arms.
 - Derived from ch. 4 Rule 1 + this rule (normal standing army):
 
 | Land | Standing army | Highest possible rank |
@@ -503,7 +504,7 @@ Built from the old canon (Twin Demon story, Li-Hattori summary, ARC files), fixe
 | 84 | Marries **Yuki**, a craftsman's daughter (weaver). |
 | 85 | Daughter **Mei** born. |
 | **87, Month 11 (Shimotsuki), day 3** | **Li** born in Hanaoka. His father calls him **"Little Dragon"** and says he will shake the world. |
-| 90 | **Battle of the Kurose**: Takeshi, as Taishō with ~60,000 men, beats a Kurogane army on the border river. Kurogane veterans still hate the name "Twin Demon". |
+| 90 | **Battle of the Kurose**: Takeshi (Commander A+, LEA ~94, enough for ~57,000 men), as Taishō with ~60,000 men, beats a Kurogane army on the border river. Kurogane veterans still hate the name "Twin Demon". |
 | 92–94 | Takeshi backs reformer **Yashiro Seigen** (let commoners rise, cut family estates). The court whispers he will be made Dai-Shōgun, over **Akabane Gendayū**. |
 | 94, Month 12 | Daughter **Kenjiko** born. |
 | **95, Month 5** | 🔒 The Three Families decide on his death (**Shirasagi** orders it, **Akabane** sets the trap, **Kinugasa** votes against and keeps proof). Takeshi is killed in a night ambush on the road home from campaign. **Official story: "Kurogane raiders"**. Akabane takes the blade **Kage** as a trophy. |
@@ -645,7 +646,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Automatic tests: the engine simulates thousands of careers/duels to check e.g. how long slave → general takes and how often a C-rank beats a B-rank; also watches for dominant strategies.
 
 ### Name registry
-- Every name is stored; new names must be unique (no more two Yukis / two Takeshis), drawn from name lists per region and family.
+- Every name is stored; new names must be unique (no more two Yukis / two Takeshis), taken from name lists per region and family **in a fixed order** (ch. 12b).
 
 ### AI cost
 - Fixed token budget per turn; only relevant memories are sent; static rules are prompt-cached.
@@ -695,10 +696,10 @@ Sizes follow the ch. 7 rule (~200–250 standing soldiers per 10,000 koku). Ever
 
 **Size rule (decided):** the two great kingdoms stay close in size (Kurogane ~7M, Suiren ~10M). Both are giants held back by inner power struggles; neither is a clear number one.
 
-Free territories: the **Kinza** (Merchant City, inspired by Sakai: council of merchants, walled, independent), **Mount Shōgen** (Monk Mountain), the **northern border tribes**.
+Free territories: **Kinza** (Merchant City, inspired by Sakai, which really was run by a council of 36 merchants: walled, independent), **Mount Shōgen** (Monk Mountain), the **northern border tribes**.
 
 ### Li's start ✅
-- Li (12) is the **slave of a famous rōnin who leads a mercenary band**, hired by a border family in the **Kurogane**. He carries gear, sees real fights, learns by watching. Later he can choose to enlist in Kurogane army, where merit can free him and his family.
+- Li (12) is the **slave of a famous rōnin who leads a mercenary band**, hired by a border family in **Kurogane** (the Hagiwara of Akaishi). He carries gear, sees real fights, learns by watching. Later he can choose to enlist in the Kurogane army, where merit can free him (Qin's real law also let men trade rank to free enslaved relatives).
 
 ## Chapter 13b – Power inside the kingdoms ✅
 
@@ -746,7 +747,7 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 2. **Slaves at war:** slaves can be sent to war as levies; in Kurogane taking heads frees them. An owner may lend or sell a slave to an army. Details for Li in ch. 10.
 3. **Coming of age:** adult at **15** (genpuku: can serve as a real soldier and own property). A king rules on his own at **20** (old Empire law still kept by all 7 kingdoms).
 4. **Lifespan without dice:** at world creation every NPC gets a hidden health and lifespan; sickness, wounds and stress lower it. Same world = same outcome. Never shown.
-5. **Neutral powers:** every kingdom has local temples and guild branches; the **Mount Shōgen (Monk Mountain)** and the **Kinza (Merchant City)** are their independent headquarters.
+5. **Neutral powers:** every kingdom has local temples and guild branches; **Mount Shōgen** (Monk Mountain) and **Kinza** (Merchant City) are their independent headquarters.
 6. **Payment to the Crown scales with Crown Authority:** ~5% of tax income in Suiren, ~20%+ in Tatara (replaces the flat 10–20% of ch. 7 per kingdom).
 7. **Mercenaries:** a band is hired by contract (pay per season + share of loot). Ranks inside a band are not Crown or family ranks; a famous rōnin can still be Warrior A.
 8. **Fuse numbers** (thresholds, "not before" dates) go on the numbers sheet.
@@ -835,7 +836,7 @@ Rank notation: `W` Warrior · `C` Commander · `S` Statesman (ch. 5), as F–S l
 | 7 | **Kitakaze** (Northern Frontier) | north wind | Shirotori | cold forest and steppe edge, long winters | Kurogane, Hayate, Takane, Ushio, tribes |
 
 **Free places:**
-- **Kinza**, the Merchant City: a walled harbour run by the **Council of 36**.
+- **Kinza**, the Merchant City: a walled harbour run by the **Council of 36** (historical echo: Sakai's 36-merchant egōshū).
 - **Mount Shōgen**, the Monk Mountain: headquarters of the temples. 8,000 warrior monks. It overlooks the ruins.
 - **The Mist Valley** (inside Takane, neutral): the shinobi village. It sells its services to every kingdom.
 - **The Horo clans**: northern horse tribes.
@@ -856,7 +857,7 @@ Every family entry gives **koku / troops**. The sums match the ch. 13 sizes and 
 | **King Asagiri Tokinari** | 19 | S B · C C · W D | the Young King; cold, patient, believes in merit | rule alone at 20, then unite the land | suspects his mother is hiding something |
 | **Queen Mother Asagiri Kaede** | 37 | S C | proud, lonely, reckless | keep her power after her son comes of age | two secret sons with Gōda Ensai |
 | **Chancellor Ebisawa Rokusai** | 56 | S A | former Kinza merchant who bought power by backing the old king; brilliant administrator; compiled the great *Ebisawa Annals* | stay the real ruler | was Kaede's lover; brought Gōda to court to get rid of her; terrified of exposure |
-| **Gōda Ensai** | 32 | S C · W C | the Queen Mother's "eunuch" favourite, now a marquis with 2 provinces | power, and protecting his sons | not a eunuch. **Coup fuse:** plans to strike before the king turns 20 and put his own son on the throne. |
+| **Gōda Ensai** | 32 | S C · W C | the Queen Mother's "eunuch" favourite, now lord of 2 provinces | power, and protecting his sons | not a eunuch. **Coup fuse:** plans to strike before the king turns 20 and put his own son on the throne. |
 | **Ōtori Gensai** | 58 | **C S−** · W B+ | **Pillar seat 1**. "The Walking Mountain". Defensive genius; serves the Crown, not factions. | keep the kingdom standing | has quietly started choosing successors |
 | **Kirishima Hyōe** | 44 | W A · C B | **Pillar seat 2**. Born a peasant, rose on enemy heads. Savage, instinctual, the King's man. | prove commoners can lead | can barely read; a scribe hides it |
 | **Tsurumaki Sanetaka** | 51 | C B+ · S B | **Pillar seat 3**. Head of the Old Blood. | abolish the merit law | would back Gōda's coup if it brings down the Chancellor |
@@ -915,7 +916,7 @@ Tier B: 1.9M / 44k.
 | **King Shinonome Haruyuki** | 41 | C C · S C− | proud, insecure, jealous of his generals | – |
 | Heir Shinonome Akitoshi | 15 | – | sheltered | – |
 | **Ugaki Jōan** | 48 | S B | the king's favourite minister; greedy, charming | **Slander fuse:** a foreign power (Kurogane's spy office, but the engine decides who pays first) is ready to buy him to call Kagami a traitor |
-| **Kagami Sōun** | 53 | **C S** · W B · S B | **Storm 1**, "the Silent Heaven". The best general alive. Intellectual, loyal to the people, not the king. | refuses to flatter the king |
+| **Kagami Sōun** | 53 | **C S** · W B · S B | **Storm 1**, "the Silent Storm". The best general alive. Intellectual, loyal to the people, not the king. | refuses to flatter the king |
 | **Homura Tetsuzan** | 46 | W A · C B+ | **Storm 2**. A berserker (Instinctual); his men worship him. | hates Ugaki |
 | **Tobita Kojūrō** | 35 | C A− · S B | **Storm 3**, "the Waiting Snake": makes you think you're winning, then strikes with reserves | ambitious; secretly gathering support |
 
@@ -1019,7 +1020,7 @@ Families: royal; **Kanemori** (120k / 2.5k, sword forges); **Hibiki** (120k / 2.
 
 | Character | Age | Rank | Who | Toward Li | 🔒 Secret |
 |---|---|---|---|---|---|
-| **Mikumo Raizen** "the Red Crane" | 47 | W A+ (was **S** at his peak, VAL declining with age) · C C+ | famous rōnin, leader of the **Red Crane band** (~120 men); hard, keeps contracts, drinks | Li is his property: useful, nothing more (yet) | served in Suiren and left in disgust after Takeshi's murder. Bought Li at Kinza's slave market in Year 96 without knowing who he is. Sees something in how the boy moves. |
+| **Mikumo Raizen** "the Red Crane" | 47 | W A+ (was **S** at his peak; an old knee wound from Year 95 and drink cost him the edge) · C C+ | famous rōnin, leader of the **Red Crane band** (~120 men); hard, keeps contracts, drinks | Li is his property: useful, nothing more (yet) | served in Suiren and left in disgust after Takeshi's murder. Bought Li at Kinza's slave market in Year 96 without knowing who he is. Sees something in how the boy moves. |
 | **Gonza "One-Ear"** | 40 | W C | Raizen's second; cruel to slaves | dislikes Li | sells band supplies on the side |
 | **Matsukaze Rokubei** | 35 | S D | quartermaster; keeps the money and the slave papers | – | – |
 | **Hisame** | 28 | W B− (bow) | silent archer of the band | ignores Li at first | a deserter from the Mist Valley |
@@ -1029,11 +1030,11 @@ Families: royal; **Kanemori** (120k / 2.5k, sword forges); **Hibiki** (120k / 2.
 | **Kaname** | 15 | W D (naginata) | the headman's daughter in a nearby border village; fierce. The renamed "warrior girl" from the old canon; a future recruit. | – | – |
 | **Ōno Daisuke** | 13 | W D | strong farm boy; will enlist when Li does. The renamed "rival recruit" from the old canon. | rival | – |
 
-**Li's family** (📝 to finalise in ch. 10):
+**Li's family** (✅ ch. 10):
 
 | Person | Age / years | Notes |
 |---|---|---|
-| Father **Hattori Takeshi** "the Twin Demon" | †95 | blades **Kage** (Shadow) and **Hikari** (Light); called Li "Little Dragon" |
+| Father **Hattori Takeshi** "the Twin Demon" (W S · C A+) | †95 | blades **Kage** (Shadow) and **Hikari** (Light); called Li "Little Dragon" |
 | Mother **Yuki** | 38 | |
 | Older sister **Mei** | 15 | |
 | Younger sister **Kenjiko** | 5 | born just before the murder; Yuki carried her as a baby over the mountains |
@@ -1048,12 +1049,12 @@ Ch. 5 said "S: 0–2 in the whole land". With 7 kingdoms and **three** sub-ranks
 
 | Living S | Sub-rank | Kingdom | Known as |
 |---|---|---|---|
-| Kagami Sōun | Commander S | Hayate | the Silent Heaven |
+| Kagami Sōun | Commander S | Hayate | the Silent Storm |
 | Ōtori Gensai | Commander S− | Kurogane | the Walking Mountain |
 | Garyū Tessai | Warrior S | Kitakaze | the Northern Bear |
 | Lady Kinugasa Ayane | Statesman S− | Suiren | the Silk Spider (behind her back) |
 
-- Fallen or faded legends: **Hattori Takeshi** (Warrior S / Commander A, †95) · **Mikumo Raizen** (was Warrior S, now A+ through age).
+- Fallen or faded legends: **Hattori Takeshi** (Warrior S / Commander A+, †95) · **Mikumo Raizen** (was Warrior S, now A+ through age).
 - Two "slots" stay open on purpose for the next generation (§10), Li included. Nothing guarantees Li one: he must earn it.
 
 ## 6. Peoples & cultures
@@ -1304,9 +1305,9 @@ Split of casualties during fighting: 40% dead · 45% wounded · 15% captured or 
 
 **Battle report** (always this format, never a loose %):
 ```
-Battle: 5 phases · Starting strength 1,000
-Dead 42 · Wounded 81 · Captured 19 · Missing 6 · Deserted 11
-Permanent losses 78 · Recoverable (wounded) 81
+Battle: 5 phases (no rout) · Starting strength 1,000
+Dead 22 · Wounded 24 · Captured 5 · Missing 3 · Deserted 6
+Permanent losses 36 · Recoverable (wounded) 24 · Total 60 (6%)
 ```
 
 **Morale points** (0–100):
@@ -1368,7 +1369,7 @@ Three kinds of merit, confirmed after the battle by witnesses, reports or the he
 | Dai-Shōgun | 0.05 | 0.45 | 0.5 |
 Result: a pure fighter reaches Kogashira fast, but cannot become a general on heads alone (e.g. Sanbyakunin-shō → Sennin-shō needs a score of 900; with weight 0.15, heads alone would need 6,000 combat merit).
 
-**Promotion thresholds** (promotion score):
+**Promotion thresholds** (promotion score, counted over the whole career, not reset after a promotion):
 
 | From → To | Merit needed |
 |---|---|
