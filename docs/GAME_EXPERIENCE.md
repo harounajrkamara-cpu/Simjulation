@@ -15,7 +15,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 5 | Simulation + story fused | ✅ |
 | 6 | Look & style | ✅ |
 | 7 | AI narrator | ✅ |
-| 8 | Onboarding | ⏳ |
+| 8 | Onboarding | 📝 |
 | 9 | Pacing | ⏳ |
 | 10 | Master build prompt + build plan | ⏳ |
 
@@ -244,6 +244,103 @@ Builds on World Bible ch. 11 (turn loop, narrator rules) and ch. 12 (safety, cos
 1. **AI writes for free text, people and story moments**; routine actions (chores, WAIT, training without story) stay template text. (option b)
 2. **Third person: "Li carries the rice"**, not "you". → Build: change the engine's template texts and the style guide above from "you" to "Li" (the player still types as Li: "I talk to Kaname").
 3. **Text streams in like ink**: yes.
+
+## Chapter 8 – Onboarding 📝 (proposal, Oct 5)
+How a new player gets from the title screen to "I understand this world and I want to keep going" **without a tutorial wall**. Builds on ch. 3 (title → prologue → chapter card → game), ch. 4 (core loop), ch. 5 (free text), ch. 7 (AI modes) and World Bible ch. 10 (Li's start) and ch. 11 (turn, commands, session start).
+
+### Research
+| Game | What they do | What we take |
+|---|---|---|
+| *Disco Elysium* | no tutorial; the hero wakes up with amnesia, so **the player's ignorance is the hero's ignorance**; skills teach themselves by speaking in dialogue; failure is part of the story | Li is new to Kōri fort too: the world is explained **as Li learns it**; failing is a story, not a game-over |
+| *Crusader Kings III* | guided tutorial on a real start (Munster, 1066) that ends in a good position; then small **just-in-time mini-tutorials**; **nested tooltips** on every term; hints can be switched on/off | no separate tutorial map: the **real first week is the tutorial**; gold-underlined terms with nested tooltips; hints on by default, switchable |
+| *Bannerlord* | character creation as **backstory questions** that set stats; the tutorial teaches basics, but players feel lost when it ends ("what now?") | Li is fixed (World Bible 10.4), so no stat questions; the "what now?" gap is closed with the **Goals panel** and a first-week plan |
+| *Pentiment* / *80 Days* | slow, mundane first days that teach daily life (wake, talk, work); the story narrates the mechanics | the first day is **daily camp life**: carrying, cooking, eating, a secret night; every mechanic shows up as a camp moment |
+| *AI Dungeon* | three suggested actions + a free box; tips: "ask questions in character, try things" | the free-text line **never starts blank**: example phrases in first person that fit the scene |
+| AI onboarding research | a blank prompt gives no idea what is possible; a **pre-written first prompt** removes the most common failure point | the first free-text moment comes with clickable example lines the player can send or edit |
+| Tutorial design (just-in-time, progressive disclosure) | one new mechanic per challenge; teach right before it is needed; don't dump everything in the first five minutes | **max one new thing per turn**; the duel screen is taught before the first real fight |
+
+Sources: [PC Gamer – Disco Elysium](https://www.pcgamer.com/uk/level-up-by-arguing-with-yourself-in-scintillating-crpg-disco-elysium/), [CogConnected – CK3 tutorials](https://cogconnected.com/2020/03/crusader-kings-3-going-easiest-paradox-game-learn/), [GamingOnLinux – CK3 guidance](https://www.gamingonlinux.com/articles/16333/), [Fextralife – Bannerlord start](https://fextralife.com/mount-and-blade-ii-bannerlord-getting-started-guide/), [TheSixthAxis – after the Bannerlord tutorial](https://www.thesixthaxis.com/?p=353857), [AI Dungeon new player guide](https://latitudegames.notion.site/New-Player-Guide-2c8105b8a632809bafebf0b463defec1), [Magic moment in AI onboarding](https://tianpan.co/blog/2026/04/17/magic-moment-ai-onboarding-converts-skeptics), [Wayline – effective tutorials](https://www.wayline.io/blog/designing-effective-game-tutorials-and-onboarding), [Gamified UK – learning by doing](https://www.gamified.uk/2014/05/15/onboarding-tutorials-and-learning-by-doing/), [GDC – 80 Days](https://gdcvault.com/play/1022101/contactUs).
+
+### Seven onboarding rules
+1. **The first week is the tutorial.** No separate tutorial level, no pop-up wall. Everything is taught inside real Year 100 play, and nothing taught is thrown away.
+2. **Li learns with the player.** Li is new at Kōri fort: the place, the Hagiwara, the river and its banners are explained to him by people, at the moment it matters.
+3. **One new thing per turn.** A turn introduces at most one new screen, command or idea.
+4. **Teach right before it is needed.** The duel screen is taught in a low-stakes sparring bout, not in the burning village.
+5. **The free-text line is never blank.** Until the player has typed freely three times, it shows clickable example lines in first person ("I ask Sukezō where we are"). The narrator answers in third person ("Li asks…", ch. 7).
+6. **Every result says why.** Each ▲▼ change and every refusal has a "Why?" that shows the cause in words (ch. 12b #11); this is how the player learns that there are no dice.
+7. **Never teach a secret.** Onboarding, hints and How to play never mention hidden rules (Li cannot die, hidden potential, 🔒 truths). They do say: *losing costs* (defeat ladder, ch. 12b #10).
+
+### The first session, step by step
+```
+TITLE ─► NEW LIFE (4 settings, ~20 s) ─► PROLOGUE (7 slides, ~90 s, skippable)
+      ─► CHAPTER CARD "CHAPTER 1 — THE RED CRANE" ─► FIRST DAY (guided by hints) ─► FIRST WEEK ─► first WAIT ─► … ─► sparring ─► the raid
+```
+
+**1. New life screen** (one screen, defaults already picked, one button "Begin"):
+| Setting | Choices | Default |
+|---|---|---|
+| Way of play | **Ironman** (outcomes never undone) · **Story mode** (can return to save points) — ch. 11 | Ironman |
+| Storyteller | **Claude in this page** (asks permission once) · **Own key / local AI** (not on claude.ai) · **No AI** (template text + numbered options) — ch. 7 | Claude (if available), else No AI |
+| Guidance | **Full hints** · **Light** (only new screens) · **Off** | Full |
+| Ink speed | Slow ink · Fast · Instant (clicking always finishes the text) | Fast |
+- No character creation: Li is fixed (World Bible 10.4). The world number (ch. 12b) is hidden under "Advanced".
+- If Claude permission is refused, the game says once, in one line, that it continues without AI, and how to switch later (Settings).
+
+**2. Prologue** — 7 narrated ink slides (ch. 3 asked 6–8), hand-written, no AI, same every time:
+1. *For four hundred years, one Empire ruled the land from Amatsu-kyō.*
+2. *Year 0. Two princes, two crowns, one city on fire. The Burning.*
+3. *Seven Wardens crowned themselves. Seven kingdoms.* — the map lights up in the seven colours with their crests.
+4. *A hundred years of war.* — the Kurose river, banners on both banks.
+5. Memory: two swords crossed on a wall · a man's laugh · *"Little Dragon."*
+6. Memory: snow, a burning lantern at night, a white rock on a coat, a woman's voice: *"Never say that name. Not to anyone."*
+7. *Year 100. Spring. A boy carries a load behind a red crane banner, toward Kōri fort.*
+- Check against World Bible 10.2: only things Li knows; no "Hattori", no "Twin Demon", no meaning of the white rock.
+- Skip button from the first slide; after the first playthrough it starts skipped (option to replay in the Journal).
+
+**3. The first week** — the real story calendar (engine content) plus small hand-written teaching beats (new content, marked ✚):
+| When | Scene | What it teaches | Screen / tool introduced |
+|---|---|---|---|
+| Day 1 morning | Arrival at Kōri (existing) · ✚ Gonza dumps a heavy chest on Hachi | reading a scene, Continue, numbered options with tested skill and ⚠ risk; **first real choice in the first 2 minutes** (help Hachi or keep your head down) | options; ▲▼ changes line with "Why?" |
+| Day 1 afternoon | ✚ Old Sukezō's cook tent | **free text**: say / do / look; example lines shown | free-text line with example chips |
+| Day 1 evening | eating with Hachi (existing beat h1) | people remember; a relationship spark | **People** tab gets a gold dot |
+| Day 1 night | ✚ first night: sleep, or practise with the sticks in secret | day parts, fatigue, risk (Gonza), growth | **Li** tab gold dot (style grows) |
+| Day 2 afternoon | Ishizue's inspection (existing) | people judge Li and the band; terms like *Kurogane* have nested tooltips | **Encyclopedia** entry appears |
+| Day 2–4 | Rokubei's price (beat k1), the merit law (k2) | goals and the routes to freedom | **Goals** panel shows the first route with progress |
+| Day 5 evening | Rice from Sasabe (existing): Kaname, Daisuke | new-person chips | — |
+| Day 7 | ✚ Sukezō: "Camp days are all alike, boy. Plan them." | **WAIT with a plan** (ch. 9); the engine stops when something matters (Sayo's visit, Day 10) | first **Timeskip summary** |
+| Month 1, ~Day 20 | ✚ Daisuke challenges Li to a stick bout at Sasabe | the **duel screen**: four moves, reading, wound track, "fight or simulate" — low stakes (worst result: a setback and some mockery) | **Duel** overlay, with hints |
+| Month 2, Day 6 | the raid on Sasabe (existing) | the first real fight, under pressure | first big moment (title card; legend moment if earned) |
+
+**4. Hints** (Guidance = Full):
+- A hint is **one short line** in the margin under a small gold label GUIDE, never inside the story text and never in the narrator's voice. It closes itself after the player does the thing once.
+- Each hint appears **once per life**; all hints can be re-read under How to play.
+- "Light" keeps only the hints for new screens (duel, timeskip, ceremony, battle later). "Off" shows none.
+- Later systems (battle map, roster, domain, court) get the same treatment when they unlock (World Bible ch. 12 "systems unlock with Li's life"), so onboarding never really ends: it follows Li's life.
+
+**5. Help that is always there**
+- **Nested tooltips** (CK3): gold-underlined terms (ranks, Kurogane, koku, mon, merit law…) show a two-line explanation; inside it, more terms; "More" opens the Encyclopedia — only what Li has learned.
+- **How to play** (title screen + HELP command): **one screen**, six points: 1) choose a number or write what Li does, in your own words, as "I…"; 2) the world is fair: no dice, every result has a cause (ask "Why?"); 3) people remember what Li does, and so do rumours; 4) losing costs: wounds, shame, chains, lost friends; 5) WAIT skips quiet days with a plan; 6) the tabs: Story · Map · Li · Army · People · Journal · Encyclopedia.
+- **Refusals teach**: an impossible action is refused in-world with the reason and one possible alternative ("Li's chains don't reach the gate. He could wait for the night shift change."). An unclear one is asked back (ch. 7).
+
+**6. Coming back** (ch. 11 session start): Continue → a "Previously" card (2–3 lines), date, place, current goals, open dangers; then the story. After a long break (30+ real days) the card adds one line on the controls.
+
+### Targets (tested in the playtest, M7)
+| Moment | Target (real time, Full hints) |
+|---|---|
+| Title → first control of Li | ≤ 3 minutes (≤ 1 with the prologue skipped) |
+| First meaningful choice | within 2 minutes of control |
+| First free-text action | within the first 10 minutes |
+| First WAIT / timeskip | ~20 minutes |
+| First fight (sparring) and the raid | within the first session (~45–60 min; exact pacing in ch. 9) |
+| Hints on screen at the same time | never more than 1 |
+
+### Contradictions & fixes found (to apply on approval)
+1. **Ch. 6 visual example vs ch. 3**: the mockup shows "Army · locked", but ch. 3 says the Army tab shows the Red Crane band from the outside while Li is a slave. → Follow ch. 3: the Army tab opens to "The Red Crane band — seen from the baggage line".
+2. **Ch. 6 mockup and the engine text use "you"**; ch. 7 decided third person ("Li"). The new ch. 8 screens use "Li"; the engine template change is already on the build list.
+3. **World Bible ch. 11 command list** has no **HELP** and no **WAIT**, but the engine and ch. 4/9 use both. → Add HELP and WAIT to the ch. 11 list.
+4. **Title button name**: ch. 3 says "New game", the ch. 6 mockup says "New life". → Use "New life" (fits the game), functionally the same.
+5. **First fight**: in the current engine the first fight is the raid itself (Month 2, Day 6), with no chance to learn the duel screen first. → Add the sparring bout (✚, owner to confirm).
+6. **Hidden rule safety**: ch. 5 says "Li cannot die" in a design text; that sentence must never reach How to play, hints or AI prompts. → Rule 7 above.
 
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
