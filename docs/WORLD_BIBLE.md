@@ -245,3 +245,45 @@ Rules:
 - **Pursuit phase** after every battle: cavalry chases routers; good commanders limit the damage.
 - **Losses split into four kinds**: dead · wounded (return after healing) · captured (can be ransomed) · deserted.
 - **Sieges** are their own battle type: starve (slow, defenders' morale drops over time) or assault (fast, very bloody); supply decides how long both sides last.
+
+## Chapter 7 – Economy
+
+### Money ✅
+- **Mon** (copper coin, daily things) · **Ryō** (gold coin, big purchases, pay, rewards) · **Koku** (rice to feed 1 person for 1 year; measures land and family wealth).
+- Game rule: **1 koku ≈ 1 ryō ≈ 1,000 mon** (rounded from historical 400–540 mon per koku).
+- Feel: 1 ryō ≈ a month's wages for a normal worker today.
+- Example prices: meal 5–20 mon · simple spear ~1 ryō · decent sword 3–10 ryō · master katana 30–100+ ryō · warhorse 10–30 ryō · buying a slave free 5–20 ryō.
+
+### Pay per rank ✅ (realistic)
+| Rank | Pay per year |
+|---|---|
+| Ashigaru | 2–3 ryō + food and basic gear |
+| Gochō / Kogashira | 4–6 ryō |
+| Gojū-gashira | 10–15 ryō |
+| Hyakunin-gashira | 25–40 ryō |
+| Sanbyakunin-shō and higher | land (a village, later a district) instead of only pay |
+Slaves receive no pay.
+
+### Land & taxes ✅
+- Land measured in koku per year: village 300–1,000 · district 10,000–50,000 · province 100,000–500,000+.
+- The lord takes **40–60%** of the harvest. Higher tax = more money but lower peasant loyalty → **uprisings** possible.
+- Tax income arrives once a year, after the autumn harvest.
+
+### Army comes from land ✅
+- Normal: **200–250 soldiers per 10,000 koku**. Total war: up to ~2×, but fields go unworked and next year's harvest drops.
+- Every family's and kingdom's army size follows from its land (fixes the old 380 vs 85,000 contradiction).
+
+### Upkeep ✅
+- Every soldier eats ~1 koku/year plus pay and gear. Campaign supplies, long supply lines and sieges cost extra; hunger lowers morale.
+- **Unpaid soldiers desert.** Wounded cost care.
+
+### Other income ✅
+Markets & trade (merchant guild) · tolls · mines · war (loot, ransom, ceremony rewards; looting hurts reputation with locals) · gifts & bribes · loans from the merchant guild with interest.
+
+### Domain & projects ✅
+- Projects (watchtower, barracks, farmland, market, roads, smithy, walls, school, shrine…) cost money, time and workers.
+- The engine stores a completion date; finished projects leave the dashboard.
+- Disasters: bad harvest, flood, famine, disease.
+
+### Wallets ✅
+Li's personal money · his unit's supplies · later his domain's treasury (family can manage it). The dashboard always shows Li's money.
