@@ -216,3 +216,15 @@ Rules:
 - **Permanent injuries** are possible for Li (scars, lasting effects such as a weaker arm).
 - **Friends and allies can die**; other characters, including famous enemies, can die.
 - **Aftermath**: wounds persist and heal over days/weeks (lower stats, may block abilities) · growth (most from beating stronger foes) · trophy collection (name, rank, men commanded, date, battle) · reputation & memories (witnesses and the loser) · ability costs (e.g. Zone penalty).
+
+### 6b – Battles ✅
+- Three sizes: **skirmish** (dozens–hundreds, mostly your own unit) · **battle** (thousands+, in phases with sectors/flanks) · **campaign** (several battles over weeks/months: marches, sieges, supply, timeskips).
+- **You command only your own unit** (size = your rank) and follow orders. Other units are run by their own commanders (AI characters, by personality and general type). You may propose things or ask permission; acceptance depends on status and relationship.
+- **Disobeying orders is allowed**: can bring glory or punishment.
+- **Battle overview every phase**: all sectors for both sides, numbers, changes since last phase, your unit (men, morale, kills). Own side exact; **enemy numbers are estimates (~)**. Numbers always change between phases.
+- Each unit: men · type (spear, bow, samurai, cavalry) · quality (training, gear) · morale · fatigue · formation · commander (LEA, INT, command abilities).
+- **Unit strength** = men × quality × commander factor (LEA) × morale × formation ± terrain ± matchup (spears vs cavalry, archers at range) ± surprise/ambush ± flank/rear ± command abilities.
+- Each phase, units in contact fight; losses follow the strength ratio. **Morale breaks before men run out**: below a limit a unit wavers, then routs. A collapsing flank exposes its neighbours (chain reaction).
+- Morale changes: commander dies or loses a duel (big drop) · flanked/surrounded · speeches, aura, command abilities · long fight without progress · hunger/bad supply.
+- Flow: war council → deployment → phases (**one phase ≈ part of a day, 3–4 per day**) → night (multi-day: rest, wounds, scouts, desertion, reinforcements) → end (rout, retreat, surrender) → aftermath (losses, merit, trophies, reputation, later the reward ceremony).
+- Unimportant fights auto-simulate; duels vs officers/commanders and key moments are offered to the player first; "simulate until the final battle" is allowed.
