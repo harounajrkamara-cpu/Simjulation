@@ -530,7 +530,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 ### Build plan
 - Build in stages; each stage must be playable before the next starts (see chat decision).
 
-## Chapter 13 – The Seven Kingdoms (base ✅, names ⏳)
+## Chapter 13 – The Seven Kingdoms (base ✅, names & world in `WORLD_ATLAS.md` 📝)
 Sizes follow the ch. 7 rule (~200–250 standing soldiers per 10,000 koku). Every kingdom has a real strength and a real weakness.
 
 | # | Type | Inspiration | Size | Strength | Weakness |
