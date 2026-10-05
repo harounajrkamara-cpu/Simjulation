@@ -103,7 +103,7 @@ Owner (Oct 5): *every* ceremony and big event must be special; the first time so
 ### Four tiers
 | Tier | When | How it looks |
 |---|---|---|
-| **Legend moment** (once in a life) | first time someone calls Li by his **nickname** · first **ability awakening** (SHINKEN NO RYŪ) · freedom · first enemy officer's head · learning his father was **the Twin Demon** · finding his family · genpuku at 15 · first command · first land · a seat among the **Six Pillars** · reaching an **S** rank · facing his father's killers | the full staging recipe below |
+| **Legend moment** (once in a life) | first time someone calls Li by his **nickname** · first **ability awakening** (SHINKEN NO RYŪ) · freedom · first enemy officer's head · learning his father was **the Twin Demon** · finding his family · genpuku at 15 · first command · first land · a seat among the **Six Pillars** · reaching an **S** rank · facing his father's killers · *(owner ✅ added)* the death of a close friend · first meeting with a living **S-rank** (feeling the aura) · **his own unit's name and banner** (like Shin's Hi Shin unit) · every big **rival encounter** (Akabane Hayame and others) | the full staging recipe below |
 | **Ceremony** (recurring, with witnesses) | reward ceremony after a campaign (rank order) · promotion · genpuku · marriage · funerals · feasts · oaths | ceremony screen: who stands where, who is honoured, every witness reacts by their own opinion and remembers it |
 | **Title card** | new chapter · rank up · battle begins · season turns · a famous enemy appears | full-screen brush title for 2–3 seconds |
 | **Spark** | a relationship turns · a skill unlock · a rumour about Li spreads | a short glowing line in the story and the notification feed |
@@ -119,7 +119,8 @@ Owner (Oct 5): *every* ceremony and big event must be special; the first time so
 ### Nicknames
 - Nicknames are **earned by deeds**, decided by the engine from what Li did and who saw it (no dice); the first person to use it in front of others is a witness of the deed.
 - Li can be called different things by different groups (soldiers vs nobles vs enemies, ch. 8 reputation).
-- ⏳ Owner to choose the style of nicknames (see questions).
+- **Style (owner ✅):** Japanese name + English meaning, e.g. *"Kurose no Ryū — the Dragon of the Kurose"*.
+- **Who decides (owner ✅):** the world decides, from his deeds and the witnesses; the player never picks.
 
 ## Chapter 4 – Core loop 📝
 What the player does, from one minute to a whole life. Bannerlord's loop (travel → fight → recruit → upgrade → grow) and Kingdom's arc (fight → merit → promotion → bigger battles) are the models.
