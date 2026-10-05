@@ -14,7 +14,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 4 | Core loop | ✅ |
 | 5 | Simulation + story fused | ✅ |
 | 6 | Look & style | ✅ |
-| 7 | AI narrator | 📝 |
+| 7 | AI narrator | ✅ |
 | 8 | Onboarding | ⏳ |
 | 9 | Pacing | ⏳ |
 | 10 | Master build prompt + build plan | ⏳ |
@@ -196,7 +196,7 @@ Visual example (4 screens): https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK �
 - **Big moments** follow the 4 tiers of ch. 3b; the legend moment is a full black screen with the name in brush capitals, the Japanese name huge behind it, what earned it and who heard it, and a red seal.
 - Rules: text contrast ≥ 4.5:1, click targets ≥ 44 px, no emoji in the interface (symbols only), works on a phone as one column.
 
-## Chapter 7 – AI narrator 📝
+## Chapter 7 – AI narrator ✅
 Builds on World Bible ch. 11 (turn loop, narrator rules) and ch. 12 (safety, cost). The AI never changes a number; it reads what you type and tells what the engine decided.
 
 ### Where the AI comes from (three modes, one interface)
@@ -225,7 +225,7 @@ Builds on World Bible ch. 11 (turn loop, narrator rules) and ch. 12 (safety, cos
 - The approved text is **stored in the save** next to its events; loading shows the same story. REWRITE re-words it, CORRECT re-reads your input before it resolves.
 
 ### Style guide for the AI
-- Second person ("you"), present tense, short blocks; grave and epic like *Kingdom*, never jokey.
+- Third person ("Li"), present tense, short blocks; grave and epic like *Kingdom*, never jokey.
 - Show, don't explain: no stats or dice language in the prose; numbers stay in the interface.
 - Japanese words sparingly, always clear from context (rank names with men count).
 - NPCs speak in their culture's voice (Atlas ch. 6: Kurogane blunt, Suiren poetic, Hayate boastful…).
@@ -240,10 +240,10 @@ Builds on World Bible ch. 11 (turn loop, narrator rules) and ch. 12 (safety, cos
 - Fixed word budget per turn; only relevant memories are sent; static rules and character sheets are cached.
 - Routine actions (WAIT, chores without story) use templates, not the AI.
 
-### Owner questions
-1. How often should the AI write? (a) every turn, (b) only for free text, people and story moments; routine stays template, (c) only big moments.
-2. Narration in "you" (now) or in third person ("Li")?
-3. Text streaming like ink: yes / no?
+### Owner decisions (Oct 5)
+1. **AI writes for free text, people and story moments**; routine actions (chores, WAIT, training without story) stay template text. (option b)
+2. **Third person: "Li carries the rice"**, not "you". → Build: change the engine's template texts and the style guide above from "you" to "Li" (the player still types as Li: "I talk to Kaname").
+3. **Text streams in like ink**: yes.
 
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
