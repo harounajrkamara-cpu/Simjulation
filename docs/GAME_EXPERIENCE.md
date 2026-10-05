@@ -10,9 +10,9 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 1 | Vision & feel | ✅ |
 | 2 | Platform & format | ✅ |
 | 3 | Screens & flow | ✅ |
-| 3b | Big moments | 📝 |
-| 4 | Core loop | 📝 |
-| 5 | Simulation + story fused | ⏳ |
+| 3b | Big moments | ✅ |
+| 4 | Core loop | ✅ |
+| 5 | Simulation + story fused | 📝 |
 | 6 | Look & style | ⏳ |
 | 7 | AI narrator | ⏳ |
 | 8 | Onboarding | ⏳ |
@@ -91,7 +91,7 @@ Overlays (take the whole screen for a moment):  Event window · Title card · Ce
 | **Battle** | battle map with unit blocks, banners and arrows per phase + the story of Li's unit + reports with age/confidence | stage 2 |
 | **Timeskip summary** | what happened to Li, his people and the world, with changes | after WAIT |
 
-## Chapter 3b – Big moments 📝
+## Chapter 3b – Big moments ✅
 Owner (Oct 5): *every* ceremony and big event must be special; the first time someone calls Li by his nickname and the first time he unlocks his own ability must be "crazy special".
 
 ### Research
@@ -122,7 +122,7 @@ Owner (Oct 5): *every* ceremony and big event must be special; the first time so
 - **Style (owner ✅):** Japanese name + English meaning, e.g. *"Kurose no Ryū — the Dragon of the Kurose"*.
 - **Who decides (owner ✅):** the world decides, from his deeds and the witnesses; the player never picks.
 
-## Chapter 4 – Core loop 📝
+## Chapter 4 – Core loop ✅
 What the player does, from one minute to a whole life. Bannerlord's loop (travel → fight → recruit → upgrade → grow) and Kingdom's arc (fight → merit → promotion → bigger battles) are the models.
 
 | Scale | Loop | What keeps it from being boring |
@@ -138,3 +138,47 @@ What the player does, from one minute to a whole life. Bannerlord's loop (travel
 2. Every play session reaches at least one **meaningful choice** (the pacing director brings the next one closer).
 3. Every big result gets a **moment** (ch. 3b), and every small one a visible sign.
 4. The world moves without Li (Bannerlord): news arrives, people change, kingdoms fall.
+
+## Chapter 5 – Simulation + story fused 📝
+The heart of "freedom of choice": you can type anything, the world answers fairly, and the numbers never lie.
+
+### Research
+- **Hidden Door** (LLM story game, 2025): an engine of human-written, structured story beats that ML recombines with world rules and player choices; the LLM only does what it is good at; player input does not execute directly but is turned into choices first ([PC Gamer](https://www.pcgamer.com/hidden-door-ai-game-narrative-rpg/), [Ian Bicking review](https://ianbicking.org/blog/2025/08/hidden-door-design-review-llm-driven-game.html)).
+- **Intent parsing** (Ian Bicking, *Intra*): split free input into **dialogue**, **an action**, or **a direct command**, each with its own pipeline ([Intra design notes](https://ianbicking.org/blog/2025/07/intra-llm-text-adventure)).
+- Research pattern: the LLM turns language into **structured data (JSON)** and a **deterministic back end** executes it ([Real-Time World Crafting, 2025](https://arxiv.org/pdf/2510.16952)). Most AI games then roll dice – we don't (World Bible: no dice).
+
+### Four roles
+| Role | Who | Does | Never does |
+|---|---|---|---|
+| **Engine** | code | owns every number, rule, person, memory and hidden truth; resolves every action | write prose |
+| **Director** | code | picks what scene comes next and when hidden causes surface (pacing director, ch. 12) | invent events or randomness |
+| **Interpreter** | AI | turns typed text into a structured intent; asks when unclear | decide outcomes |
+| **Narrator** | AI | writes the scene and NPC voices from the facts it gets | change numbers, add names, reveal secrets |
+
+### What happens when you type
+1. **Interpreter** sorts the input: **say** something to someone · **do** something · **look/ask** about the world · **command** (STATUS, WAIT…).
+2. It fills a fixed form: *verb, target, method, manner (careful / bold / sly), what Li says, any promise or lie*.
+3. **Engine checks** possibility: is it physically possible here and now, for a 12-year-old slave? Impossible → refused in-world ("Your chains don't reach that far"); unclear → the game **asks**.
+4. **Engine resolves deterministically**:
+   - known actions use their own rules (training, duel, work…);
+   - **any other action** = the best fitting skill/stat vs a fixed difficulty + modifiers (place, time, who watches, wounds). Margin decides the degree. **No dice.**
+5. **Consequences** become events: relationships (with reasons), memories of witnesses, rumours, flags, wounds, merit.
+6. **Narrator** writes the scene only from those facts; a checker rejects invented names, numbers or events.
+7. **Options** for the next moment come from the engine; the AI may phrase them.
+
+### Talking freely
+- You can talk to anyone present in your own words. The AI plays the NPC **inside fences**: their personality, mood, opinion of Li, and **only what they know** (ch. 8).
+- *What* an NPC reveals is decided by the engine (beats unlocked by opinion and flags); the AI only decides *how* they say it.
+- Tone is read from what you write: polite · rude · threat · flattery · **promise** · **lie** · question. Promises are stored and tracked (kept → trust up, broken → trust scar). Lies are caught or not by fixed rules (the NPC's INT/observation vs Li's POL and what they know).
+
+### Crazy actions are allowed
+"I attack Raizen", "I steal the slave papers", "I run away tonight", "I insult Ishizue": all possible if physically possible, with **real consequences** through the defeat ladder (ch. 12b). Li cannot die, but he can be beaten, chained, sold, branded or hunted.
+
+### Hand-written core, AI connective tissue (Hidden Door lesson)
+- **Story beats, legend moments, ceremonies and key NPC lines** are written by us in the content files (deterministic, checked against the World Bible).
+- The AI writes the connective scenes, daily life, and NPC replies around them.
+
+### Determinism with AI
+- The structured intent is **stored** in the save; outcomes depend only on it.
+- The narration text is **stored** too, so loading shows the same story; REWRITE only re-words it.
+- Without an AI (offline or no key), the game still runs on template text and the numbered options.
