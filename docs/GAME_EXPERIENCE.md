@@ -12,7 +12,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 3 | Screens & flow | ✅ |
 | 3b | Big moments | ✅ |
 | 4 | Core loop | ✅ |
-| 5 | Simulation + story fused | 📝 |
+| 5 | Simulation + story fused | ✅ |
 | 6 | Look & style | ⏳ |
 | 7 | AI narrator | ⏳ |
 | 8 | Onboarding | ⏳ |
@@ -48,7 +48,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - **Text + code-drawn visuals**: map, crests, character cards, ink-wash scene headers, system windows for big moments.
 - **Freedom of choice requires the AI layer**: the AI reads typed actions (structured, asks when unclear) and the AI narrator writes the scenes. Without it, free text stays limited. → AI narrator moves from "later" to **core**.
 - **Text length mixed by moment** (ch. 11 of the World Bible: ~150–200 words normally, ~300+ for epic moments), with a "Continue" beat between long parts.
-- Sound: ⏳ later (optional ambient + a few effects).
+- Sound: ⏳ later (optional ambient + a few effects). Owner has set up the free sound sources (Pixabay / Freesound, Oct 5).
 
 ## Owner answers (Oct 5, round 2)
 - Main screen: **War chronicle** – a wide story page with tabs on top (Story · Map · Li · Army · People · Journal).
@@ -139,7 +139,7 @@ What the player does, from one minute to a whole life. Bannerlord's loop (travel
 3. Every big result gets a **moment** (ch. 3b), and every small one a visible sign.
 4. The world moves without Li (Bannerlord): news arrives, people change, kingdoms fall.
 
-## Chapter 5 – Simulation + story fused 📝
+## Chapter 5 – Simulation + story fused ✅
 The heart of "freedom of choice": you can type anything, the world answers fairly, and the numbers never lie.
 
 ### Research
@@ -182,3 +182,13 @@ The heart of "freedom of choice": you can type anything, the world answers fairl
 - The structured intent is **stored** in the save; outcomes depend only on it.
 - The narration text is **stored** too, so loading shows the same story; REWRITE only re-words it.
 - Without an AI (offline or no key), the game still runs on template text and the numbered options.
+
+## Tools & sources (owner ✅ Oct 5)
+- **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
+- **Icons:** [game-icons.net](https://game-icons.net/) (CC BY 3.0 → credit line in the game).
+- **Crests:** our own, code-drawn, inspired by kamon ([Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_Japanese_family_crests)).
+- **Map:** drawn by Claude in code (owner chose not to use Azgaar).
+- **Sound (later):** [Pixabay](https://pixabay.com/sound-effects/) (no credit needed) and [Freesound](https://freesound.org/) (CC0 preferred, CC BY credited).
+- **Plugins:** frontend-design, Design, code-review, playwright installed by the owner.
+- **Not used:** Blender (3D, not our style), paid map tools.
+- **Publishing elsewhere (itch.io) only on the owner's go.**
