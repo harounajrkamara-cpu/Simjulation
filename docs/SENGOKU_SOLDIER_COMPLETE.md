@@ -73,7 +73,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - **100 years ago** the Empire collapsed and split into **7 kingdoms**.
 - The imperial bloodline **still exists**: powerless, possibly hidden. ⏳ Designed together later, in the worldbuilding of the kingdoms and families.
 - The great goal of the world: whoever reunites the 7 kingdoms becomes the new Empire.
-- All families have **invented names** (no real clans like Takeda/Oda).
+- All families have **invented names** (no real clans like Takeda/Oda). **One exception ✅:** Li's own family name **Hattori** (the owner's character across all simulations).
 - **No magic** ✅: gods are believed in but never act visibly. Abilities (ch. 5) are extreme human skill, will and training, never sorcery.
 - **No firearms** exist in this world: swords, spears, bows, **crossbows**, cavalry, siege engines.
 - **Crossbows** exist (decided): mainly made and used in Tatara; rare and expensive elsewhere.
