@@ -2,6 +2,10 @@
 
 Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 
+### Core principle: no dice ✅
+- **Deterministic wherever the player acts**: duels, battles, conversations, promotions — same situation, same outcome.
+- **The world runs on hidden causes, not luck**: weather, harvests, disease, disasters follow seasons and conditions (neglect, war, overpopulation). Causes are not shown in advance, so events still feel surprising, but nothing is pure chance.
+
 ### ⏳ To design later (kingdoms & families worldbuilding)
 - The 7 kingdoms: names, map, rulers, armies, relations.
 - The great and lesser families per kingdom, with branches and key characters.
