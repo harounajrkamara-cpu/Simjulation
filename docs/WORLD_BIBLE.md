@@ -1,4 +1,4 @@
-# World Bible – Sengoku-inspired simulation (v0.3)
+# World Bible – Sengoku-inspired simulation (v0.4)
 
 Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 
@@ -60,6 +60,7 @@ KINGDOM → STATE (crown) → PROVINCE → DISTRICT (city + villages) → TOWN �
 - Built-in tension: families want power, the Crown wants control, branches compete with each other and with their main branch.
 
 ### Li's starting position (template)
+⚠️ Superseded by ch. 13 (Li starts as the slave of a rōnin's mercenary band). The chain below is still how any place in a kingdom is addressed.
 ```
 Kingdom ___ → State ___ (Governor ___) → Province ___ (Great Family A)
   → District ___ (Lesser Family B, sworn to A)
@@ -537,7 +538,7 @@ Sizes follow the ch. 7 rule (~200–250 standing soldiers per 10,000 koku). Ever
 | 1 | Iron West (great) | Qin | ~7M koku, ~150k | merit system (enemy officer heads → rank + land; several heads can free enslaved family), best administration and supply lines, low-born can rise (highest posts stay with officials) | feared and hated by neighbours, brutal to its own people, old nobles resent the merit system |
 | 2 | Southern Giant (great) | Chu / Imagawa | ~10M koku, ~220k on paper | biggest and richest (rice, silk, culture) | three great families control the court; reformers get murdered; only part of the army answers quickly. **Murdered Li's father.** |
 | 3 | War Kingdom (middle) | Zhao / Takeda | ~4M, ~90k | best cavalry (mounted archery), famous great generals, war culture | borders almost everyone, never rests, smaller economy |
-| 4 | Eastern Sea Kingdom (middle) | Qi | ~5M, ~100k | richest coast, salt-and-iron monopoly, biggest city, scholars' academy, navy; pays others to fight | army out of practice, soft quarrelling rulers |
+| 4 | Eastern Sea Kingdom (middle) | Qi | ~5M, ~100k | richest coast, salt-and-iron monopoly, biggest city, scholars' academy, navy; pays others to fight | army out of practice; child king, regent's family reaching for the throne (ch. 13b) |
 | 5 | Mountain Kingdom (middle) | Anegakoji | ~2.5M, ~55k | controls the mountain passes, fortresses, archers, kingmaker position | poor soil, small population, a side family wants to betray it |
 | 6 | Smiths' Kingdom (small) | Han | ~1.2M, ~25k | best steel and weapons, strong bows, the only crossbow corps | no room to grow, surrounded, prey for everyone |
 | 7 | Northern Frontier (small) | Yan | ~2M, ~45k | hardened soldiers, horse archers, winter endurance | poor economy, also fights the northern tribes |
@@ -586,6 +587,6 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 | Smiths' | **Absolute king** (63); only heir is 14; clever prince-scholar ignored | – (total unity) | **King's death** (no court strong enough) · **Canal exposed** (Iron West war pretext) | – | craft skill or the king's favour | 95 / 80% / 90 / 75 / 45 |
 | Northern Frontier | King + war chiefs who must agree on big wars | Crown · War Chiefs · tribes outside | **Hostage prince's revenge**: the crown prince (ex-hostage in the Iron West) plans to assassinate the Iron West king (fails → war of revenge / succeeds → Iron West chaos / discovered early) | – | strength; chiefs accept anyone who proves himself | 40 / 35% / 55 / 45 / 20 |
 
-**Balance of the giants:** Iron West ~55% of 150k answers fast (~80k); Southern Giant ~35% of 220k (~75k). Same real speed: one richer, one better organised.
+**Balance of the giants:** "answers fast" = royal troops + families with loyalty ≥70. Iron West: 55% royal of 150k ≈ 80k. Southern Giant: 30% royal + ~5% loyal border lords = 35% of 220k ≈ 75k. Same real speed: one richer, one better organised.
 
 **Links to Li:** three fuses touch the Iron West (coup, canal, assassin), so big politics reach Li as rumours first, chances later. Mountain hook: the poor mining family's former head fought beside Li's father (check in ch. 10).
