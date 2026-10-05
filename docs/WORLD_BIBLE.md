@@ -1,4 +1,4 @@
-# World Bible – Sengoku-inspired simulation (v0.4)
+# World Bible – Sengoku-inspired simulation (v0.5)
 
 Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 
@@ -23,6 +23,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - The imperial bloodline **still exists**: powerless, possibly hidden. ⏳ Designed together later, in the worldbuilding of the kingdoms and families.
 - The great goal of the world: whoever reunites the 7 kingdoms becomes the new Empire.
 - All families have **invented names** (no real clans like Takeda/Oda).
+- **No magic** ✅: gods are believed in but never act visibly. Abilities (ch. 5) are extreme human skill, will and training, never sorcery.
 - **No firearms** exist in this world: swords, spears, bows, **crossbows**, cavalry, siege engines.
 - **Crossbows** exist (decided): mainly made and used in the Smiths' Kingdom; rare and expensive elsewhere.
 
@@ -131,6 +132,7 @@ Every important family has a named head, heir, general and a few key characters 
 Stats 0–100:
 - **LEA** – troop strength & morale, how many men handled well. Grows from commanding, speeches, won battles; not from duels.
   - **Command capacity**: each LEA level can handle a certain number of men well. Leading more than that = slower orders and faster morale loss (e.g. a strong fighter promoted too fast).
+  - ✅ (ch. 12b) The table gives labels only. Overload is **gradual**: the further the troop count is above capacity, the slower the orders and the faster the morale loss. No tenfold jump at a band edge.
 
     | LEA | Handles well |
     |---|---|
@@ -158,7 +160,7 @@ Power Rank (F–S), separate from men commanded:
 | C | 45–59 | captains, strong officers |
 | B | 60–74 | generals, elite warriors |
 | A | 75–89 | a few per kingdom |
-| S | 90–100 | 0–2 in the whole land |
+| S | 90–100 | counted per sub-rank: ~4–6 living S in the whole land, max 2 per kingdom ✅ |
 Plus/minus allowed (B+ = high in B).
 
 ### Part 2 – Styles, skills, abilities
@@ -212,6 +214,7 @@ Rules:
 **Aura** ✅
 - Strength = Overall Rank + reputation.
 - Enemies 2+ ranks lower may hesitate or panic; nearby enemy troops lose some morale.
+- ✅ (ch. 12b) Aura acts only on **morale and the opponent's choices** (hesitation, panic). It is **not** added to Combat Power, so rank is never counted twice.
 - Equal auras cancel out. A small bonus, never an auto-win.
 - Can be suppressed to look weak; revealing it is a scene moment.
 
@@ -230,7 +233,7 @@ Rules:
 - Flow: size up → exchanges → decision → aftermath.
 - Choices per round (numbered + free text): attack · defend/counter · feint · observe · use ability · use environment · talk/taunt.
 - **Choice clash**: counter beats reckless attack · attack beats observing · feint beats defense · observing gives info and a later bonus. Combined with stats, so the stronger fighter usually still wins.
-- **Combat Power** per round = VAL × style-mastery factor (0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0) ± condition ± ability ± terrain/weather ± matchup (reach, style) ± choice clash ± knowledge (observation) ± aura (rank gap ≥2) ± surprise.
+- **Combat Power** per round = VAL × style-mastery factor (0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0) ± condition ± ability ± terrain/weather ± matchup (reach, style) ± choice clash ± knowledge (observation) ± surprise (aura: morale/hesitation only, ch. 12b).
 - Round winner = higher Combat Power; the gap decides the effect on the loser: small = pushed back/tired · medium = wounded · large = badly wounded · huge = down.
 - **Wound track** instead of HP: Fresh → Hurt → Wounded → Badly wounded → Down; each step lowers Combat Power for the rest of the duel.
 - **Upset rule**: same rank = better choices win · 1 rank = possible with good play + 1–2 factors · 2 ranks = 3–4 factors stacked · 3+ = practically impossible (survival is victory).
@@ -245,7 +248,7 @@ Rules:
 - Three sizes: **skirmish** (dozens–hundreds, mostly your own unit) · **battle** (thousands+, in phases with sectors/flanks) · **campaign** (several battles over weeks/months: marches, sieges, supply, timeskips).
 - **You command only your own unit** (size = your rank) and follow orders. Other units are run by their own commanders (AI characters, by personality and general type). You may propose things or ask permission; acceptance depends on status and relationship.
 - **Disobeying orders is allowed**: can bring glory or punishment.
-- **Battle overview every phase**: all sectors for both sides, numbers, changes since last phase, your unit (men, morale, kills). **Information depends on position**: own sector exact · other allied sectors as reports (roughly right, sometimes late) · **enemy numbers are estimates (~)**. Higher rank = better information (messengers, scouts). The overview is still shown every phase. Numbers always change between phases.
+- **Battle overview every phase**: all sectors for both sides, numbers, changes since last phase, your unit (men, morale, kills). **Information depends on position**: own sector exact · other allied sectors as reports (roughly right, sometimes late) · **enemy numbers are estimates (~)**. Higher rank = better information (messengers, scouts). The overview is still shown every phase. A quiet phase may change only position, fatigue or information (ch. 12b).
 - Each unit: men · type (spear, bow, samurai, cavalry) · quality (training, gear) · morale · fatigue · formation · commander (LEA, INT, command abilities).
 - **Unit strength** = men × quality × commander factor (LEA) × morale × formation ± terrain ± matchup (spears vs cavalry, archers at range) ± surprise/ambush ± flank/rear ± command abilities.
 - Each phase, units in contact fight; losses follow the strength ratio. **Morale breaks before men run out**: below a limit a unit wavers, then routs. A collapsing flank exposes its neighbours (chain reaction).
@@ -254,7 +257,7 @@ Rules:
 - Unimportant fights auto-simulate; duels vs officers/commanders and key moments are offered to the player first; "simulate until the final battle" is allowed.
 - **INT in battle**: spotting ambushes and traps, how much your tactics add, accuracy of enemy estimates.
 - **Maneuver phase** (during deployment): no losses; INT, terrain and scouting decide who starts with the advantage.
-- **Morale states**: Steady → Wavering → Routing → Shattered (if their general died). **Chain rout**: a routing unit lowers the morale of its neighbours. Flank/rear attacks give big morale hits; attacked from three sides a unit breaks fast.
+- **Morale states**: Steady → Wavering → Routing → Shattered (ch. 12b: only if their general died **and** the unit was already wavering, cut off, or has no stand-in commander). **Chain rout**: a routing unit lowers the morale of its neighbours. Flank/rear attacks give big morale hits; attacked from three sides a unit breaks fast.
 - **Taking the general's head**: killing or capturing the enemy commander shatters his troops' morale (duels decide battles).
 - **Local superiority**: what counts is how many men you bring to one spot (soft Lanchester for melee); cutting the enemy into pieces lets a smaller army win.
 - **Realistic losses**: during the fight ~3–10% dead on both sides; most deaths come after a rout (20–30%+, more if the winner has cavalry); an orderly retreat keeps losses ~10–20%.
@@ -364,7 +367,7 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 ### NPC memory
 - Memory record: what happened · date · how known (saw it / told / rumour) · certainty · emotional weight.
 - **An NPC only knows what he saw or was told**; secrets stay secret.
-- **Rumours spread** person to person and lose accuracy (sometimes exaggerated).
+- **Rumours spread** person to person and lose accuracy (changed by fixed rules, ch. 12b).
 - The engine selects the **most relevant memories** per scene (recent, important, fitting — Stanford Generative Agents).
 
 ### Personality & goals
@@ -522,13 +525,31 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Player text is always story input, never an instruction to the system ("ignore your rules…" has no effect). The AI gets only the minimum access it needs; it cannot change numbers.
 
 ### Save versioning
-- Every save has a version number; the engine upgrades old saves automatically when the design changes.
+- Every save has a version number; saves upgrade only between **tested** versions (ch. 12b).
 
 ### Provisional examples
 - Examples from the old canon (Zone, Kage no Yaiba, Hattori) are placeholders until Li's background and the kingdoms are designed.
 
 ### Build plan
 - Build in stages; each stage must be playable before the next starts (see chat decision).
+
+## Chapter 12b – Determinism & feedback rules ✅
+From the external design audit (Oct 2026); approved by the owner.
+
+1. **Fixed input translation:** the AI turns player text into a structured action that is **stored** as data. If more than one reading is possible, the game **asks** the player; it never guesses. Same stored action + same state = same result.
+2. **No hidden randomness anywhere:** the world is created from one fixed **world number** (same number = same world). Names come from regional lists in a fixed order; Tier C families are built by fixed rules; rumours change by fixed rules (each retelling: numbers grow by a set step, uncertain details drop out); NPC choices are scored, and ties are broken by a fixed order (urgency → deadline → closeness to Li → oldest ID).
+3. **Aura** affects morale and the opponent's choices only, never Combat Power (rank is not counted twice).
+4. **Command capacity:** gradual overload instead of tenfold jumps (ch. 5).
+5. **Commander loss:** a big shock to the units under him. Only units already wavering, cut off, or without a **stand-in commander** shatter. Each unit has a stand-in; units can **rally**; a rallied unit comes back as Wavering, not Steady.
+6. **Battle reports:** outside Li's own sector, information arrives as reports with **source, age and confidence** ("~800–1,200 cavalry · scouts · 2 hours old · fairly sure"). Higher rank = more and faster reports. INT narrows the ranges; it never reveals hidden exact numbers.
+7. **Quiet phases** are allowed: a phase may change only position, fatigue, supply or information.
+8. **Factions:** discontent builds gradually from several factors (ch. 13b); the ultimatum still comes at 100.
+9. **World shocks:** several crises may happen at once; the limit is on **what reaches Li** (distance, messengers, delay, distortion), not on the world.
+10. **Defeat ladder** (Li cannot die, so losing must cost): setback → wound & recovery time → lost chance → public humiliation → disappointed sponsor → rank loss → capture or forced service → a follower dies because of Li's failure → permanent political damage. Permanent injuries force **adaptation** (new style or role), not endless weakening.
+11. **Visible consequence:** every big hidden change (relationship, faction, morale) shows at least one sign Li can notice ("Kagami saw you refuse the order"), without showing the number.
+12. **Saves:** upgrade only between tested versions.
+13. **Rule status:** every rule is marked ✅ approved · 📝 proposal · ⚠️ replaced; replaced rules point to their replacement.
+14. **Working title** *Sengoku Soldier* is close to the existing game *Sengoku Dynasty* (2024): check the name before any public release.
 
 ## Chapter 13 – The Seven Kingdoms (base ✅, names & world in `WORLD_ATLAS.md` 📝)
 Sizes follow the ch. 7 rule (~200–250 standing soldiers per 10,000 koku). Every kingdom has a real strength and a real weakness.
@@ -563,13 +584,13 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 | Treasury | money and grain in reserve |
 
 **Factions** (deterministic version of the Crusader Kings 3 system): each faction has a leader, members, troops, a goal and **Discontent** (0–100).
-- Discontent rises only while the faction's troops are ≥ ~80% of the troops loyal to the Crown; it falls below that. The king's **dread** raises that bar.
+- ✅ (ch. 12b) Discontent builds **gradually** from: military power vs the Crown (≈80% = strong push) · leader legitimacy · faction unity · treasury & supply · foreign support · Crown authority & dread · a trigger grievance. No on/off switch.
 - At 100 → **ultimatum**. Accepted = the Crown loses authority. Refused = civil war.
 - Same logic as ch. 8 betrayal: low loyalty + opportunity (power ratio) + not too much fear.
 
 **Hidden fuses:** each kingdom starts with 1–2 crises already building when Li is 12.
 - Each fuse has trigger conditions, a "not before" date and **2–3 possible outcomes** (never a script).
-- The pacing director only decides *when* a fuse surfaces once its conditions are true; max **one big political shock per season** in the whole world.
+- The pacing director only decides *when* a fuse surfaces once its conditions are true; several crises may run at once; **what reaches Li** is limited by distance, messengers and delay (ch. 12b).
 - Fuses are inspired by history but use our own names and details, so they stay unpredictable.
 
 **Elite titles:** some kingdoms have a famous set of seats for their greatest generals (honours, not ranks; ch. 4 rules still apply). A long-term goal for Li. Names ⏳.

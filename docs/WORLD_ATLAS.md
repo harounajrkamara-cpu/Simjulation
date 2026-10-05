@@ -280,9 +280,9 @@ Families: royal; **Kanemori** (120k / 2.5k, sword forges); **Hibiki** (120k / 2.
 
 ---
 
-## 5. The S-rank tier (📝 changes ch. 5)
+## 5. The S-rank tier ✅ (rule in ch. 5)
 Ch. 5 said "S: 0–2 in the whole land". With 7 kingdoms and **three** sub-ranks that is too thin; *Kingdom* also has a handful of "monsters" per era.
-**Proposed rule:** S is counted **per sub-rank**. About **4–6 living S in the land**, never more than 2 in one kingdom. S stays legendary: most soldiers never see one.
+**Rule:** S is counted **per sub-rank**. About **4–6 living S in the land**, never more than 2 in one kingdom. S stays legendary: most soldiers never see one.
 
 | Living S | Sub-rank | Kingdom | Known as |
 |---|---|---|---|
@@ -305,7 +305,7 @@ Ch. 5 said "S: 0–2 in the whole land". With 7 kingdoms and **three** sub-ranks
 | Tatara | orange & black · hammer and flame | craft, duty to the king · *"A blade is only as true as its smith."* | leather aprons, scarred hands; simple stews | precise, technical | fire kami of the forge |
 | Kitakaze | white & dark blue · a wolf | strength, freedom, hospitality · *"Winter judges every man."* | furs, felt; meat, fermented milk, barley | rough, honest | sky and wolf spirits, little temple influence |
 
-**No magic exists** (📝): gods are believed in but never act visibly. Abilities (ch. 5) are extreme human skill, will and training, never sorcery.
+**No magic exists** ✅: gods are believed in but never act visibly. Abilities (ch. 5) are extreme human skill, will and training, never sorcery.
 
 ## 7. Armies & doctrine (feeds ch. 6b)
 | Kingdom | Army mix (approx.) | Signature unit | Doctrine |
