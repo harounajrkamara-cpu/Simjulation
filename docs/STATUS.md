@@ -15,6 +15,11 @@ Big worldbuilding round:
 2. Families per kingdom, branches, key characters.
 3. Imperial bloodline and the Imperial treasures.
 4. Li's background (ch. 10): based on the old 1540 backstory (Twin Demon father), checked and fixed for the new world; Li starts as a slave.
+   - Decided: **option C** – Li alone was captured and sold as a boy, separated from mother and sisters (finding them is a later goal).
+   - Decided: **Li was young** when his father died, so he barely remembers him.
+   - Decided: family names stay (mother Yuki, sisters Mei & Kenjiko); the warrior girl and the rival recruit get new names.
+   - Decided: old real-world names (Imagawa, Anegakoji, Shiina, Takeda, Kawanakajima) get invented names.
+   - Open: starting age (12 or 16).
 Then: numbers sheet → build stage 1.
 
 ## Open issues
