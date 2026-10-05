@@ -19,9 +19,9 @@ Rank notation: `W` Warrior · `C` Commander · `S` Statesman (ch. 5), as F–S l
 | 0 – 30 | **The Wardens' Wars**: the seven new kingdoms fix their borders. The ruins of Amatsu-kyō become no-man's-land. |
 | ~40 | The Merchant City of **Kinza** buys its independence from Suiren. |
 | ~60 | Kurogane introduces the **merit law** (enemy heads → rank and land). The old nobles resist and lose. |
-| 88 | Li Hattori is born in Suiren. |
+| 87 | Li Hattori is born in Suiren (Month 11, day 3). |
 | 95 | **Hattori Takeshi, "the Twin Demon"**, a commoner-born great general of Suiren, is murdered (see ch. 10). His family flees. |
-| 95 | Li (7) is separated from his family during the flight, captured by slavers and sold. |
+| 95 | Li (7) is lost in a mountain snowstorm during the flight, found by slavers and sold in Kinza (Year 96). His family believes he is dead. |
 | 99 | Shiraiwa Yasumichi of Takane dies. Before he dies he makes his son swear an oath. |
 | 100 | Story start. |
 
@@ -399,7 +399,7 @@ Young talents with high hidden potential, Li's peers across the world (like *Kin
 ## 13. Legends (lore the world talks about)
 - **The Burning of the Capital** (Year 0) and the curse said to lie on the ruins.
 - **The old Six Great Generals** of Kurogane, who won the Wardens' Wars; their seats emptied one by one.
-- **The Twin Demon** Hattori Takeshi: a commoner who became Suiren's greatest general, "fell in a night ambush" (official story).
+- **The Twin Demon** Hattori Takeshi: a commoner who became Suiren's greatest general, "fell in a night ambush by Kurogane raiders" (official story; 🔒 a lie, ch. 10).
 - **Garyū Tessai** killed a Horo khan in single combat at 25.
 - **The Red Crane** Mikumo Raizen held a bridge alone against 300 men (true, but it was 120).
 

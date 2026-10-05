@@ -1,6 +1,7 @@
 # Project status
 
 ## Where we are
+- Ch. 10 Li's background: 📝 draft written, waiting for owner approval.
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)
 - Previously: World Bible v0.3: chapters 1–9, 11, 12 approved. Chapter 10 (Li's start) is open.
 - Language of the simulation: **English**.

@@ -9,6 +9,7 @@ Generated from the repo: STATUS + WORLD BIBLE (rules) + WORLD ATLAS (world). The
 ## Project status
 
 ## Where we are
+- Ch. 10 Li's background: 📝 draft written, waiting for owner approval.
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)
 - Previously: World Bible v0.3: chapters 1–9, 11, 12 approved. Chapter 10 (Li's start) is open.
 - Language of the simulation: **English**.
@@ -488,6 +489,81 @@ New Year (start of spring) · harvest festival (autumn) · tax day (end of month
 ### Dashboard date
 `📅 Year 100, Spring – Month 2 (Kisaragi), Day 12`
 
+## Chapter 10 – Li's background 📝 (draft for owner approval)
+Built from the old canon (Twin Demon story, Li-Hattori summary, ARC files), fixed for the new world. 🔒 = engine truth, never narrated until discovered.
+
+### 10.1 Timeline
+| Year | Event |
+|---|---|
+| 60 | **Hattori Takeshi** born a peasant's son in Suiren. |
+| 75–85 | Rises from ashigaru through the border wars; famous for fighting with two swords, **Kage** (Shadow) and **Hikari** (Light). Nickname: **"the Twin Demon"**. |
+| 84 | Marries **Yuki**, a craftsman's daughter (weaver). |
+| 85 | Daughter **Mei** born. |
+| **87, Month 11 (Shimotsuki), day 3** | **Li** born in Hanaoka. His father calls him **"Little Dragon"** and says he will shake the world. |
+| 90 | **Battle of the Kurose**: Takeshi, as Taishō with ~60,000 men, beats a Kurogane army on the border river. Kurogane veterans still hate the name "Twin Demon". |
+| 92–94 | Takeshi backs reformer **Yashiro Seigen** (let commoners rise, cut family estates). The court whispers he will be made Dai-Shōgun, over **Akabane Gendayū**. |
+| 94, Month 12 | Daughter **Kenjiko** born. |
+| **95, Month 5** | 🔒 The Three Families decide on his death (**Shirasagi** orders it, **Akabane** sets the trap, **Kinugasa** votes against and keeps proof). Takeshi is killed in a night ambush on the road home from campaign. **Official story: "Kurogane raiders"**. Akabane takes the blade **Kage** as a trophy. |
+| 95, Month 5–6 | 🔒 **Shiraiwa Yasumichi** (allied Takane officer, Takeshi's comrade of 20 years) saw the ambush. He hides **Hikari** and leads Yuki, Mei (10), Li (7) and baby Kenjiko north toward the mountains. Yuki tells the children: **never say the name Hattori to anyone**. |
+| **95, Month 8** | **Li is lost.** In an early mountain snowstorm he goes back for a dropped bundle, falls down a slope and is found by slavers on the pass road. 🔒 Yasumichi searches and finds only a torn sandal at a ravine edge: **the family believes Li is dead.** Mei never fully accepts it. |
+| 95–96 | Li is carried south and east by the slavers; he keeps his promise and only ever says "Li". |
+| **96, Month 2** | Sold at the **Kinza** slave market to **Mikumo Raizen** for 8 ryō. 🔒 Raizen left Suiren's service in disgust after Takeshi's murder, but never met the children and does not know who the boy is. |
+| 96–100 | Four years as the band's slave (see 10.3). |
+| 99 | 🔒 Shiraiwa Yasumichi dies; his son **Yasutoki** swears the deathbed oath to protect the family. |
+| **100, Month 1** | Story start: the Red Crane band is hired by the **Hagiwara** at Akaishi, on the Kurogane side of the Kurose. Across the river: Suiren banners. |
+
+### 10.2 What Li knows and believes (his starting journal)
+| Li knows | Li does **not** know |
+|---|---|
+| His name is Li Hattori, but he must never say "Hattori" | that his father was the famous Twin Demon |
+| His father Takeshi was a soldier and was killed when Li was 7 | who really killed him (he believes the official story if he ever hears it: Kurogane) |
+| Mother Yuki, sister Mei, baby sister Kenjiko | that they are alive, where they are, or that they think he is dead |
+| They came from Suiren (lakes, a big city) and fled north at night | that his father beat Kurogane at the Kurose |
+| The guide wore a crest of a **white rock** on his coat | that the crest means the Shiraiwa family of Takane |
+| Fragments: two swords crossed on a wall, his father's laugh, "Little Dragon", a burning lantern the night they fled | where the blades Kage and Hikari are |
+
+**Keepsake:** a small **wooden dragon** his father carved, hidden in Li's loincloth for five years. 🔒 Yuki, Mei and Yasutoki would recognise it on sight.
+
+**Irony built in:** Li serves the kingdom he has been told killed his father, while the real killers are across the river. When the truth comes out, both sides are dangerous: Suiren's Three Families want the line gone, and Kurogane veterans hate the Twin Demon.
+
+### 10.3 Five years as a slave (Year 95–100)
+- **Work:** carries gear, cleans armour, helps **Old Sukezō** cook and treat wounds, cares for the horses, digs latrines.
+- **Learned:** letters (from Sukezō, in secret), camp medicine basics, horse care, how a band fights, how to stay invisible.
+- **Seen:** 6 real fights from the baggage line, 1 night raid where he dragged a wounded man to safety.
+- **Secret practice:** at night with two sticks, copying Raizen's moves from memory. 🔒 **Hisame** has seen it and said nothing. 🔒 Raizen has noticed the boy's footwork and does not understand where it comes from.
+- **Enemies & friends:** beaten often by **Gonza "One-Ear"**; protects **Hachi** (bought Year 98) and shares food with him.
+- **Money:** 12 mon saved in secret (scraps from soldiers' tips).
+
+### 10.4 Starting character (Year 100, age 12)
+| Stat | Now | 🔒 Hidden potential |
+|---|---|---|
+| LEA | 6 | 95 |
+| VAL | 14 | 97 |
+| INT | 17 | 86 |
+| POL | 5 | 72 |
+- Ranks: **Overall F** (Warrior F · Commander F · Statesman F).
+- Styles: two swords (stick practice) 6 · unarmed 4.
+- Skills: endurance 25 · camp work 30 · horse care 20 · medicine 12 · reading 15 · stealth 15 · observation 20.
+- Traits: quiet · watchful · stubborn · protective of the weak · hides his anger · fear of fire at night (from the flight; can be overcome).
+- Goals: survive · win his freedom · find his mother and sisters · learn why his father died.
+- Body: thin, small for his age, old scars on the back, healthy.
+- Legal status: **slave of Mikumo Raizen**; papers kept by quartermaster Matsukaze Rokubei.
+
+**Freedom routes at the start** (ch. 3 + ch. 13c):
+1. **Kurogane merit law:** an enemy officer's head taken in Kurogane service frees a slave; Kurogane pays the owner a fixed price.
+2. Raizen frees him (needs very high trust and respect).
+3. Buy himself free (5–20 ryō).
+4. Escape (hunted; the Smiths' Kingdom has no slavery and is a refuge).
+
+### 10.5 Bloodline & abilities (replaces the ch. 12 placeholders)
+- **Zone – SHINKEN NO RYŪ** (Li's own unique Combat ability, active): a state of total focus. Unlocks through a **near-death event**; can start at **C-rank** at very low mastery (ch. 5 prodigy rule). Limit 3 per battle at first. Weakness: time limit, then exhaustion. Activation always shows "SHINKEN NO RYŪ" (ch. 11).
+- **Twin Demon Dance** (bloodline, two swords): cannot appear by itself. Li must learn it from people who saw Takeshi fight, or from 🔒 notes kept with Hikari. Bloodline exception: may exceed the rank limit but starts at very low mastery.
+- **Kage no Yaiba** ("Shadow Blade"): a technique that needs the blade **Kage**, which 🔒 hangs in Akabane's hall.
+
+### 10.6 "The son lives" fuse (hidden)
+Discovery triggers (any one): Li says the name Hattori · someone who saw Takeshi fight sees Li's two-sword footwork (Raizen, Tōno Shigemasa, Akabane, old Kurogane veterans) · the wooden dragon is seen by family or Shiraiwa · Li's face is seen by someone who knew Takeshi well, after Li turns 16.
+Possible outcomes: an ally reaches out · a Kurogane veteran turns hostile · word reaches Suiren and the Three Families send killers (Li cannot die; people around him can).
+
 ## Chapter 11 – Turn, dashboard & session rules ✅
 
 ### Turn loop (code decides, AI narrates)
@@ -578,7 +654,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Every save has a version number; saves upgrade only between **tested** versions (ch. 12b).
 
 ### Provisional examples
-- Examples from the old canon (Zone, Kage no Yaiba, Hattori) are placeholders until Li's background and the kingdoms are designed.
+- Examples from the old canon (Zone, Kage no Yaiba, Hattori) are defined in ch. 10.5 (📝 pending approval).
 
 ### Build plan
 - Build in stages; each stage must be playable before the next starts (see chat decision).
@@ -702,9 +778,9 @@ Rank notation: `W` Warrior · `C` Commander · `S` Statesman (ch. 5), as F–S l
 | 0 – 30 | **The Wardens' Wars**: the seven new kingdoms fix their borders. The ruins of Amatsu-kyō become no-man's-land. |
 | ~40 | The Merchant City of **Kinza** buys its independence from Suiren. |
 | ~60 | Kurogane introduces the **merit law** (enemy heads → rank and land). The old nobles resist and lose. |
-| 88 | Li Hattori is born in Suiren. |
+| 87 | Li Hattori is born in Suiren (Month 11, day 3). |
 | 95 | **Hattori Takeshi, "the Twin Demon"**, a commoner-born great general of Suiren, is murdered (see ch. 10). His family flees. |
-| 95 | Li (7) is separated from his family during the flight, captured by slavers and sold. |
+| 95 | Li (7) is lost in a mountain snowstorm during the flight, found by slavers and sold in Kinza (Year 96). His family believes he is dead. |
 | 99 | Shiraiwa Yasumichi of Takane dies. Before he dies he makes his son swear an oath. |
 | 100 | Story start. |
 
@@ -1082,7 +1158,7 @@ Young talents with high hidden potential, Li's peers across the world (like *Kin
 ## 13. Legends (lore the world talks about)
 - **The Burning of the Capital** (Year 0) and the curse said to lie on the ruins.
 - **The old Six Great Generals** of Kurogane, who won the Wardens' Wars; their seats emptied one by one.
-- **The Twin Demon** Hattori Takeshi: a commoner who became Suiren's greatest general, "fell in a night ambush" (official story).
+- **The Twin Demon** Hattori Takeshi: a commoner who became Suiren's greatest general, "fell in a night ambush by Kurogane raiders" (official story; 🔒 a lie, ch. 10).
 - **Garyū Tessai** killed a Horo khan in single combat at 25.
 - **The Red Crane** Mikumo Raizen held a bridge alone against 300 men (true, but it was 120).
 
