@@ -10,7 +10,7 @@ Generated from the repo: STATUS + WORLD BIBLE (rules) + WORLD ATLAS (world) + NU
 
 ## Where we are
 - Ch. 10 Li's background ✅ approved. Kingdom names are now used everywhere (epithets only as nicknames). Elite titles: Six Pillars (Kurogane), Three Storms (Hayate). Family Mibu renamed Tsurumaki (real clan name).
-- Numbers sheet `docs/NUMBERS_SHEET.md` **v0.2 ✅ approved** (owner kept fast progression and the Kurogane head-for-freedom law). Next: **build stage 1** (Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels).
+- Numbers sheet `docs/NUMBERS_SHEET.md` **v0.3 ✅ approved** (owner kept fast progression and the Kurogane head-for-freedom law). Next: **build stage 1** (Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels).
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)
 - Language of the simulation: **English**.
 - Build plan: 4 stages, each playable.
@@ -20,8 +20,8 @@ Generated from the repo: STATUS + WORLD BIBLE (rules) + WORLD ATLAS (world) + NU
   4. Court, kingdoms, full world
 
 ## Next step
-- Done: ch. 10, 12b, 13, 13b, 13c, numbers sheet v0.2. `docs/WORLD_ATLAS.md` v0.3 (S-tier, no magic and names approved; the atlas as a whole still waits for the owner's final check).
-- Done (Oct 5): full read + fact check of all files; consistency fixes applied; open decisions: duel balance fix, army delegation rule.
+- Done: ch. 10, 12b, 13, 13b, 13c, numbers sheet v0.2. `docs/WORLD_ATLAS.md` v0.3 ✅ approved.
+- Done (Oct 5): full read + fact check of all files; consistency fixes applied; duel balance fix and army delegation rule approved (numbers sheet v0.3). **Design complete → build stage 1.**
 - Decided: crossbows exist (Tatara, the Smiths' Kingdom). The two giants stay close in size and both are internally divided.
 
 Big worldbuilding round:
@@ -185,6 +185,7 @@ Stats 0–100:
 - **LEA** – troop strength & morale, how many men handled well. Grows from commanding, speeches, won battles; not from duels.
   - **Command capacity**: each LEA level can handle a certain number of men well. Leading more than that = slower orders and faster morale loss (e.g. a strong fighter promoted too fast).
   - ⚠️ The numbers in this table are replaced by the formula in `NUMBERS_SHEET.md` §3 (up to 100,000 at LEA 100); the table stays as a rough guide.
+  - ✅ **Delegation:** big armies are led through sub-commanders; only 20% of the men under capable lieutenants count toward the general's load (`NUMBERS_SHEET.md` §3).
   - ✅ (ch. 12b) The table gives labels only. Overload is **gradual**: the further the troop count is above capacity, the slower the orders and the faster the morale loss. No tenfold jump at a band edge.
 
     | LEA | Handles well |
@@ -286,7 +287,7 @@ Rules:
 - Flow: size up → exchanges → decision → aftermath.
 - Choices per round (numbered + free text): attack · defend/counter · feint · observe · use ability · use environment · talk/taunt.
 - **Choice clash**: counter beats reckless attack · attack beats observing · feint beats defense · observing gives info and a later bonus. Combined with stats, so the stronger fighter usually still wins.
-- **Combat Power** per round = VAL × style-mastery factor (0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0) ± condition ± ability ± terrain/weather ± matchup (reach, style) ± choice clash ± knowledge (observation) ± surprise (aura: morale/hesitation only, ch. 12b). ⚠️ Exact formula, caps and thresholds: `NUMBERS_SHEET.md` §4.
+- **Combat Power** per round = VAL × style-mastery factor (0–20 ×0.8 · 21–40 ×1.0 · 41–60 ×1.15 · 61–80 ×1.3 · 81–100 ×1.45, v0.3) ± condition ± ability ± terrain/weather ± matchup (reach, style) ± choice clash ± knowledge (observation) ± surprise (aura: morale/hesitation only, ch. 12b). ⚠️ Exact formula, caps and thresholds: `NUMBERS_SHEET.md` §4.
 - Round winner = higher Combat Power; the gap decides the effect on the loser: small = pushed back/tired · medium = wounded · large = badly wounded · huge = down.
 - **Wound track** instead of HP: Fresh → Hurt → Wounded → Badly wounded → Down; each step lowers Combat Power for the rest of the duel.
 - **Upset rule**: same rank = better choices win · 1 rank = possible with good play + 1–2 factors · 2 ranks = 3–4 factors stacked · 3+ = practically impossible (survival is victory).
@@ -642,7 +643,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Slave: survival, people, training · Soldier: unit, battles · Landholder: economy, domain · Court: politics. The game grows with Li.
 
 ### Numbers sheet & balance tests
-- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (✅ v0.2).
+- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (✅ v0.3).
 - Automatic tests: the engine simulates thousands of careers/duels to check e.g. how long slave → general takes and how often a C-rank beats a B-rank; also watches for dominant strategies.
 
 ### Name registry
@@ -761,7 +762,7 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 
 # PART 3 – WORLD ATLAS (world, families, characters)
 
-## World Atlas – Sengoku Soldier (v0.3)
+## World Atlas – Sengoku Soldier (v0.3 ✅ approved)
 
 Companion to `WORLD_BIBLE.md`. The World Bible holds the **rules**; this atlas holds the **world**: places, families and characters.
 If they ever conflict, the World Bible wins.
@@ -1184,7 +1185,7 @@ Reserved given names (never reuse): Yuki, Mei, Kenjiko, Takeshi, Li.
 
 # PART 4 – NUMBERS SHEET
 
-## Numbers Sheet – Sengoku Soldier (v0.2 ✅ approved)
+## Numbers Sheet – Sengoku Soldier (v0.3 ✅ approved)
 
 The exact numbers behind the World Bible rules. Code uses these; the AI never invents numbers.
 Every value states its **unit**. All results are deterministic (ch. 12b). These are **first values**; the balance tests (§12) will tune them.
@@ -1241,6 +1242,8 @@ Check: Li at start = Warrior (14+6)/2 = 10 · Commander 11.5 · Statesman 11 →
 - order delay: +1 step per doubling (o = 2 → +1, o = 4 → +2);
 - morale losses × (1 + 0.5 × log₂ o).
 
+**Delegation (v0.3):** a commander's **load** = men he leads directly + **20%** of the men under capable sub-commanders (each one not overloaded himself). Overload uses load ÷ C. Example: Kagami (C ≈ 48,000) with 10,000 direct and 90,000 under good lieutenants carries 28,000 → fine; with poor lieutenants the full 100,000 counts → heavily overloaded. Great generals need great lieutenants.
+
 Players only see a broad label, never the exact capacity:
 | LEA | Capacity (men) | Label |
 |---|---|---|
@@ -1258,17 +1261,19 @@ Players only see a broad label, never the exact capacity:
 - **Situational modifiers** (clash, observation, surprise, terrain, matchup, ability) are added and then **capped at +50% / −50%**.
 - Surprise and observation do not stack: use the higher of the two.
 - Abilities preferably **change options** (block one counter, turn a wound into fatigue, stop a retreat, reveal a habit, win the next clash) instead of adding more %.
-Style factor: mastery 0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0.
+Style factor (v0.3, narrowed so upsets are possible): mastery 0–20 ×0.8 · 21–40 ×1.0 · 41–60 ×1.15 · 61–80 ×1.3 · 81–100 ×1.45.
 
 | Situational modifier (capped ±50% total) | Value |
 |---|---|
-| winning the choice clash | +25% |
+| choice clash (two-sided) | winner +25% · loser −15% |
 | observed rounds (knowledge) | +5% per round, max +15% |
 | surprise (first round only) | +30% |
 | terrain / weather advantage | ±10% |
 | reach or style matchup | ±10% |
 | ability | as written on the ability |
 Condition: Fresh 0 · Hurt −10% · Wounded −25% · Badly wounded −45%. Fatigue: −5% per step (max 3). Aura is **not** a CP modifier (ch. 12b).
+
+Check (v0.3): same rank → choices decide · 1 rank up → winnable with good play (clash + observation) · 2 ranks up → only with 3–4 factors (clash, surprise, the stronger one tired or wounded) · 3+ ranks → practically impossible. Matches ch. 6a.
 
 **Round result** by gap g = (CP winner − CP loser) ÷ CP loser:
 - g < 10%: loser pushed back, +1 fatigue;

@@ -1,4 +1,4 @@
-# Numbers Sheet – Sengoku Soldier (v0.2 ✅ approved)
+# Numbers Sheet – Sengoku Soldier (v0.3 ✅ approved)
 
 The exact numbers behind the World Bible rules. Code uses these; the AI never invents numbers.
 Every value states its **unit**. All results are deterministic (ch. 12b). These are **first values**; the balance tests (§12) will tune them.
@@ -55,6 +55,8 @@ Check: Li at start = Warrior (14+6)/2 = 10 · Commander 11.5 · Statesman 11 →
 - order delay: +1 step per doubling (o = 2 → +1, o = 4 → +2);
 - morale losses × (1 + 0.5 × log₂ o).
 
+**Delegation (v0.3):** a commander's **load** = men he leads directly + **20%** of the men under capable sub-commanders (each one not overloaded himself). Overload uses load ÷ C. Example: Kagami (C ≈ 48,000) with 10,000 direct and 90,000 under good lieutenants carries 28,000 → fine; with poor lieutenants the full 100,000 counts → heavily overloaded. Great generals need great lieutenants.
+
 Players only see a broad label, never the exact capacity:
 | LEA | Capacity (men) | Label |
 |---|---|---|
@@ -72,17 +74,19 @@ Players only see a broad label, never the exact capacity:
 - **Situational modifiers** (clash, observation, surprise, terrain, matchup, ability) are added and then **capped at +50% / −50%**.
 - Surprise and observation do not stack: use the higher of the two.
 - Abilities preferably **change options** (block one counter, turn a wound into fatigue, stop a retreat, reveal a habit, win the next clash) instead of adding more %.
-Style factor: mastery 0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0.
+Style factor (v0.3, narrowed so upsets are possible): mastery 0–20 ×0.8 · 21–40 ×1.0 · 41–60 ×1.15 · 61–80 ×1.3 · 81–100 ×1.45.
 
 | Situational modifier (capped ±50% total) | Value |
 |---|---|
-| winning the choice clash | +25% |
+| choice clash (two-sided) | winner +25% · loser −15% |
 | observed rounds (knowledge) | +5% per round, max +15% |
 | surprise (first round only) | +30% |
 | terrain / weather advantage | ±10% |
 | reach or style matchup | ±10% |
 | ability | as written on the ability |
 Condition: Fresh 0 · Hurt −10% · Wounded −25% · Badly wounded −45%. Fatigue: −5% per step (max 3). Aura is **not** a CP modifier (ch. 12b).
+
+Check (v0.3): same rank → choices decide · 1 rank up → winnable with good play (clash + observation) · 2 ranks up → only with 3–4 factors (clash, surprise, the stronger one tired or wounded) · 3+ ranks → practically impossible. Matches ch. 6a.
 
 **Round result** by gap g = (CP winner − CP loser) ÷ CP loser:
 - g < 10%: loser pushed back, +1 fatigue;

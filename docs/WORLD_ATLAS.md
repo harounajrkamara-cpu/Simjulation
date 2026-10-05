@@ -1,4 +1,4 @@
-# World Atlas – Sengoku Soldier (v0.3)
+# World Atlas – Sengoku Soldier (v0.3 ✅ approved)
 
 Companion to `WORLD_BIBLE.md`. The World Bible holds the **rules**; this atlas holds the **world**: places, families and characters.
 If they ever conflict, the World Bible wins.

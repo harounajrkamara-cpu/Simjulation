@@ -133,6 +133,7 @@ Stats 0–100:
 - **LEA** – troop strength & morale, how many men handled well. Grows from commanding, speeches, won battles; not from duels.
   - **Command capacity**: each LEA level can handle a certain number of men well. Leading more than that = slower orders and faster morale loss (e.g. a strong fighter promoted too fast).
   - ⚠️ The numbers in this table are replaced by the formula in `NUMBERS_SHEET.md` §3 (up to 100,000 at LEA 100); the table stays as a rough guide.
+  - ✅ **Delegation:** big armies are led through sub-commanders; only 20% of the men under capable lieutenants count toward the general's load (`NUMBERS_SHEET.md` §3).
   - ✅ (ch. 12b) The table gives labels only. Overload is **gradual**: the further the troop count is above capacity, the slower the orders and the faster the morale loss. No tenfold jump at a band edge.
 
     | LEA | Handles well |
@@ -234,7 +235,7 @@ Rules:
 - Flow: size up → exchanges → decision → aftermath.
 - Choices per round (numbered + free text): attack · defend/counter · feint · observe · use ability · use environment · talk/taunt.
 - **Choice clash**: counter beats reckless attack · attack beats observing · feint beats defense · observing gives info and a later bonus. Combined with stats, so the stronger fighter usually still wins.
-- **Combat Power** per round = VAL × style-mastery factor (0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0) ± condition ± ability ± terrain/weather ± matchup (reach, style) ± choice clash ± knowledge (observation) ± surprise (aura: morale/hesitation only, ch. 12b). ⚠️ Exact formula, caps and thresholds: `NUMBERS_SHEET.md` §4.
+- **Combat Power** per round = VAL × style-mastery factor (0–20 ×0.8 · 21–40 ×1.0 · 41–60 ×1.15 · 61–80 ×1.3 · 81–100 ×1.45, v0.3) ± condition ± ability ± terrain/weather ± matchup (reach, style) ± choice clash ± knowledge (observation) ± surprise (aura: morale/hesitation only, ch. 12b). ⚠️ Exact formula, caps and thresholds: `NUMBERS_SHEET.md` §4.
 - Round winner = higher Combat Power; the gap decides the effect on the loser: small = pushed back/tired · medium = wounded · large = badly wounded · huge = down.
 - **Wound track** instead of HP: Fresh → Hurt → Wounded → Badly wounded → Down; each step lowers Combat Power for the rest of the duel.
 - **Upset rule**: same rank = better choices win · 1 rank = possible with good play + 1–2 factors · 2 ranks = 3–4 factors stacked · 3+ = practically impossible (survival is victory).
@@ -590,7 +591,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Slave: survival, people, training · Soldier: unit, battles · Landholder: economy, domain · Court: politics. The game grows with Li.
 
 ### Numbers sheet & balance tests
-- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (✅ v0.2).
+- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (✅ v0.3).
 - Automatic tests: the engine simulates thousands of careers/duels to check e.g. how long slave → general takes and how often a C-rank beats a B-rank; also watches for dominant strategies.
 
 ### Name registry
