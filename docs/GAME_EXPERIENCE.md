@@ -9,8 +9,9 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 |---|---|---|
 | 1 | Vision & feel | ✅ |
 | 2 | Platform & format | ✅ |
-| 3 | Screens & flow | ⏳ |
-| 4 | Core loop | ⏳ |
+| 3 | Screens & flow | ✅ |
+| 3b | Big moments | 📝 |
+| 4 | Core loop | 📝 |
 | 5 | Simulation + story fused | ⏳ |
 | 6 | Look & style | ⏳ |
 | 7 | AI narrator | ⏳ |
@@ -64,7 +65,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | *Bannerlord* | campaign map with moving parties; **notifications** on the map side that open the right screen; **party screen** (troops, upgrades), **clan screen**, **encyclopedia** of everyone | notification feed; troop **roster**; clan screen later; an **encyclopedia** of every person, family and kingdom Li knows |
 Sources: [TW wiki – UI](https://totalwar.fandom.com/wiki/User_interface), [CK3 Dev Diary #97](https://forum.paradoxplaza.com/forum/developer-diary/ck3-dev-diary-97-event-illustration-showcase-and-workflow.1524206/), [CK3 Coronations](https://ck3.paradoxwikis.com/Coronations), [Nobunaga Awakening review](https://www.mkaugaming.com/all-review-list/nobunagas-ambition-awakening-review/), [Bannerlord update notes](https://fextralife.com/bannerlord-update-unveils-ui-multiplayer-celebration-clans-and-more/).
 
-## Chapter 3 – Screens & flow 📝
+## Chapter 3 – Screens & flow ✅
 ```
 TITLE SCREEN ──► New game ──► PROLOGUE (narrated ink slides + map reveal) ──► CHAPTER CARD ──► GAME
      │                                                                          ▲
@@ -89,3 +90,50 @@ Overlays (take the whole screen for a moment):  Event window · Title card · Ce
 | **Duel** | two character cards facing each other, wound tracks, the four moves, what Li has read | duels |
 | **Battle** | battle map with unit blocks, banners and arrows per phase + the story of Li's unit + reports with age/confidence | stage 2 |
 | **Timeskip summary** | what happened to Li, his people and the world, with changes | after WAIT |
+
+## Chapter 3b – Big moments 📝
+Owner (Oct 5): *every* ceremony and big event must be special; the first time someone calls Li by his nickname and the first time he unlocks his own ability must be "crazy special".
+
+### Research
+- *Ghost of Tsushima*: the **standoff** uses a letterbox frame and the samurai-film weight of drawing a blade; every deed spreads **"the Ghost" legend**, so the name itself grows in the world ([Game Developer](https://www.gamedeveloper.com/game-platforms/ghost-of-tsushima-design-analysis), [GamesRadar](https://www.gamesradar.com/ghost-of-tsushima-best-standoffs/)).
+- *Crusader Kings III*: **ceremonies with witnesses** (coronations, feasts) – the people present see it, remember it and react.
+- *Bannerlord* mods: players asked for **feasts, weddings, funerals and knighting ceremonies** where lords really travel to attend ([Feast and Gatherings](https://www.nexusmods.com/mountandblade2bannerlord/mods/12192), [Vassal Barons](https://www.nexusmods.com/mountandblade2bannerlord/mods/8579)) – proof that ceremonies make a sandbox feel alive.
+- Cutscene design: big scenes **reward the player, show the effect of his actions and create emotional connection** ([Game Developer](https://www.gamedeveloper.com/design/better-game-design-through-cutscenes)).
+
+### Four tiers
+| Tier | When | How it looks |
+|---|---|---|
+| **Legend moment** (once in a life) | first time someone calls Li by his **nickname** · first **ability awakening** (SHINKEN NO RYŪ) · freedom · first enemy officer's head · learning his father was **the Twin Demon** · finding his family · genpuku at 15 · first command · first land · a seat among the **Six Pillars** · reaching an **S** rank · facing his father's killers | the full staging recipe below |
+| **Ceremony** (recurring, with witnesses) | reward ceremony after a campaign (rank order) · promotion · genpuku · marriage · funerals · feasts · oaths | ceremony screen: who stands where, who is honoured, every witness reacts by their own opinion and remembers it |
+| **Title card** | new chapter · rank up · battle begins · season turns · a famous enemy appears | full-screen brush title for 2–3 seconds |
+| **Spark** | a relationship turns · a skill unlock · a rumour about Li spreads | a short glowing line in the story and the notification feed |
+
+### Staging recipe for a Legend moment
+1. **Silence**: the screen darkens, letterbox bars slide in (Ghost of Tsushima standoff).
+2. **Slow text**: the scene appears line by line; the AI narrator writes it long and epic (~300+ words).
+3. **The name or word** lands as a **giant gold brush title**: e.g. *"SHINKEN NO RYŪ"*, or the nickname spoken by the person who gives it.
+4. **Witnesses**: character cards of everyone present, each with their reaction (from their own opinion and personality).
+5. **The world hears**: the deed becomes a rumour with Li's nickname; it spreads to who could hear it (ch. 8).
+6. **Legend page**: a permanent page in the Journal ("The Night of Fire – where the boy got his name"), with date, witnesses and the title.
+
+### Nicknames
+- Nicknames are **earned by deeds**, decided by the engine from what Li did and who saw it (no dice); the first person to use it in front of others is a witness of the deed.
+- Li can be called different things by different groups (soldiers vs nobles vs enemies, ch. 8 reputation).
+- ⏳ Owner to choose the style of nicknames (see questions).
+
+## Chapter 4 – Core loop 📝
+What the player does, from one minute to a whole life. Bannerlord's loop (travel → fight → recruit → upgrade → grow) and Kingdom's arc (fight → merit → promotion → bigger battles) are the models.
+
+| Scale | Loop | What keeps it from being boring |
+|---|---|---|
+| **Turn** (a minute) | read the scene → choose or type → see the result and one visible sign → new situation | every turn shows *why* something happened; free text always possible |
+| **Day** | morning & afternoon = duty · evening = people · night = secrets (training, sneaking) | each part offers a real trade-off (safety vs growth vs people) |
+| **Season** (3 months) | training caps, campaigns in summer/autumn, politics in winter; ends with a **season title card + summary** | something is always brewing: rumours, rivals, hidden fuses surfacing |
+| **Life stage** | slave → soldier → officer → commander → landholder → general → lord of the realm | each stage **unlocks new screens and systems** (ch. 12 World Bible): roster, battle map, domain, court |
+| **Life arcs** | freedom · the truth about the father · finding the family · rivals (Akabane Hayame) · the Six Pillars · the fate of the kingdoms | a **Goals panel** with Li's current 3 goals and visible progress |
+
+**Anti-boredom rules**
+1. Routine is never played turn by turn: **WAIT / skip** with a plan, stopping when something matters.
+2. Every play session reaches at least one **meaningful choice** (the pacing director brings the next one closer).
+3. Every big result gets a **moment** (ch. 3b), and every small one a visible sign.
+4. The world moves without Li (Bannerlord): news arrives, people change, kingdoms fall.
