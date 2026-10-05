@@ -16,7 +16,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 6 | Look & style | ✅ |
 | 7 | AI narrator | ✅ |
 | 8 | Onboarding | ✅ |
-| 9 | Pacing | 📝 |
+| 9 | Pacing | ✅ |
 | 10 | Master build prompt + build plan | ⏳ |
 
 ---
@@ -351,7 +351,7 @@ Applied: 1 + 2 in the style canvas (Army tab opens to the band seen from outside
 3. **Claude permission is asked on the New life screen**; if it is refused, the game runs without AI and can switch later in Settings.
 4. **Hints are a plain GUIDE line**, not in a character's voice; world knowledge still comes from people.
 
-## Chapter 9 – Pacing 📝 (proposal, Oct 5)
+## Chapter 9 – Pacing ✅ (owner approved Oct 5)
 How fast time, story and growth move: per turn, per session, per season and over a whole life. Builds on World Bible ch. 9 (time, timeskips), ch. 12 (pacing director, systems unlock), ch. 12b (determinism, world shocks), Numbers §2 (training cap), §6 (merit) and §12 (target ages), and ch. 4 and 8 here.
 
 ### Research
@@ -437,10 +437,10 @@ Target ages from Numbers §12, mapped to play time (to confirm in the M7 playtes
 - Template text for routine and skipped days; the AI writes free text, people and story moments (ch. 7, owner decision 1).
 - Target: **~20–40 AI calls per hour of play**; legend moments use the strongest model, others the normal one. So a 70-hour life stays affordable on a player's own plan.
 
-### Contradictions & fixes found
+### Contradictions & fixes (✅ applied Oct 5)
 1. **Director vs "the world goes on without Li"** (ch. 4 rule 4, ch. 12b #9): a director that delays threats would hold the world back. → Fixed by rule 1 above: it schedules only Li-local beats and news delivery, never world events.
 2. **Director vs fairness:** L4D-style adapting to performance would be hidden difficulty changes. → Rejected (rule 3).
-3. **World Bible ch. 9 timeskips** gives no longest skip and no "same as playing" rule. → Add §6 to ch. 9 on approval.
+3. **World Bible ch. 9 timeskips** gives no longest skip and no "same as playing" rule. → Added to World Bible ch. 9 (Timeskips).
 4. **Ch. 8 target "raid within the first session"** needs ~4 in-game weeks in under an hour. → Fits: the slave stage skips up to a month, and the first WAIT comes on Day 7.
 5. **Numbers §12 test "never stuck 3 years"** has no mechanism yet. → Rule 5 (6-month check) gives one.
 

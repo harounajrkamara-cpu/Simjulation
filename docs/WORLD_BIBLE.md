@@ -435,6 +435,9 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 - During the skip the world simulates at levels of detail: near Li detailed (weekly) · important NPCs & families weekly/monthly by their goals · far kingdoms monthly, roughly.
 - Important events interrupt the skip (attack, summons, illness in the family, a nemesis appears); the player can react or continue.
 - Afterwards a **timeskip recap**: what happened to Li, the people around him and the world, plus stat changes.
+- **Same result as playing it** (Game Experience ch. 9 §6): a skip with a plan gives exactly what playing those days with the same routine gives (training cap: Numbers §2). No reward for clicking through routine.
+- **A skip also stops for** a once-only chance, a peak from the pacing director, a season change and a birthday that matters (genpuku at 15).
+- **Longest skip:** slave 1 month · soldier 1 season · officer and up 1 year.
 
 ### Fixed moments in the year
 New Year (start of spring) · harvest festival (autumn) · tax day (end of month 9) · council meetings and reward ceremonies after campaigns.
@@ -586,6 +589,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 ### Pacing director
 - Decides **when** consequences that are already building (rumours, enemy plans, hidden causes) surface, following a tension curve: pressure → breathing room → pressure. It never invents random events (no-dice principle).
 - Fast-forward for slow parts.
+- Full rules (four phases, beat windows, no rubber-banding, the 6-month "never stuck" check): Game Experience ch. 9 §2. It schedules only Li-local beats and news delivery, never world events.
 
 ### Systems unlock with Li's life
 - Slave: survival, people, training · Soldier: unit, battles · Landholder: economy, domain · Court: politics. The game grows with Li.
