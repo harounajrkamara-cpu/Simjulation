@@ -342,6 +342,12 @@ TITLE ─► NEW LIFE (4 settings, ~20 s) ─► PROLOGUE (7 slides, ~90 s, skip
 5. **First fight**: in the current engine the first fight is the raid itself (Month 2, Day 6), with no chance to learn the duel screen first. → Add the sparring bout (✚, owner to confirm).
 6. **Hidden rule safety**: ch. 5 says "Li cannot die" in a design text; that sentence must never reach How to play, hints or AI prompts. → Rule 7 above.
 
+### Owner decisions (Oct 5)
+1. **No character creation**: Li is fixed (World Bible 10.4); the prologue shows his memories and asks nothing.
+2. **Sparring first**: Daisuke's stick bout (Month 1, ~Day 20) teaches the duel screen before the raid. ✚ new content.
+3. **Claude permission is asked on the New life screen**; if it is refused, the game runs without AI and can switch later in Settings.
+4. **Hints are a plain GUIDE line**, not in a character's voice; world knowledge still comes from people.
+
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
 - **Icons:** [game-icons.net](https://game-icons.net/) (CC BY 3.0 → credit line in the game).

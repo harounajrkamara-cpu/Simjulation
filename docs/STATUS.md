@@ -1,7 +1,7 @@
 # Project status
 
 ## Where we are
-- **Game Experience Bible (Oct 5):** `docs/GAME_EXPERIENCE.md` ch. 1–7 ✅, **ch. 8 Onboarding 📝 drafted** (research, first-session flow, first-week teaching map, hints, 6 contradictions found; waiting for owner answers), ch. 9–10 ⏳. Ch. 8 example screens (New life · prologue slide · first free text) added as row 2 of the style canvas. Visual style example: https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK (approved). Owner installed plugins (frontend-design, Design, code-review, playwright) locally; they are not loaded in cloud sessions (the claude.ai Design canvas is used instead).
+- **Game Experience Bible (Oct 5):** `docs/GAME_EXPERIENCE.md` ch. 1–7 ✅, **ch. 8 Onboarding 📝 drafted** (research, first-session flow, first-week teaching map, hints, 6 contradictions found; owner answered the 4 questions, all as recommended; waiting for the final OK on the whole chapter), ch. 9–10 ⏳. Ch. 8 example screens (New life · prologue slide · first free text) added as row 2 of the style canvas. Visual style example: https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK (approved). Owner installed plugins (frontend-design, Design, code-review, playwright) locally; they are not loaded in cloud sessions (the claude.ai Design canvas is used instead).
 - **Stage 1 build started (Oct 5):** new engine in `engine/`, playable in browser (`npm run web`), terminal (`npm run play`) and chat (`npm run turn`). M0–M3 and M5 done (duel engine + Sasabe raid), M4 partly. Online page: https://claude.ai/artifact/AcDN6DV8D9SC5dBJybhcdx. Next: AI narrator (M6), more story after the raid, balance tests. See `docs/BUILD_PLAN.md`.
 - Ch. 10 Li's background ✅ approved. Kingdom names are now used everywhere (epithets only as nicknames). Elite titles: Six Pillars (Kurogane), Three Storms (Hayate). Family Mibu renamed Tsurumaki (real clan name).
 - Numbers sheet `docs/NUMBERS_SHEET.md` **v0.3 ✅ approved** (owner kept fast progression and the Kurogane head-for-freedom law). Next: **build stage 1** (Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels).
@@ -14,7 +14,7 @@
   4. Court, kingdoms, full world
 
 ## Next step
-- **NEXT:** owner answers the ch. 8 questions → apply the answers and the 6 contradiction fixes → ch. 8 ✅; then ch. 9 Pacing, then ch. 10 master build prompt + build plan; one chapter at a time, research first, owner approves each. Then build with the plugins.
+- **NEXT:** owner gives the final OK on ch. 8 → apply the 6 contradiction fixes (incl. HELP/WAIT in World Bible ch. 11) → ch. 8 ✅; then ch. 9 Pacing, then ch. 10 master build prompt + build plan; one chapter at a time, research first, owner approves each. Then build with the plugins.
 - Done: ch. 10, 12b, 13, 13b, 13c, numbers sheet v0.2. `docs/WORLD_ATLAS.md` v0.3 ✅ approved.
 - Done (Oct 5): full read + fact check of all files; consistency fixes applied; duel balance fix and army delegation rule approved (numbers sheet v0.3). **Design complete → build stage 1.**
 - Decided: crossbows exist (Tatara, the Smiths' Kingdom). The two giants stay close in size and both are internally divided.
