@@ -511,7 +511,14 @@ Each phase starts with its own detailed milestone table, written at the start of
 1. **CLAUDE.md** says `server.ts` still holds the key; it was moved to `legacy/` and the key line blanked (M0). → Update CLAUDE.md: key removed from the code, but still in the history of `main`; the owner must revoke it.
 2. **CLAUDE.md** names only the World Bible as the source of truth; the Atlas, Numbers Sheet and Game Experience Bible are canon too. → Add the source order from the master prompt.
 3. **BUILD_PLAN.md** (stage 1, M0–M7) has no UI, onboarding or pacing milestones from GE ch. 3–9. → Replaced by Part B on approval (the done work stays recorded).
-4. **The design work lives on `design/world-bible`, `main` holds only the old prototype.** → Branch question for the owner (below).
+4. **The design work lives on `design/world-bible`, `main` holds only the old prototype.** → Owner decision 2: building happens on `build/stage-1`.
+
+### Owner decisions (Oct 5)
+1. **Vertical slice first** (Phase 1, V1–V6), then widen.
+2. **Build on a new branch `build/stage-1`**, made from `design/world-bible` at the first build session; merging into `main` only on the owner's yes.
+3. **Local AI = Claude Code itself:** when the owner plays locally, Claude in the chat is the narrator (`play` skill, chat mode). No key needed; an API-key adapter can come later.
+4. **Playtests** at the end of the vertical slice and of every phase; screenshots for each milestone in between.
+5. **Always playable locally** (see Part B): chat mode + `play` skill keep working after every milestone.
 
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.

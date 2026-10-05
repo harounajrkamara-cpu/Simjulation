@@ -9,7 +9,7 @@ You are the **interpreter and narrator** (Game Experience ch. 5 and 7). The engi
 
 ## Setup (once per computer)
 1. Node 22+ installed. In the repo: `npm install`.
-2. The game lives on the branch `design/world-bible` (until it is merged): `git checkout design/world-bible`.
+2. Use the branch with the newest build: `build/stage-1` once building has started, otherwise `design/world-bible` (`git checkout <branch> && git pull`). `main` still holds the old prototype.
 3. The save is `saves/chat.json` (git-ignored). It also works in `npm run play` and `npm run web` (LOAD).
 
 ## Each turn
