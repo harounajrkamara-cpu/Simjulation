@@ -13,8 +13,8 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 3b | Big moments | ✅ |
 | 4 | Core loop | ✅ |
 | 5 | Simulation + story fused | ✅ |
-| 6 | Look & style | 📝 |
-| 7 | AI narrator | ⏳ |
+| 6 | Look & style | ✅ |
+| 7 | AI narrator | 📝 |
 | 8 | Onboarding | ⏳ |
 | 9 | Pacing | ⏳ |
 | 10 | Master build prompt + build plan | ⏳ |
@@ -183,7 +183,7 @@ The heart of "freedom of choice": you can type anything, the world answers fairl
 - The narration text is **stored** too, so loading shows the same story; REWRITE only re-words it.
 - Without an AI (offline or no key), the game still runs on template text and the numbered options.
 
-## Chapter 6 – Look & style 📝
+## Chapter 6 – Look & style ✅ (owner: "I like every one, that's how I want it")
 Visual example (4 screens): https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK — title screen · war chronicle (Story tab) · legend moment (nickname) · style kit.
 
 - **Mood: night war scroll.** Dark ink ground, paper-coloured text, **one seal red** (actions, danger, the 兵 seal) and **one gold** (titles, honour, chapter labels). No bright colours except the kingdoms' own.
@@ -195,6 +195,55 @@ Visual example (4 screens): https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK �
 - **Layout (war chronicle):** top strip (chapter, date, place, condition, money) · tabs · story column with a drawn scene header, new-person chips and ▲▼ changes, choices with the tested skill and ⚠ risk, and a free-text line · side panel with Li's card, the fogged map, the chronicle feed (rumours marked uncertain) and goals.
 - **Big moments** follow the 4 tiers of ch. 3b; the legend moment is a full black screen with the name in brush capitals, the Japanese name huge behind it, what earned it and who heard it, and a red seal.
 - Rules: text contrast ≥ 4.5:1, click targets ≥ 44 px, no emoji in the interface (symbols only), works on a phone as one column.
+
+## Chapter 7 – AI narrator 📝
+Builds on World Bible ch. 11 (turn loop, narrator rules) and ch. 12 (safety, cost). The AI never changes a number; it reads what you type and tells what the engine decided.
+
+### Where the AI comes from (three modes, one interface)
+| Mode | When | How |
+|---|---|---|
+| **Claude in the page** | the published claude.ai version | the page asks Claude directly with the player's own Claude account (permission asked once). No key in the game. Players' usage counts against their own plan. |
+| **Own key / local AI** | `npm run web`, terminal, chat, or a page hosted elsewhere (itch.io) | adapter: Claude API, Gemini free tier, OmniRoute or Ollama. Key only in `.env`, never in code, chat or the save. |
+| **No AI** | offline, permission refused, limit reached | template text + numbered options (today's game). The game never stops because the AI is missing. |
+
+### Two jobs
+1. **Interpreter** (fast, small model): free text → structured intent `{kind, target, method, tone, promise?, lie?, confidence}` with a fixed schema. Low confidence → it asks back ("Do you mean you talk to Kaname, or follow her?"). Impossible → the engine explains why (ch. 11 step 3).
+2. **Narrator** (normal model; strongest only for legend moments): turns the engine's events into the scene.
+
+### What the narrator receives (the fact packet)
+- the **visible facts** of this turn (events with `visible: true`), date, part of day, place and weather;
+- the people present: name, look, personality, mood, opinion label of Li, and **only what they know**;
+- Li's voice: quiet, watchful, stubborn, hides his anger, fears fire at night;
+- the moment tier (normal · spark · title card · ceremony · legend) and a word target (≈150–200, epic ≈300);
+- **hand-written core lines** that must appear word for word (beats, legend moments, ceremonies);
+- the last 2–3 turns of story for continuity.
+- 🔒 hidden truths are **never sent**, so the AI cannot leak them.
+
+### Check before showing (code, not AI)
+- Every number and name in the text must be in the fact packet; no new events, no deaths, no items that don't exist.
+- Fails → one automatic rewrite → still fails → template text. The player never sees a wrong fact.
+- The approved text is **stored in the save** next to its events; loading shows the same story. REWRITE re-words it, CORRECT re-reads your input before it resolves.
+
+### Style guide for the AI
+- Second person ("you"), present tense, short blocks; grave and epic like *Kingdom*, never jokey.
+- Show, don't explain: no stats or dice language in the prose; numbers stay in the interface.
+- Japanese words sparingly, always clear from context (rank names with men count).
+- NPCs speak in their culture's voice (Atlas ch. 6: Kurogane blunt, Suiren poetic, Hayate boastful…).
+- Narrator rules 1–6 of World Bible ch. 11 are part of every prompt.
+
+### Feel
+- Text **streams in** word by word like ink on a scroll (it arrives in 5–20 s); the choices appear when it is done.
+- While waiting: the scene header and the engine's changes line are already shown, so the turn never feels empty.
+
+### Safety and cost
+- Your typed text is passed as **story data inside fences**, never as instructions ("ignore your rules" does nothing).
+- Fixed word budget per turn; only relevant memories are sent; static rules and character sheets are cached.
+- Routine actions (WAIT, chores without story) use templates, not the AI.
+
+### Owner questions
+1. How often should the AI write? (a) every turn, (b) only for free text, people and story moments; routine stays template, (c) only big moments.
+2. Narration in "you" (now) or in third person ("Li")?
+3. Text streaming like ink: yes / no?
 
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
