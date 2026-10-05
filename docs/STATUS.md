@@ -19,7 +19,10 @@ Big worldbuilding round:
    - Decided: **Li was young** when his father died, so he barely remembers him.
    - Decided: family names stay (mother Yuki, sisters Mei & Kenjiko); the warrior girl and the rival recruit get new names.
    - Decided: old real-world names (Imagawa, Anegakoji, Shiina, Takeda, Kawanakajima) get invented names.
-   - Open: starting age (12 or 16).
+   - Decided: Li starts at **age 12**.
+   - Decided: the **Southern Giant** kingdom murdered Li's father.
+   - Open: where Li starts as a slave.
+- Decided: **no firearms** in this world.
 Then: numbers sheet → build stage 1.
 
 ## Open issues

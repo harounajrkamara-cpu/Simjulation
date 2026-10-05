@@ -23,6 +23,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - The imperial bloodline **still exists**: powerless, possibly hidden. ⏳ Designed together later, in the worldbuilding of the kingdoms and families.
 - The great goal of the world: whoever reunites the 7 kingdoms becomes the new Empire.
 - All families have **invented names** (no real clans like Takeda/Oda).
+- **No firearms** exist in this world: swords, spears, bows, cavalry, siege engines.
 
 ## Chapter 2 – Political structure ✅
 
