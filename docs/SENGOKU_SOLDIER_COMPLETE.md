@@ -10,7 +10,7 @@ Generated from the repo: STATUS + WORLD BIBLE (rules) + WORLD ATLAS (world) + NU
 
 ## Where we are
 - Ch. 10 Li's background ✅ approved. Kingdom names are now used everywhere (epithets only as nicknames). Elite titles: Six Pillars (Kurogane), Three Storms (Hayate). Family Mibu renamed Tsurumaki (real clan name).
-- Numbers sheet `docs/NUMBERS_SHEET.md` v0.1: 📝 draft, waiting for owner approval. After that: build stage 1.
+- Numbers sheet `docs/NUMBERS_SHEET.md` **v0.2 ✅ approved** (owner kept fast progression and the Kurogane head-for-freedom law). Next: **build stage 1** (Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels).
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)
 - Previously: World Bible v0.3: chapters 1–9, 11, 12 approved. Chapter 10 (Li's start) is open.
 - Language of the simulation: **English**.
@@ -176,7 +176,7 @@ Every important family has a named head, heir, general and a few key characters 
 - Rule 2: Crown service counts higher than family service at the same rank.
 - No fixed number of Dai-Shōgun: it emerges from the simulation.
 - Dai-Shōgun are almost always in **Crown service** (only kingdoms have armies that large); a great family can only have one if its army is big enough (Rule 1).
-- Promotion = merit + status + a free position; big campaigns end with a reward ceremony (in rank order, with reactions).
+- Promotion = merit (combat, command and political merit, weighted by rank: `NUMBERS_SHEET.md` §6) + status + a free position; big campaigns end with a reward ceremony (in rank order, with reactions).
 
 ## Chapter 5 – Character system ✅
 
@@ -184,6 +184,7 @@ Every important family has a named head, heir, general and a few key characters 
 Stats 0–100:
 - **LEA** – troop strength & morale, how many men handled well. Grows from commanding, speeches, won battles; not from duels.
   - **Command capacity**: each LEA level can handle a certain number of men well. Leading more than that = slower orders and faster morale loss (e.g. a strong fighter promoted too fast).
+  - ⚠️ The numbers in this table are replaced by the formula in `NUMBERS_SHEET.md` §3 (up to 100,000 at LEA 100); the table stays as a rough guide.
   - ✅ (ch. 12b) The table gives labels only. Overload is **gradual**: the further the troop count is above capacity, the slower the orders and the faster the morale loss. No tenfold jump at a band edge.
 
     | LEA | Handles well |
@@ -411,6 +412,7 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 | 0–39 | will betray or rebel |
 - Up: victories, rewards, fair treatment, kept promises. Down: defeats, broken promises, being passed over, favouritism to rivals.
 - **Betrayal needs three things together**: low loyalty + an **opportunity** (enough power, a better offer, the lord looks weak, own land threatened) + **not too much fear** of the lord.
+- ✅ **Obedience ≠ loyalty:** obedience comes from authority, fear and enforcement; loyalty from trust, respect and affection. A frightened man obeys while watched and defects when he can (formulas: `NUMBERS_SHEET.md` §8).
 - Personality shifts the limits (honourable stays longer, greedy switches faster); blood ties to the lord's family make betrayal less likely.
 - Rebel groups act only with enough combined power (CK3-style threshold).
 - **Family level**: a family's loyalty follows its head; family **cohesion** (ch. 3) = how the branch heads see the main-branch head.
@@ -639,7 +641,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Slave: survival, people, training · Soldier: unit, battles · Landholder: economy, domain · Court: politics. The game grows with Li.
 
 ### Numbers sheet & balance tests
-- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (📝 v0.1).
+- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (✅ v0.2).
 - Automatic tests: the engine simulates thousands of careers/duels to check e.g. how long slave → general takes and how often a C-rank beats a B-rank; also watches for dominant strategies.
 
 ### Name registry
@@ -1181,10 +1183,11 @@ Reserved given names (never reuse): Yuki, Mei, Kenjiko, Takeshi, Li.
 
 # PART 4 – NUMBERS SHEET
 
-## Numbers Sheet – Sengoku Soldier (v0.1, 📝 draft for approval)
+## Numbers Sheet – Sengoku Soldier (v0.2 ✅ approved)
 
 The exact numbers behind the World Bible rules. Code uses these; the AI never invents numbers.
 Every value states its **unit**. All results are deterministic (ch. 12b). These are **first values**; the balance tests (§12) will tune them.
+v0.2 adds the owner-approved fixes from the second external review (merit split, lower contact losses, duel cap, obedience vs loyalty, decay classes, faction power, ledgers). Owner decisions kept: **fast progression** and the **Kurogane head-for-freedom law**.
 
 Conventions: stats are stored with one decimal and shown as whole numbers · "per day / phase / season / year" always stated · % = percent of the stated base.
 
@@ -1231,35 +1234,47 @@ Check: Li at start = Warrior (14+6)/2 = 10 · Commander 11.5 · Statesman 11 →
 
 **Style unlocks** (ch. 5): mastery 30 / 50 / 70 / 100 → choice of 1 of 2.
 
-## 3. Command capacity (ch. 5 + 12b)
+## 3. Command capacity (ch. 5 + 12b) — official, replaces the ch. 5 band numbers
 **Capacity C = 10^(1 + LEA ÷ 25) men** → LEA 0: 10 · 25: 100 · 50: 1,000 · 75: 10,000 · 100: 100,000.
 **Overload o = men ÷ C.** If o > 1:
 - order delay: +1 step per doubling (o = 2 → +1, o = 4 → +2);
 - morale losses × (1 + 0.5 × log₂ o).
-The ch. 5 table stays as player-facing labels.
+
+Players only see a broad label, never the exact capacity:
+| LEA | Capacity (men) | Label |
+|---|---|---|
+| 0–14 | 10–36 | handles a few |
+| 15–29 | 40–145 | small unit |
+| 30–44 | 160–575 | company |
+| 45–59 | 640–2,300 | battalion |
+| 60–74 | 2,500–9,000 | large formation |
+| 75–89 | 10,000–36,000 | army |
+| 90–100 | 40,000–100,000 | great army |
 
 ## 4. Duels (ch. 6a)
-**Combat Power (CP) per round** = VAL × style factor × (1 + sum of modifiers).
+**Combat Power (CP) per round** = VAL × style factor × condition factor × (1 + situational modifiers).
+- **Condition factor** = 1 + condition + fatigue (wounds and tiredness, not capped).
+- **Situational modifiers** (clash, observation, surprise, terrain, matchup, ability) are added and then **capped at +50% / −50%**.
+- Surprise and observation do not stack: use the higher of the two.
+- Abilities preferably **change options** (block one counter, turn a wound into fatigue, stop a retreat, reveal a habit, win the next clash) instead of adding more %.
 Style factor: mastery 0–20 ×0.7 · 21–40 ×1.0 · 41–60 ×1.3 · 61–80 ×1.6 · 81–100 ×2.0.
 
-| Modifier | Value |
+| Situational modifier (capped ±50% total) | Value |
 |---|---|
-| condition: Fresh / Hurt / Wounded / Badly wounded | 0 / −10% / −25% / −45% |
-| fatigue (per tired step, max 3) | −5% |
 | winning the choice clash | +25% |
 | observed rounds (knowledge) | +5% per round, max +15% |
 | surprise (first round only) | +30% |
 | terrain / weather advantage | ±10% |
 | reach or style matchup | ±10% |
 | ability | as written on the ability |
-Aura is **not** a CP modifier (ch. 12b).
+Condition: Fresh 0 · Hurt −10% · Wounded −25% · Badly wounded −45%. Fatigue: −5% per step (max 3). Aura is **not** a CP modifier (ch. 12b).
 
 **Round result** by gap g = (CP winner − CP loser) ÷ CP loser:
 - g < 10%: loser pushed back, +1 fatigue;
 - 10–30%: loser one wound step;
 - 30–60%: two steps;
 - above 60%: loser Down.
-- Exact tie: both +1 fatigue; tie-breaker for initiative: higher INT, then whoever attacked last round.
+- Exact tie: both +1 fatigue. Initiative tie-break, in order: whoever won the previous clash → lower fatigue → the defender if he guarded → fixed character ID (hidden, stored in the replay log).
 
 **Draw** after 10 rounds without Down or yield.
 
@@ -1273,16 +1288,26 @@ Aura is **not** a CP modifier (ch. 12b).
 - Morale factor: Steady 1.0 · Wavering 0.8 · Routing 0.3.
 - Modifiers: flank +20% · rear +40% · high ground +15% · fortification +30–60% · spears vs cavalry +30% · surprise/ambush +40% (first phase).
 
-**Losses per phase in contact** (ratio r = stronger ÷ weaker, ≥ 1):
+**Losses per phase in contact** (ratio r = stronger ÷ weaker, ≥ 1), as % of the unit's current men, **per phase**:
 
-| Side | Loss per phase (% of current men) |
+| Side | Contact loss per phase |
 |---|---|
-| weaker side | 4% × √r, max 10% |
-| stronger side | 2% ÷ √r |
+| weaker side | 1.5% × √r, max 5% |
+| stronger side | 0.75% ÷ √r |
+| equal (r = 1) | both 1.1% |
+
+Normal fighting is slow; **big losses come from collapse**: routing, being surrounded or cut off, enemy cavalry, a blocked retreat or no organised withdrawal.
 
 Split of casualties during fighting: 40% dead · 45% wounded · 15% captured or missing.
 
-**Rout & pursuit:** a routing unit loses an extra 10% per phase, +10% if the enemy has ≥ 20% cavalry. An orderly retreat (Wavering, commander alive) loses 3% per phase. These give the ch. 6b totals: ~3–10% dead in the fight, 20–30%+ after a rout, ~10–20% in an orderly retreat.
+**Rout & pursuit:** a routing unit loses an extra 10% per phase, +10% if the enemy has ≥ 20% cavalry. An orderly retreat (Wavering, commander alive) loses 3% per phase. These give the ch. 6b totals **per battle, as % of starting strength, all casualty kinds together**: ~3–10% in the fight itself, 20–30%+ for a side that routs and is pursued, ~10–20% for an orderly retreat.
+
+**Battle report** (always this format, never a loose %):
+```
+Battle: 5 phases · Starting strength 1,000
+Dead 42 · Wounded 81 · Captured 19 · Missing 6 · Deserted 11
+Permanent losses 78 · Recoverable (wounded) 81
+```
 
 **Morale points** (0–100):
 - Steady ≥ 60 · Wavering 30–59 · Routing < 30.
@@ -1302,7 +1327,9 @@ Split of casualties during fighting: 40% dead · 45% wounded · 15% captured or 
 **Shattered** = commander dead **and** the unit is at < 30, cut off, or has no stand-in (ch. 12b).
 
 ## 6. Merit & promotion (ch. 4, 7)
-**Merit points**, earned per deed and confirmed after the battle by witnesses or the head count:
+Three kinds of merit, confirmed after the battle by witnesses, reports or the head count.
+
+**Combat merit** (personal deeds):
 
 | Deed | Merit |
 |---|---|
@@ -1317,9 +1344,31 @@ Split of casualties during fighting: 40% dead · 45% wounded · 15% captured or 
 | first over the wall in an assault | 15 |
 | saving an officer's life | 10 |
 | useful scouting report | 3 |
-| own unit wins its fight | 2 × size class (5-man = 1 … 1,000-man = 6) |
 
-**Promotion thresholds** (total merit):
+**Command merit** (leading), size class: 5-man = 1 · 10 = 2 · 50 = 3 · 100 = 4 · 300 = 5 · 1,000 = 6 · 5,000 = 7 · 10,000+ = 8:
+| Deed | Merit |
+|---|---|
+| unit completes its objective | 5 × size class |
+| unit wins its fight | 3 × size class |
+| losses below half of the expected | +2 × size class |
+| orderly withdrawal that saved the unit | 3 × size class |
+| unit morale never fell below Wavering | +1 × size class |
+| supply kept (no hunger days on campaign) | +1 × size class |
+| disobeyed an order and it clearly paid off | +3 × size class (if it failed: −3 × size class) |
+
+**Political merit**: negotiation won 5–30 · useful intelligence 5–20 · good governance per season 5 · protecting civilians 3–10.
+
+**Promotion score** = combat × w₁ + command × w₂ + (political + reputation + sponsor) × w₃, by the **target** rank:
+| Target rank | Combat w₁ | Command w₂ | Political / reputation / sponsor w₃ |
+|---|---|---|---|
+| Gochō – Kogashira | 0.6 | 0.3 | 0.1 |
+| Gojū-gashira – Hyakunin-gashira | 0.35 | 0.5 | 0.15 |
+| Sanbyakunin-shō – Sennin-shō | 0.15 | 0.6 | 0.25 |
+| Gosennin-shō – Taishō | 0.05 | 0.55 | 0.4 |
+| Dai-Shōgun | 0.05 | 0.45 | 0.5 |
+Result: a pure fighter reaches Kogashira fast, but cannot become a general on heads alone (e.g. Sanbyakunin-shō → Sennin-shō needs a score of 900; with weight 0.15, heads alone would need 6,000 combat merit).
+
+**Promotion thresholds** (promotion score):
 
 | From → To | Merit needed |
 |---|---|
@@ -1333,13 +1382,18 @@ Split of casualties during fighting: 40% dead · 45% wounded · 15% captured or 
 | Gosennin-shō → Taishō | 3,500 |
 | Taishō → Dai-Shōgun | 7,000 |
 
-**Social barrier** (ch. 7) multiplies the merit needed for low-born or ex-slaves: Kurogane ×1.0 (merit law) · Kitakaze ×1.0 · Hayate ×1.25 · Takane ×1.25 · Ushio ×1.5 · Tatara ×1.25 · Suiren ×2.0.
+**Social barrier** (ch. 7) multiplies the score needed for low-born or ex-slaves: Kurogane ×1.0 (merit law) · Kitakaze ×1.0 · Hayate ×1.25 · Takane ×1.25 · Ushio ×1.5 · Tatara ×1.25 · Suiren ×2.0.
 
 **Also required:** a **vacancy** (an officer dies, is promoted, or a new unit is formed; filled at reward ceremonies, best merit first). From Sanbyakunin-shō up, a **sponsor** is also needed: a superior with opinion ≥ +40 of Li.
 
-**Freedom through merit** (Kurogane law): one enemy head of Kogashira rank or higher, **or** 30 merit, frees a slave in Kurogane service. Kurogane pays the owner **10 ryō**.
+**The barrier is shown, not hidden:** when a promotion is blocked, Li sees the reason ("the elders reject a low-born", "a noble candidate has priority", "a sponsor is required", "your owner refuses to release you").
+
+**Freedom through merit** (Kurogane law, owner's decision kept): one enemy head of Kogashira rank or higher, **or** 30 combat + command merit, frees a slave. Conditions: the deed is **witnessed** and done in **official Kurogane service** (enlisted as a levy or lent by the owner). Kurogane pays the owner **10 ryō**. Officer duels only happen when a battle offers them; Li cannot create them at will.
 
 ## 7. Money, pay & land (ch. 7)
+**Three ledgers:** food reserve in **koku** · treasury in **ryō** · daily spending in **mon**.
+**Game conversion (fixed, fictional, not historical):** 1 koku = 1 ryō = 1,000 mon. Hidden causes (bad harvest, war) can change food *prices* in mon locally, never the conversion itself.
+
 - Pay per year: as ch. 7.
 - **Ceremony reward:** 0.1 ryō per merit point earned in that campaign. Slaves get none (an owner may share).
 - **Buying freedom:** Raizen's price for Li is **15 ryō** (he paid 8).
@@ -1379,15 +1433,33 @@ Split of casualties during fighting: 40% dead · 45% wounded · 15% captured or 
 | shared hardship (a campaign or season) | Affection +5 · Trust +5 |
 | cruelty Li is known for | Dread +5 (world) |
 
-**Fading:** non-permanent changes lose 1/12 of their value per month.
+**Fading by kind** (time until a change is gone, linear):
+| Kind | Fades over |
+|---|---|
+| casual insult or slight | 1–3 months |
+| rumour (unless repeated) | 1 month |
+| public humiliation, harsh punishment | 6–12 months |
+| shared hardship | 2–5 years |
+| broken promise | leaves a permanent **trust scar** of half its size; the rest recovers over 2 years of kept promises |
+| saved life, betrayal | permanent |
 
-**Loyalty** (0–100), derived = 0.35 × Trust + 0.25 × Respect + 0.20 × Affection + 0.20 × min(Fear, 60) + modifiers (blood ties +15, oath +10, passed over −15, unpaid −20).
+**Loyalty** (0–100, inner commitment) = 0.45 × Trust + 0.30 × Respect + 0.25 × Affection + modifiers (blood ties +15, oath +10, shared identity +5, passed over −15, unpaid −20).
+**Obedience** (0–100, doing what he is told) = 0.4 × lord's authority (rank, legitimacy) + 0.4 × Fear + 0.2 × enforcement (guards, hostages, nearness).
+
+| Obedience / Loyalty | Behaviour |
+|---|---|
+| high / high | reliable core supporter |
+| high / low | obeys while watched; defects when a chance comes |
+| low / high | may disobey an order but stays personally committed |
+| low / low | desertion or betrayal risk now |
 
 **Summary opinion** (−100 … +100) = ((Trust − 50) + (Respect − 50) + (Affection − 50)) × 2 ÷ 3 − Rivalry ÷ 2 − max(0, Fear − 50) ÷ 2, clamped. All values at 50 with no rivalry → 0 (neutral).
 
-**Betrayal** happens only when all three hold: loyalty < 40 · opportunity score ≥ 60 (better offer, the lord looks weak, own land threatened, enough power) · Fear < 50.
+**Betrayal** happens only when all three hold (ch. 8): loyalty < 40 · opportunity score ≥ 60 (better offer, the lord looks weak, own land threatened, enough power) · obedience < 50 (not too much fear or enforcement).
 
 ## 9. Factions (ch. 13b + 12b)
+**Power ratio** = (faction's committed troops + reliable allies) ÷ (Crown troops + reliably loyal families), where every side counts **effective troops** = available men × readiness × supply × cohesion (each 0–1).
+
 **Discontent change per month** = 10 × (power ratio − 0.6) + grievance (0–5) + foreign support (0–3) + leader legitimacy (0–2) − Crown authority ÷ 20 − Crown dread ÷ 25.
 Clamped to 0–100. **Ultimatum at 100.**
 
@@ -1395,6 +1467,7 @@ Clamped to 0–100. **Ultimatum at 100.**
 Uses ch. 9: walking 30 km/day · army 15–20 km/day · battle phase = part of a day (3–4 per day) · healing as in §4.
 
 ## 11. Fuse numbers (engine only, 🔒)
+Full decision trees per fuse (eligible actors, decision order, scored actions, tie-breaker, visible evidence, outcome, side effects) are written in **build stage 4**; the AI narrates fuses but never decides them.
 | Fuse | Not before | Trigger | Outcome decided by |
 |---|---|---|---|
 | Gōda's coup (Kurogane) | Year 100, Month 9 | King Tokinari turns 20 in **Year 101, Month 3**; Gōda has ≥ 6,500 men; the Chancellor's suspicion < 50 | who controls the palace guard on the night (Ōtori's choice, the King's Men's readiness) |
@@ -1407,7 +1480,7 @@ Uses ch. 9: walking 30 km/day · army 15–20 km/day · battle phase = part of a
 | Hostage prince's revenge (Kitakaze) | Year 101, Month 6 | a Kitakaze embassy is received in Seikyō (treaty renewal) | guard alertness; Kamio border bribes; whether anyone warns the court |
 
 ## 12. Balance targets (to test with thousands of simulated careers)
-Expected pace for a **strong** player in Kurogane (a weak player is slower; nothing is guaranteed):
+Expected pace for a **strong** player in Kurogane (owner's choice: fast progression is allowed; a weak or cautious player is slower; nothing is guaranteed):
 
 | Milestone | Target age |
 |---|---|
@@ -1423,5 +1496,6 @@ Expected pace for a **strong** player in Kurogane (a weak player is slower; noth
 **Tests:**
 - How often does a C beat a B in a duel? Target: 10–20% with good choices, < 3% with bad ones.
 - No single strategy may win more than 60% of careers (e.g. only hunting heads, only training).
-- Head-hunting may not beat command merit after Hyakunin-gashira.
+- Head-hunting may not beat command merit after Hyakunin-gashira (checked with the §6 weights).
+- A normal battle (no rout) costs each side under ~10% of its men in total.
 - No career may get stuck for more than 3 years without any route forward.

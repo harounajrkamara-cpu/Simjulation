@@ -124,7 +124,7 @@ Every important family has a named head, heir, general and a few key characters 
 - Rule 2: Crown service counts higher than family service at the same rank.
 - No fixed number of Dai-Shōgun: it emerges from the simulation.
 - Dai-Shōgun are almost always in **Crown service** (only kingdoms have armies that large); a great family can only have one if its army is big enough (Rule 1).
-- Promotion = merit + status + a free position; big campaigns end with a reward ceremony (in rank order, with reactions).
+- Promotion = merit (combat, command and political merit, weighted by rank: `NUMBERS_SHEET.md` §6) + status + a free position; big campaigns end with a reward ceremony (in rank order, with reactions).
 
 ## Chapter 5 – Character system ✅
 
@@ -132,6 +132,7 @@ Every important family has a named head, heir, general and a few key characters 
 Stats 0–100:
 - **LEA** – troop strength & morale, how many men handled well. Grows from commanding, speeches, won battles; not from duels.
   - **Command capacity**: each LEA level can handle a certain number of men well. Leading more than that = slower orders and faster morale loss (e.g. a strong fighter promoted too fast).
+  - ⚠️ The numbers in this table are replaced by the formula in `NUMBERS_SHEET.md` §3 (up to 100,000 at LEA 100); the table stays as a rough guide.
   - ✅ (ch. 12b) The table gives labels only. Overload is **gradual**: the further the troop count is above capacity, the slower the orders and the faster the morale loss. No tenfold jump at a band edge.
 
     | LEA | Handles well |
@@ -359,6 +360,7 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 | 0–39 | will betray or rebel |
 - Up: victories, rewards, fair treatment, kept promises. Down: defeats, broken promises, being passed over, favouritism to rivals.
 - **Betrayal needs three things together**: low loyalty + an **opportunity** (enough power, a better offer, the lord looks weak, own land threatened) + **not too much fear** of the lord.
+- ✅ **Obedience ≠ loyalty:** obedience comes from authority, fear and enforcement; loyalty from trust, respect and affection. A frightened man obeys while watched and defects when he can (formulas: `NUMBERS_SHEET.md` §8).
 - Personality shifts the limits (honourable stays longer, greedy switches faster); blood ties to the lord's family make betrayal less likely.
 - Rebel groups act only with enough combined power (CK3-style threshold).
 - **Family level**: a family's loyalty follows its head; family **cohesion** (ch. 3) = how the branch heads see the main-branch head.
@@ -587,7 +589,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Slave: survival, people, training · Soldier: unit, battles · Landholder: economy, domain · Court: politics. The game grows with Li.
 
 ### Numbers sheet & balance tests
-- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (📝 v0.1).
+- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses. → `docs/NUMBERS_SHEET.md` (✅ v0.2).
 - Automatic tests: the engine simulates thousands of careers/duels to check e.g. how long slave → general takes and how often a C-rank beats a B-rank; also watches for dominant strategies.
 
 ### Name registry
