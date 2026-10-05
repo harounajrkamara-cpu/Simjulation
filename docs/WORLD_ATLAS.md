@@ -1,4 +1,4 @@
-# World Atlas – Sengoku Soldier (v0.2, 📝 draft for approval)
+# World Atlas – Sengoku Soldier (v0.3)
 
 Companion to `WORLD_BIBLE.md`. The World Bible holds the **rules**; this atlas holds the **world**: places, families and characters.
 If they ever conflict, the World Bible wins.
@@ -95,18 +95,18 @@ Every family entry gives **koku / troops**. The sums match the ch. 13 sizes and 
 | **Queen Mother Asagiri Kaede** | 37 | S C | proud, lonely, reckless | keep her power after her son comes of age | two secret sons with Gōda Ensai |
 | **Chancellor Ebisawa Rokusai** | 56 | S A | former Kinza merchant who bought power by backing the old king; brilliant administrator; compiled the great *Ebisawa Annals* | stay the real ruler | was Kaede's lover; brought Gōda to court to get rid of her; terrified of exposure |
 | **Gōda Ensai** | 32 | S C · W C | the Queen Mother's "eunuch" favourite, now a marquis with 2 provinces | power, and protecting his sons | not a eunuch. **Coup fuse:** plans to strike before the king turns 20 and put his own son on the throne. |
-| **Ōtori Gensai** | 58 | **C S−** · W B+ | **Great General seat 1**. "The Walking Mountain". Defensive genius; serves the Crown, not factions. | keep the kingdom standing | has quietly started choosing successors |
-| **Kirishima Hyōe** | 44 | W A · C B | **Great General seat 2**. Born a peasant, rose on enemy heads. Savage, instinctual, the King's man. | prove commoners can lead | can barely read; a scribe hides it |
-| **Mibu Sanetaka** | 51 | C B+ · S B | **Great General seat 3**. Head of the Old Blood. | abolish the merit law | would back Gōda's coup if it brings down the Chancellor |
+| **Ōtori Gensai** | 58 | **C S−** · W B+ | **Pillar seat 1**. "The Walking Mountain". Defensive genius; serves the Crown, not factions. | keep the kingdom standing | has quietly started choosing successors |
+| **Kirishima Hyōe** | 44 | W A · C B | **Pillar seat 2**. Born a peasant, rose on enemy heads. Savage, instinctual, the King's man. | prove commoners can lead | can barely read; a scribe hides it |
+| **Tsurumaki Sanetaka** | 51 | C B+ · S B | **Pillar seat 3**. Head of the Old Blood. | abolish the merit law | would back Gōda's coup if it brings down the Chancellor |
 | Seats 4–6 | – | – | **empty** since the last war | – | open goal for Li |
-| **Nagi Shōma** | 22 | C B− · W B | Gosennin-shō, prodigy of the merit route; arrogant, gifted | a Great General seat before 30 | – |
+| **Nagi Shōma** | 22 | C B− · W B | Gosennin-shō, prodigy of the merit route; arrogant, gifted | a Pillar seat before 30 | – |
 | **Kawabe Sekkei** | 45 | S C | canal engineer from Tatara, honoured guest | build the great canal | **Canal fuse:** sent by King Tatara to drain Kurogane's money and men. Has begun to love the work itself. |
 
 **Tier A families:**
 
 | Family | Province / land | koku / troops | Head | Heir & key members | Faction | Goal | 🔒 Secret |
 |---|---|---|---|---|---|---|---|
-| **Mibu** | Two old heartland provinces | 600k / 13k | Mibu Sanetaka (above) | heir Mibu Kagetoshi (24), arrogant duelist, W B− | Old Blood | restore noble privilege | in contact with Gōda |
+| **Tsurumaki** | Two old heartland provinces | 600k / 13k | Tsurumaki Sanetaka (above) | heir Tsurumaki Kagetoshi (24), arrogant duelist, W B− | Old Blood | restore noble privilege | in contact with Gōda |
 | **Kamio** | northern pass province, on the Kitakaze border | 350k / 7.5k | Kamio Ujihide (60), C B, old and loyal | grandson Kamio Seijūrō (19), the king's friend | King's Men | hold the north | his border guards are bribed: the Kitakaze assassin will pass here |
 | **Hagiwara** | **Akaishi**, southern border province on the Suiren border | 300k / 6.5k | Hagiwara Munenori (49), C B−, cautious and pragmatic | heir Tadaoki (26) · daughter **Sayo** (13), bright and curious | neutral | survive Suiren raids after losing 2,000 men last year; **hires Raizen's band** | smuggles rice to Suiren's western border lords for profit |
 | **Gōda** | 2 provinces granted by the Queen Mother | 300k / 6.5k | Gōda Ensai (above) | – | the Favourite | the coup | (above) |
@@ -153,9 +153,9 @@ Tier B: 1.9M / 44k.
 | **King Shinonome Haruyuki** | 41 | C C · S C− | proud, insecure, jealous of his generals | – |
 | Heir Shinonome Akitoshi | 15 | – | sheltered | – |
 | **Ugaki Jōan** | 48 | S B | the king's favourite minister; greedy, charming | **Slander fuse:** a foreign power (Kurogane's spy office, but the engine decides who pays first) is ready to buy him to call Kagami a traitor |
-| **Kagami Sōun** | 53 | **C S** · W B · S B | **Heaven 1**, "the Silent Heaven". The best general alive. Intellectual, loyal to the people, not the king. | refuses to flatter the king |
-| **Homura Tetsuzan** | 46 | W A · C B+ | **Heaven 2**. A berserker (Instinctual); his men worship him. | hates Ugaki |
-| **Tobita Kojūrō** | 35 | C A− · S B | **Heaven 3**, "the Waiting Snake": makes you think you're winning, then strikes with reserves | ambitious; secretly gathering support |
+| **Kagami Sōun** | 53 | **C S** · W B · S B | **Storm 1**, "the Silent Heaven". The best general alive. Intellectual, loyal to the people, not the king. | refuses to flatter the king |
+| **Homura Tetsuzan** | 46 | W A · C B+ | **Storm 2**. A berserker (Instinctual); his men worship him. | hates Ugaki |
+| **Tobita Kojūrō** | 35 | C A− · S B | **Storm 3**, "the Waiting Snake": makes you think you're winning, then strikes with reserves | ambitious; secretly gathering support |
 
 **Families:**
 
@@ -398,7 +398,7 @@ Young talents with high hidden potential, Li's peers across the world (like *Kin
 
 ## 13. Legends (lore the world talks about)
 - **The Burning of the Capital** (Year 0) and the curse said to lie on the ruins.
-- **The old Six Great Generals** of Kurogane, who won the Wardens' Wars; their seats emptied one by one.
+- **The old Six Pillars** of Kurogane, who won the Wardens' Wars; their seats emptied one by one.
 - **The Twin Demon** Hattori Takeshi: a commoner who became Suiren's greatest general, "fell in a night ambush by Kurogane raiders" (official story; 🔒 a lie, ch. 10).
 - **Garyū Tessai** killed a Horo khan in single combat at 25.
 - **The Red Crane** Mikumo Raizen held a bridge alone against 300 men (true, but it was 120).
@@ -413,6 +413,6 @@ Young talents with high hidden potential, Li's peers across the world (like *Kin
 ---
 
 ## 15. Name registry (all names used; no repeats)
-Family names: Amatsu · Asagiri · Ebisawa · Gōda · Ōtori · Kirishima · Mibu · Nagi · Kawabe · Kamio · Hagiwara · Ishizue · Hasunuma · Shirasagi · Akabane · Kinugasa · Yashiro · Tōno · Okitsu · Shinonome · Ugaki · Kagami · Homura · Tobita · Kurokoma · Wadatsumi · Tagami · Isonokami · Daikokuya · Hamazaki · Kiriyama · Ōkura · Shiraiwa · Haguro · Sakaguchi · Tatara · Tobe · Kanemori · Hibiki · Fuyutsuki · Utsugi · Garyū · Shiramine · Ebisu-ya · Mikumo · Matsukaze · Ōno · Hattori.
+Family names: Amatsu · Asagiri · Ebisawa · Gōda · Ōtori · Kirishima · Tsurumaki · Nagi · Kawabe · Kamio · Hagiwara · Ishizue · Hasunuma · Shirasagi · Akabane · Kinugasa · Yashiro · Tōno · Okitsu · Shinonome · Ugaki · Kagami · Homura · Tobita · Kurokoma · Wadatsumi · Tagami · Isonokami · Daikokuya · Hamazaki · Kiriyama · Ōkura · Shiraiwa · Haguro · Sakaguchi · Tatara · Tobe · Kanemori · Hibiki · Fuyutsuki · Utsugi · Garyū · Shiramine · Ebisu-ya · Mikumo · Matsukaze · Ōno · Hattori.
 New given names also in use: Hayame, Shion, Nami, Tōta, Tsubasa, Ryūnosuke, Kunimaru, Sayuri/Ofuji.
 Reserved given names (never reuse): Yuki, Mei, Kenjiko, Takeshi, Li.

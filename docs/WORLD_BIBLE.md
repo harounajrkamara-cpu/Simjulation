@@ -25,7 +25,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - All families have **invented names** (no real clans like Takeda/Oda).
 - **No magic** ✅: gods are believed in but never act visibly. Abilities (ch. 5) are extreme human skill, will and training, never sorcery.
 - **No firearms** exist in this world: swords, spears, bows, **crossbows**, cavalry, siege engines.
-- **Crossbows** exist (decided): mainly made and used in the Smiths' Kingdom; rare and expensive elsewhere.
+- **Crossbows** exist (decided): mainly made and used in the Tatara; rare and expensive elsewhere.
 
 ## Chapter 2 – Political structure ✅
 
@@ -180,7 +180,7 @@ Types, each linked to a sub-rank:
 | Type | Linked rank | Example |
 |---|---|---|
 | Combat | Warrior | Zone – SHINKEN NO RYŪ, Kage no Yaiba |
-| Command | Commander | Fūrinkazan (whole army faster/stronger) |
+| Command | Commander | Gale March (whole army faster/stronger) |
 | Political | Statesman | Silver Tongue, court schemes |
 | Special | set per ability | stealth → Warrior; spy network → Statesman |
 
@@ -438,7 +438,7 @@ New Year (start of spring) · harvest festival (autumn) · tax day (end of month
 ### Dashboard date
 `📅 Year 100, Spring – Month 2 (Kisaragi), Day 12`
 
-## Chapter 10 – Li's background 📝 (draft for owner approval)
+## Chapter 10 – Li's background ✅
 Built from the old canon (Twin Demon story, Li-Hattori summary, ARC files), fixed for the new world. 🔒 = engine truth, never narrated until discovered.
 
 ### 10.1 Timeline
@@ -465,7 +465,7 @@ Built from the old canon (Twin Demon story, Li-Hattori summary, ARC files), fixe
 | Li knows | Li does **not** know |
 |---|---|
 | His name is Li Hattori, but he must never say "Hattori" | that his father was the famous Twin Demon |
-| His father Takeshi was a soldier and was killed when Li was 7 | who really killed him (he believes the official story if he ever hears it: Kurogane) |
+| His father Takeshi was a soldier and was killed when Li was 7 | who killed him. The official lie ("Kurogane raiders") exists in the world as a rumour; Li starts without knowing it, and whether he believes it depends on play |
 | Mother Yuki, sister Mei, baby sister Kenjiko | that they are alive, where they are, or that they think he is dead |
 | They came from Suiren (lakes, a big city) and fled north at night | that his father beat Kurogane at the Kurose |
 | The guide wore a crest of a **white rock** on his coat | that the crest means the Shiraiwa family of Takane |
@@ -473,7 +473,7 @@ Built from the old canon (Twin Demon story, Li-Hattori summary, ARC files), fixe
 
 **Keepsake:** a small **wooden dragon** his father carved, hidden in Li's loincloth for five years. 🔒 Yuki, Mei and Yasutoki would recognise it on sight.
 
-**Irony built in:** Li serves the kingdom he has been told killed his father, while the real killers are across the river. When the truth comes out, both sides are dangerous: Suiren's Three Families want the line gone, and Kurogane veterans hate the Twin Demon.
+**Irony possible:** if Li hears and believes the official lie, he serves the kingdom he thinks killed his father, while the real killers are across the river. When the truth comes out, both sides are dangerous: Suiren's Three Families want the line gone, and Kurogane veterans hate the Twin Demon.
 
 ### 10.3 Five years as a slave (Year 95–100)
 - **Work:** carries gear, cleans armour, helps **Old Sukezō** cook and treat wounds, cares for the horses, digs latrines.
@@ -502,7 +502,7 @@ Built from the old canon (Twin Demon story, Li-Hattori summary, ARC files), fixe
 1. **Kurogane merit law:** an enemy officer's head taken in Kurogane service frees a slave; Kurogane pays the owner a fixed price.
 2. Raizen frees him (needs very high trust and respect).
 3. Buy himself free (5–20 ryō).
-4. Escape (hunted; the Smiths' Kingdom has no slavery and is a refuge).
+4. Escape (hunted; the Tatara has no slavery and is a refuge).
 
 ### 10.5 Bloodline & abilities (replaces the ch. 12 placeholders)
 - **Zone – SHINKEN NO RYŪ** (Li's own unique Combat ability, active): a state of total focus. Unlocks through a **near-death event**; can start at **C-rank** at very low mastery (ch. 5 prodigy rule). Limit 3 per battle at first. Weakness: time limit, then exhaustion. Activation always shows "SHINKEN NO RYŪ" (ch. 11).
@@ -603,7 +603,7 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - Every save has a version number; saves upgrade only between **tested** versions (ch. 12b).
 
 ### Provisional examples
-- Examples from the old canon (Zone, Kage no Yaiba, Hattori) are defined in ch. 10.5 (📝 pending approval).
+- Examples from the old canon (Zone, Kage no Yaiba, Hattori) are defined in ch. 10.5.
 
 ### Build plan
 - Build in stages; each stage must be playable before the next starts (see chat decision).
@@ -626,25 +626,25 @@ From the external design audit (Oct 2026); approved by the owner.
 13. **Rule status:** every rule is marked ✅ approved · 📝 proposal · ⚠️ replaced; replaced rules point to their replacement.
 14. **Working title** *Sengoku Soldier* is close to the existing game *Sengoku Dynasty* (2024): check the name before any public release.
 
-## Chapter 13 – The Seven Kingdoms (base ✅, names & world in `WORLD_ATLAS.md` 📝)
+## Chapter 13 – The Seven Kingdoms ✅ (names ✅; places, families & characters in `WORLD_ATLAS.md`)
 Sizes follow the ch. 7 rule (~200–250 standing soldiers per 10,000 koku). Every kingdom has a real strength and a real weakness.
 
 | # | Type | Inspiration | Size | Strength | Weakness |
 |---|---|---|---|---|---|
-| 1 | Iron West (great) | Qin | ~7M koku, ~150k | merit system (enemy officer heads → rank + land; several heads can free enslaved family), best administration and supply lines, low-born can rise (highest posts stay with officials) | feared and hated by neighbours, brutal to its own people, old nobles resent the merit system |
-| 2 | Southern Giant (great) | Chu / Imagawa | ~10M koku, ~220k on paper | biggest and richest (rice, silk, culture) | three great families control the court; reformers get murdered; only part of the army answers quickly. **Murdered Li's father.** |
-| 3 | War Kingdom (middle) | Zhao / Takeda | ~4M, ~90k | best cavalry (mounted archery), famous great generals, war culture | borders almost everyone, never rests, smaller economy |
-| 4 | Eastern Sea Kingdom (middle) | Qi | ~5M, ~100k | richest coast, salt-and-iron monopoly, biggest city, scholars' academy, navy; pays others to fight | army out of practice; child king, regent's family reaching for the throne (ch. 13b) |
-| 5 | Mountain Kingdom (middle) | Anegakoji | ~2.5M, ~55k | controls the mountain passes, fortresses, archers, kingmaker position | poor soil, small population, a side family wants to betray it |
-| 6 | Smiths' Kingdom (small) | Han | ~1.2M, ~25k | best steel and weapons, strong bows, the only crossbow corps | no room to grow, surrounded, prey for everyone |
-| 7 | Northern Frontier (small) | Yan | ~2M, ~45k | hardened soldiers, horse archers, winter endurance | poor economy, also fights the northern tribes |
+| 1 | **Kurogane** – Iron West (great) | Qin | ~7M koku, ~150k | merit system (enemy officer heads → rank + land; several heads can free enslaved family), best administration and supply lines, low-born can rise (highest posts stay with officials) | feared and hated by neighbours, brutal to its own people, old nobles resent the merit system |
+| 2 | **Suiren** – Southern Giant (great) | Chu / Imagawa | ~10M koku, ~220k on paper | biggest and richest (rice, silk, culture) | three great families control the court; reformers get murdered; only part of the army answers quickly. **Murdered Li's father.** |
+| 3 | **Hayate** – War Kingdom (middle) | Zhao / Takeda | ~4M, ~90k | best cavalry (mounted archery), famous great generals, war culture | borders almost everyone, never rests, smaller economy |
+| 4 | **Ushio** – Eastern Sea (middle) | Qi | ~5M, ~100k | richest coast, salt-and-iron monopoly, biggest city, scholars' academy, navy; pays others to fight | army out of practice; child king, regent's family reaching for the throne (ch. 13b) |
+| 5 | **Takane** – Mountain (middle) | Anegakoji | ~2.5M, ~55k | controls the mountain passes, fortresses, archers, kingmaker position | poor soil, small population, a side family wants to betray it |
+| 6 | **Tatara** – Smiths' Kingdom (small) | Han | ~1.2M, ~25k | best steel and weapons, strong bows, the only crossbow corps | no room to grow, surrounded, prey for everyone |
+| 7 | **Kitakaze** – Northern Frontier (small) | Yan | ~2M, ~45k | hardened soldiers, horse archers, winter endurance | poor economy, also fights the northern tribes |
 
-**Size rule (decided):** the two great kingdoms stay close in size (Iron West ~7M, Southern Giant ~10M). Both are giants held back by inner power struggles; neither is a clear number one.
+**Size rule (decided):** the two great kingdoms stay close in size (Kurogane ~7M, Suiren ~10M). Both are giants held back by inner power struggles; neither is a clear number one.
 
-Free territories: the **Merchant City** (inspired by Sakai: council of merchants, walled, independent), the **Monk Mountain**, the **northern border tribes**.
+Free territories: the **Kinza** (Merchant City, inspired by Sakai: council of merchants, walled, independent), **Mount Shōgen** (Monk Mountain), the **northern border tribes**.
 
 ### Li's start ✅
-- Li (12) is the **slave of a famous rōnin who leads a mercenary band**, hired by a border family in the **Iron West**. He carries gear, sees real fights, learns by watching. Later he can choose to enlist in the Iron West army, where merit can free him and his family.
+- Li (12) is the **slave of a famous rōnin who leads a mercenary band**, hired by a border family in the **Kurogane**. He carries gear, sees real fights, learns by watching. Later he can choose to enlist in the Kurogane army, where merit can free him and his family.
 
 ## Chapter 13b – Power inside the kingdoms ✅
 
@@ -668,32 +668,32 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 - The pacing director only decides *when* a fuse surfaces once its conditions are true; several crises may run at once; **what reaches Li** is limited by distance, messengers and delay (ch. 12b).
 - Fuses are inspired by history but use our own names and details, so they stay unpredictable.
 
-**Elite titles:** some kingdoms have a famous set of seats for their greatest generals (honours, not ranks; ch. 4 rules still apply). A long-term goal for Li. Names ⏳.
+**Elite titles:** some kingdoms have a famous set of seats for their greatest generals (honours, not ranks; ch. 4 rules still apply). A long-term goal for Li: Kurogane's **Six Pillars**, Hayate's **Three Storms**.
 
 **How a nobody rises:** each kingdom has its own route (Li can switch sides).
 
-### The seven profiles (names ⏳)
+### The seven profiles
 | Kingdom | Who really rules | Factions | Fuses | Elite title | How a nobody rises | Auth / Royal / Unity / Succ / Treas |
 |---|---|---|---|---|---|---|
-| Iron West | King (19, full power at 20); until then the **Chancellor** (ex-merchant who bought power) | King's Men (merit officers) · Chancellor's House (officials, merchants, 3,000 retainers) · Old Blood (nobles hating the merit system) · Queen Mother's favourite (fake eunuch, building power) | **Favourite's coup** before the coming-of-age (crushed / purge of the Chancellor / king killed) · **The great canal**: a Smiths' Kingdom engineer's plan to drain the Iron West (exposed / finished and enriches the land / bankrupts it) | Six Great Generals (6 seats) | enemy officer heads → rank + land; best route for a slave | 55 / 55% / 50 / 50 / 60 |
-| Southern Giant | Puppet king (40s); **three great families** split the court | Three Families (united against reform, rivals among themselves) · Reformers (small, afraid) · Border Lords (fight, get no thanks) | **Hostage heir** of an eastern border family (breaks away when it can) · **Murdered reformer** (hook for Li's father, ch. 10) | – | almost impossible; only border lords take outsiders | 25 / 30% / 45 / 40 / 85 |
-| War Kingdom | Jealous king, depends on famous generals whose troops love *them* | The Generals · The Favourite (court minister, can be bought) | **Bribed slander**: a foreign power pays the favourite to call the best general a traitor (executed / rebels / plot exposed) | Three Heavens (3 seats) | a famous general takes you into his private army | 50 / 40% / 60 / 35 / 35 |
-| Eastern Sea | Child king (9); the **regent** is head of a family buying the people's love (lends grain big, collects small) | Regent's House · Old Royalists · Trade Council | **Slow usurpation**: when regent popularity > threshold and authority < threshold, he claims the throne (smooth / civil war / child murdered) | – | money, or the scholars' academy exam | 30 / 35% / 40 / 70 / 90 |
-| Mountain | King through the main house (from the owner's 1540 design) | Loyalists 68% (main house, cautious family, poor mining family) · Ambitious 11% (young proud leader) · Separatists 21% (pass family, grudge over a passed-over brother, secret talks with the War Kingdom) | **Pass revolt**: if the separatists rebel, loyalists fall to 47% and the pass opens | – | adoption into a pass family | 60 / 45% / 45 / 30 / 30 |
-| Smiths' | **Absolute king** (63); only heir is 14; clever prince-scholar ignored | – (total unity) | **King's death** (no court strong enough) · **Canal exposed** (Iron West war pretext) | – | craft skill or the king's favour | 95 / 80% / 90 / 75 / 45 |
-| Northern Frontier | King + war chiefs who must agree on big wars | Crown · War Chiefs · tribes outside | **Hostage prince's revenge**: the crown prince (ex-hostage in the Iron West) plans to assassinate the Iron West king (fails → war of revenge / succeeds → Iron West chaos / discovered early) | – | strength; chiefs accept anyone who proves himself | 40 / 35% / 55 / 45 / 20 |
+| Kurogane | King (19, full power at 20); until then the **Chancellor** (ex-merchant who bought power) | King's Men (merit officers) · Chancellor's House (officials, merchants, 3,000 retainers) · Old Blood (nobles hating the merit system) · Queen Mother's favourite (fake eunuch, building power) | **Favourite's coup** before the coming-of-age (crushed / purge of the Chancellor / king killed) · **The great canal**: a Tatara engineer's plan to drain the Kurogane (exposed / finished and enriches the land / bankrupts it) | **Six Pillars** (6 seats) | enemy officer heads → rank + land; best route for a slave | 55 / 55% / 50 / 50 / 60 |
+| Suiren | Puppet king (40s); **three great families** split the court | Three Families (united against reform, rivals among themselves) · Reformers (small, afraid) · Border Lords (fight, get no thanks) | **Hostage heir** of an eastern border family (breaks away when it can) · **Murdered reformer** (hook for Li's father, ch. 10) | – | almost impossible; only border lords take outsiders | 25 / 30% / 45 / 40 / 85 |
+| Hayate | Jealous king, depends on famous generals whose troops love *them* | The Generals · The Favourite (court minister, can be bought) | **Bribed slander**: a foreign power pays the favourite to call the best general a traitor (executed / rebels / plot exposed) | **Three Storms** (3 seats) | a famous general takes you into his private army | 50 / 40% / 60 / 35 / 35 |
+| Ushio | Child king (9); the **regent** is head of a family buying the people's love (lends grain big, collects small) | Regent's House · Old Royalists · Trade Council | **Slow usurpation**: when regent popularity > threshold and authority < threshold, he claims the throne (smooth / civil war / child murdered) | – | money, or the scholars' academy exam | 30 / 35% / 40 / 70 / 90 |
+| Takane | King through the main house (from the owner's 1540 design) | Loyalists 68% (main house, cautious family, poor mining family) · Ambitious 11% (young proud leader) · Separatists 21% (pass family, grudge over a passed-over brother, secret talks with the Hayate) | **Pass revolt**: if the separatists rebel, loyalists fall to 47% and the pass opens | – | adoption into a pass family | 60 / 45% / 45 / 30 / 30 |
+| Tatara | **Absolute king** (63); only heir is 14; clever prince-scholar ignored | – (total unity) | **King's death** (no court strong enough) · **Canal exposed** (Kurogane war pretext) | – | craft skill or the king's favour | 95 / 80% / 90 / 75 / 45 |
+| Kitakaze | King + war chiefs who must agree on big wars | Crown · War Chiefs · tribes outside | **Hostage prince's revenge**: the crown prince (ex-hostage in the Kurogane) plans to assassinate the Kurogane king (fails → war of revenge / succeeds → Kurogane chaos / discovered early) | – | strength; chiefs accept anyone who proves himself | 40 / 35% / 55 / 45 / 20 |
 
-**Balance of the giants:** "answers fast" = royal troops + families with loyalty ≥70. Iron West: 55% royal of 150k ≈ 80k. Southern Giant: 30% royal + ~5% loyal border lords = 35% of 220k ≈ 75k. Same real speed: one richer, one better organised.
+**Balance of the giants:** "answers fast" = royal troops + families with loyalty ≥70. Kurogane: 55% royal of 150k ≈ 80k. Suiren: 30% royal + ~5% loyal border lords = 35% of 220k ≈ 75k. Same real speed: one richer, one better organised.
 
-**Links to Li:** three fuses touch the Iron West (coup, canal, assassin), so big politics reach Li as rumours first, chances later. Mountain hook: the poor mining family's former head fought beside Li's father (check in ch. 10).
+**Links to Li:** three fuses touch the Kurogane (coup, canal, assassin), so big politics reach Li as rumours first, chances later. Takane hook: the Shiraiwa (poor mining family) former head fought beside Li's father and hides his family (ch. 10).
 
 ## Chapter 13c – Extra world rules ✅
 1. **Royal hostages:** kingdoms swap royal hostages as part of peace treaties (besides ch. 2 family hostages to their own capital).
-2. **Slaves at war:** slaves can be sent to war as levies; in the Iron West taking heads frees them. An owner may lend or sell a slave to an army. Details for Li in ch. 10.
+2. **Slaves at war:** slaves can be sent to war as levies; in the Kurogane taking heads frees them. An owner may lend or sell a slave to an army. Details for Li in ch. 10.
 3. **Coming of age:** adult at **15** (genpuku: can serve as a real soldier and own property). A king rules on his own at **20** (old Empire law still kept by all 7 kingdoms).
 4. **Lifespan without dice:** at world creation every NPC gets a hidden health and lifespan; sickness, wounds and stress lower it. Same world = same outcome. Never shown.
-5. **Neutral powers:** every kingdom has local temples and guild branches; the **Monk Mountain** and the **Merchant City** are their independent headquarters.
-6. **Payment to the Crown scales with Crown Authority:** ~5% of tax income in the Southern Giant, ~20%+ in the Smiths' Kingdom (replaces the flat 10–20% of ch. 7 per kingdom).
+5. **Neutral powers:** every kingdom has local temples and guild branches; the **Mount Shōgen (Monk Mountain)** and the **Kinza (Merchant City)** are their independent headquarters.
+6. **Payment to the Crown scales with Crown Authority:** ~5% of tax income in the Suiren, ~20%+ in the Tatara (replaces the flat 10–20% of ch. 7 per kingdom).
 7. **Mercenaries:** a band is hired by contract (pay per season + share of loot). Ranks inside a band are not Crown or family ranks; a famous rōnin can still be Warrior A.
 8. **Fuse numbers** (thresholds, "not before" dates) go on the numbers sheet.
 

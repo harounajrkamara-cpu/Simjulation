@@ -1,7 +1,7 @@
 # Project status
 
 ## Where we are
-- Ch. 10 Li's background: 📝 draft written, waiting for owner approval.
+- Ch. 10 Li's background ✅ approved. Kingdom names are now used everywhere (epithets only as nicknames). Elite titles: Six Pillars (Kurogane), Three Storms (Hayate). Family Mibu renamed Tsurumaki (real clan name).
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)
 - Previously: World Bible v0.3: chapters 1–9, 11, 12 approved. Chapter 10 (Li's start) is open.
 - Language of the simulation: **English**.
@@ -13,7 +13,7 @@
 
 ## Next step
 - Done: ch. 13b power inside the kingdoms (engine, factions, fuses, profiles). Done: big check (v0.4), ch. 13c extra rules, family tiers. Draft: `docs/WORLD_ATLAS.md` v0.2 (history, map, kingdoms, families, characters, S-tier proposal, cultures, armies, trade, relations, Li's generation, places, law, legends, rumours) waiting for owner approval.
-- Decided: crossbows exist (Smiths' Kingdom). The two giants stay close in size and both are internally divided.
+- Decided: crossbows exist (Tatara, the Smiths' Kingdom). The two giants stay close in size and both are internally divided.
 
 Big worldbuilding round:
 1. The 7 kingdoms (names, map, rulers, size, cultures, relations).
@@ -25,8 +25,8 @@ Big worldbuilding round:
    - Decided: family names stay (mother Yuki, sisters Mei & Kenjiko); the warrior girl and the rival recruit get new names.
    - Decided: old real-world names (Imagawa, Anegakoji, Shiina, Takeda, Kawanakajima) get invented names.
    - Decided: Li starts at **age 12**.
-   - Decided: the **Southern Giant** kingdom murdered Li's father.
-   - Decided: Li starts as the slave of a famous rōnin's mercenary band in the Iron West (World Bible ch. 13).
+   - Decided: the **Suiren (Southern Giant)** kingdom murdered Li's father.
+   - Decided: Li starts as the slave of a famous rōnin's mercenary band in the Kurogane (Iron West) (World Bible ch. 13).
 - Decided: **no firearms** in this world.
 Then: numbers sheet → build stage 1.
 
