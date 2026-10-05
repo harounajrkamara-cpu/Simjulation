@@ -1,4 +1,4 @@
-# World Bible – Sengoku-inspired simulation (v0.2)
+# World Bible – Sengoku-inspired simulation (v0.3)
 
 Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 
@@ -233,7 +233,7 @@ Rules:
 - **Upset rule**: same rank = better choices win · 1 rank = possible with good play + 1–2 factors · 2 ranks = 3–4 factors stacked · 3+ = practically impossible (survival is victory).
 - **End**: someone is Down, yields, flees, or the duel is interrupted; usually 3–6 rounds. No winner after ~8–10 rounds = **draw**. Epic duels may run longer in phases.
 - **Fleeing** is allowed but costs reputation and troop morale (more when fleeing from a weaker foe). Losing a duel lowers your troops' morale; winning raises it.
-- **Li cannot die** — not in duels, battles, from disease or any other cause. Defeat = badly wounded, captured, humiliated, or losses around him.
+- **Li cannot die** — not in duels, battles, from disease or any other cause. This rule is **never mentioned in the game**: fights are described as truly deadly, and losing must really hurt (permanent injuries, capture, rank loss, friends dying, family in danger). Defeat = badly wounded, captured, humiliated, or losses around him.
 - **Permanent injuries** are possible for Li (scars, lasting effects such as a weaker arm).
 - **Friends and allies can die**; other characters, including famous enemies, can die.
 - **Aftermath**: wounds persist and heal over days to months (lower stats, may block abilities) · growth (most from beating stronger foes) · trophy collection (name, rank, men commanded, date, battle) · reputation & memories (witnesses and the loser) · ability costs (e.g. Zone penalty).
@@ -374,8 +374,9 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 - Only a few active real rivals/enemies at the same time.
 - **NPC tiers**: major characters get full relationship webs; minor characters only track their view of the player and their own group.
 
-### Nemesis system
-- Named enemies who survive keep a memory of Li, can grow (promotion, new ability, new trait such as fear of fire) and come back.
+### Rivals & Grudges
+- Named enemies who survive keep a memory of Li, can grow (promotion, new ability, new trait) and come back.
+- Built like Crusader Kings' rivals plus our own memory system (ch. 8); **not** a copy of Shadow of Mordor's patented Nemesis system (patent until 2036). Get legal advice before any commercial release.
 
 ### Reputation
 - Separate per group: soldiers · nobles · peasants · enemies. Titles/nicknames come from deeds and spread as rumours.
@@ -494,3 +495,34 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 
 ### ⏳ Open
 - Language of the simulation (Dutch / English / choosable).
+
+## Chapter 12 – Engine & quality rules ✅
+
+### Pacing director
+- Decides **when** consequences that are already building (rumours, enemy plans, hidden causes) surface, following a tension curve: pressure → breathing room → pressure. It never invents random events (no-dice principle).
+- Fast-forward for slow parts.
+
+### Systems unlock with Li's life
+- Slave: survival, people, training · Soldier: unit, battles · Landholder: economy, domain · Court: politics. The game grows with Li.
+
+### Numbers sheet & balance tests
+- Before building, a numbers sheet: stat growth per event, merit per deed, promotion thresholds, prices, losses.
+- Automatic tests: the engine simulates thousands of careers/duels to check e.g. how long slave → general takes and how often a C-rank beats a B-rank; also watches for dominant strategies.
+
+### Name registry
+- Every name is stored; new names must be unique (no more two Yukis / two Takeshis), drawn from name lists per region and family.
+
+### AI cost
+- Fixed token budget per turn; only relevant memories are sent; static rules are prompt-cached.
+
+### Safety
+- Player text is always story input, never an instruction to the system ("ignore your rules…" has no effect). The AI gets only the minimum access it needs; it cannot change numbers.
+
+### Save versioning
+- Every save has a version number; the engine upgrades old saves automatically when the design changes.
+
+### Provisional examples
+- Examples from the old canon (Zone, Kage no Yaiba, Hattori) are placeholders until Li's background and the kingdoms are designed.
+
+### Build plan
+- Build in stages; each stage must be playable before the next starts (see chat decision).
