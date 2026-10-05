@@ -17,7 +17,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 7 | AI narrator | ✅ |
 | 8 | Onboarding | ✅ |
 | 9 | Pacing | ✅ |
-| 10 | Master build prompt + build plan | ⏳ |
+| 10 | Master build prompt + build plan | 📝 |
 
 ---
 
@@ -449,6 +449,67 @@ Target ages from Numbers §12, mapped to play time (to confirm in the M7 playtes
 2. **Open sandbox + epilogue:** play as long as you like; when Li retires (a player choice) or reaches old age (60+), an epilogue chapter tells what became of him, his people and the kingdoms. The epilogue never shows Li dying in play (hidden rule kept).
 3. **Sessions of 45–90 minutes**, with natural stopping points (§4).
 4. **One fixed pace** for every player; no pacing-style setting.
+
+## Chapter 10 – Master build prompt + build plan 📝 (proposal, Oct 5)
+Turns ch. 1–9 and the World Bible into something a builder (Claude in a build session) can execute, check and finish, one playable step at a time.
+
+### Research
+| Source | Lesson | What we do |
+|---|---|---|
+| Claude Code best practices (official docs; analysis of 400,000 sessions) | success comes from **precise directions, a check the agent can run, and correction**; explore → plan → implement → verify; keep CLAUDE.md short (commands, structure, hard rules) | a short **master build prompt** + a separate plan; every milestone ends with checks that produce evidence (tests, replay hash, screenshots) |
+| Spec-driven development (GitHub Spec Kit, Kiro) | spec → plan → tasks, with checkpoints where a human checks the AI's output | our design files are the spec; the build plan has tasks with **"done when"**; the owner checks at each milestone |
+| Game production (first playable → vertical slice) | a **vertical slice** is a thin, deep piece of the game with every system and the final look, before building wide | build **a vertical slice first**: Year 100, Month 1 → after the raid, complete and polished; then widen to the whole slave arc |
+| LLM game evaluation (RPGBench, golden sets) | check narration against an explicit **fact ledger**; replay a **golden set** after every prompt or model change | the narrator **golden set**: fixed fact packets → the checker must find no invented names, numbers or events |
+
+Sources: [Claude Code – best practices](https://code.claude.com/docs/en/best-practices.md), [Analytics Vidhya – 400,000 sessions](https://www.analyticsvidhya.com/blog/2026/08/claude-code-best-practices-analysis/), [GitHub blog – Spec Kit](https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/), [Morph – spec-driven development](https://www.morphllm.com/spec-driven-development), [Unity Learn – vertical slice](https://learn.unity.com/course/milestones/tutorial/your-first-milestone-vertical-slice), [Wayline – vertical slices](https://www.wayline.io/blog/vertical-slices-indie-game-pacing), [RPGBench](https://arxiv.org/html/2502.00595v1), [Golden sets and replay](https://dev.to/aiarch_wibo/how-to-evaluate-an-llm-agent-evals-golden-sets-and-llm-as-judge-1e2g).
+
+### Part A – The master build prompt
+Lives in **`docs/MASTER_BUILD_PROMPT.md`** (one page). It holds: who the builder is · the order of the sources of truth · 7 rules never to break · the architecture · how every task runs (read → plan → tests first → build → verify with evidence → review → report) · which plugin for what · when to stop and ask · definition of done. Every build session starts from it.
+
+### Part B – Build plan v2 (replaces `BUILD_PLAN.md` on approval)
+**Where we are (checked Oct 5):** engine M0–M3 and M5 done, M4 partly; 19 tests pass; typecheck clean; the current code holds no API key.
+
+**Phase 1 – Vertical slice: "The Red Crane's boy"** (Year 100, Month 1 → after the raid, ~1–2 sessions of play, final look)
+| # | Milestone | Uses | Done when |
+|---|---|---|---|
+| V1 | Engine catch-up | WB ch. 8, 11; GE ch. 7 | rumour spreading (M4) done; all engine text in third person; HELP/WAIT per ch. 11; replay test green |
+| V2 | War chronicle UI | GE ch. 3, 6 | Story tab + side panel (Li card, fogged map, chronicle, goals) + tabs Li · People · Journal · Encyclopedia · Army (outside view) match the reference screens at 1440 and 390 px; contrast and target checks pass |
+| V3 | AI layer | GE ch. 5, 7 | interpreter (asks when unsure) + narrator + fact checker; claude.ai page mode and no-AI mode; ink streaming; REWRITE / CORRECT; golden set of ≥ 20 fact packets passes |
+| V4 | Onboarding | GE ch. 8 | title → New life → prologue (7 slides) → chapter card → first week beats ✚ → Sukezō's WAIT lesson → Daisuke sparring ✚; GUIDE hints, example lines, "Why?", nested tooltips, How to play; ch. 8 time targets met in a Playwright run |
+| V5 | Big moments + pacing core | GE ch. 3b, 9 | 4 moment tiers; title card, duel overlay, legend moment screen; director phases with beat windows (slave stage); session-end summary at natural breaks |
+| V6 | Slice test | GE ch. 8–9; Numbers §4, §12 | Monte Carlo duel tests (upset rates); determinism tests; **owner plays the slice** and gives feedback; fixes done |
+
+**Phase 2 – Stage 1 complete: the slave arc** (Year 100 → freedom, 8–12 h): all freedom routes (merit law via service, Raizen's trust, buying, escape), the band's contract seasons, Year 100 story calendar, timeskip summary, the Journal/RECAP, saves and slots. Done when a strong player reaches freedom at 13–15 in simulated careers (Numbers §12) and the owner has played to freedom.
+
+**Phase 3 – Stage 2: soldier life** (Kurogane service, Ashigaru → Hyakunin-gashira): units, battles with the battle map (ch. 6b, GE ch. 3), merit and promotion, reward ceremonies, Army roster, time zoom to days.
+
+**Phase 4 – Stage 3: land & family** (Sanbyakunin-shō, first land): economy, domain, families, time zoom to weeks.
+
+**Phase 5 – Stage 4: court & kingdoms** (general): factions, fuses (Numbers §11), the full world, epilogue (GE ch. 9 decision 2).
+
+Each phase starts with its own detailed milestone table, written at the start of that phase (spec → plan → tasks), so plans never go stale.
+
+### Part C – Testing (all phases)
+| Test | What | When |
+|---|---|---|
+| Unit (Vitest) | every rule in the engine | every change |
+| Determinism | replay a recorded game → same hash; no `Math.random` in `engine/` | every change |
+| Balance (Monte Carlo) | thousands of duels and careers vs Numbers §12 targets | every milestone that touches numbers |
+| Narrator golden set | fixed fact packets → fact checker finds nothing invented; hidden truths never in packets | every prompt or model change |
+| UI (Playwright) | click-through of the first week; screenshots at 1440 and 390 px; contrast, 44 px targets | every UI milestone |
+| Owner playtest | the owner plays and reports | end of every phase (and the slice) |
+
+### Part D – Risks
+1. **The old Google key is still in the git history of `main`** (first commit). Removing it from the code does not remove it from history: **the owner must revoke the key** in Google Cloud. Rewriting history is not planned (destructive; owner's call).
+2. **Claude in the claude.ai page:** usage counts against each player's own plan; heavy players may hit limits → no-AI mode must stay good.
+3. **Content volume:** a 65–100 h life needs many hand-written beats; the AI writes connective scenes only (ch. 5). Content is written per phase, not all up front.
+4. **Name:** *Sengoku Soldier* is close to *Sengoku Dynasty* (WB ch. 12b #14): check before any public release.
+
+### Contradictions & fixes found
+1. **CLAUDE.md** says `server.ts` still holds the key; it was moved to `legacy/` and the key line blanked (M0). → Update CLAUDE.md: key removed from the code, but still in the history of `main`; the owner must revoke it.
+2. **CLAUDE.md** names only the World Bible as the source of truth; the Atlas, Numbers Sheet and Game Experience Bible are canon too. → Add the source order from the master prompt.
+3. **BUILD_PLAN.md** (stage 1, M0–M7) has no UI, onboarding or pacing milestones from GE ch. 3–9. → Replaced by Part B on approval (the done work stays recorded).
+4. **The design work lives on `design/world-bible`, `main` holds only the old prototype.** → Branch question for the owner (below).
 
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
