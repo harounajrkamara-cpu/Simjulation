@@ -13,7 +13,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 3b | Big moments | ✅ |
 | 4 | Core loop | ✅ |
 | 5 | Simulation + story fused | ✅ |
-| 6 | Look & style | ⏳ |
+| 6 | Look & style | 📝 |
 | 7 | AI narrator | ⏳ |
 | 8 | Onboarding | ⏳ |
 | 9 | Pacing | ⏳ |
@@ -182,6 +182,19 @@ The heart of "freedom of choice": you can type anything, the world answers fairl
 - The structured intent is **stored** in the save; outcomes depend only on it.
 - The narration text is **stored** too, so loading shows the same story; REWRITE only re-words it.
 - Without an AI (offline or no key), the game still runs on template text and the numbered options.
+
+## Chapter 6 – Look & style 📝
+Visual example (4 screens): https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK — title screen · war chronicle (Story tab) · legend moment (nickname) · style kit.
+
+- **Mood: night war scroll.** Dark ink ground, paper-coloured text, **one seal red** (actions, danger, the 兵 seal) and **one gold** (titles, honour, chapter labels). No bright colours except the kingdoms' own.
+- **Colours:** ink `#0E1014` · ink 2 `#171A20` (panels) · line `#2C3038` · paper `#E9E0CA` · faded ink `#A79F8C` · seal red `#A8361F` · gold `#C9A55E`.
+- **Type:** *Shippori Mincho* for titles, names, buttons and kanji; *Spectral* for the story text (true italic for thoughts and rumours); small tracked gold capitals for labels. Both from Google Fonts.
+- **Drawn in code:** ink mountain ridges, the moon, campfires, banners (scene headers); the map as ink lines with fog (only what Li knows); crests as simple kamon-style SVGs.
+- **Kingdom crests (first sketch)** from the Atlas colours: Kurogane iron gate · Suiren lotus · Hayate horse · Ushio wave · Takane snowy peak · Tatara hammer & flame · Kitakaze wolf.
+- **Ranks** F→S grow from grey outline to gold to a red-and-gold seal for S. **Wounds** as a 5-step track from Fresh to Down.
+- **Layout (war chronicle):** top strip (chapter, date, place, condition, money) · tabs · story column with a drawn scene header, new-person chips and ▲▼ changes, choices with the tested skill and ⚠ risk, and a free-text line · side panel with Li's card, the fogged map, the chronicle feed (rumours marked uncertain) and goals.
+- **Big moments** follow the 4 tiers of ch. 3b; the legend moment is a full black screen with the name in brush capitals, the Japanese name huge behind it, what earned it and who heard it, and a red seal.
+- Rules: text contrast ≥ 4.5:1, click targets ≥ 44 px, no emoji in the interface (symbols only), works on a phone as one column.
 
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
