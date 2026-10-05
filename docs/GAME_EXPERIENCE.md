@@ -444,6 +444,12 @@ Target ages from Numbers §12, mapped to play time (to confirm in the M7 playtes
 4. **Ch. 8 target "raid within the first session"** needs ~4 in-game weeks in under an hour. → Fits: the slave stage skips up to a month, and the first WAIT comes on Day 7.
 5. **Numbers §12 test "never stuck 3 years"** has no mechanism yet. → Rule 5 (6-month check) gives one.
 
+### Owner decisions (Oct 5)
+1. **Life length ~65–100 h** to Taishō (Bannerlord-sized), as in §5.
+2. **Open sandbox + epilogue:** play as long as you like; when Li retires (a player choice) or reaches old age (60+), an epilogue chapter tells what became of him, his people and the kingdoms. The epilogue never shows Li dying in play (hidden rule kept).
+3. **Sessions of 45–90 minutes**, with natural stopping points (§4).
+4. **One fixed pace** for every player; no pacing-style setting.
+
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
 - **Icons:** [game-icons.net](https://game-icons.net/) (CC BY 3.0 → credit line in the game).
