@@ -10,7 +10,7 @@
   4. Court, kingdoms, full world
 
 ## Next step
-- Done: ch. 13b power inside the kingdoms (engine, factions, fuses, profiles). Done: big check (v0.4), ch. 13c extra rules, family tiers. Draft: `docs/WORLD_ATLAS.md` v0.1 (history, map, all 7 kingdoms, Tier A families, ~90 characters, Li's circle, hidden truths) waiting for owner approval.
+- Done: ch. 13b power inside the kingdoms (engine, factions, fuses, profiles). Done: big check (v0.4), ch. 13c extra rules, family tiers. Draft: `docs/WORLD_ATLAS.md` v0.2 (history, map, kingdoms, families, characters, S-tier proposal, cultures, armies, trade, relations, Li's generation, places, law, legends, rumours) waiting for owner approval.
 - Decided: crossbows exist (Smiths' Kingdom). The two giants stay close in size and both are internally divided.
 
 Big worldbuilding round:
