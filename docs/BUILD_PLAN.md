@@ -1,38 +1,30 @@
-# Build Plan – Stage 1 (✅ approved · in progress)
+# Build Plan v2 (✅ approved Oct 5, Game Experience ch. 10)
 
-Goal of stage 1: **Li as a slave in the Red Crane band is fully playable** – daily life, people who remember, training, one real duel – with the engine deciding everything and the AI only narrating (World Bible ch. 11, 12, 12b).
+Every build session starts from `docs/MASTER_BUILD_PROMPT.md`. Build branch: **`build/stage-1`** (made from `design/world-bible` at the first build session); merging into `main` only on the owner's yes.
+**Always playable locally:** after every milestone the game runs in chat mode with Claude (`npm run turn` + the `play` skill).
 
-## Tech choices
-- **TypeScript** on Node 22, a fresh project (owner: "build a new one"). Browser UI = Vite + plain TypeScript; terminal and chat runners use tsx.
-- **Engine = a pure TypeScript library** in `engine/` with no UI and no AI inside it. Same state + same action = same result (ch. 12b). Tested with **Vitest**.
-- **AI layer** behind one interface (`narrate`, `parseIntent`). Claude first; adapters for Gemini, DeepSeek, Ollama and OmniRoute later (owner's plan). A **no-AI mode** with simple template text, so the game runs and is testable without any key.
-- **Saves** = the append-only event log + world number, stored as JSON (ch. 11, event sourcing).
-- The old prototype code (`src/`, `server.ts`, `gameEngine.ts`) moves to `legacy/`; the hardcoded Google key is removed (owner must revoke it first).
+## Tech (unchanged from v1)
+TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` one interface (`interpret`, `narrate`), adapters: claude.ai page · Claude Code chat (local play) · no AI; key adapters later · web = Vite + plain TS · saves = event log + world number + version.
 
-## Milestones
-| # | Milestone | Done when |
-|---|---|---|
-| M0 | Clean-up | old code in `legacy/`, key removed, Vitest runs, folder structure in place |
-| M1 | Engine core | state, calendar (ch. 9), world number, `resolve(state, action) → events`, event log, save/load, replay test (same input → same hash) |
-| M2 | Start data | Li, Raizen's band, Hachi, Sukezō, Gonza, Hisame, Hagiwara family, Akaishi / Kōri fort / Sasabe as data files from the Atlas; hidden truths flagged 🔒 |
-| M3 | Turn loop (no AI) | numbered options + free-text commands, actions (work, train, talk, observe, rest, sneak, help someone), time passing, short + full dashboard, alerts, commands STATUS / INFOCHAR / RECAP / RELATIONS / LOG / SAVE / LOAD |
-| M4 | People & memory | 5 relationship values, opinion, loyalty vs obedience, memories with source and certainty, decay classes, rumours (fixed rules), visible consequences (ch. 12b #11) |
-| M5 | Growth & duel | training and growth (Numbers §2, caps), duel engine (Numbers §4, v0.3), wound track, defeat ladder, one scripted-free duel situation (e.g. Gonza, or a night raid) |
-| M6 | AI layer | intent parser (structured output, asks when unsure), narrator using only given facts, fact check on the narration, REWRITE / CORRECT |
-| M7 | Tests & playtest | Monte Carlo duel tests (upset rates), first-year growth pace, determinism tests; owner plays the first weeks of Year 100 and gives feedback |
+## Done before v2 (stage 1, v1 plan)
+- ✅ M0 clean-up (old code in `legacy/`, key line blanked; key revoked by the owner Oct 5) · ✅ M1 engine core · ✅ M2 start data · ✅ M3 turn loop (terminal, chat, browser) · ✅ M5 training, growth, duel engine, Sasabe raid · 🟡 M4 people & memory (rumour spreading missing) · online page published.
+- Checked Oct 5: 19 tests pass, typecheck clean, no key in the current code.
 
-Stage 1 is finished when the owner can play from Year 100, Month 1 for at least a few in-game months, and can always see **why** something happened.
+## Phase 1 – Vertical slice "The Red Crane's boy" (Year 100, Month 1 → after the raid, final look)
+| # | Milestone | Uses | Done when |
+|---|---|---|---|
+| V1 | Engine catch-up | WB ch. 8, 11; GE ch. 7 | rumour spreading done; all engine text in third person; HELP/WAIT per ch. 11; replay test green |
+| V2 | War chronicle UI | GE ch. 3, 6 | Story tab + side panel + tabs (Army = outside view) match the reference screens at 1440 and 390 px; contrast and 44 px checks pass |
+| V3 | AI layer | GE ch. 5, 7 | interpreter (asks when unsure) + narrator + fact checker; claude.ai page mode, chat mode and no-AI mode; ink streaming; REWRITE / CORRECT; golden set ≥ 20 fact packets passes |
+| V4 | Onboarding | GE ch. 8 | New life → prologue → chapter card → first-week beats ✚ → WAIT lesson → Daisuke sparring ✚; GUIDE hints, example lines, "Why?", tooltips, How to play; ch. 8 time targets met in a Playwright run |
+| V5 | Big moments + pacing core | GE ch. 3b, 9 | 4 moment tiers; title card, duel overlay, legend screen; director phases with beat windows (slave stage); session-end summary |
+| V6 | Slice test | GE ch. 8–9; Numbers §4, §12 | Monte Carlo duel tests; determinism tests; **owner playtest**; fixes done |
 
-## Progress
-- ✅ M0 clean-up (old code in `legacy/`, key line blanked, Vitest)
-- ✅ M1 engine core (calendar, event log, resolve/apply, saves with replay check)
-- ✅ M2 start data (Li, the band, Sasabe youths, Sayo, Ishizue; Kōri camp)
-- ✅ M3 turn loop (options, free text, WAIT, dashboard, commands) — terminal, chat and browser modes
-- 🟡 M4 people & memory: relationships, opinion, decay, beats, memories done; rumour spreading between NPCs next
-- ✅ M5 training & growth, **duel engine** (4 moves, clash table, capped bonuses, learning opponent, simulate/run/yield, defeat ladder) and the Sasabe raid (Month 2, Day 6)
-- ✅ Online version published as a claude.ai page
-- ⏳ Onboarding (Game Experience ch. 8 ✅): New life screen, 7-slide prologue, first-week teaching beats (Gonza's chest, cook tent, first night, Sukezō's WAIT lesson), **Daisuke sparring bout (Month 1, ~Day 20)**, GUIDE hints, example lines, "Why?", nested tooltips, How to play; engine texts "you" → "Li"
-- ⏳ M6 AI narrator · ⏳ M7 Monte Carlo tests & playtest
+## Phase 2 – Stage 1 complete: the slave arc (→ freedom, 8–12 h)
+Freedom routes, contract seasons, Year 100 story calendar, timeskip summary, Journal/RECAP, save slots. Done when simulated strong careers reach freedom at 13–15 and the owner has played to freedom.
 
-## Not in stage 1 (later stages)
-Battles and units, promotions (stage 2) · land and economy (stage 3) · kingdoms, factions, fuses (stage 4). The world data exists already; those systems are simply not switched on yet (ch. 12 "systems unlock with Li's life").
+## Phase 3 – Stage 2: soldier life · Phase 4 – Stage 3: land & family · Phase 5 – Stage 4: court & kingdoms + epilogue
+Each phase gets its own milestone table at its start (spec → plan → tasks). Details: GE ch. 10 Part B.
+
+## Testing (every phase)
+Unit · determinism replay · Monte Carlo balance (Numbers §12) · narrator golden set · Playwright UI (1440 / 390 px) · owner playtest at the end of the slice and of each phase.

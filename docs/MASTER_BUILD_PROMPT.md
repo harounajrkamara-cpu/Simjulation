@@ -1,4 +1,4 @@
-# Master Build Prompt – Sengoku Soldier (📝 proposal, Game Experience ch. 10)
+# Master Build Prompt – Sengoku Soldier (✅ approved Oct 5, Game Experience ch. 10)
 
 Paste this (or point the session to this file) at the start of **every build session**. It is short on purpose: the details live in the design files, and this prompt tells the builder how to use them.
 

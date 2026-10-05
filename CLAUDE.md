@@ -8,6 +8,8 @@ If the owner wants to **play** ("let's play", a game action), use the `play` ski
 ## Read first, every design or build session
 1. `docs/STATUS.md` – where we are, decisions, next step.
 2. `docs/WORLD_BIBLE.md` – the canon design. **The World Bible wins over memory, chat history and old documents.**
+3. Canon order (higher wins): World Bible → `WORLD_ATLAS.md` → `NUMBERS_SHEET.md` → `GAME_EXPERIENCE.md` → `BUILD_PLAN.md` → `STATUS.md`. All beat memory and chat history.
+4. **Build sessions** start from `docs/MASTER_BUILD_PROMPT.md`.
 
 ## Working rules
 - Design goes chapter by chapter: propose → research (games, professionals) → owner approves → write to the World Bible → commit and push.
@@ -15,5 +17,5 @@ If the owner wants to **play** ("let's play", a game action), use the `play` ski
 - Be honest: say clearly when an idea of the owner is not the best, with reasons and sources. Do not just agree.
 - Core principles: code owns numbers, the AI only narrates; deterministic (no dice); the world runs on hidden causes; Li cannot die (hidden rule).
 - Build in stages; each stage must be playable before the next starts.
-- Never commit secrets. `server.ts` still contains a hardcoded Google API key from the original AI Studio export: the owner must revoke it, and it must be removed when building starts.
+- Never commit secrets (keys only in `.env`, git-ignored). The old Google key from the AI Studio export was blanked in `legacy/server.ts` and **revoked by the owner (Oct 5)**; it still exists in `main`'s first commit, which is harmless now. Never restore anything from `legacy/server.ts`.
 - Update `docs/STATUS.md` at the end of every work session.

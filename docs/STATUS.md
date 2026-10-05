@@ -1,8 +1,8 @@
 # Project status
 
 ## Where we are
-- **Game Experience Bible (Oct 5):** `docs/GAME_EXPERIENCE.md` ch. 1–7 ✅, **ch. 8 Onboarding ✅** (approved with 6 fixes, applied), **ch. 9 Pacing ✅**, **ch. 10 📝 drafted** (master build prompt in `docs/MASTER_BUILD_PROMPT.md`, build plan v2 in ch. 10; owner answered all 4 questions as recommended; waiting for the final OK). Local play with Claude: `play` skill + chat mode (`.claude/skills/play/`). Ch. 8 example screens (New life · prologue slide · first free text) added as row 2 of the style canvas. Visual style example: https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK (approved). Owner installed plugins (frontend-design, Design, code-review, playwright) locally; for cloud sessions they must be turned on for the claude.ai account (install card shown Oct 5).
-- **Stage 1 build started (Oct 5):** new engine in `engine/`, playable in browser (`npm run web`), terminal (`npm run play`) and chat (`npm run turn`). M0–M3 and M5 done (duel engine + Sasabe raid), M4 partly. Online page: https://claude.ai/artifact/AcDN6DV8D9SC5dBJybhcdx. Next: AI narrator (M6), more story after the raid, balance tests. See `docs/BUILD_PLAN.md`.
+- **Game Experience Bible (Oct 5):** `docs/GAME_EXPERIENCE.md` ch. 1–7 ✅, **ch. 8 Onboarding ✅** (approved with 6 fixes, applied), **ch. 9 Pacing ✅**, **ch. 10 ✅** — Game Experience Bible complete (v1.0). Local play with Claude: `play` skill + chat mode (`.claude/skills/play/`). Ch. 8 example screens (New life · prologue slide · first free text) added as row 2 of the style canvas. Visual style example: https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK (approved). Owner installed plugins (frontend-design, Design, code-review, playwright) locally; turned on for the claude.ai account and enabled for this repo in `.claude/settings.json` (Oct 5).
+- **Stage 1 build started (Oct 5):** new engine in `engine/`, playable in browser (`npm run web`), terminal (`npm run play`) and chat (`npm run turn`). M0–M3 and M5 done (duel engine + Sasabe raid), M4 partly. Online page: https://claude.ai/artifact/AcDN6DV8D9SC5dBJybhcdx. Continues with **build plan v2** (vertical slice V1–V6), see `docs/BUILD_PLAN.md`.
 - Ch. 10 Li's background ✅ approved. Kingdom names are now used everywhere (epithets only as nicknames). Elite titles: Six Pillars (Kurogane), Three Storms (Hayate). Family Mibu renamed Tsurumaki (real clan name).
 - Numbers sheet `docs/NUMBERS_SHEET.md` **v0.3 ✅ approved** (owner kept fast progression and the Kurogane head-for-freedom law). Next: **build stage 1** (Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels).
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)
@@ -14,7 +14,7 @@
   4. Court, kingdoms, full world
 
 ## Next step
-- **NEXT:** ch. 10 master build prompt + build plan; one chapter at a time, research first, owner approves each. Then build with the plugins.
+- **NEXT (new session):** start building. Create `build/stage-1` from `design/world-bible`, start from `docs/MASTER_BUILD_PROMPT.md`, do milestone **V1 Engine catch-up** (`docs/BUILD_PLAN.md`). Local play: `play` skill + `npm run turn`.
 - Done: ch. 10, 12b, 13, 13b, 13c, numbers sheet v0.2. `docs/WORLD_ATLAS.md` v0.3 ✅ approved.
 - Done (Oct 5): full read + fact check of all files; consistency fixes applied; duel balance fix and army delegation rule approved (numbers sheet v0.3). **Design complete → build stage 1.**
 - Decided: crossbows exist (Tatara, the Smiths' Kingdom). The two giants stay close in size and both are internally divided.
@@ -35,7 +35,7 @@ Big worldbuilding round:
 Then: numbers sheet → build stage 1.
 
 ## Open issues
-- `server.ts`: hardcoded Google API key — owner should revoke it; remove from code when building.
+- Old Google key: blanked in `legacy/server.ts` and **revoked by the owner (Oct 5)**; it remains in `main`'s first commit (harmless now).
 - Old app code (`src/`, `server.ts`) predates the World Bible and will be rebuilt.
 
 ## Source material (owner's uploads, not in repo)

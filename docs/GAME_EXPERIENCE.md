@@ -1,4 +1,4 @@
-# Game Experience Bible – Sengoku Soldier (v0.2, 📝 in progress)
+# Game Experience Bible – Sengoku Soldier (v1.0, ✅ complete)
 
 The World Bible says **what** exists. This file says **how the game looks, feels and plays**, and how the simulation and the story are fused.
 Same process as the World Bible: propose → research → owner approves → write → build. Ends with a master build prompt and build plan (ch. 10).
@@ -17,7 +17,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 7 | AI narrator | ✅ |
 | 8 | Onboarding | ✅ |
 | 9 | Pacing | ✅ |
-| 10 | Master build prompt + build plan | 📝 |
+| 10 | Master build prompt + build plan | ✅ |
 
 ---
 
@@ -450,7 +450,7 @@ Target ages from Numbers §12, mapped to play time (to confirm in the M7 playtes
 3. **Sessions of 45–90 minutes**, with natural stopping points (§4).
 4. **One fixed pace** for every player; no pacing-style setting.
 
-## Chapter 10 – Master build prompt + build plan 📝 (proposal, Oct 5)
+## Chapter 10 – Master build prompt + build plan ✅ (owner approved Oct 5)
 Turns ch. 1–9 and the World Bible into something a builder (Claude in a build session) can execute, check and finish, one playable step at a time.
 
 ### Research
@@ -466,7 +466,7 @@ Sources: [Claude Code – best practices](https://code.claude.com/docs/en/best-p
 ### Part A – The master build prompt
 Lives in **`docs/MASTER_BUILD_PROMPT.md`** (one page). It holds: who the builder is · the order of the sources of truth · 7 rules never to break · the architecture · how every task runs (read → plan → tests first → build → verify with evidence → review → report) · which plugin for what · when to stop and ask · definition of done. Every build session starts from it.
 
-### Part B – Build plan v2 (replaces `BUILD_PLAN.md` on approval)
+### Part B – Build plan v2 (now in `BUILD_PLAN.md`)
 **Where we are (checked Oct 5):** engine M0–M3 and M5 done, M4 partly; 19 tests pass; typecheck clean; the current code holds no API key.
 
 **Phase 1 – Vertical slice: "The Red Crane's boy"** (Year 100, Month 1 → after the raid, ~1–2 sessions of play, final look)
@@ -502,12 +502,12 @@ Each phase starts with its own detailed milestone table, written at the start of
 | Owner playtest | the owner plays and reports | end of every phase (and the slice) |
 
 ### Part D – Risks
-1. **The old Google key is still in the git history of `main`** (first commit). Removing it from the code does not remove it from history: **the owner must revoke the key** in Google Cloud. Rewriting history is not planned (destructive; owner's call).
+1. **The old Google key is still in the git history of `main`** (first commit). ✅ The owner revoked the key (Oct 5), so the old value no longer works. Rewriting history is not planned.
 2. **Claude in the claude.ai page:** usage counts against each player's own plan; heavy players may hit limits → no-AI mode must stay good.
 3. **Content volume:** a 65–100 h life needs many hand-written beats; the AI writes connective scenes only (ch. 5). Content is written per phase, not all up front.
 4. **Name:** *Sengoku Soldier* is close to *Sengoku Dynasty* (WB ch. 12b #14): check before any public release.
 
-### Contradictions & fixes found
+### Contradictions & fixes (✅ applied Oct 5)
 1. **CLAUDE.md** says `server.ts` still holds the key; it was moved to `legacy/` and the key line blanked (M0). → Update CLAUDE.md: key removed from the code, but still in the history of `main`; the owner must revoke it.
 2. **CLAUDE.md** names only the World Bible as the source of truth; the Atlas, Numbers Sheet and Game Experience Bible are canon too. → Add the source order from the master prompt.
 3. **BUILD_PLAN.md** (stage 1, M0–M7) has no UI, onboarding or pacing milestones from GE ch. 3–9. → Replaced by Part B on approval (the done work stays recorded).
