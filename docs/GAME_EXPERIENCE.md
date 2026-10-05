@@ -1,4 +1,4 @@
-# Game Experience Bible – Sengoku Soldier (v0.1, 📝 in progress)
+# Game Experience Bible – Sengoku Soldier (v0.2, 📝 in progress)
 
 The World Bible says **what** exists. This file says **how the game looks, feels and plays**, and how the simulation and the story are fused.
 Same process as the World Bible: propose → research → owner approves → write → build. Ends with a master build prompt and build plan (ch. 10).
@@ -15,7 +15,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 5 | Simulation + story fused | ✅ |
 | 6 | Look & style | ✅ |
 | 7 | AI narrator | ✅ |
-| 8 | Onboarding | 📝 |
+| 8 | Onboarding | ✅ |
 | 9 | Pacing | ⏳ |
 | 10 | Master build prompt + build plan | ⏳ |
 
@@ -67,7 +67,7 @@ Sources: [TW wiki – UI](https://totalwar.fandom.com/wiki/User_interface), [CK3
 
 ## Chapter 3 – Screens & flow ✅
 ```
-TITLE SCREEN ──► New game ──► PROLOGUE (narrated ink slides + map reveal) ──► CHAPTER CARD ──► GAME
+TITLE SCREEN ──► New life ──► PROLOGUE (narrated ink slides + map reveal) ──► CHAPTER CARD ──► GAME
      │                                                                          ▲
      └──► Continue ─────────────────────────────────────────────────────────────┘
 GAME = War chronicle with tabs:  Story · Map · Li · Army · People · Journal · Encyclopedia
@@ -75,7 +75,8 @@ Overlays (take the whole screen for a moment):  Event window · Title card · Ce
 ```
 | Screen | What it shows | Unlocks |
 |---|---|---|
-| **Title** | big title on a night ink scroll, slow drifting smoke/embers; Continue · New game · How to play · Load save | always |
+| **Title** | big title on a night ink scroll, slow drifting smoke/embers; Continue · New life · How to play · Load save | always |
+| **New life** | 4 settings with defaults: way of play, storyteller (Claude permission asked here), guidance, ink speed (ch. 8) | new game |
 | **Prologue** | 6–8 narrated slides: the Amatsu Empire → the Burning → the 7 kingdoms lighting up on the map → Li's memory fragments → "Year 100. Kōri fort." Skippable | new game |
 | **Story** (main tab) | chapter heading, the scene text, choices + free text, a slim status strip (date, place, wounds, money) and a notification feed on the side | always |
 | **Map** | the land drawn as an ink map; kingdoms in their colours and crests; Li's position; armies moving (later); fog of war: only what Li knows | always (mostly fogged at start) |
@@ -217,7 +218,7 @@ Builds on World Bible ch. 11 (turn loop, narrator rules) and ch. 12 (safety, cos
 - the moment tier (normal · spark · title card · ceremony · legend) and a word target (≈150–200, epic ≈300);
 - **hand-written core lines** that must appear word for word (beats, legend moments, ceremonies);
 - the last 2–3 turns of story for continuity.
-- 🔒 hidden truths are **never sent**, so the AI cannot leak them.
+- 🔒 hidden truths are **never sent**, so the AI cannot leak them. Hidden rules (Li cannot die, hidden potential) are never sent either (ch. 8 rule 7).
 
 ### Check before showing (code, not AI)
 - Every number and name in the text must be in the fact packet; no new events, no deaths, no items that don't exist.
@@ -245,7 +246,7 @@ Builds on World Bible ch. 11 (turn loop, narrator rules) and ch. 12 (safety, cos
 2. **Third person: "Li carries the rice"**, not "you". → Build: change the engine's template texts and the style guide above from "you" to "Li" (the player still types as Li: "I talk to Kaname").
 3. **Text streams in like ink**: yes.
 
-## Chapter 8 – Onboarding 📝 (proposal, Oct 5)
+## Chapter 8 – Onboarding ✅ (owner approved Oct 5, with the 6 fixes)
 How a new player gets from the title screen to "I understand this world and I want to keep going" **without a tutorial wall**. Builds on ch. 3 (title → prologue → chapter card → game), ch. 4 (core loop), ch. 5 (free text), ch. 7 (AI modes) and World Bible ch. 10 (Li's start) and ch. 11 (turn, commands, session start).
 
 ### Research
@@ -334,13 +335,15 @@ TITLE ─► NEW LIFE (4 settings, ~20 s) ─► PROLOGUE (7 slides, ~90 s, skip
 | First fight (sparring) and the raid | within the first session (~45–60 min; exact pacing in ch. 9) |
 | Hints on screen at the same time | never more than 1 |
 
-### Contradictions & fixes found (to apply on approval)
+### Contradictions & fixes (✅ applied Oct 5)
 1. **Ch. 6 visual example vs ch. 3**: the mockup shows "Army · locked", but ch. 3 says the Army tab shows the Red Crane band from the outside while Li is a slave. → Follow ch. 3: the Army tab opens to "The Red Crane band — seen from the baggage line".
 2. **Ch. 6 mockup and the engine text use "you"**; ch. 7 decided third person ("Li"). The new ch. 8 screens use "Li"; the engine template change is already on the build list.
 3. **World Bible ch. 11 command list** has no **HELP** and no **WAIT**, but the engine and ch. 4/9 use both. → Add HELP and WAIT to the ch. 11 list.
 4. **Title button name**: ch. 3 says "New game", the ch. 6 mockup says "New life". → Use "New life" (fits the game), functionally the same.
 5. **First fight**: in the current engine the first fight is the raid itself (Month 2, Day 6), with no chance to learn the duel screen first. → Add the sparring bout (✚, owner to confirm).
-6. **Hidden rule safety**: ch. 5 says "Li cannot die" in a design text; that sentence must never reach How to play, hints or AI prompts. → Rule 7 above.
+6. **Hidden rule safety**: ch. 5 says "Li cannot die" in a design text; that sentence must never reach How to play, hints or AI prompts. → Rule 7 above; added to the ch. 7 fact-packet rule.
+
+Applied: 1 + 2 in the style canvas (Army tab opens to the band seen from outside; mockup text in third person) · 3 in World Bible ch. 11 · 4 in ch. 3 (New life, plus the New life screen row) · 5 in `BUILD_PLAN.md` (stage 1 content) · 6 in ch. 7. Still to build: engine template texts "you" → "Li" (ch. 7 decision 2).
 
 ### Owner decisions (Oct 5)
 1. **No character creation**: Li is fixed (World Bible 10.4); the prologue shows his memories and asks nothing.

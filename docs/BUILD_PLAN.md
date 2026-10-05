@@ -31,6 +31,7 @@ Stage 1 is finished when the owner can play from Year 100, Month 1 for at least 
 - 🟡 M4 people & memory: relationships, opinion, decay, beats, memories done; rumour spreading between NPCs next
 - ✅ M5 training & growth, **duel engine** (4 moves, clash table, capped bonuses, learning opponent, simulate/run/yield, defeat ladder) and the Sasabe raid (Month 2, Day 6)
 - ✅ Online version published as a claude.ai page
+- ⏳ Onboarding (Game Experience ch. 8 ✅): New life screen, 7-slide prologue, first-week teaching beats (Gonza's chest, cook tent, first night, Sukezō's WAIT lesson), **Daisuke sparring bout (Month 1, ~Day 20)**, GUIDE hints, example lines, "Why?", nested tooltips, How to play; engine texts "you" → "Li"
 - ⏳ M6 AI narrator · ⏳ M7 Monte Carlo tests & playtest
 
 ## Not in stage 1 (later stages)

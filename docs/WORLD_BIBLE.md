@@ -552,7 +552,7 @@ Possible outcomes: an ally reaches out · a Kurogane veteran turns hostile · wo
 - Battle: overview every phase (ch. 6b) plus own unit. Back to normal turns afterwards.
 
 ### Commands
-INFOCHAR · STATUS · RECAP · TROPHIES · RELATIONS · WORLD · THREATS · LOG · SAVE / LOAD · REWRITE · CORRECT.
+INFOCHAR · STATUS · RECAP · TROPHIES · RELATIONS · WORLD · THREATS · LOG · SAVE / LOAD · REWRITE · CORRECT · **WAIT** (timeskip with a plan, ch. 9) · **HELP** (the How to play page, Game Experience ch. 8).
 
 ### RECAP = Li's journal
 - Built from the event log, **only ever added to**, in arcs, same structure, story-like, in Li's voice.
