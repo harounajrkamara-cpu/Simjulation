@@ -9,7 +9,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - Setting: a **fictional land inspired by Sengoku Japan**. Japanese culture, armor, weapons, names and rank terms; our own map, kingdoms, families and history.
 - **The Empire** ruled the whole land for centuries.
 - **100 years ago** the Empire collapsed and split into **7 kingdoms**.
-- The imperial bloodline may still exist as a powerless symbol (📝 to decide).
+- The imperial bloodline **still exists**: powerless, possibly hidden. Who and where is decided later.
 - The great goal of the world: whoever reunites the 7 kingdoms becomes the new Empire.
 - All families have **invented names** (no real clans like Takeda/Oda).
 
@@ -20,7 +20,7 @@ Two separate power systems that work together.
 ### System A – The Crown (government, serves the kingdom)
 ```
 KING
-└─ ROYAL COURT – chancellor, ministers, royal Grand Generals
+└─ ROYAL COURT – chancellor, ministers, royal Grand Generals (= Dai-Shōgun in Crown service)
    └─ GOVERNORS – one per STATE, appointed by the king
 ```
 - A **state** = an administrative region of 3–5 provinces.
@@ -108,6 +108,7 @@ Every important family has a named head, heir, general and a few key characters 
 - Rule 1: nobody can outrank the army they serve (a family of 3,000 cannot have a Taishō).
 - Rule 2: Crown service counts higher than family service at the same rank.
 - No fixed number of Dai-Shōgun: it emerges from the simulation.
+- Dai-Shōgun are almost always in **Crown service** (only kingdoms have armies that large); a great family can only have one if its army is big enough (Rule 1).
 - Promotion = merit + status + a free position; big campaigns end with a reward ceremony (in rank order, with reactions).
 
 ## Chapter 5 – Character system
@@ -115,6 +116,7 @@ Every important family has a named head, heir, general and a few key characters 
 ### Part 1 – Stats & Power Rank ✅
 Stats 0–100:
 - **LEA** – troop strength & morale, how many men handled well. Grows from commanding, speeches, won battles; not from duels.
+  - **Command capacity**: each LEA level can handle a certain number of men well. Leading more than that = slower orders and faster morale loss (e.g. a strong fighter promoted too fast).
 - **VAL** – personal combat, duels, courage, inspiring by example. Grows from duels, real fights, training with masters.
 - **INT** – tactics, reading the enemy, ambushes, traps. Grows from strategy, study, successful plans.
 - **POL** – court, negotiation, governing, persuasion. Grows from negotiation, governing, intrigue.
@@ -221,10 +223,19 @@ Rules:
 - Three sizes: **skirmish** (dozens–hundreds, mostly your own unit) · **battle** (thousands+, in phases with sectors/flanks) · **campaign** (several battles over weeks/months: marches, sieges, supply, timeskips).
 - **You command only your own unit** (size = your rank) and follow orders. Other units are run by their own commanders (AI characters, by personality and general type). You may propose things or ask permission; acceptance depends on status and relationship.
 - **Disobeying orders is allowed**: can bring glory or punishment.
-- **Battle overview every phase**: all sectors for both sides, numbers, changes since last phase, your unit (men, morale, kills). Own side exact; **enemy numbers are estimates (~)**. Numbers always change between phases.
+- **Battle overview every phase**: all sectors for both sides, numbers, changes since last phase, your unit (men, morale, kills). **Information depends on position**: own sector exact · other allied sectors as reports (roughly right, sometimes late) · **enemy numbers are estimates (~)**. Higher rank = better information (messengers, scouts). The overview is still shown every phase. Numbers always change between phases.
 - Each unit: men · type (spear, bow, samurai, cavalry) · quality (training, gear) · morale · fatigue · formation · commander (LEA, INT, command abilities).
 - **Unit strength** = men × quality × commander factor (LEA) × morale × formation ± terrain ± matchup (spears vs cavalry, archers at range) ± surprise/ambush ± flank/rear ± command abilities.
 - Each phase, units in contact fight; losses follow the strength ratio. **Morale breaks before men run out**: below a limit a unit wavers, then routs. A collapsing flank exposes its neighbours (chain reaction).
 - Morale changes: commander dies or loses a duel (big drop) · flanked/surrounded · speeches, aura, command abilities · long fight without progress · hunger/bad supply.
 - Flow: war council → deployment → phases (**one phase ≈ part of a day, 3–4 per day**) → night (multi-day: rest, wounds, scouts, desertion, reinforcements) → end (rout, retreat, surrender) → aftermath (losses, merit, trophies, reputation, later the reward ceremony).
 - Unimportant fights auto-simulate; duels vs officers/commanders and key moments are offered to the player first; "simulate until the final battle" is allowed.
+- **INT in battle**: spotting ambushes and traps, how much your tactics add, accuracy of enemy estimates.
+- **Maneuver phase** (during deployment): no losses; INT, terrain and scouting decide who starts with the advantage.
+- **Morale states**: Steady → Wavering → Routing → Shattered (if their general died). **Chain rout**: a routing unit lowers the morale of its neighbours. Flank/rear attacks give big morale hits; attacked from three sides a unit breaks fast.
+- **Taking the general's head**: killing or capturing the enemy commander shatters his troops' morale (duels decide battles).
+- **Local superiority**: what counts is how many men you bring to one spot (soft Lanchester for melee); cutting the enemy into pieces lets a smaller army win.
+- **Realistic losses**: during the fight ~3–10% dead on both sides; most deaths come after a rout (20–30%+, more if the winner has cavalry); an orderly retreat keeps losses ~10–20%.
+- **Pursuit phase** after every battle: cavalry chases routers; good commanders limit the damage.
+- **Losses split into four kinds**: dead · wounded (return after healing) · captured (can be ransomed) · deserted.
+- **Sieges** are their own battle type: starve (slow, defenders' morale drops over time) or assault (fast, very bloody); supply decides how long both sides last.
