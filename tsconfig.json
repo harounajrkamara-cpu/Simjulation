@@ -11,5 +11,5 @@
     "types": ["node"],
     "noEmit": true
   },
-  "include": ["engine", "cli", "web", "tests"]
+  "include": ["engine", "ai", "cli", "web", "tests"]
 }

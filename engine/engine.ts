@@ -349,7 +349,7 @@ function startDuel(s: GameState, id: string): Draft[] {
     foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: t.foe.wound, fatigue: t.foe.fatigue, observed: 0, history: [] },
   };
   return [
-    { type: 'story', fact: `${t.intro}\n\nOpponent (Li\'s estimate): ${t.foe.estimate}.\nFight it yourself, or let it play out (option 5)?`, visible: true, data: { duel: id } },
+    { type: 'story', fact: `${t.intro}\n\nOpponent (Li\'s estimate): ${t.foe.estimate}.`, visible: true, data: { duel: id } },
     { type: 'duel', fact: `duel ${id} begins`, visible: false, data: { state } },
   ];
 }
@@ -468,6 +468,14 @@ export function startGame(worldNumber = 1): GameState {
   const s = createWorld(worldNumber);
   commit(s, storyDrafts(s));
   return s;
+}
+
+/**
+ * Record what the AI layer did, without changing the world (ch. 12b #1, GE ch. 5): the stored intent behind an action,
+ * or the approved narration of a turn, so a loaded game shows the same story. Time does not pass.
+ */
+export function recordNote(s: GameState, type: 'intent' | 'narration', fact: string, data: Record<string, unknown>): GameEvent {
+  return commit(s, [{ type, fact, visible: false, data }])[0];
 }
 
 export function takeAction(s: GameState, a: Action): TurnResult {

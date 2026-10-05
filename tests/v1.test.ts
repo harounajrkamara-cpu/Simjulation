@@ -126,7 +126,7 @@ describe('third person (Game Experience ch. 7)', () => {
     handleInput(fled, 'run');
     days(raid, 2);
     const facts = [s, raid, lost, fled].flatMap((x) => x.events.filter((e) => e.visible).map((e) => e.fact));
-    const narration = facts.map((f) => f.replace(/"[^"]*"/g, '""').replace(/Fight it yourself, or let it play out \(option 5\)\?/, ''));
+    const narration = facts.map((f) => f.replace(/"[^"]*"/g, '""'));
     const bad = narration.filter((f) => /\b(you|your|yours|yourself)\b/i.test(f));
     expect(bad).toEqual([]);
     for (const cmd of ['STATUS', 'RELATIONS', 'RECAP', 'INFOCHAR hachi']) {
@@ -144,7 +144,7 @@ describe('third person in the engine source', () => {
       const src = readFileSync(f, 'utf8');
       for (const m of src.matchAll(/'((?:[^'\\\n]|\\.)*)'|`([^`]*)`/g)) {
         const text = (m[1] ?? m[2]).replace(/"[^"]*"/g, '""').replace(/\\"[^"]*\\"/g, '');
-        if (/\b(you|your|yours|yourself)\b/i.test(text) && !/Fight it yourself/.test(text)) bad.push(`${f}: ${text.slice(0, 80)}`);
+        if (/\b(you|your|yours|yourself)\b/i.test(text)) bad.push(`${f}: ${text.slice(0, 80)}`);
       }
     }
     expect(bad).toEqual([]);

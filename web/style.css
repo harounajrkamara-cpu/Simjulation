@@ -102,6 +102,20 @@ button { cursor: pointer; }
 .write input::placeholder { color: #8E8776; font-style: italic; }
 .write button { min-height: 46px; padding: 0 18px; background: var(--seal); border: 0; border-radius: 4px; color: var(--seal-ink); font: 600 15px var(--display); letter-spacing: .08em; }
 
+.text.wet { color: var(--faded); font-style: italic; }
+@media (prefers-reduced-motion: no-preference) { .text.wet { animation: wet 1.6s ease-in-out infinite; } @keyframes wet { 50% { opacity: .55; } } }
+.rewrite { align-self: flex-start; min-height: 44px; padding: 0 14px; background: none; border: 1px solid var(--line-2); border-radius: 4px; color: var(--faded); font-size: 14px; }
+.rewrite:hover { border-color: var(--gold); color: var(--paper); }
+.confirm { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 4px; background: var(--ink-2); }
+.confirm .row { display: flex; gap: 8px; }
+.confirm button { min-height: 44px; padding: 0 18px; border-radius: 4px; font: 600 15px var(--display); }
+.confirm .yes { background: var(--seal); border: 0; color: var(--seal-ink); }
+.confirm .no { background: none; border: 1px solid var(--line-2); color: var(--paper-2); }
+.confirm .risk { color: var(--risk); }
+.choose.busy .opts { opacity: .6; }
+#storyteller[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+#storyteller:disabled { cursor: default; opacity: .8; }
+
 /* Side panel */
 .side { width: 400px; flex-shrink: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 22px 26px; background: var(--ink-3); }
 .side-block { display: flex; flex-direction: column; gap: 8px; }

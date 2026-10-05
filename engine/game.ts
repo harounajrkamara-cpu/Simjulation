@@ -1,12 +1,16 @@
 import { has, li, maxSkipDays, options, skipDays, startGame, takeAction, today } from './engine';
 import { HELP, changesLine, findPerson, infochar, logText, noticeable, optionsText, recap, relationsText, shortDashboard, status, visibleFacts } from './render';
-import { Action, GameState } from './types';
+import { Action, GameEvent, GameState } from './types';
 
 // One input → one reply. Shared by the terminal, the chat mode and the browser.
 // Without an AI, free text is read with simple keyword rules; if unclear, the game asks (ch. 12b #1).
 
 export interface Reply {
   text: string;
+  /** The events this input created (for the narrator's fact packet). */
+  events?: GameEvent[];
+  /** True when the input was turned into an action that ran (time may have passed). */
+  acted?: boolean;
   /** Set when the caller should save/load (handled by the CLI or browser). */
   command?: 'save' | 'load' | 'new';
 }
@@ -88,7 +92,7 @@ export function handleInput(s: GameState, raw: string): Reply {
     const passed = today(s) - dayBefore;
     const head = capped + (r.interrupted ? `⏸ The days pass… until something happens:\n\n${r.interrupted}` : `⏩ ${passed} days pass in the usual routine.`);
     const alerts = r.events.filter((e) => e.type === 'alert' || e.type === 'rumour').map((e) => `${e.type === 'rumour' ? '◆' : '⚠'} ${e.fact}`);
-    return { text: [head, ...alerts.slice(-3), '', shortDashboard(s), changesLine(before, noticeable(s)), '', optionsText(s)].filter((x) => x !== undefined).join('\n') };
+    return { text: [head, ...alerts.slice(-3), '', shortDashboard(s), changesLine(before, noticeable(s)), '', optionsText(s)].filter((x) => x !== undefined).join('\n'), events: r.events, acted: true };
   }
 
   let action: Action | undefined;
@@ -99,17 +103,22 @@ export function handleInput(s: GameState, raw: string): Reply {
     if (p.ask) return { text: p.ask };
     action = p.action;
   }
-  if (action!.kind === 'talk' && !action!.target) return { text: 'Talk to whom? Type for example: talk hisame' };
+  return handleAction(s, action!);
+}
 
+/** Resolve one canonical action and describe the result (used by typed options, the rules reader and the AI interpreter). */
+export function handleAction(s: GameState, action: Action): Reply {
+  if (action.kind === 'talk' && !action.target) return { text: 'Talk to whom? Type for example: talk hisame' };
+  const before = noticeable(s);
   const dayBefore = today(s);
-  const r = takeAction(s, action!);
+  const r = takeAction(s, action);
   const facts = visibleFacts(r.events);
   const out = [facts.join('\n\n')];
-  if (r.refused) return { text: out.join('\n') };
+  if (r.refused) return { text: out.join('\n'), events: r.events };
   out.push('', shortDashboard(s));
   const ch = changesLine(before, noticeable(s));
   if (ch) out.push(ch);
   if (today(s) !== dayBefore && li(s).wound > 0) out.push(`(Healing: ${li(s).healDays} days left for this wound step.)`);
   out.push('', optionsText(s));
-  return { text: out.join('\n') };
+  return { text: out.join('\n'), events: r.events, acted: true };
 }

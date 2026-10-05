@@ -103,6 +103,8 @@ export type EventType =
   | 'flag'
   | 'heard'
   | 'rumour'
+  | 'intent'
+  | 'narration'
   | 'duel';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */

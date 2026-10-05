@@ -1,3 +1,5 @@
+import { buildPacket } from '../ai/packet';
+import { shouldNarrate } from '../ai/narrate';
 import { handleInput, newGame } from '../engine/game';
 import { optionsText, shortDashboard } from '../engine/render';
 import { loadFrom, saveTo } from './storage';
@@ -27,5 +29,11 @@ if (!state || wantsNew) {
   const r = handleInput(state, input);
   if (r.command === 'save') saveTo(FILE.replace('.json', '.slot1.json'), state);
   console.log(r.command === 'save' ? 'Saved.' : r.text);
+  // For the play skill: the facts the narrator may use (Game Experience ch. 7), only after story moments.
+  const free = !/^\d$/.test(input.trim()) && !/^(HELP|STATUS|INFOCHAR|RELATIONS|RECAP|LOG|SAVE|LOAD|WAIT|SKIP)\b/i.test(input.trim());
+  if (r.acted && r.events && shouldNarrate(r.events, free)) {
+    const p = buildPacket(state, r.events, free ? input : undefined);
+    console.log(`\n--- narrator packet (play skill: tell only this) ---\n${JSON.stringify({ tier: p.tier, words: p.words, place: p.place, facts: p.facts, coreLines: p.coreLines, people: p.people.map((x) => `${x.name} (${x.personality}; toward Li: ${x.viewOfLi})`) }, null, 1)}`);
+  }
   saveTo(FILE, state);
 }

@@ -82,6 +82,57 @@ for (const v of VIEWS) {
   }
   await page.close();
 }
+// The AI path with a fake Claude in the page (the real one only exists on claude.ai): interpret → confirm → engine → narrate.
+const FAKE_CLAUDE = () => {
+  const words = (t) => (t.toLowerCase().match(/[a-zō]{4,}/g) ?? []);
+  const sample = async (prompt) => {
+    const facts = (prompt.match(/<facts>\n([\s\S]*?)\n<\/facts>/) ?? [])[1] ?? '';
+    const text = facts.split('\n').map((l) => l.replace(/^\d+\.\s*/, '')).join('\n\n');
+    return { text: `The camp breathes smoke and cold air.\n\n${text}` };
+  };
+  sample.json = async (prompt) => {
+    const said = (prompt.match(/<player_text>\n([\s\S]*?)\n<\/player_text>/) ?? [])[1] ?? '';
+    const choices = [...prompt.matchAll(/^- (\S+): (.*)$/gm)].map((m) => ({ id: m[1], label: m[2] }));
+    const best = choices.map((c) => ({ c, score: words(c.label).filter((w) => words(said).includes(w)).length })).sort((a, b) => b.score - a.score)[0];
+    return best && best.score > 0 ? { choice: best.c.id, confidence: 0.9, question: null, tone: 'neutral', says: null } : { choice: 'none', confidence: 0.2, question: null };
+  };
+  window.claude = { use: async (name) => (name === 'sample' ? sample : null) };
+};
+{
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  page.on('pageerror', (e) => problems.push(`ai: page error: ${e.message}`));
+  await page.addInitScript(FAKE_CLAUDE);
+  await page.goto(url);
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#storyteller[aria-pressed="true"]', { timeout: 5000 }).catch(() => problems.push('ai: storyteller did not switch to Claude'));
+  await page.fill('#in', 'I help Old Sukezō with the cooking and the wounded');
+  await page.press('#in', 'Enter');
+  await page.waitForSelector('.turn:last-child .rewrite', { timeout: 8000 }).catch(() => problems.push('ai: free text was not narrated'));
+  const story = await page.textContent('.turn:last-child');
+  if (!story.includes('The camp breathes smoke') || !story.includes('Sukezō')) problems.push(`ai: narration missing: ${story.slice(0, 120)}`);
+  await page.fill('#in', 'I watch Raizen train the men at the drill ground');
+  await page.press('#in', 'Enter');
+  if (!(await page.waitForSelector('.confirm .yes', { timeout: 5000 }).catch(() => null))) problems.push('ai: no confirmation before a risky action');
+  else {
+    await page.waitForTimeout(700);
+    for (const p of await page.evaluate(audit)) problems.push(`ai / confirm: ${p}`);
+    await page.screenshot({ path: `${out}/desktop-3-confirm.png` });
+    await page.click('.confirm .yes');
+    await page.waitForSelector('.turn:last-child .rewrite', { timeout: 8000 }).catch(() => problems.push('ai: confirmed action did not resolve and narrate'));
+  }
+  await page.fill('#in', 'I fly to the moon');
+  await page.press('#in', 'Enter');
+  await page.waitForTimeout(800);
+  if (!(await page.textContent('.turn:last-child')).includes('not something Li can do')) problems.push('ai: impossible action was not refused');
+  await page.waitForTimeout(700);
+  for (const p of await page.evaluate(audit)) problems.push(`ai / after: ${p}`);
+  await page.screenshot({ path: `${out}/desktop-4-ai.png` });
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sengoku-soldier-save')).events.filter((e) => e.type === 'narration' || e.type === 'intent').length);
+  if (saved < 3) problems.push(`ai: intents and narrations not stored in the save (${saved})`);
+  await page.close();
+}
+
 // A save from an older game version must not break the page: a new life starts instead.
 {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });

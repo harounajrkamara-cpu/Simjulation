@@ -14,7 +14,7 @@
   4. Court, kingdoms, full world
 
 ## Next step
-- **Building (Oct 5), branch `build/stage-1`:** V1 Engine catch-up ✅ (rumours, third person, WAIT rules; 32 tests) · V2 War chronicle UI ✅ (approved look, all tabs, phone layout, `npm run ui:check`). **NEXT: V3 AI layer** (`docs/BUILD_PLAN.md`). Local play: `play` skill + `npm run turn` on `build/stage-1`.
+- **Building (Oct 5), branch `build/stage-1`:** V1 Engine catch-up ✅ (rumours, third person, WAIT rules; 32 tests) · V2 War chronicle UI ✅ (approved look, all tabs, phone layout, `npm run ui:check`) · V3 AI layer ✅ (interpreter, narrator, code fact check, golden set; Claude in the page + chat packet). **NEXT: V4 Onboarding** (`docs/BUILD_PLAN.md`); owner: try free text with Claude on the published page. Local play: `play` skill + `npm run turn` on `build/stage-1`.
 - Done: ch. 10, 12b, 13, 13b, 13c, numbers sheet v0.2. `docs/WORLD_ATLAS.md` v0.3 ✅ approved.
 - Done (Oct 5): full read + fact check of all files; consistency fixes applied; duel balance fix and army delegation rule approved (numbers sheet v0.3). **Design complete → build stage 1.**
 - Decided: crossbows exist (Tatara, the Smiths' Kingdom). The two giants stay close in size and both are internally divided.

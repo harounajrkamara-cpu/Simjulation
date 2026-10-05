@@ -1,7 +1,12 @@
-import { fromSave, li, met, options, toSave } from '../engine/engine';
-import { handleInput, newGame } from '../engine/game';
+import { AiAdapter, PERMANENT, errorCode } from '../ai/adapter';
+import { Reading, interpret } from '../ai/interpret';
+import { Narration, narrate, shouldNarrate, templateText } from '../ai/narrate';
+import { FactPacket, buildPacket } from '../ai/packet';
+import { fromSave, li, met, options, recordNote, toSave } from '../engine/engine';
+import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
 import { duelPanel } from '../engine/render';
 import { GameState } from '../engine/types';
+import { pageAdapter } from './ai-page';
 import {
   armyPage, chronicle, encyclopediaPage, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
 } from './panels';
@@ -60,39 +65,67 @@ function openTab(t: Tab) {
 
 // ---------- the story column ----------
 
-/** Turn the engine's reply text into story paragraphs, change chips and notes. */
-function renderReply(text: string, newPeople: string[]): string {
+interface Parts { paras: { kind: string; text: string }[]; chips: string[] }
+
+/** Split the engine's reply text into story paragraphs, change chips and notes. */
+function replyParts(text: string, newPeople: string[]): Parts {
   const lines = text.split('\n').filter((l) => !/^(📅|📍)/.test(l) && !/^\d\. /.test(l) && !/^Or (type freely|write what Li does)/.test(l));
   const blocks = lines.join('\n').split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean)
     .filter((b) => !b.startsWith('⚔ DUEL') && !b.startsWith('What Li has read'));
-  const out: string[] = [];
-  const chips: string[] = newPeople.map((n) => `<span class="chip new">New: ${esc(n)}</span>`);
+  const parts: Parts = { paras: [], chips: newPeople.map((n) => `<span class="chip new">New: ${esc(n)}</span>`) };
   for (const block of blocks) {
     for (const part of block.split('\n').filter((l) => l.startsWith('Changes:') || l.startsWith('(Healing'))) {
       if (part.startsWith('Changes:')) {
         for (const c of part.slice(8).split(' · ').map((x) => x.trim()).filter(Boolean)) {
-          chips.push(`<span class="chip ${c.startsWith('▲') ? 'up' : c.startsWith('▼') ? 'down' : ''}">${esc(c)}</span>`);
+          parts.chips.push(`<span class="chip ${c.startsWith('▲') ? 'up' : c.startsWith('▼') ? 'down' : ''}">${esc(c)}</span>`);
         }
-      } else chips.push(`<span class="chip">${esc(part.replace(/[()]/g, ''))}</span>`);
+      } else parts.chips.push(`<span class="chip">${esc(part.replace(/[()]/g, ''))}</span>`);
     }
     const body = block.split('\n').filter((l) => !l.startsWith('Changes:') && !l.startsWith('(Healing')).join('\n').trim();
     if (!body) continue;
     const kind = /^[◆]/.test(body) ? 'spark' : /^⚠/.test(body) ? 'alert' : /^(==|Commands:|Pick an option|— Month|Li's journal)/.test(body) || /^Li does not know/.test(body) ? 'info' : '';
-    for (const para of body.split(/\n(?=[◆⚠])/)) out.push(`<p class="text ${kind}">${esc(plain(para.replace(/^[◆⚠]\s*/, '')))}</p>`);
+    for (const para of body.split(/\n(?=[◆⚠])/)) parts.paras.push({ kind, text: plain(para.replace(/^[◆⚠]\s*/, '')) });
   }
-  if (chips.length) out.push(`<div class="chips">${chips.join('')}</div>`);
-  return out.join('');
+  return parts;
 }
 
-function show(text: string, said?: string, newPeople: string[] = []) {
+const paraHtml = (p: { kind: string; text: string }) => `<p class="text ${p.kind}">${esc(p.text)}</p>`;
+const chipsHtml = (chips: string[]) => (chips.length ? `<div class="chips">${chips.join('')}</div>` : '');
+
+/** Start a new turn in the log (older turns fade back). */
+function newTurn(said?: string): HTMLElement {
   log.querySelectorAll('.turn:not(.old)').forEach((t) => { t.classList.add('old'); t.classList.remove('fresh'); });
   const turn = document.createElement('article');
   turn.className = 'turn fresh';
-  turn.innerHTML = (said ? `<p class="said">${esc(said)}</p>` : '') + renderReply(text, newPeople);
+  turn.innerHTML = said ? `<p class="said">${esc(said)}</p>` : '';
   log.appendChild(turn);
   while (log.children.length > 40) log.firstElementChild!.remove();
+  return turn;
+}
+
+function show(text: string, said?: string, newPeople: string[] = []) {
+  const turn = newTurn(said);
+  const p = replyParts(text, newPeople);
+  turn.insertAdjacentHTML('beforeend', p.paras.map(paraHtml).join('') + chipsHtml(p.chips));
   turn.scrollIntoView({ block: 'start' });
   refresh();
+}
+
+/** Ink: the approved narration appears word by word; a click finishes it (ch. 7). */
+function inkReveal(el: HTMLElement, text: string): Promise<void> {
+  const words = text.split(/(\s+)/);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = text; return Promise.resolve(); }
+  return new Promise((done) => {
+    let i = 0;
+    el.textContent = '';
+    const finish = () => { clearInterval(timer); el.textContent = text; el.removeEventListener('click', finish); done(); };
+    const timer = window.setInterval(() => {
+      if (i >= words.length) return finish();
+      el.append(words.slice(i, i + 3).join(''));
+      i += 3;
+    }, 45);
+    el.addEventListener('click', finish);
+  });
 }
 
 function renderOptions() {
@@ -105,7 +138,7 @@ function renderOptions() {
   }
   $('opts').innerHTML = options(state).map((o) => {
     const t = [o.test ? esc(plain(o.test)) : '', o.risk ? `<span class="risk">⚠&#xFE0E; ${esc(o.risk)}</span>` : ''].filter(Boolean).join(' · ');
-    return `<button type="button" class="opt" data-key="${esc(o.key)}"><span class="k">${esc(o.key)}</span><span class="l">${esc(o.label)}</span>${t ? `<span class="t">${t}</span>` : ''}</button>`;
+    return `<button type="button" class="opt" data-key="${esc(o.key)}"${busy ? ' disabled' : ''}><span class="k">${esc(o.key)}</span><span class="l">${esc(o.label)}</span>${t ? `<span class="t">${t}</span>` : ''}</button>`;
   }).join('');
 }
 
@@ -127,21 +160,154 @@ function refresh() {
   dots();
 }
 
+// ---------- the AI layer (GE ch. 5, 7) ----------
+
+let ai: AiAdapter | null = null;
+let aiOn = true;
+let busy = false;
+const recent: string[] = [];
+const storyteller = $<HTMLButtonElement>('storyteller');
+
+function setStoryteller() {
+  const on = !!ai && aiOn;
+  storyteller.textContent = on ? 'Storyteller: Claude' : 'Storyteller: plain';
+  storyteller.setAttribute('aria-pressed', String(on));
+  storyteller.title = ai ? 'Switch between Claude and the plain chronicle' : 'Claude is only available in the published claude.ai page';
+  storyteller.disabled = !ai;
+}
+
+function aiFailed(e: unknown, turn: HTMLElement) {
+  const code = errorCode(e);
+  if (code === 'cancelled') return;
+  if (PERMANENT.has(code)) { ai = null; setStoryteller(); }
+  const why = code === 'rate_limited' ? 'Claude needs a rest (usage limit); the plain chronicle continues.' : PERMANENT.has(code) ? 'Claude is not available here; the chronicle continues in plain text.' : 'Claude did not answer this time; the plain chronicle is shown.';
+  turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc(why)}</p>`);
+}
+
+function setBusy(on: boolean) {
+  busy = on;
+  document.querySelector('.choose')!.classList.toggle('busy', on);
+  $('opts').querySelectorAll('button').forEach((b) => ((b as HTMLButtonElement).disabled = on));
+}
+
+/** Show a resolved turn: narrated by Claude when it is a story moment, template text otherwise. */
+async function finish(reply: Reply, turn: HTMLElement, said: string | undefined, free: boolean, before: Set<string>) {
+  const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !before.has(id)).map((id) => state.characters[id].name);
+  const parts = replyParts(reply.text, newPeople);
+  const events = reply.events ?? [];
+  const story = parts.paras.filter((p) => !p.kind);
+  const notes = parts.paras.filter((p) => p.kind);
+  if (ai && aiOn && reply.acted && shouldNarrate(events, free)) {
+    const packet = buildPacket(state, events, free ? said : undefined, recent);
+    turn.insertAdjacentHTML('beforeend', `<p class="text ink wet">The ink is still wet…</p>${notes.map(paraHtml).join('')}${chipsHtml(parts.chips)}`);
+    refresh();
+    turn.scrollIntoView({ block: 'start' });
+    await narrateInto(turn, packet);
+  } else {
+    turn.insertAdjacentHTML('beforeend', story.concat(notes).map(paraHtml).join('') + chipsHtml(parts.chips));
+    refresh();
+    turn.scrollIntoView({ block: 'start' });
+  }
+  persist();
+}
+
+async function narrateInto(turn: HTMLElement, packet: FactPacket) {
+  const el = turn.querySelector<HTMLElement>('.ink')!;
+  el.classList.add('wet');
+  el.textContent = 'The ink is still wet…';
+  turn.querySelector('.rewrite')?.remove();
+  let n: Narration;
+  try {
+    n = await narrate(ai!, packet);
+  } catch (e) {
+    aiFailed(e, turn);
+    n = { text: templateText(packet), source: 'template', problems: [] };
+  }
+  el.classList.remove('wet');
+  await inkReveal(el, n.text);
+  recordNote(state, 'narration', `narration (${n.source})`, { text: n.text, source: n.source, problems: n.problems });
+  recent.push(n.text);
+  if (recent.length > 3) recent.shift();
+  if (n.source === 'ai') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'rewrite';
+    b.textContent = 'Rewrite';
+    b.title = 'Same events, new words';
+    b.onclick = async () => { if (busy || !ai) return; setBusy(true); await narrateInto(turn, packet); setBusy(false); };
+    el.after(b);
+  }
+  persist();
+}
+
+function confirmReading(turn: HTMLElement, r: Extract<Reading, { kind: 'action' }>): Promise<boolean> {
+  return new Promise((resolve) => {
+    const box = document.createElement('div');
+    box.className = 'confirm';
+    const opt = options(state).find((o) => o.label === r.label);
+    box.innerHTML = `<p class="text info">Li will: ${esc(r.label)}${opt?.risk ? ` <span class="risk">⚠&#xFE0E; ${esc(opt.risk)}</span>` : ''}</p>
+      <div class="row"><button type="button" class="yes">Do it</button><button type="button" class="no">Change</button></div>`;
+    turn.appendChild(box);
+    const answer = (ok: boolean) => { box.remove(); resolve(ok); };
+    box.querySelector<HTMLButtonElement>('.yes')!.onclick = () => answer(true);
+    box.querySelector<HTMLButtonElement>('.no')!.onclick = () => answer(false);
+    box.querySelector<HTMLButtonElement>('.yes')!.focus();
+  });
+}
+
+const situation = () => `${strip(state).date} · ${strip(state).place} · ${state.duel && !state.duel.over ? 'in a fight' : state.date.part}`;
+const COMMAND = /^(HELP|STATUS|INFOCHAR|RELATIONS|RECAP|LOG|SAVE|LOAD|NEW|WAIT|SKIP)\b/i;
+
 // ---------- input ----------
 
 function persist() {
   try { localStorage.setItem(KEY, JSON.stringify(toSave(state))); } catch { /* storage blocked: the game still runs */ }
 }
 
-function send(text: string, said = text) {
+async function send(raw: string, said = raw) {
+  if (busy) return;
+  const text = raw.trim();
   const before = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
-  const r = handleInput(state, text);
-  if (r.command === 'new') return start(true);
-  if (r.command === 'save') { persist(); return show('Saved in this browser. Use "Save file" to copy it somewhere safe.', said); }
-  if (r.command === 'load') { if (!resume()) show('No saved game in this browser.', said); return; }
-  const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !before.has(id)).map((id) => state.characters[id].name);
-  show(r.text, said, newPeople);
-  persist();
+  const isKey = options(state).some((o) => o.key === text);
+  if (isKey || COMMAND.test(text) || !ai || !aiOn) {
+    const r = handleInput(state, text);
+    if (r.command === 'new') return start(true);
+    if (r.command === 'save') { persist(); return show('Saved in this browser. Use "Save file" to copy it somewhere safe.', said); }
+    if (r.command === 'load') { if (!resume()) show('No saved game in this browser.', said); return; }
+    setBusy(true);
+    await finish(r, newTurn(said), said, !isKey && !COMMAND.test(text), before);
+    return setBusy(false);
+  }
+  // Free text with Claude: interpret → (confirm) → engine → narrate.
+  const teller = ai.name; // ai can become null mid-turn after a permanent error
+  setBusy(true);
+  const turn = newTurn(said);
+  turn.insertAdjacentHTML('beforeend', '<p class="text info wet reading">Li weighs it…</p>');
+  turn.scrollIntoView({ block: 'start' });
+  let reading: Reading;
+  try {
+    reading = await interpret(ai, state, text, situation());
+  } catch (e) {
+    aiFailed(e, turn);
+    reading = { kind: 'none' };
+  }
+  turn.querySelector('.reading')?.remove();
+  if (reading.kind === 'none') {
+    // Claude found nothing that fits; the rules reader may still know it, otherwise it explains what is possible.
+    const p = parseFreeText(state, text);
+    const opt = p.action && options(state).find((o) => o.action.kind === p.action!.kind && (o.action.target ?? '') === (p.action!.target ?? ''));
+    if (p.action) reading = { kind: 'action', action: p.action, label: opt?.label ?? p.action.kind.replace('_', ' '), confidence: 1, tone: 'neutral', says: null, risky: !!opt?.risk };
+    else { turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc(`That is not something Li can do here and now. ${(p.ask ?? '').replace('I did not understand that. ', '')}`.trim())}</p>`); refresh(); return setBusy(false); }
+  }
+  if (reading.kind === 'ask') { turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc(reading.question)}</p>`); refresh(); return setBusy(false); }
+  if (reading.kind === 'command') { await finish(handleInput(state, reading.command), turn, said, false, before); return setBusy(false); }
+  if (reading.risky || reading.confidence < 0.75) {
+    // The game stays busy while the box is open, so no other turn can slip in before the answer.
+    if (!(await confirmReading(turn, reading))) { turn.insertAdjacentHTML('beforeend', '<p class="text info">Then write it again, or pick an option.</p>'); setBusy(false); input.value = raw; input.focus(); return; }
+  }
+  recordNote(state, 'intent', `intent: ${reading.label}`, { input: text, action: reading.action, tone: reading.tone, says: reading.says, confidence: reading.confidence, by: teller });
+  await finish(handleAction(state, reading.action), turn, said, true, before);
+  setBusy(false);
 }
 
 function resume(): boolean {
@@ -151,7 +317,8 @@ function resume(): boolean {
     state = fromSave(JSON.parse(raw));
     seen = look(state);
     log.innerHTML = '';
-    show('The chronicle continues.');
+    const last = [...state.events].reverse().find((e) => e.type === 'narration');
+    show(last ? `${(last.data as { text: string }).text}\n\nThe chronicle continues.` : 'The chronicle continues.');
     return true;
   } catch (e) {
     // No game state may exist yet: start() shows this note together with the new game.
@@ -168,6 +335,7 @@ function start(fresh = false) {
   const g = newGame();
   state = g.state;
   seen = look(state);
+  recent.length = 0;
   show(note ? `${note}\n\n${g.text}` : g.text);
   note = '';
   persist();
@@ -179,12 +347,13 @@ $('opts').addEventListener('click', (e) => {
 });
 $('f').addEventListener('submit', (e) => {
   e.preventDefault();
-  if (input.value.trim()) { send(input.value); input.value = ''; }
+  if (input.value.trim() && !busy) { const v = input.value; input.value = ''; send(v); }
 });
 document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => (b.onclick = () => openTab(b.dataset.tab as Tab)));
+storyteller.onclick = () => { aiOn = !aiOn; setStoryteller(); };
 // Number keys pick an option while the input is empty (desktop speed).
 document.addEventListener('keydown', (e) => {
-  if (tab !== 'story' || e.ctrlKey || e.metaKey || e.altKey || !/^[1-9]$/.test(e.key)) return;
+  if (tab !== 'story' || busy || e.ctrlKey || e.metaKey || e.altKey || !/^[1-9]$/.test(e.key)) return;
   if (document.activeElement === input && input.value) return;
   if (document.activeElement instanceof HTMLTextAreaElement) return;
   const o = options(state).find((x) => x.key === e.key);
@@ -225,3 +394,5 @@ $('loadsave').onclick = () => {
 };
 
 start();
+setStoryteller();
+pageAdapter().then((a) => { ai = a; setStoryteller(); }).catch(() => setStoryteller());
