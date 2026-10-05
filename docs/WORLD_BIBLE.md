@@ -493,8 +493,8 @@ Max 1–3 per turn, only information Li could know (rumours, reports) – never 
 - **CORRECT** (always): when the AI misunderstood the action or a typo — caught before resolution by the confirmation step.
 - **Ironman by default**: outcomes are never undone. Optional "story mode" can roll back to a save point.
 
-### ⏳ Open
-- Language of the simulation (Dutch / English / choosable).
+### Language ✅
+- The simulation is played in **English**.
 
 ## Chapter 12 – Engine & quality rules ✅
 

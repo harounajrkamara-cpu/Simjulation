@@ -1,0 +1,25 @@
+# Project status
+
+## Where we are
+- World Bible **v0.3**: chapters 1–9, 11, 12 approved. Chapter 10 (Li's start) is open.
+- Language of the simulation: **English**.
+- Build plan: 4 stages, each playable.
+  1. Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels
+  2. Soldier life: units, battles, ranks, promotions, pacing director
+  3. Land & economy, family politics
+  4. Court, kingdoms, full world
+
+## Next step
+Big worldbuilding round:
+1. The 7 kingdoms (names, map, rulers, size, cultures, relations).
+2. Families per kingdom, branches, key characters.
+3. Imperial bloodline and the Imperial treasures.
+4. Li's background (ch. 10): based on the old 1540 backstory (Twin Demon father), checked and fixed for the new world; Li starts as a slave.
+Then: numbers sheet → build stage 1.
+
+## Open issues
+- `server.ts`: hardcoded Google API key — owner should revoke it; remove from code when building.
+- Old app code (`src/`, `server.ts`) predates the World Bible and will be rebuilt.
+
+## Source material (owner's uploads, not in repo)
+Old chats and docs: ARC 1/2 (old slave "Ali" story), ARC 1 manhwa + Li Hattori summary (1540 Twin Demon story), complete 1540 simulation doc, tracking systems, master tracking PDF v3, Simulatie systeem/ChatGPT docs, Black Clover / Bleach / Solo Leveling / Naruto chats.
