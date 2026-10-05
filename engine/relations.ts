@@ -64,7 +64,8 @@ export function visibleOpinion(state: GameState, npcId: string): string {
   if (v.respect >= 60) parts.push('respects Li');
   if (v.rivalry >= 40) parts.push('sees Li as a rival');
   if (v.fear >= 40) parts.push('is wary of Li');
-  const num = close ? `${op >= 0 ? '+' : ''}${op}` : `~${op >= 0 ? '+' : ''}${Math.round(op / 10) * 10}`;
+  const sign = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0');
+  const num = close ? sign(op) : `about ${sign(Math.round(op / 10) * 10)}`;
   return `${parts.join(', ')} (${num})`;
 }
 

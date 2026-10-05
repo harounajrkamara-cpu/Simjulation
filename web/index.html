@@ -4,32 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sengoku Soldier</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23A8361F'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23F3EBD8'%3E%E5%85%B5%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Shippori+Mincho+B1:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap">
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<div class="app">
-  <header>
-    <h1>SENGOKU SOLDIER<small>Year 100 of the Warring Kingdoms</small></h1>
-    <div class="tools">
-      <button data-cmd="STATUS">Status</button>
-      <button data-cmd="RELATIONS">People</button>
-      <button data-cmd="RECAP">Journal</button>
-      <button id="savebtn" type="button">Save file</button>
-      <button id="new" type="button">New game</button>
-    </div>
-  </header>
-  <div id="savebox" hidden>
-    <span class="note">Copy this text to keep your game, or paste a save here and load it. The same save works in the terminal and chat versions.</span>
-    <textarea id="savetext" spellcheck="false"></textarea>
-    <div class="row"><button id="copysave" type="button">Copy</button><button id="loadsave" type="button">Load pasted save</button><button id="closesave" type="button">Close</button></div>
-  </div>
-  <div id="log" aria-live="polite"></div>
-  <div id="opts"></div>
-  <form id="f"><input id="in" placeholder="Type freely, a number, or HELP" autocomplete="off"><button>Go</button></form>
-</div>
-
+<!--BODY-->
 <script type="module" src="./main.ts"></script>
 </body>
 </html>

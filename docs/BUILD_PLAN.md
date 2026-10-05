@@ -14,7 +14,7 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 | # | Milestone | Uses | Done when |
 |---|---|---|---|
 | V1 ✅ | Engine catch-up | WB ch. 8, 11; GE ch. 7 | rumour spreading done; all engine text in third person; HELP/WAIT per ch. 11; replay test green |
-| V2 | War chronicle UI | GE ch. 3, 6 | Story tab + side panel + tabs (Army = outside view) match the reference screens at 1440 and 390 px; contrast and 44 px checks pass |
+| V2 ✅ | War chronicle UI | GE ch. 3, 6 | Story tab + side panel + tabs (Army = outside view) match the reference screens at 1440 and 390 px; contrast and 44 px checks pass |
 | V3 | AI layer | GE ch. 5, 7 | interpreter (asks when unsure) + narrator + fact checker; claude.ai page mode, chat mode and no-AI mode; ink streaming; REWRITE / CORRECT; golden set ≥ 20 fact packets passes |
 | V4 | Onboarding | GE ch. 8 | New life → prologue → chapter card → first-week beats ✚ → WAIT lesson → Daisuke sparring ✚; GUIDE hints, example lines, "Why?", tooltips, How to play; ch. 8 time targets met in a Playwright run |
 | V5 | Big moments + pacing core | GE ch. 3b, 9 | 4 moment tiers; title card, duel overlay, legend screen; director phases with beat windows (slave stage); session-end summary |
@@ -27,6 +27,15 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 - **Saves**: DATA_VERSION 3 → 4 (character texts changed); older saves are refused with the "older game version" message.
 - **Evidence**: `npm test` 32 passed (19 old + 13 new in `tests/v1.test.ts`), `npm run typecheck` clean, replay/save tests green; code review (medium) found 4 issues, all fixed; chat mode smoke test OK.
 - **Not yet**: rumours between the camp and Sasabe on visit days; TROPHIES/WORLD/THREATS/REWRITE/CORRECT (later milestones).
+
+### V2 report (Oct 5) ✅
+- **War chronicle** (`web/`): top strip (chapter, date, place, condition, money, Save file, New life) · tabs Story · Map · Li · Army · People · Journal · Encyclopedia with gold "new" dots · Story tab with drawn scene header (day/night, campfire), turns (the player's words, story, ▲▼ chips, "New:" people), choices with tested skill and ⚠ risk, "Or write it" line · side panel with Li card, fogged ink map, chronicle feed, goals. Approved ch. 6 tokens and type only; no emoji in the interface.
+- **Tabs**: Li (condition, stats, styles, skills, season training, traits, goals) · People and Army (cards with Li's estimate of strength and opinion; Army = the band seen from the baggage line, ch. 3) · Journal (Li's words by day) · Encyclopedia (only learned entries, new `ENCYCLOPEDIA` data) · Map (Akaishi, Kōri, Sasabe when known, the Kurose; Suiren to the south, per the Atlas).
+- **Phone (390 px)**: one column, the page scrolls, choices pinned at the bottom; side panel content lives in the Li and Map tabs. Number keys pick options on desktop.
+- **Markup in one place**: `web/body.html` feeds both `index.html` (new `web/vite.config.ts`) and the published page; fonts switched to Shippori Mincho + Spectral; inline favicon.
+- **Evidence**: new `npm run ui:check` (`scripts/ui-check.mjs`, playwright-core + the pre-installed Chromium): plays turns and opens every tab at 1440 and 390 px; checks contrast ≥ 4.5:1, targets ≥ 44 px, no emoji, no horizontal scroll, no page errors, and that an old save starts a new life instead of breaking. Passed on the dev page and on the built single file. Screenshots: `docs/screens/v2/`. `npm test` 32 passed, typecheck clean. Code review (medium) found 3 issues, all fixed.
+- **Deviation**: the map runs the Kurose west–east with Suiren to the south (Atlas), not north–south as in the ch. 6 sketch.
+- **Not yet** (later milestones): "Why?" links, hints and example lines (V4), title cards and duel overlay (V5), AI narration (V3). The playwright plugin needs Google Chrome, which is not installed in cloud sessions; `ui:check` is used instead.
 
 ## Phase 2 – Stage 1 complete: the slave arc (→ freedom, 8–12 h)
 Freedom routes, contract seasons, Year 100 story calendar, timeskip summary, Journal/RECAP, save slots. Done when simulated strong careers reach freedom at 13–15 and the owner has played to freedom.

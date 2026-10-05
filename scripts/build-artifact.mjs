@@ -7,7 +7,7 @@ const css = readFileSync('web/style.css', 'utf8');
 const body = readFileSync('web/body.html', 'utf8');
 const page = `<title>Sengoku Soldier</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Shippori+Mincho+B1:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap">
 <style>
 ${css}</style>
 ${body}

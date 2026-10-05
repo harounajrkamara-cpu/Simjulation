@@ -87,6 +87,8 @@ export const DUELS: Record<string, DuelTemplate> = {
 
 export interface StoryEvent {
   id: string;
+  /** Scene header title (GE ch. 6). */
+  title: string;
   day: number; // day index (Year 100, Month 1, Day 1 = 0)
   part: 'morning' | 'afternoon' | 'evening' | 'night';
   text: string;
@@ -97,30 +99,30 @@ export interface StoryEvent {
 
 export const STORY: StoryEvent[] = [
   {
-    id: 'arrival', day: 0, part: 'morning',
+    id: 'arrival', title: "Under Kōri fort", day: 0, part: 'morning',
     text: 'The Red Crane band reaches Kōri fort in Akaishi province, on the Kurogane side of the Kurose river. Lord Hagiwara has hired the band after losing two thousand men last year. Across the river, Suiren banners hang still in the cold spring air.',
     journal: 'Year 100, spring. We reached Kōri fort on the Kurose. Across the river: Suiren banners.',
   },
   {
-    id: 'inspection', day: 1, part: 'afternoon',
+    id: 'inspection', title: "Paid dogs", day: 1, part: 'afternoon',
     text: 'Commander Ishizue Gonroku of Kōri fort inspects the band. He spits in the dirt in front of Raizen. "Paid dogs," he says, loud enough for everyone. Raizen only smiles.',
     journal: 'Commander Ishizue of Kōri fort hates mercenaries. He spat in front of Raizen.',
     meet: ['ishizue'],
   },
   {
-    id: 'sasabe_rice', day: 4, part: 'evening',
+    id: 'sasabe_rice', title: "Rice from Sasabe", day: 4, part: 'evening',
     text: 'Villagers from Sasabe bring rice to the camp. A fierce girl with a naginata on her back watches the mercenaries with open contempt, and a big farm boy carries two sacks at once to show off.',
     journal: 'Met two youths from Sasabe: Kaname, a girl with a naginata, and Daisuke, a strong farm boy.',
     meet: ['kaname', 'daisuke'],
   },
   {
-    id: 'sayo_visit', day: 9, part: 'morning',
+    id: 'sayo_visit', title: "The lord's daughter", day: 9, part: 'morning',
     text: 'A small party rides into the camp: the Hagiwara steward and a girl of about thirteen in a fine riding coat, Lord Hagiwara\'s daughter Sayo. She asks more questions than the steward likes.',
     journal: 'Lord Hagiwara\'s daughter Sayo visited the camp. She asks a lot of questions.',
     meet: ['sayo'],
   },
   {
-    id: 'raid', day: 35, part: 'night',
+    id: 'raid', title: "Fire on the river", day: 35, part: 'night',
     text: 'Bells in the dark. Fire on the river: Suiren raiders have crossed the Kurose and hit Sasabe. Raizen\'s band runs for the village; Li runs behind with a bundle of arrows. Sasabe is smoke, screams and burning thatch.',
     journal: 'Month 2, night: Suiren raiders crossed the Kurose and attacked Sasabe. The band ran to help.',
     duel: 'raid',
@@ -134,4 +136,21 @@ export const RUMOURS: string[] = [
   '"They say the canal will make the plain green. Others say it will empty the treasury."',
   '"The Red Crane has never broken a contract."',
   '"A northern prince who once lived in Seikyō as a hostage swore he\'d come back."',
+];
+
+/** Encyclopedia (GE ch. 3): only what Li has learned. An entry shows when its flag or knowledge is set (or always). */
+export interface Entry { id: string; title: string; text: string; needs?: string }
+
+export const ENCYCLOPEDIA: Entry[] = [
+  { id: 'kurogane', title: 'Kurogane, the Iron West', text: 'The kingdom where the Red Crane band now serves. Its law is hard and its army is large.' },
+  { id: 'kurose', title: 'The Kurose', text: 'The river border between Kurogane and Suiren at Akaishi. Suiren banners hang on the far bank.' },
+  { id: 'suiren', title: 'Suiren, the Southern Giant', text: 'The biggest and richest kingdom, south across the Kurose. Li\'s family came from there: a land of lakes and a big city.', needs: 'came_from_suiren' },
+  { id: 'red_crane', title: 'The Red Crane band', text: 'About 120 hired swords led by the rōnin Mikumo Raizen, "the Red Crane". Li is their slave.' },
+  { id: 'contract', title: 'The Hagiwara contract', text: 'The Hagiwara pay the band for three seasons.', needs: 'contract_three_seasons' },
+  { id: 'hagiwara', title: 'The Hagiwara', text: 'The border lords of Akaishi. They lost two thousand men last year and hired the band.' },
+  { id: 'kori', title: 'Kōri fort', text: 'A border fort in Akaishi province, held by Commander Ishizue Gonroku. The band camps below its walls.', needs: 'story_inspection' },
+  { id: 'sasabe', title: 'Sasabe', text: 'A village near the camp. Its people bring rice to the band.', needs: 'story_sasabe_rice' },
+  { id: 'merit_law', title: 'The merit law', text: 'In Kurogane, a slave who takes an enemy officer\'s head in the kingdom\'s army walks free, and the kingdom pays the owner.', needs: 'kurogane_merit_law' },
+  { id: 'price', title: 'Li\'s price', text: 'Rokubei says fifteen ryō. Raizen paid eight for him.', needs: 'own_price_15' },
+  { id: 'papers', title: 'The slave papers', text: 'Every slave\'s name and price, kept in Rokubei\'s iron box.', needs: 'papers_in_iron_box' },
 ];
