@@ -1,9 +1,9 @@
-# Build Plan – Stage 1 (📝 draft for owner approval)
+# Build Plan – Stage 1 (✅ approved · in progress)
 
 Goal of stage 1: **Li as a slave in the Red Crane band is fully playable** – daily life, people who remember, training, one real duel – with the engine deciding everything and the AI only narrating (World Bible ch. 11, 12, 12b).
 
 ## Tech choices
-- **TypeScript**, reusing the repo's existing setup (Vite + React + Express).
+- **TypeScript** on Node 22, a fresh project (owner: "build a new one"). Browser UI = Vite + plain TypeScript; terminal and chat runners use tsx.
 - **Engine = a pure TypeScript library** in `engine/` with no UI and no AI inside it. Same state + same action = same result (ch. 12b). Tested with **Vitest**.
 - **AI layer** behind one interface (`narrate`, `parseIntent`). Claude first; adapters for Gemini, DeepSeek, Ollama and OmniRoute later (owner's plan). A **no-AI mode** with simple template text, so the game runs and is testable without any key.
 - **Saves** = the append-only event log + world number, stored as JSON (ch. 11, event sourcing).
@@ -22,6 +22,15 @@ Goal of stage 1: **Li as a slave in the Red Crane band is fully playable** – d
 | M7 | Tests & playtest | Monte Carlo duel tests (upset rates), first-year growth pace, determinism tests; owner plays the first weeks of Year 100 and gives feedback |
 
 Stage 1 is finished when the owner can play from Year 100, Month 1 for at least a few in-game months, and can always see **why** something happened.
+
+## Progress
+- ✅ M0 clean-up (old code in `legacy/`, key line blanked, Vitest)
+- ✅ M1 engine core (calendar, event log, resolve/apply, saves with replay check)
+- ✅ M2 start data (Li, the band, Sasabe youths, Sayo, Ishizue; Kōri camp)
+- ✅ M3 turn loop (options, free text, WAIT, dashboard, commands) — terminal, chat and browser modes
+- 🟡 M4 people & memory: relationships, opinion, decay, beats, memories done; rumour spreading between NPCs next
+- 🟡 M5 training & growth done (caps, age, room); **duel engine next**
+- ⏳ M6 AI narrator · ⏳ M7 Monte Carlo tests & playtest
 
 ## Not in stage 1 (later stages)
 Battles and units, promotions (stage 2) · land and economy (stage 3) · kingdoms, factions, fuses (stage 4). The world data exists already; those systems are simply not switched on yet (ch. 12 "systems unlock with Li's life").

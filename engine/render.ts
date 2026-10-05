@@ -1,0 +1,124 @@
+import { ageOn, formatDate } from './calendar';
+import { PLACES } from './data';
+import { has, li, met, options, today } from './engine';
+import { opinion, relSnapshot, visibleOpinion } from './relations';
+import { STAT_NAMES, WOUND_LABEL, capacityLabel, masteryLabel, rankLetter, rankScores, rankSummary } from './rules';
+import { GameEvent, GameState, STAT_KEYS } from './types';
+
+// Text rendering (ch. 11). Shows only what Li can know; hidden values stay in the engine.
+
+const i = (x: number) => Math.floor(x);
+
+export function shortDashboard(s: GameState): string {
+  const c = li(s);
+  return `📅 ${formatDate(s.date)}\n📍 ${PLACES[c.location]} | ❤ ${WOUND_LABEL[c.wound]} · Fatigue ${c.fatigue}/3 | 💰 ${s.money} mon`;
+}
+
+/** Snapshot of what Li can notice, for the ▲▼ changes line. */
+export function noticeable(s: GameState): Record<string, number> {
+  const c = li(s);
+  const snap: Record<string, number> = { money: s.money, fatigue: c.fatigue, wound: c.wound };
+  for (const k of STAT_KEYS) snap[k] = i(c.stats[k]);
+  for (const [k, v] of Object.entries(c.styles)) snap[`style:${k}`] = i(v);
+  for (const [k, v] of Object.entries(c.skills)) snap[`skill:${k}`] = i(v);
+  return snap;
+}
+
+export function changesLine(before: Record<string, number>, after: Record<string, number>): string {
+  const parts: string[] = [];
+  for (const k of Object.keys(after)) {
+    const d = after[k] - (before[k] ?? 0);
+    if (d === 0) continue;
+    const name = k.replace('style:', '').replace('skill:', '').replace('_', ' ');
+    if (k === 'wound') parts.push(`wound → ${WOUND_LABEL[after[k] as 0]}`);
+    else parts.push(`${d > 0 ? '▲' : '▼'} ${name} ${d > 0 ? '+' : ''}${d}`);
+  }
+  return parts.length ? `Changes: ${parts.join(' · ')}` : '';
+}
+
+export function optionsText(s: GameState): string {
+  const lines = options(s).map((o) => {
+    const extra = [o.test, o.risk ? `⚠ ${o.risk}` : ''].filter(Boolean).join(' · ');
+    return `${o.key}. ${o.label}${extra ? `  (${extra})` : ''}`;
+  });
+  lines.push('Or type freely, "wait 7" to skip a week, or HELP for commands.');
+  return lines.join('\n');
+}
+
+export function status(s: GameState): string {
+  const c = li(s);
+  const r = rankScores(c);
+  const age = ageOn(c.born, s.date);
+  const lines = [
+    `== LI · age ${age} · ${c.role} ==`,
+    `Rank: ${rankSummary(c)}`,
+    `Condition: ${WOUND_LABEL[c.wound]}${c.wound ? ` (${c.healDays} days to heal a step)` : ''} · Fatigue ${c.fatigue}/3 · Money ${s.money} mon`,
+    'Stats: ' + STAT_KEYS.map((k) => `${k} ${c.stats[k].toFixed(1)}`).join(' · '),
+    `Command: ${capacityLabel(c.stats.LEA)}`,
+    'Styles: ' + Object.entries(c.styles).map(([k, v]) => `${k.replace('_', ' ')} ${v.toFixed(1)} (${masteryLabel(v)})`).join(' · '),
+    'Skills: ' + Object.entries(c.skills).map(([k, v]) => `${k.replace('_', ' ')} ${i(v)}`).join(' · '),
+    `Scores: Warrior ${r.warrior.toFixed(1)} · Commander ${r.commander.toFixed(1)} · Statesman ${r.statesman.toFixed(1)}`,
+    `Traits: ${c.traits.join(', ')}`,
+    `Training this season: ${Object.entries(s.seasonGains).map(([k, v]) => `${k.split(':')[1]} +${v.toFixed(2)}/2`).join(' · ') || 'none yet'}`,
+    'Goals: survive · win your freedom · find your mother and sisters · learn why your father died',
+  ];
+  return lines.join('\n');
+}
+
+export function infochar(s: GameState, query: string): string {
+  const id = findPerson(s, query);
+  if (!id) return `You do not know anyone called "${query}".`;
+  if (id === s.liId) return status(s);
+  const c = s.characters[id];
+  const age = ageOn(c.born, s.date);
+  return [
+    `== ${c.name} · about ${age} · ${c.role} ==`,
+    c.desc,
+    `Estimated strength: ${c.publicRank ?? '?'}`,
+    `Toward you: ${visibleOpinion(s, id)}`,
+  ].join('\n');
+}
+
+export function relationsText(s: GameState): string {
+  const ids = Object.keys(s.relations).filter((id) => met(s, id));
+  return ['== PEOPLE YOU KNOW ==', ...ids.map((id) => `${s.characters[id].name}: ${visibleOpinion(s, id)}`)].join('\n');
+}
+
+export function recap(s: GameState): string {
+  if (!s.journal.length) return 'Your journal is empty.';
+  let lastDay = -1;
+  const lines = ['== LI\'S JOURNAL =='];
+  for (const j of s.journal) {
+    if (j.day !== lastDay) {
+      const m = Math.floor(j.day / 30) % 12 + 1;
+      lines.push(`— Month ${m}, Day ${(j.day % 30) + 1}`);
+      lastDay = j.day;
+    }
+    lines.push(`  ${j.text}`);
+  }
+  return lines.join('\n');
+}
+
+export function logText(s: GameState, n = 20): string {
+  return s.events.filter((e) => e.visible).slice(-n).map((e) => `#${e.seq} [day ${e.day + 1}, ${e.part}] ${e.fact}`).join('\n');
+}
+
+export function findPerson(s: GameState, query: string): string | undefined {
+  const q = query.toLowerCase().trim();
+  if (!q) return undefined;
+  if (['li', 'me', 'myself'].includes(q)) return s.liId;
+  const ids = Object.keys(s.characters).filter((id) => id === s.liId || met(s, id));
+  return ids.find((id) => id === q || s.characters[id].name.toLowerCase().includes(q) || q.includes(id));
+}
+
+export const HELP = [
+  'Commands: STATUS · INFOCHAR <name> · RELATIONS · RECAP · LOG · WAIT <days> [train] · SAVE · LOAD · HELP',
+  'Pick an option by number, or type freely: "train with the sticks", "talk to hisame", "listen at the fire", "sleep".',
+].join('\n');
+
+/** Facts the narrator may use for this turn (ch. 11 step 6). */
+export function visibleFacts(events: GameEvent[]): string[] {
+  return events.filter((e) => e.visible && e.type !== 'fatigue' && e.type !== 'wound').map((e) => e.fact);
+}
+
+export { rankLetter, opinion, relSnapshot, STAT_NAMES, today, has };

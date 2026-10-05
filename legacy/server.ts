@@ -20,7 +20,7 @@ app.use(express.json());
 function getGeminiClient(useUserKey: boolean = false): GoogleGenAI {
   // Support both the correct name and the user's misspelled name 'GEMINI_API_KE'
   const envKey = process.env.GEMINI_API_KEY || process.env.GEMINI_API_KE;
-  const userKey = 'AQ.Ab8RN6KmaarmqwKg4XkWB3bBQGmDrglkgfW3ZEqAcTJFsaKQFA';
+  const userKey = ''; // hardcoded key removed
   
   // Use user-provided key if requested or if environment key is not set or is the placeholder
   const apiKey = (useUserKey || !envKey || envKey === 'MY_GEMINI_API_KEY') ? userKey : envKey;

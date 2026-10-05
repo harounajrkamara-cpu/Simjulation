@@ -1,20 +1,40 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Sengoku Soldier
 
-# Run and deploy your AI Studio app
+A deterministic text simulation: **Li Hattori**, a 12-year-old slave in a mercenary band, rises (maybe) to great general in a fictional Sengoku-inspired world.
+The engine decides everything (no dice); the narrator only tells what happened. Design: `docs/` (start with `docs/STATUS.md`).
 
-This contains everything you need to run your app locally.
+## Play
 
-View your app in AI Studio: https://ai.studio/apps/24914a5f-fb44-4e07-83da-fb16d61a2d9b
+```bash
+npm install
+```
 
-## Run Locally
+**In the browser** (buttons, journal, export/import saves):
+```bash
+npm run web        # open the address it prints, e.g. http://localhost:5173
+```
 
-**Prerequisites:**  Node.js
+**In the terminal**:
+```bash
+npm run play       # autosaves to saves/autosave.json
+```
 
+**In a chat with Claude** (one input per call):
+```bash
+npm run turn -- new          # new game
+npm run turn -- 2            # choose option 2
+npm run turn -- "talk to hisame"
+npm run turn -- "wait 7 train"
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Commands: `STATUS` · `INFOCHAR <name>` · `RELATIONS` · `RECAP` · `LOG` · `WAIT <days> [train]` · `SAVE` · `LOAD` · `HELP`.
+Saves are the event log, so a save works in every mode.
+
+## Develop
+
+```bash
+npm test           # determinism, replay, rules
+npm run typecheck
+```
+
+`engine/` is pure TypeScript with no UI and no AI inside. `legacy/` holds the old AI Studio prototype (not used).
