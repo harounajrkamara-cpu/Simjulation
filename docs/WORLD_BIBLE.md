@@ -430,3 +430,67 @@ New Year (start of spring) · harvest festival (autumn) · tax day (end of month
 
 ### Dashboard date
 `📅 Year 100, Spring – Month 2 (Kisaragi), Day 12`
+
+## Chapter 11 – Turn, dashboard & session rules ✅
+
+### Turn loop (code decides, AI narrates)
+1. **Player** picks a numbered option or types freely.
+2. **AI** translates the input into a structured action (what, target, method, stat) – structured output with a fixed schema.
+3. **Engine** checks it: possible? allowed by status? realistic? If not: "not possible in your position, because…". It never changes the player's intention, only judges whether it can work.
+4. **Confirmation** for important actions only (fights, risky orders, big decisions): "You will: … (⚔️ VAL – very hard?). Confirm or change?"
+5. **Engine** resolves deterministically and writes the result as **events** (append-only log).
+6. **AI** narrates using only the facts it is given.
+7. **Check**: the narration may not invent numbers, names or events; otherwise it is rewritten.
+8. **Engine** renders the short dashboard, alerts and options (AI may suggest options; the engine checks and rates them).
+
+### Text
+- Normal scenes ~150–200 words; long scenes are split into beats with a small choice or "Continue".
+- **Epic moments** (big duel, battlefield speech, Zone activation) up to ~300 words.
+- Grave, epic tone like Kingdom, in short clear blocks. Japanese rank names with men count ("Hyakunin-gashira (100)"). Zone activation always shows "SHINKEN NO RYŪ".
+
+### Dashboard
+- **Every turn (short, 2–3 lines)**: date, place, condition, money, plus what changed this turn (▲▼).
+- **Full dashboard** automatically after important events (battle, promotion, timeskip) and on STATUS / INFOCHAR.
+- Active projects only while unfinished, with time left.
+- **Changes line shows only what Li can notice** (his stats, money, visible reactions); hidden changes stay in the engine.
+
+### Options
+- 3–5 numbered options, urgent first, plus free text, plus **Continue**.
+- Each option shows the stat/skill it tests and a difficulty; **against people the difficulty is an estimate** ("⚔️ VAL – very hard?") based on what Li knows (hidden abilities excluded).
+- Only the **immediate risk** (danger, cost, time) is shown; long-term consequences stay hidden and come back later.
+- **Once-only chances** (saving someone, a duel challenge, an audience) vs **retryable chances** (after training or new information).
+
+### Combat turns
+- Before every important fight: "Fight it yourself, or simulate?"
+- Duel panel: round, both wound states, abilities left ("Zone: 2 of 3"), estimate of the opponent.
+- Battle: overview every phase (ch. 6b) plus own unit. Back to normal turns afterwards.
+
+### Commands
+INFOCHAR · STATUS · RECAP · TROPHIES · RELATIONS · WORLD · THREATS · LOG · SAVE / LOAD · REWRITE · CORRECT.
+
+### RECAP = Li's journal
+- Built from the event log, **only ever added to**, in arcs, same structure, story-like, in Li's voice.
+- Contains only what Li knows (can be wrong where he was deceived). The engine keeps the true history; the truth enters the journal when Li discovers it.
+- Corrections only on explicit player request.
+
+### Trophy collection
+`Name – Rank (men commanded) – Battle/place – Date – Difficulty`. Every duel won against an officer counts.
+
+### Alerts
+Max 1–3 per turn, only information Li could know (rumours, reports) – never hidden causes.
+
+### Session start & end
+- Start: short "previously on" (2–3 lines), date, place, current goal, open dangers.
+- End: what happened, stat changes, open storylines, where it goes next.
+
+### Narrator rules (hard)
+1. Never decides for Li. 2. Never changes numbers. 3. Only uses given facts; asks if unclear. 4. Realistic about status and era. 5. Brings life: flashbacks, side scenes, dreams, soldiers with requests. 6. NPCs may refuse, mock or punish, based on their values and goals.
+
+### Saving (event sourcing)
+- Autosave every turn; save slots.
+- **REWRITE** (always): same events, new words.
+- **CORRECT** (always): when the AI misunderstood the action or a typo — caught before resolution by the confirmation step.
+- **Ironman by default**: outcomes are never undone. Optional "story mode" can roll back to a save point.
+
+### ⏳ Open
+- Language of the simulation (Dutch / English / choosable).
