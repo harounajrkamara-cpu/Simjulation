@@ -10,7 +10,7 @@
   4. Court, kingdoms, full world
 
 ## Next step
-- In progress: the 7 kingdoms' internal power structure (who really rules, factions, crises). Then names, rulers, great families.
+- Done: ch. 13b power inside the kingdoms (engine, factions, fuses, profiles). Next: big consistency check, then families + worldbuilding (names, map, great families).
 - Decided: crossbows exist (Smiths' Kingdom). The two giants stay close in size and both are internally divided.
 
 Big worldbuilding round:

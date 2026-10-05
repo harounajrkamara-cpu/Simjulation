@@ -548,3 +548,44 @@ Free territories: the **Merchant City** (inspired by Sakai: council of merchants
 
 ### Li's start ✅
 - Li (12) is the **slave of a famous rōnin who leads a mercenary band**, hired by a border family in the **Iron West**. He carries gear, sees real fights, learns by watching. Later he can choose to enlist in the Iron West army, where merit can free him and his family.
+
+## Chapter 13b – Power inside the kingdoms ✅
+
+### Shared engine (all kingdoms)
+Hidden values per kingdom (0–100), never shown; Li only learns them through rumours and what he sees:
+| Value | Meaning |
+|---|---|
+| Crown Authority | how fast and fully the king's orders are obeyed |
+| Royal Share | % of the army that answers to the Crown, not to families |
+| Unity | how well the great families get along |
+| Succession Risk | chance of a throne fight when the king dies |
+| Treasury | money and grain in reserve |
+
+**Factions** (deterministic version of the Crusader Kings 3 system): each faction has a leader, members, troops, a goal and **Discontent** (0–100).
+- Discontent rises only while the faction's troops are ≥ ~80% of the troops loyal to the Crown; it falls below that. The king's **dread** raises that bar.
+- At 100 → **ultimatum**. Accepted = the Crown loses authority. Refused = civil war.
+- Same logic as ch. 8 betrayal: low loyalty + opportunity (power ratio) + not too much fear.
+
+**Hidden fuses:** each kingdom starts with 1–2 crises already building when Li is 12.
+- Each fuse has trigger conditions, a "not before" date and **2–3 possible outcomes** (never a script).
+- The pacing director only decides *when* a fuse surfaces once its conditions are true; max **one big political shock per season** in the whole world.
+- Fuses are inspired by history but use our own names and details, so they stay unpredictable.
+
+**Elite titles:** some kingdoms have a famous set of seats for their greatest generals (honours, not ranks; ch. 4 rules still apply). A long-term goal for Li. Names ⏳.
+
+**How a nobody rises:** each kingdom has its own route (Li can switch sides).
+
+### The seven profiles (names ⏳)
+| Kingdom | Who really rules | Factions | Fuses | Elite title | How a nobody rises | Auth / Royal / Unity / Succ / Treas |
+|---|---|---|---|---|---|---|
+| Iron West | King (19, full power at 20); until then the **Chancellor** (ex-merchant who bought power) | King's Men (merit officers) · Chancellor's House (officials, merchants, 3,000 retainers) · Old Blood (nobles hating the merit system) · Queen Mother's favourite (fake eunuch, building power) | **Favourite's coup** before the coming-of-age (crushed / purge of the Chancellor / king killed) · **The great canal**: a Smiths' Kingdom engineer's plan to drain the Iron West (exposed / finished and enriches the land / bankrupts it) | Six Great Generals (6 seats) | enemy officer heads → rank + land; best route for a slave | 55 / 55% / 50 / 50 / 60 |
+| Southern Giant | Puppet king (40s); **three great families** split the court | Three Families (united against reform, rivals among themselves) · Reformers (small, afraid) · Border Lords (fight, get no thanks) | **Hostage heir** of an eastern border family (breaks away when it can) · **Murdered reformer** (hook for Li's father, ch. 10) | – | almost impossible; only border lords take outsiders | 25 / 30% / 45 / 40 / 85 |
+| War Kingdom | Jealous king, depends on famous generals whose troops love *them* | The Generals · The Favourite (court minister, can be bought) | **Bribed slander**: a foreign power pays the favourite to call the best general a traitor (executed / rebels / plot exposed) | Three Heavens (3 seats) | a famous general takes you into his private army | 50 / 40% / 60 / 35 / 35 |
+| Eastern Sea | Child king (9); the **regent** is head of a family buying the people's love (lends grain big, collects small) | Regent's House · Old Royalists · Trade Council | **Slow usurpation**: when regent popularity > threshold and authority < threshold, he claims the throne (smooth / civil war / child murdered) | – | money, or the scholars' academy exam | 30 / 35% / 40 / 70 / 90 |
+| Mountain | King through the main house (from the owner's 1540 design) | Loyalists 68% (main house, cautious family, poor mining family) · Ambitious 11% (young proud leader) · Separatists 21% (pass family, grudge over a passed-over brother, secret talks with the War Kingdom) | **Pass revolt**: if the separatists rebel, loyalists fall to 47% and the pass opens | – | adoption into a pass family | 60 / 45% / 45 / 30 / 30 |
+| Smiths' | **Absolute king** (63); only heir is 14; clever prince-scholar ignored | – (total unity) | **King's death** (no court strong enough) · **Canal exposed** (Iron West war pretext) | – | craft skill or the king's favour | 95 / 80% / 90 / 75 / 45 |
+| Northern Frontier | King + war chiefs who must agree on big wars | Crown · War Chiefs · tribes outside | **Hostage prince's revenge**: the crown prince (ex-hostage in the Iron West) plans to assassinate the Iron West king (fails → war of revenge / succeeds → Iron West chaos / discovered early) | – | strength; chiefs accept anyone who proves himself | 40 / 35% / 55 / 45 / 20 |
+
+**Balance of the giants:** Iron West ~55% of 150k answers fast (~80k); Southern Giant ~35% of 220k (~75k). Same real speed: one richer, one better organised.
+
+**Links to Li:** three fuses touch the Iron West (coup, canal, assassin), so big politics reach Li as rumours first, chances later. Mountain hook: the poor mining family's former head fought beside Li's father (check in ch. 10).
