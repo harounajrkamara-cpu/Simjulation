@@ -128,6 +128,14 @@ Every important family has a named head, heir, general and a few key characters 
 Stats 0–100:
 - **LEA** – troop strength & morale, how many men handled well. Grows from commanding, speeches, won battles; not from duels.
   - **Command capacity**: each LEA level can handle a certain number of men well. Leading more than that = slower orders and faster morale loss (e.g. a strong fighter promoted too fast).
+
+    | LEA | Handles well |
+    |---|---|
+    | 0–20 | ~10 men |
+    | 21–40 | ~100 |
+    | 41–60 | ~1,000 |
+    | 61–80 | ~10,000 |
+    | 81–100 | 50,000+ |
 - **VAL** – personal combat, duels, courage, inspiring by example. Grows from duels, real fights, training with masters.
 - **INT** – tactics, reading the enemy, ambushes, traps. Grows from strategy, study, successful plans.
 - **POL** – court, negotiation, governing, persuasion. Grows from negotiation, governing, intrigue.
