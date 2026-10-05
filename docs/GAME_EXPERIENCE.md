@@ -16,7 +16,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 | 6 | Look & style | ✅ |
 | 7 | AI narrator | ✅ |
 | 8 | Onboarding | ✅ |
-| 9 | Pacing | ⏳ |
+| 9 | Pacing | 📝 |
 | 10 | Master build prompt + build plan | ⏳ |
 
 ---
@@ -350,6 +350,99 @@ Applied: 1 + 2 in the style canvas (Army tab opens to the band seen from outside
 2. **Sparring first**: Daisuke's stick bout (Month 1, ~Day 20) teaches the duel screen before the raid. ✚ new content.
 3. **Claude permission is asked on the New life screen**; if it is refused, the game runs without AI and can switch later in Settings.
 4. **Hints are a plain GUIDE line**, not in a character's voice; world knowledge still comes from people.
+
+## Chapter 9 – Pacing 📝 (proposal, Oct 5)
+How fast time, story and growth move: per turn, per session, per season and over a whole life. Builds on World Bible ch. 9 (time, timeskips), ch. 12 (pacing director, systems unlock), ch. 12b (determinism, world shocks), Numbers §2 (training cap), §6 (merit) and §12 (target ages), and ch. 4 and 8 here.
+
+### Research
+| Source | What they do | What we take |
+|---|---|---|
+| *Left 4 Dead* AI Director | a tension curve with four phases: **build-up → peak → fade → relax**; it watches the players and adds or removes pressure | the four phases. **Rejected:** changing difficulty according to how well the player does (that breaks "no dice, the world is fair") |
+| *RimWorld* – Cassandra | storyteller with fixed **"on" phases (~4.6 days) and "off" phases (~6 days)**, a minimum gap between big threats, slowly rising challenge | on/off rhythm with a **minimum breathing time** after a peak; challenge rises with Li's life stage, not with a hidden timer |
+| *Bannerlord* | 84-day years; becoming king takes **~80–100+ real hours** (≈10–12 in-game days per hour) | a full rise is a long game; time must speed up as Li rises |
+| *Crusader Kings III* | one life is a few to many hours; time runs fast, stopping for events | a life spans decades, so the default time step **zooms out** as Li grows |
+| *Kingdom* (manga) | arcs alternate: **battle arcs** (long, 50–150 chapters) and **between-battle arcs** (training, politics, people) | the year rhythm: campaign arc → aftermath (ceremony, promotion) → quiet arc (training, people, politics) |
+| *Hades* | story drip: characters always have something new, but **say only one thing per visit**; failure feeds the story | NPC beats are spread out, one per meeting; losses open new story instead of just costing |
+
+Sources: [Game Developer – Valve's AI Director](https://www.gamedeveloper.com/design/the-discomfort-zone-the-hidden-potential-of-valve-s-ai-director), [PaceMaker (pacing tool, 2024)](https://arxiv.org/pdf/2408.15001), [RimWorld wiki – Cassandra](https://www.rimworldwiki.com/wiki/Cassandra), [RimWorld wiki – storytellers](https://rimworldwiki.com/wiki/AI_storyteller), [ExpertBeacon – Bannerlord year](https://expertbeacon.com/how-long-is-a-year-in-bannerlord/), [ExpertBeacon – becoming king](https://expertbeacon.com/is-it-possible-to-become-king-of-vlandia/), [CK3 playtime (HowLongToBeat data via RAWG)](https://rawg.io/games/384567), [Kingdom wiki – arcs](https://kingdom.fandom.com/wiki/Season_1), [Screenhub – Kasavin on Hades](https://www.screenhub.com.au/news-article/features/digital/jini-maxwell/hades-greg-kasavin-breaks-down-supergiants-unique-approach-to-narrative-262459).
+
+### 1. Time zooms out as Li rises
+The same game is played at a different time step in each life stage (fits World Bible ch. 12 "systems unlock with Li's life").
+| Life stage | Default step | Played turn by turn | Usually skipped |
+|---|---|---|---|
+| Slave (12–~14) | **part of a day** (morning · afternoon · evening · night) | people, secrets, training choices, fights | chores, routine days |
+| Soldier (Ashigaru–Kogashira) | **a day** | drills that matter, fights, battle phases, comrades | marching, garrison weeks |
+| Officer (Gojū–Hyakunin) | **a few days** | battles, orders, men's problems, rivals | training cycles, marches |
+| Commander + land (Sanbyakunin+) | **a week** | battles, council, domain decisions | harvest, projects running |
+| General | **a season** | campaigns, court, great battles (phase by phase) | peace years |
+- **Scenes never zoom out:** a conversation, duel, ceremony or battle phase is always played at full detail, in any stage.
+- **A turn must earn its place:** if no option differs in a meaningful way and nothing new is known, the engine offers to continue the plan ("Nothing presses today. Continue the plan?") instead of asking for a turn.
+
+### 2. The pacing director (deterministic)
+Four phases, as in *Left 4 Dead*, but it **only decides when things reach Li, never what happens in the world**:
+| Phase | What the director does |
+|---|---|
+| **Build-up** | surfaces brewing things that are ready, at the **early** end of their window: rumours reach Li, a rival moves, an NPC asks something |
+| **Peak** | the big moment itself (fight, raid, battle, ceremony, reveal); nothing else is added |
+| **Fade** | consequences arrive: wounds, witnesses talk, merit, rumours with Li's name |
+| **Relax** | quiet time with people and training; non-urgent beats wait until the **late** end of their window. Minimum: slave/soldier 3 in-game days, officer 7, commander 14, general one month |
+
+**Rules that keep it fair (ch. 12b):**
+1. **The world never waits for the director.** Armies, fuses, deaths and harvests follow their own rules and dates (ch. 12b #9). The director only schedules **Li-local beats** (an NPC approaching, a side scene, a request) and **news delivery** inside a realistic messenger delay.
+2. **Every beat has a window** in the data (earliest · latest day). The director picks a day inside it by a fixed rule (build-up → earliest, relax → latest, otherwise the middle); ties are broken in the fixed ch. 12b order. Same save = same timing.
+3. **No rubber-banding:** it never makes enemies weaker or stronger because Li is winning or losing. A wounded Li gets breathing time only if the people around him would give it (in the relax phase, inside windows).
+4. **Tension is computed, not rolled:** from open threats near Li, his wounds, days since the last peak and days since the last meaningful choice.
+5. **Never stuck:** if Li has had no route forward for 6 in-game months (no merit, no new chance, no freedom progress), the director brings forward the earliest opportunity from the data (a recruiter, a campaign call, a patron's errand). This checks the Numbers §12 test "no career stuck for 3 years".
+
+### 3. The year rhythm (Kingdom arcs × the calendar)
+```
+SPRING  quiet arc: training, people, recruiting, rumours build ───┐
+SUMMER  campaign arc: march → battle (several sessions) → fade     │  ~1–2 campaign arcs a year
+AUTUMN  harvest · tax day · a second campaign or aftermath         │
+WINTER  quiet arc: ceremonies, politics, plans; passes close ──────┘
+```
+- Every season ends with a **season title card + summary** (ch. 4); every campaign ends with an **aftermath** (reward ceremony in rank order, promotions, funerals: ch. 3b).
+- Each year has at least **one peak per season** near Li; a battle arc is the longest peak.
+
+### 4. Session rhythm (real time)
+| Unit | Target |
+|---|---|
+| one turn | 30 s – 2 min (reading + choosing), streaming ink included |
+| a **spark** (relationship turn, skill, rumour about Li) | about every 10 minutes |
+| a **meaningful choice** | at least one per session (ch. 4), aim for 3–5 per hour |
+| a **title card** or bigger | every 1–2 sessions |
+| a **legend moment** | every ~5–10 hours; rarer later in life (they must stay special) |
+| a play session | ~45–90 minutes, ending at a natural break |
+- **Natural stopping points:** after a fade phase, a season card or a chapter end, the game shows the session-end summary (World Bible ch. 11) with "A good place to rest." The player may also stop any time (autosave every turn).
+- **Chapters** follow the arcs: one chapter ≈ one arc ≈ 2–6 hours of play.
+
+### 5. A whole life (real time, strong player)
+Target ages from Numbers §12, mapped to play time (to confirm in the M7 playtest and with simulated careers):
+| Stage | In-game | Real time (target) |
+|---|---|---|
+| Slave → freedom | Year 100 → age 13–15 | 8–12 h |
+| Soldier → Kogashira | to ~16 | 8–12 h |
+| Officer → Hyakunin-gashira | to 18–19 | 12–18 h |
+| Sanbyakunin-shō + first land | to 20–21 | 12–18 h |
+| General → Taishō | to 27–32 | 25–40 h |
+| **Total to Taishō** | ~15–20 years | **~65–100 h** (Bannerlord-sized) |
+- Early years are slow and close (≈30–40 in-game days per hour); general years are fast (≈1–2 in-game years per 10 hours, except for battles).
+
+### 6. Skipping (WAIT) rules (adds to World Bible ch. 9)
+- **Same result as playing it:** a skip with a plan gives exactly what playing those days with the same routine would give (training cap 2.0 per stat per season, Numbers §2). There is no reward for clicking through routine, so no grind.
+- **A skip stops for:** danger to Li or someone close · a once-only chance · a summons · a peak from the director · a season change (title card) · a birthday that matters (genpuku at 15).
+- **Longest skip** by stage: slave 1 month · soldier 1 season · officer and up 1 year.
+
+### 7. AI use follows pacing (ch. 7)
+- Template text for routine and skipped days; the AI writes free text, people and story moments (ch. 7, owner decision 1).
+- Target: **~20–40 AI calls per hour of play**; legend moments use the strongest model, others the normal one. So a 70-hour life stays affordable on a player's own plan.
+
+### Contradictions & fixes found
+1. **Director vs "the world goes on without Li"** (ch. 4 rule 4, ch. 12b #9): a director that delays threats would hold the world back. → Fixed by rule 1 above: it schedules only Li-local beats and news delivery, never world events.
+2. **Director vs fairness:** L4D-style adapting to performance would be hidden difficulty changes. → Rejected (rule 3).
+3. **World Bible ch. 9 timeskips** gives no longest skip and no "same as playing" rule. → Add §6 to ch. 9 on approval.
+4. **Ch. 8 target "raid within the first session"** needs ~4 in-game weeks in under an hour. → Fits: the slave stage skips up to a month, and the first WAIT comes on Day 7.
+5. **Numbers §12 test "never stuck 3 years"** has no mechanism yet. → Rule 5 (6-month check) gives one.
 
 ## Tools & sources (owner ✅ Oct 5)
 - **AI narrator online without a key:** the published claude.ai page can ask Claude directly (each player uses their own Claude account, with permission on first use). Used in ch. 7. Outside claude.ai: a pluggable adapter (Gemini free tier, OmniRoute or Ollama), key never in code or chat.
