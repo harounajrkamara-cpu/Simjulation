@@ -1,4 +1,4 @@
-# World Bible – Sengoku-inspired simulation (v0.1)
+# World Bible – Sengoku-inspired simulation (v0.2)
 
 Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 
@@ -225,10 +225,10 @@ Rules:
 - **Upset rule**: same rank = better choices win · 1 rank = possible with good play + 1–2 factors · 2 ranks = 3–4 factors stacked · 3+ = practically impossible (survival is victory).
 - **End**: someone is Down, yields, flees, or the duel is interrupted; usually 3–6 rounds. No winner after ~8–10 rounds = **draw**. Epic duels may run longer in phases.
 - **Fleeing** is allowed but costs reputation and troop morale (more when fleeing from a weaker foe). Losing a duel lowers your troops' morale; winning raises it.
-- **Li cannot die.** Defeat = badly wounded, captured, humiliated, or losses around him.
+- **Li cannot die** — not in duels, battles, from disease or any other cause. Defeat = badly wounded, captured, humiliated, or losses around him.
 - **Permanent injuries** are possible for Li (scars, lasting effects such as a weaker arm).
 - **Friends and allies can die**; other characters, including famous enemies, can die.
-- **Aftermath**: wounds persist and heal over days/weeks (lower stats, may block abilities) · growth (most from beating stronger foes) · trophy collection (name, rank, men commanded, date, battle) · reputation & memories (witnesses and the loser) · ability costs (e.g. Zone penalty).
+- **Aftermath**: wounds persist and heal over days to months (lower stats, may block abilities) · growth (most from beating stronger foes) · trophy collection (name, rank, men commanded, date, battle) · reputation & memories (witnesses and the loser) · ability costs (e.g. Zone penalty).
 
 ### 6b – Battles ✅
 - Three sizes: **skirmish** (dozens–hundreds, mostly your own unit) · **battle** (thousands+, in phases with sectors/flanks) · **campaign** (several battles over weeks/months: marches, sieges, supply, timeskips).
@@ -277,6 +277,16 @@ Slaves receive no pay.
 ### Army comes from land ✅
 - Normal: **200–250 soldiers per 10,000 koku**. Total war: up to ~2×, but fields go unworked and next year's harvest drops.
 - Every family's and kingdom's army size follows from its land (fixes the old 380 vs 85,000 contradiction).
+- Derived from ch. 4 Rule 1 + this rule (normal standing army):
+
+| Land | Standing army | Highest possible rank |
+|---|---|---|
+| Village (300–1,000 koku) | ~5–25 | Gochō / Kogashira |
+| Several villages (side branch) | ~25–100 | Gojū-gashira / Hyakunin-gashira |
+| District (10k–50k koku) | ~200–1,250 | Sanbyakunin-shō / Sennin-shō |
+| Province (100k–500k koku) | ~2,000–12,500 (×2 in total war) | Gosennin-shō / Taishō |
+| Kingdom (1M–10M koku) | ~20,000–250,000 | Taishō / Dai-Shōgun |
+So a slave in a small branch can only rise so far there; to go higher he must move up to bigger families or the Crown.
 
 ### Upkeep ✅
 - Every soldier eats ~1 koku/year plus pay and gear. Campaign supplies, long supply lines and sieges cost extra; hunger lowers morale.
@@ -367,3 +377,48 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 
 ### Romance & marriage
 - Marriage for love, alliance, or both (links ch. 2 extra 3). Status matters: low-born + noble is very hard. Jealousy and rivals in love possible.
+
+## Chapter 9 – Time ✅
+
+### Calendar
+- 12 months of 30 days (no leap months). The year starts in spring (old Japanese New Year ≈ start of spring).
+- Old month names shown next to the number: 1 Mutsuki · 2 Kisaragi · 3 Yayoi · 4 Uzuki · 5 Satsuki · 6 Minazuki · 7 Fumizuki · 8 Hazuki · 9 Nagatsuki · 10 Kannazuki · 11 Shimotsuki · 12 Shiwasu.
+
+| Season | Months | What happens |
+|---|---|---|
+| Spring | 1–3 | New Year, plowing, recruiting, roads become passable |
+| Summer | 4–6 | rice planting, best marching weather, big campaigns |
+| Autumn | 7–9 | harvest, taxes arrive (end of month 9), campaigns after the harvest |
+| Winter | 10–12 | snow closes mountain passes, few campaigns, training and politics |
+- Levies called up during planting or harvest reduce the harvest (ch. 7).
+
+### Years
+- Counted from the fall of the Empire: **"Year 100 of the Warring Kingdoms"** = the story start.
+
+### Age
+- Everyone has a birthday (month/day); the engine ages people automatically (normal age counting).
+- Age effects as in ch. 5. NPCs (not Li) can die of old age or disease; heirs take over, so the world changes over time.
+
+### Time must fit the action
+| Action | Typical duration |
+|---|---|
+| conversation / short scene | minutes – hours |
+| battle phase | part of a day |
+| training session | a day |
+| travel on foot | ~30 km per day |
+| army march | ~15–20 km per day (slower in mud, snow, mountains) |
+| healing | days – months |
+| projects | weeks – months |
+- No long time skips during a battle; the next fight is the next phase or day.
+
+### Timeskips
+- The player asks ("skip until the next campaign", "skip 3 months"). First the engine asks what Li does (training plan, with whom, money, family).
+- During the skip the world simulates at levels of detail: near Li detailed (weekly) · important NPCs & families weekly/monthly by their goals · far kingdoms monthly, roughly.
+- Important events interrupt the skip (attack, summons, illness in the family, a nemesis appears); the player can react or continue.
+- Afterwards a **timeskip recap**: what happened to Li, the people around him and the world, plus stat changes.
+
+### Fixed moments in the year
+New Year (start of spring) · harvest festival (autumn) · tax day (end of month 9) · council meetings and reward ceremonies after campaigns.
+
+### Dashboard date
+`📅 Year 100, Spring – Month 2 (Kisaragi), Day 12`
