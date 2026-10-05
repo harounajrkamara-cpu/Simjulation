@@ -25,7 +25,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - All families have **invented names** (no real clans like Takeda/Oda).
 - **No magic** ✅: gods are believed in but never act visibly. Abilities (ch. 5) are extreme human skill, will and training, never sorcery.
 - **No firearms** exist in this world: swords, spears, bows, **crossbows**, cavalry, siege engines.
-- **Crossbows** exist (decided): mainly made and used in the Tatara; rare and expensive elsewhere.
+- **Crossbows** exist (decided): mainly made and used in Tatara; rare and expensive elsewhere.
 
 ## Chapter 2 – Political structure ✅
 
@@ -502,7 +502,7 @@ Built from the old canon (Twin Demon story, Li-Hattori summary, ARC files), fixe
 1. **Kurogane merit law:** an enemy officer's head taken in Kurogane service frees a slave; Kurogane pays the owner a fixed price.
 2. Raizen frees him (needs very high trust and respect).
 3. Buy himself free (5–20 ryō).
-4. Escape (hunted; the Tatara has no slavery and is a refuge).
+4. Escape (hunted; Tatara has no slavery and is a refuge).
 
 ### 10.5 Bloodline & abilities (replaces the ch. 12 placeholders)
 - **Zone – SHINKEN NO RYŪ** (Li's own unique Combat ability, active): a state of total focus. Unlocks through a **near-death event**; can start at **C-rank** at very low mastery (ch. 5 prodigy rule). Limit 3 per battle at first. Weakness: time limit, then exhaustion. Activation always shows "SHINKEN NO RYŪ" (ch. 11).
@@ -644,7 +644,7 @@ Sizes follow the ch. 7 rule (~200–250 standing soldiers per 10,000 koku). Ever
 Free territories: the **Kinza** (Merchant City, inspired by Sakai: council of merchants, walled, independent), **Mount Shōgen** (Monk Mountain), the **northern border tribes**.
 
 ### Li's start ✅
-- Li (12) is the **slave of a famous rōnin who leads a mercenary band**, hired by a border family in the **Kurogane**. He carries gear, sees real fights, learns by watching. Later he can choose to enlist in the Kurogane army, where merit can free him and his family.
+- Li (12) is the **slave of a famous rōnin who leads a mercenary band**, hired by a border family in the **Kurogane**. He carries gear, sees real fights, learns by watching. Later he can choose to enlist in Kurogane army, where merit can free him and his family.
 
 ## Chapter 13b – Power inside the kingdoms ✅
 
@@ -675,25 +675,25 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 ### The seven profiles
 | Kingdom | Who really rules | Factions | Fuses | Elite title | How a nobody rises | Auth / Royal / Unity / Succ / Treas |
 |---|---|---|---|---|---|---|
-| Kurogane | King (19, full power at 20); until then the **Chancellor** (ex-merchant who bought power) | King's Men (merit officers) · Chancellor's House (officials, merchants, 3,000 retainers) · Old Blood (nobles hating the merit system) · Queen Mother's favourite (fake eunuch, building power) | **Favourite's coup** before the coming-of-age (crushed / purge of the Chancellor / king killed) · **The great canal**: a Tatara engineer's plan to drain the Kurogane (exposed / finished and enriches the land / bankrupts it) | **Six Pillars** (6 seats) | enemy officer heads → rank + land; best route for a slave | 55 / 55% / 50 / 50 / 60 |
+| Kurogane | King (19, full power at 20); until then the **Chancellor** (ex-merchant who bought power) | King's Men (merit officers) · Chancellor's House (officials, merchants, 3,000 retainers) · Old Blood (nobles hating the merit system) · Queen Mother's favourite (fake eunuch, building power) | **Favourite's coup** before the coming-of-age (crushed / purge of the Chancellor / king killed) · **The great canal**: a Tatara engineer's plan to drain Kurogane (exposed / finished and enriches the land / bankrupts it) | **Six Pillars** (6 seats) | enemy officer heads → rank + land; best route for a slave | 55 / 55% / 50 / 50 / 60 |
 | Suiren | Puppet king (40s); **three great families** split the court | Three Families (united against reform, rivals among themselves) · Reformers (small, afraid) · Border Lords (fight, get no thanks) | **Hostage heir** of an eastern border family (breaks away when it can) · **Murdered reformer** (hook for Li's father, ch. 10) | – | almost impossible; only border lords take outsiders | 25 / 30% / 45 / 40 / 85 |
 | Hayate | Jealous king, depends on famous generals whose troops love *them* | The Generals · The Favourite (court minister, can be bought) | **Bribed slander**: a foreign power pays the favourite to call the best general a traitor (executed / rebels / plot exposed) | **Three Storms** (3 seats) | a famous general takes you into his private army | 50 / 40% / 60 / 35 / 35 |
 | Ushio | Child king (9); the **regent** is head of a family buying the people's love (lends grain big, collects small) | Regent's House · Old Royalists · Trade Council | **Slow usurpation**: when regent popularity > threshold and authority < threshold, he claims the throne (smooth / civil war / child murdered) | – | money, or the scholars' academy exam | 30 / 35% / 40 / 70 / 90 |
-| Takane | King through the main house (from the owner's 1540 design) | Loyalists 68% (main house, cautious family, poor mining family) · Ambitious 11% (young proud leader) · Separatists 21% (pass family, grudge over a passed-over brother, secret talks with the Hayate) | **Pass revolt**: if the separatists rebel, loyalists fall to 47% and the pass opens | – | adoption into a pass family | 60 / 45% / 45 / 30 / 30 |
+| Takane | King through the main house (from the owner's 1540 design) | Loyalists 68% (main house, cautious family, poor mining family) · Ambitious 11% (young proud leader) · Separatists 21% (pass family, grudge over a passed-over brother, secret talks with Hayate) | **Pass revolt**: if the separatists rebel, loyalists fall to 47% and the pass opens | – | adoption into a pass family | 60 / 45% / 45 / 30 / 30 |
 | Tatara | **Absolute king** (63); only heir is 14; clever prince-scholar ignored | – (total unity) | **King's death** (no court strong enough) · **Canal exposed** (Kurogane war pretext) | – | craft skill or the king's favour | 95 / 80% / 90 / 75 / 45 |
-| Kitakaze | King + war chiefs who must agree on big wars | Crown · War Chiefs · tribes outside | **Hostage prince's revenge**: the crown prince (ex-hostage in the Kurogane) plans to assassinate the Kurogane king (fails → war of revenge / succeeds → Kurogane chaos / discovered early) | – | strength; chiefs accept anyone who proves himself | 40 / 35% / 55 / 45 / 20 |
+| Kitakaze | King + war chiefs who must agree on big wars | Crown · War Chiefs · tribes outside | **Hostage prince's revenge**: the crown prince (ex-hostage in Kurogane) plans to assassinate the Kurogane king (fails → war of revenge / succeeds → Kurogane chaos / discovered early) | – | strength; chiefs accept anyone who proves himself | 40 / 35% / 55 / 45 / 20 |
 
 **Balance of the giants:** "answers fast" = royal troops + families with loyalty ≥70. Kurogane: 55% royal of 150k ≈ 80k. Suiren: 30% royal + ~5% loyal border lords = 35% of 220k ≈ 75k. Same real speed: one richer, one better organised.
 
-**Links to Li:** three fuses touch the Kurogane (coup, canal, assassin), so big politics reach Li as rumours first, chances later. Takane hook: the Shiraiwa (poor mining family) former head fought beside Li's father and hides his family (ch. 10).
+**Links to Li:** three fuses touch Kurogane (coup, canal, assassin), so big politics reach Li as rumours first, chances later. Takane hook: the Shiraiwa (poor mining family) former head fought beside Li's father and hides his family (ch. 10).
 
 ## Chapter 13c – Extra world rules ✅
 1. **Royal hostages:** kingdoms swap royal hostages as part of peace treaties (besides ch. 2 family hostages to their own capital).
-2. **Slaves at war:** slaves can be sent to war as levies; in the Kurogane taking heads frees them. An owner may lend or sell a slave to an army. Details for Li in ch. 10.
+2. **Slaves at war:** slaves can be sent to war as levies; in Kurogane taking heads frees them. An owner may lend or sell a slave to an army. Details for Li in ch. 10.
 3. **Coming of age:** adult at **15** (genpuku: can serve as a real soldier and own property). A king rules on his own at **20** (old Empire law still kept by all 7 kingdoms).
 4. **Lifespan without dice:** at world creation every NPC gets a hidden health and lifespan; sickness, wounds and stress lower it. Same world = same outcome. Never shown.
 5. **Neutral powers:** every kingdom has local temples and guild branches; the **Mount Shōgen (Monk Mountain)** and the **Kinza (Merchant City)** are their independent headquarters.
-6. **Payment to the Crown scales with Crown Authority:** ~5% of tax income in the Suiren, ~20%+ in the Tatara (replaces the flat 10–20% of ch. 7 per kingdom).
+6. **Payment to the Crown scales with Crown Authority:** ~5% of tax income in Suiren, ~20%+ in Tatara (replaces the flat 10–20% of ch. 7 per kingdom).
 7. **Mercenaries:** a band is hired by contract (pay per season + share of loot). Ranks inside a band are not Crown or family ranks; a famous rōnin can still be Warrior A.
 8. **Fuse numbers** (thresholds, "not before" dates) go on the numbers sheet.
 
