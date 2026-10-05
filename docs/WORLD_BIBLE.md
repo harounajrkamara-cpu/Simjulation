@@ -23,7 +23,8 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - The imperial bloodline **still exists**: powerless, possibly hidden. ⏳ Designed together later, in the worldbuilding of the kingdoms and families.
 - The great goal of the world: whoever reunites the 7 kingdoms becomes the new Empire.
 - All families have **invented names** (no real clans like Takeda/Oda).
-- **No firearms** exist in this world: swords, spears, bows, cavalry, siege engines.
+- **No firearms** exist in this world: swords, spears, bows, **crossbows**, cavalry, siege engines.
+- **Crossbows** exist (decided): mainly made and used in the Smiths' Kingdom; rare and expensive elsewhere.
 
 ## Chapter 2 – Political structure ✅
 
@@ -538,8 +539,10 @@ Sizes follow the ch. 7 rule (~200–250 standing soldiers per 10,000 koku). Ever
 | 3 | War Kingdom (middle) | Zhao / Takeda | ~4M, ~90k | best cavalry (mounted archery), famous great generals, war culture | borders almost everyone, never rests, smaller economy |
 | 4 | Eastern Sea Kingdom (middle) | Qi | ~5M, ~100k | richest coast, salt-and-iron monopoly, biggest city, scholars' academy, navy; pays others to fight | army out of practice, soft quarrelling rulers |
 | 5 | Mountain Kingdom (middle) | Anegakoji | ~2.5M, ~55k | controls the mountain passes, fortresses, archers, kingmaker position | poor soil, small population, a side family wants to betray it |
-| 6 | Smiths' Kingdom (small) | Han | ~1.2M, ~25k | best steel and weapons, strong bows | no room to grow, surrounded, prey for everyone |
+| 6 | Smiths' Kingdom (small) | Han | ~1.2M, ~25k | best steel and weapons, strong bows, the only crossbow corps | no room to grow, surrounded, prey for everyone |
 | 7 | Northern Frontier (small) | Yan | ~2M, ~45k | hardened soldiers, horse archers, winter endurance | poor economy, also fights the northern tribes |
+
+**Size rule (decided):** the two great kingdoms stay close in size (Iron West ~7M, Southern Giant ~10M). Both are giants held back by inner power struggles; neither is a clear number one.
 
 Free territories: the **Merchant City** (inspired by Sakai: council of merchants, walled, independent), the **Monk Mountain**, the **northern border tribes**.
 

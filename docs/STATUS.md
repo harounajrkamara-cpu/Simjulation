@@ -11,7 +11,7 @@
 
 ## Next step
 - In progress: the 7 kingdoms' internal power structure (who really rules, factions, crises). Then names, rulers, great families.
-- Open: crossbows in the Smiths' Kingdom (yes/no).
+- Decided: crossbows exist (Smiths' Kingdom). The two giants stay close in size and both are internally divided.
 
 Big worldbuilding round:
 1. The 7 kingdoms (names, map, rulers, size, cultures, relations).
