@@ -2,6 +2,12 @@
 
 Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 
+### ⏳ To design later (kingdoms & families worldbuilding)
+- The 7 kingdoms: names, map, rulers, armies, relations.
+- The great and lesser families per kingdom, with branches and key characters.
+- The imperial bloodline: who, where, what they want, how it ties to the Imperial treasures.
+- Li's background and starting location.
+
 ---
 
 ## Chapter 1 – World & history ✅
@@ -9,7 +15,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - Setting: a **fictional land inspired by Sengoku Japan**. Japanese culture, armor, weapons, names and rank terms; our own map, kingdoms, families and history.
 - **The Empire** ruled the whole land for centuries.
 - **100 years ago** the Empire collapsed and split into **7 kingdoms**.
-- The imperial bloodline **still exists**: powerless, possibly hidden. Who and where is decided later.
+- The imperial bloodline **still exists**: powerless, possibly hidden. ⏳ Designed together later, in the worldbuilding of the kingdoms and families.
 - The great goal of the world: whoever reunites the 7 kingdoms becomes the new Empire.
 - All families have **invented names** (no real clans like Takeda/Oda).
 
