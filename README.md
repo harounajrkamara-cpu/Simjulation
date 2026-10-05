@@ -9,7 +9,9 @@ The engine decides everything (no dice); the narrator only tells what happened. 
 npm install
 ```
 
-**In the browser** (buttons, journal, export/import saves):
+**Online** (no install): https://claude.ai/artifact/AcDN6DV8D9SC5dBJybhcdx (rebuild with `node scripts/build-artifact.mjs`).
+
+**In the browser** (buttons, journal, save file copy/paste):
 ```bash
 npm run web        # open the address it prints, e.g. http://localhost:5173
 ```

@@ -1,7 +1,7 @@
 # Project status
 
 ## Where we are
-- **Stage 1 build started (Oct 5):** new engine in `engine/`, playable in browser (`npm run web`), terminal (`npm run play`) and chat (`npm run turn`). M0–M3 done, M4/M5 partly. Next: duel engine, then AI narrator. See `docs/BUILD_PLAN.md`.
+- **Stage 1 build started (Oct 5):** new engine in `engine/`, playable in browser (`npm run web`), terminal (`npm run play`) and chat (`npm run turn`). M0–M3 and M5 done (duel engine + Sasabe raid), M4 partly. Online page: https://claude.ai/artifact/AcDN6DV8D9SC5dBJybhcdx. Next: AI narrator (M6), more story after the raid, balance tests. See `docs/BUILD_PLAN.md`.
 - Ch. 10 Li's background ✅ approved. Kingdom names are now used everywhere (epithets only as nicknames). Elite titles: Six Pillars (Kurogane), Three Storms (Hayate). Family Mibu renamed Tsurumaki (real clan name).
 - Numbers sheet `docs/NUMBERS_SHEET.md` **v0.3 ✅ approved** (owner kept fast progression and the Kurogane head-for-freedom law). Next: **build stage 1** (Li as a slave: turn loop, dashboard, RECAP, people & memories, training, duels).
 - World Bible **v0.5** (ch. 12b determinism & feedback rules, S-rank rule, no magic approved)

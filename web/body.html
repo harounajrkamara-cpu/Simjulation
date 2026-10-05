@@ -1,0 +1,20 @@
+<div class="app">
+  <header>
+    <h1>SENGOKU SOLDIER<small>Year 100 of the Warring Kingdoms</small></h1>
+    <div class="tools">
+      <button data-cmd="STATUS">Status</button>
+      <button data-cmd="RELATIONS">People</button>
+      <button data-cmd="RECAP">Journal</button>
+      <button id="savebtn" type="button">Save file</button>
+      <button id="new" type="button">New game</button>
+    </div>
+  </header>
+  <div id="savebox" hidden>
+    <span class="note">Copy this text to keep your game, or paste a save here and load it. The same save works in the terminal and chat versions.</span>
+    <textarea id="savetext" spellcheck="false"></textarea>
+    <div class="row"><button id="copysave" type="button">Copy</button><button id="loadsave" type="button">Load pasted save</button><button id="closesave" type="button">Close</button></div>
+  </div>
+  <div id="log" aria-live="polite"></div>
+  <div id="opts"></div>
+  <form id="f"><input id="in" placeholder="Type freely, a number, or HELP" autocomplete="off"><button>Go</button></form>
+</div>

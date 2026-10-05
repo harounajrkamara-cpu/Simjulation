@@ -29,7 +29,8 @@ Stage 1 is finished when the owner can play from Year 100, Month 1 for at least 
 - ✅ M2 start data (Li, the band, Sasabe youths, Sayo, Ishizue; Kōri camp)
 - ✅ M3 turn loop (options, free text, WAIT, dashboard, commands) — terminal, chat and browser modes
 - 🟡 M4 people & memory: relationships, opinion, decay, beats, memories done; rumour spreading between NPCs next
-- 🟡 M5 training & growth done (caps, age, room); **duel engine next**
+- ✅ M5 training & growth, **duel engine** (4 moves, clash table, capped bonuses, learning opponent, simulate/run/yield, defeat ladder) and the Sasabe raid (Month 2, Day 6)
+- ✅ Online version published as a claude.ai page
 - ⏳ M6 AI narrator · ⏳ M7 Monte Carlo tests & playtest
 
 ## Not in stage 1 (later stages)

@@ -2,46 +2,34 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sengoku Soldier</title>
-<style>
-  :root { --bg:#f5f1e8; --panel:#fffdf8; --ink:#1d1b18; --muted:#6b645a; --accent:#8c2f25; --line:#d9d0c1; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#14120f; --panel:#1d1a16; --ink:#ece6da; --muted:#a49a8b; --accent:#d0644f; --line:#3a342c; } }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Georgia, 'Times New Roman', serif; }
-  main { max-width: 820px; margin: 0 auto; padding: 16px; display:flex; flex-direction:column; height:100dvh; }
-  header { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:8px; }
-  h1 { font-size:20px; margin:0; letter-spacing:.04em; }
-  h1 span { color:var(--accent); }
-  .tools button { font:13px system-ui, sans-serif; }
-  #log { flex:1; overflow-y:auto; padding:12px 0; white-space:pre-wrap; }
-  .turn { padding:10px 12px; margin:10px 0; background:var(--panel); border:1px solid var(--line); border-radius:6px; }
-  .you { color:var(--muted); font-style:italic; margin:6px 0 0; }
-  #opts { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
-  #opts button { text-align:left; }
-  button { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:8px 10px; cursor:pointer; font:15px Georgia, serif; }
-  button:hover { border-color:var(--accent); }
-  form { display:flex; gap:8px; }
-  input { flex:1; padding:10px; border-radius:6px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:15px Georgia, serif; }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Shippori+Mincho+B1:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<main>
+<div class="app">
   <header>
-    <h1>SENGOKU <span>SOLDIER</span></h1>
+    <h1>SENGOKU SOLDIER<small>Year 100 of the Warring Kingdoms</small></h1>
     <div class="tools">
       <button data-cmd="STATUS">Status</button>
       <button data-cmd="RELATIONS">People</button>
       <button data-cmd="RECAP">Journal</button>
-      <button id="export">Export save</button>
-      <label><button id="importBtn" type="button">Import save</button><input id="import" type="file" accept=".json" hidden></label>
-      <button id="new">New game</button>
+      <button id="savebtn" type="button">Save file</button>
+      <button id="new" type="button">New game</button>
     </div>
   </header>
+  <div id="savebox" hidden>
+    <span class="note">Copy this text to keep your game, or paste a save here and load it. The same save works in the terminal and chat versions.</span>
+    <textarea id="savetext" spellcheck="false"></textarea>
+    <div class="row"><button id="copysave" type="button">Copy</button><button id="loadsave" type="button">Load pasted save</button><button id="closesave" type="button">Close</button></div>
+  </div>
   <div id="log" aria-live="polite"></div>
   <div id="opts"></div>
-  <form id="f"><input id="in" placeholder="Type freely, a number, or a command (HELP)" autocomplete="off"><button>Go</button></form>
-</main>
+  <form id="f"><input id="in" placeholder="Type freely, a number, or HELP" autocomplete="off"><button>Go</button></form>
+</div>
+
 <script type="module" src="./main.ts"></script>
 </body>
 </html>
