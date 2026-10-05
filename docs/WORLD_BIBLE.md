@@ -125,7 +125,7 @@ Every important family has a named head, heir, general and a few key characters 
 - Dai-Shōgun are almost always in **Crown service** (only kingdoms have armies that large); a great family can only have one if its army is big enough (Rule 1).
 - Promotion = merit + status + a free position; big campaigns end with a reward ceremony (in rank order, with reactions).
 
-## Chapter 5 – Character system
+## Chapter 5 – Character system ✅
 
 ### Part 1 – Stats & Power Rank ✅
 Stats 0–100:
@@ -222,7 +222,7 @@ Rules:
 
 **Engine note**: abilities are stored as data records; limits and the rank+1 rule are enforced by code.
 
-## Chapter 6 – Combat
+## Chapter 6 – Combat ✅
 
 ### 6a – Duels ✅
 - **Fully deterministic**: same situation → same outcome. Unpredictability comes only from hidden information (fog of war, hidden abilities) and the opponent's own choices (personality, general type, learning).
@@ -262,7 +262,7 @@ Rules:
 - **Losses split into four kinds**: dead · wounded (return after healing) · captured (can be ransomed) · deserted.
 - **Sieges** are their own battle type: starve (slow, defenders' morale drops over time) or assault (fast, very bloody); supply decides how long both sides last.
 
-## Chapter 7 – Economy
+## Chapter 7 – Economy ✅
 
 ### Money ✅
 - **Mon** (copper coin, daily things) · **Ryō** (gold coin, big purchases, pay, rewards) · **Koku** (rice to feed 1 person for 1 year; measures land and family wealth).
@@ -590,3 +590,18 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 **Balance of the giants:** "answers fast" = royal troops + families with loyalty ≥70. Iron West: 55% royal of 150k ≈ 80k. Southern Giant: 30% royal + ~5% loyal border lords = 35% of 220k ≈ 75k. Same real speed: one richer, one better organised.
 
 **Links to Li:** three fuses touch the Iron West (coup, canal, assassin), so big politics reach Li as rumours first, chances later. Mountain hook: the poor mining family's former head fought beside Li's father (check in ch. 10).
+
+## Chapter 13c – Extra world rules ✅
+1. **Royal hostages:** kingdoms swap royal hostages as part of peace treaties (besides ch. 2 family hostages to their own capital).
+2. **Slaves at war:** slaves can be sent to war as levies; in the Iron West taking heads frees them. An owner may lend or sell a slave to an army. Details for Li in ch. 10.
+3. **Coming of age:** adult at **15** (genpuku: can serve as a real soldier and own property). A king rules on his own at **20** (old Empire law still kept by all 7 kingdoms).
+4. **Lifespan without dice:** at world creation every NPC gets a hidden health and lifespan; sickness, wounds and stress lower it. Same world = same outcome. Never shown.
+5. **Neutral powers:** every kingdom has local temples and guild branches; the **Monk Mountain** and the **Merchant City** are their independent headquarters.
+6. **Payment to the Crown scales with Crown Authority:** ~5% of tax income in the Southern Giant, ~20%+ in the Smiths' Kingdom (replaces the flat 10–20% of ch. 7 per kingdom).
+7. **Mercenaries:** a band is hired by contract (pay per season + share of loot). Ranks inside a band are not Crown or family ranks; a famous rōnin can still be Warrior A.
+8. **Fuse numbers** (thresholds, "not before" dates) go on the numbers sheet.
+
+### Family tiers ✅ (scale fix: 100+ great families exist)
+- **Tier A:** 3–5 key great families per kingdom, fully designed (head, heir, general, branches, goals, secrets).
+- **Tier B:** the other great families: named, with head and values.
+- **Tier C:** lesser families and branches, generated only when Li gets close, then saved permanently in the name registry.
