@@ -7,6 +7,7 @@ Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 - The great and lesser families per kingdom, with branches and key characters.
 - The imperial bloodline: who, where, what they want, how it ties to the Imperial treasures.
 - Li's background and starting location.
+- **Design rule for kingdom sizes**: Kingdom-epic armies need land. A 200,000-man army needs ~8–10M koku (or ~4–5M in total war). Big kingdoms ≈ 5–10M koku, small ones ≈ 1–3M. The world is larger than real Japan (~18.5M koku in 1598).
 
 ---
 
@@ -287,3 +288,21 @@ Markets & trade (merchant guild) · tolls · mines · war (loot, ransom, ceremon
 
 ### Wallets ✅
 Li's personal money · his unit's supplies · later his domain's treasury (family can manage it). The dashboard always shows Li's money.
+
+### Standing troops & levies ✅
+| | Standing troops | Levies |
+|---|---|---|
+| Who | professional soldiers | peasants called up for a campaign |
+| Cost | full pay all year | cheap, only during the campaign |
+| Quality | trained, good gear | weak, poor gear, break faster |
+| Side effect | – | harvest drops while they are away |
+The normal 200–250 per 10,000 koku are mostly standing troops; total war adds levies. Slaves and peasants are often thrown in as levies.
+
+### Families and the Crown ✅
+- Families send ~**10–20% of their tax income** to the Crown and provide a **troop quota** when the king calls.
+- Paying less is possible, but the governor notices and Crown trust drops.
+
+### Social barrier ✅
+- Not a law, just how the world is: **low-born people do not climb easily.** Nobles look down on them, promotions come slower, they need more merit for the same step, and some people will try to block them.
+- Some individuals (mentors, open-minded lords) judge by deeds instead.
+- Historical echo: Toyotomi Hideyoshi rose from peasant's son to ruler.
