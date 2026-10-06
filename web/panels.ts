@@ -3,6 +3,7 @@ import { ENCYCLOPEDIA, STORY } from '../engine/content';
 import { ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PRICE_MON, inService } from '../engine/campaign';
 import { PLACES } from '../engine/data';
 import { has, li, met, today } from '../engine/engine';
+import { journalArcs, trophies } from '../engine/render';
 import { visibleOpinion } from '../engine/relations';
 import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '../engine/rules';
 import { GameState, STAT_KEYS } from '../engine/types';
@@ -130,11 +131,11 @@ export function armyPage(s: GameState): string {
 
 export function journalPage(s: GameState): string {
   if (!s.journal.length) return '<h1>Journal</h1><p class="empty">Li has written nothing yet.</p>';
-  const days = new Map<number, string[]>();
-  for (const j of s.journal) days.set(j.day, [...(days.get(j.day) ?? []), j.text]);
-  const blocks = [...days.entries()].reverse().map(([d, lines]) =>
-    `<section><h3>Month ${Math.floor(d / 30) % 12 + 1}, Day ${(d % 30) + 1}</h3>${lines.map((l) => `<p>${esc(l)}</p>`).join('')}</section>`).join('');
-  return `<h1>Journal</h1><p class="lead">In Li's own words. Only what he knows, and he can be wrong.</p><div class="journal">${blocks}</div>`;
+  const won = trophies(s);
+  const trophyHtml = won.length ? `<h2 class="label">Trophies</h2><ul class="trophies">${won.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+  const arcs = journalArcs(s).reverse().map((a) => `<h2 class="label">${esc(a.title)}</h2>${a.days.slice().reverse().map((d) =>
+    `<section><h3>${esc(d.label)}</h3>${d.lines.map((l) => `<p>${esc(l)}</p>`).join('')}</section>`).join('')}`).join('');
+  return `<h1>Journal</h1><p class="lead">In Li's own words. Only what he knows, and he can be wrong.</p>${trophyHtml}<div class="journal">${arcs}</div>`;
 }
 
 export function knownEntries(s: GameState) {

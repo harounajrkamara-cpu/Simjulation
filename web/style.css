@@ -293,3 +293,17 @@ button { cursor: pointer; }
   .turn.fresh { animation: ink .5s ease-out; }
   @keyframes ink { from { opacity: 0; } to { opacity: 1; } }
 }
+
+/* Timeskip summary (GE ch. 3 overlay): Li, his people, the world, the changes. */
+.skipbox .overlay-inner { width: min(760px, 100%); }
+.sk-body { display: flex; flex-direction: column; gap: 18px; }
+.sk-body section { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
+.sk-body ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 17px; }
+.sk-body .stop { margin: 0; color: var(--gold); font-style: italic; }
+.trophies { max-width: 760px; margin: 0 0 8px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; color: var(--gold); font-size: 16px; }
+.journal h2.label { margin: 18px 0 0; }
+.slots { display: flex; flex-wrap: wrap; gap: 8px; }
+.slot { flex: 1 1 260px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 56px; padding: 8px 14px; background: none; border: 1px solid var(--line-2); border-radius: 4px; text-align: left; color: var(--paper-2); font-size: 15px; }
+.slot b { font-family: var(--display); color: var(--paper); }
+.slot.on { border-color: var(--gold); cursor: default; }
+.slot:not(.on):hover { border-color: var(--gold); }

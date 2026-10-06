@@ -42,4 +42,8 @@ for (let g = 0; g < 40000; g++) {
   else takeAction(s, { kind: 'chores' });
 }
 
-console.log(JSON.stringify({ beforeRaid: toSave(beforeRaid), beforeNickname: toSave(beforeNickname), beforeFord: toSave(beforeFord), beforeEscape: toSave(beforeEscape) }));
+// Day 3, morning: past the first-day beats, ready for a first WAIT (stops at Sasabe's rice on Day 5).
+const early = startGame();
+while (!(today(early) === 2 && early.date.part === 'morning')) { const o = options(early).find((x) => x.action.kind === 'choose'); if (o) handleInput(early, o.key); else quiet(early); }
+
+console.log(JSON.stringify({ early: toSave(early), beforeRaid: toSave(beforeRaid), beforeNickname: toSave(beforeNickname), beforeFord: toSave(beforeFord), beforeEscape: toSave(beforeEscape) }));

@@ -2,8 +2,9 @@ import { AiAdapter, PERMANENT, errorCode } from '../ai/adapter';
 import { Reading, interpret } from '../ai/interpret';
 import { Narration, narrate, shouldNarrate, templateText } from '../ai/narrate';
 import { FactPacket, buildPacket } from '../ai/packet';
-import { fromSave, li, met, options, recordNote, toSave } from '../engine/engine';
+import { fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
+import { SkipSummary, summaryText } from '../engine/summary';
 import { GameEvent } from '../engine/types';
 import { lastPeakDay, phase as directorPhase } from '../engine/director';
 import { WOUND_LABEL } from '../engine/rules';
@@ -18,6 +19,12 @@ import {
 
 // Browser mode: the war chronicle (Game Experience ch. 3, 6). Same engine and save format as the terminal and chat modes.
 const KEY = 'sengoku-soldier-save';
+// Save slots (World Bible ch. 11): three separate lives. Ironman: a slot is another life, never a way back in time.
+const SLOT_KEY = 'sengoku-soldier-slot';
+const SLOTS = [1, 2, 3];
+const slotKey = (n: number) => (n === 1 ? KEY : `${KEY}-${n}`);
+let slot = 1;
+try { const n = Number(localStorage.getItem(SLOT_KEY)); if (SLOTS.includes(n)) slot = n; } catch { /* storage blocked: slot 1 */ }
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const log = $('log');
 const input = $<HTMLInputElement>('in');
@@ -202,9 +209,12 @@ function setBusy(on: boolean) {
 /** Show a resolved turn: narrated by Claude when it is a story moment, template text otherwise. */
 async function finish(reply: Reply, turn: HTMLElement, said: string | undefined, free: boolean, before: Set<string>, seasonBefore = state.seasonKey) {
   const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !before.has(id)).map((id) => state.characters[id].name);
-  const parts = replyParts(reply.text, newPeople);
+  // After a WAIT the summary gets its own screen; the turn keeps only its changes line.
+  const text = reply.summary ? reply.text.replace(summaryText(reply.summary), reply.summary.changes ? `Changes: ${reply.summary.changes}` : '') : reply.text;
+  const parts = replyParts(text, newPeople);
   const events = reply.events ?? [];
   await bigMoments(events, seasonBefore);
+  if (reply.summary) await skipScreen(reply.summary);
   const story = parts.paras.filter((p) => !p.kind);
   const notes = parts.paras.filter((p) => p.kind);
   if (ai && aiOn && reply.acted && shouldNarrate(events, free)) {
@@ -282,7 +292,7 @@ const COMMAND = /^(HELP|STATUS|INFOCHAR|RELATIONS|RECAP|LOG|SAVE|LOAD|NEW|WAIT|S
 // ---------- input ----------
 
 function persist() {
-  try { localStorage.setItem(KEY, JSON.stringify(toSave(state))); } catch { /* storage blocked: the game still runs */ }
+  try { localStorage.setItem(slotKey(slot), JSON.stringify(toSave(state))); localStorage.setItem(SLOT_KEY, String(slot)); } catch { /* storage blocked: the game still runs */ }
 }
 
 async function send(raw: string, said = raw) {
@@ -336,7 +346,7 @@ async function send(raw: string, said = raw) {
 
 function resume(): boolean {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(slotKey(slot));
     if (!raw) return false;
     state = fromSave(JSON.parse(raw));
     seen = look(state);
@@ -404,6 +414,20 @@ function openHowTo() {
 $('howto').onclick = openHowTo;
 $('nl-howto').onclick = openHowTo;
 $('ht-close').onclick = () => { $('howto-box').hidden = true; };
+
+/** Timeskip summary (World Bible ch. 9): what happened to Li, his people and the world while the days passed. */
+function skipScreen(x: SkipSummary): Promise<void> {
+  const list = (title: string, lines: string[]) => (lines.length ? `<section><h2 class="label">${esc(title)}</h2><ul>${lines.map((l) => `<li>${esc(plain(l))}</li>`).join('')}</ul></section>` : '');
+  $('sk-title').textContent = x.days === 1 ? '1 day passes' : `${x.days} days pass`;
+  $('sk-when').textContent = `${x.from} → ${x.to}`;
+  $('sk-body').innerHTML = (x.stopped ? '<p class="stop">The days stop: something happens.</p>' : '')
+    + list('Li', x.li) + list('His people', x.people) + list('The world', x.world)
+    + list('Changes', x.changes ? x.changes.split(' · ') : ['Nothing Li can notice.']);
+  const box = $('skipbox');
+  box.hidden = false;
+  $('sk-close').focus();
+  return new Promise((done) => { $('sk-close').onclick = () => { box.hidden = true; done(); }; });
+}
 
 /** Full-screen brush title for 2–3 seconds; a click or key ends it (GE ch. 3b "title card"). */
 function titleCard(label: string, title: string, ms = 2600): Promise<void> {
@@ -551,7 +575,34 @@ newBtn.onclick = () => {
 // Save file: copy or paste the event log as text.
 const box = $('savebox');
 const saveText = $<HTMLTextAreaElement>('savetext');
-$('savebtn').onclick = () => { saveText.value = JSON.stringify(toSave(state)); box.hidden = false; saveText.focus(); };
+$('savebtn').onclick = () => { saveText.value = JSON.stringify(toSave(state)); renderSlots(); box.hidden = false; saveText.focus(); };
+
+/** One line about the life in a slot (replayed from its save; an old save says so). */
+function slotLine(n: number): string {
+  if (n === slot) return `${describe(state)} · playing now`;
+  let raw: string | null = null;
+  try { raw = localStorage.getItem(slotKey(n)); } catch { /* blocked */ }
+  if (!raw) return 'Empty: begin a new life here';
+  try { return describe(fromSave(JSON.parse(raw))); } catch { return 'A life from an older game version (it will start over)'; }
+}
+function describe(g: GameState): string {
+  const c = li(g);
+  return `Year ${g.date.year}, Month ${g.date.month}, Day ${g.date.day} · age ${Math.floor(liAge(g))} · ${c.status === 'slave' ? 'slave' : 'free'}${g.knowledge.includes('nickname_kurose_no_ryu') ? ' · Kurose no Ryū' : ''}`;
+}
+function renderSlots() {
+  $('slots').innerHTML = SLOTS.map((n) => `<button type="button" class="slot${n === slot ? ' on' : ''}" data-slot="${n}"${n === slot ? ' aria-current="true"' : ''}><b>Life ${n}</b> <span>${esc(slotLine(n))}</span></button>`).join('');
+}
+$('slots').addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-slot]');
+  const n = Number(b?.dataset.slot);
+  if (!b || n === slot || busy) return;
+  persist();
+  slot = n;
+  try { localStorage.setItem(SLOT_KEY, String(slot)); } catch { /* fine */ }
+  box.hidden = true;
+  hadSave = false;
+  start();
+});
 $('closesave').onclick = () => { box.hidden = true; };
 $('copysave').onclick = async () => {
   try { await navigator.clipboard.writeText(saveText.value); $('copysave').textContent = 'Copied'; }

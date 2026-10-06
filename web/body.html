@@ -42,6 +42,15 @@
     <button id="ht-close" type="button" class="primary">Back to the chronicle</button>
   </div>
 </div>
+<div id="skipbox" class="overlay skipbox" hidden role="dialog" aria-modal="true" aria-labelledby="sk-title">
+  <div class="overlay-inner">
+    <span class="label">Timeskip</span>
+    <h1 id="sk-title"></h1>
+    <p id="sk-when" class="lead"></p>
+    <div id="sk-body" class="sk-body"></div>
+    <button id="sk-close" type="button" class="primary">Continue</button>
+  </div>
+</div>
 <div id="legend" class="overlay legend" hidden role="dialog" aria-modal="true" aria-labelledby="lg-title">
   <div class="lg-inner">
     <span id="lg-native" class="lg-native" aria-hidden="true"></span>
@@ -89,6 +98,8 @@
   </nav>
 
   <div id="savebox" class="savebox" hidden>
+    <p class="note">Three lives can be kept in this browser. Each is its own story: switching never undoes anything.</p>
+    <div id="slots" class="slots" aria-label="Lives"></div>
     <p class="note">Copy this text to keep the game, or paste a save here and load it. A save works in the browser, the terminal and the chat version.</p>
     <textarea id="savetext" spellcheck="false" aria-label="Save file text"></textarea>
     <div class="row"><button id="copysave" type="button">Copy</button><button id="loadsave" type="button">Load pasted save</button><button id="closesave" type="button">Close</button></div>

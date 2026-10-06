@@ -102,6 +102,12 @@ for (const v of VIEWS) {
   await page.click('.opt[data-key="1"]');
   await page.fill('#in', 'wait 4');
   await page.press('#in', 'Enter');
+  // The WAIT ends on the timeskip summary (checked at every size), then back to the story.
+  if (await page.waitForSelector('#skipbox:not([hidden])', { timeout: 5000 }).catch(() => null)) {
+    await check('timeskip');
+    await page.screenshot({ path: `${out}/${v.name}-2-timeskip.png` });
+    await page.click('#sk-close');
+  } else problems.push(`${v.name}: no timeskip summary after WAIT`);
   await check('after turns');
   await page.screenshot({ path: `${out}/${v.name}-2-turns.png` });
   for (const t of TABS) {
@@ -192,6 +198,31 @@ const FAKE_CLAUDE = () => {
     await page.screenshot({ path: `${out}/moment-legend.png` });
     await page.click('#lg-close');
     if (!(await page.textContent('#side-li')).includes('Kurose no Ryū')) problems.push('moments: nickname not on the Li card');
+  }
+  // Phase 2 row: a WAIT ends on the timeskip summary; the Journal is grouped by season; three lives in Save file.
+  await load(fx.early);
+  await page.fill('#in', 'wait 7');
+  await page.press('#in', 'Enter');
+  if (!(await page.waitForSelector('#skipbox:not([hidden])', { timeout: 5000 }).catch(() => null))) problems.push('moments: no timeskip summary after WAIT');
+  else {
+    await page.waitForTimeout(700);
+    if (!(await page.textContent('#sk-body')).includes('Li worked')) problems.push('moments: timeskip summary misses the routine');
+    for (const p of await page.evaluate(audit)) problems.push(`moments / timeskip: ${p}`);
+    await page.screenshot({ path: `${out}/moment-timeskip.png` });
+    await page.click('#sk-close');
+  }
+  if ((await page.textContent('.turn:last-child')).includes('== TIMESKIP')) problems.push('moments: summary text repeated in the story');
+  await page.click('[data-tab="journal"]');
+  if (!(await page.textContent('#tab-journal')).includes('Year 100 · Spring')) problems.push('moments: journal not grouped by season');
+  await page.click('[data-tab="story"]');
+  await page.click('#savebtn');
+  if ((await page.$$('.slot')).length !== 3) problems.push('moments: not three lives in Save file');
+  else {
+    for (const p of await page.evaluate(audit)) problems.push(`moments / slots: ${p}`);
+    await page.screenshot({ path: `${out}/moment-slots.png` });
+    await page.click('.slot[data-slot="2"]');
+    if (!(await page.waitForSelector('#newlife:not([hidden])', { timeout: 4000 }).catch(() => null))) problems.push('moments: an empty slot did not begin a new life');
+    await page.evaluate(() => { localStorage.removeItem('sengoku-soldier-save-2'); localStorage.setItem('sengoku-soldier-slot', '1'); });
   }
   // Phase 2: an officer at the ford — a title card, then the choice to go for him.
   await load(fx.beforeFord);

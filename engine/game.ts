@@ -1,5 +1,6 @@
 import { has, li, maxSkipDays, options, skipDays, startGame, takeAction, today } from './engine';
 import { HELP, changesLine, findPerson, infochar, logText, noticeable, optionsText, recap, relationsText, shortDashboard, status, visibleFacts } from './render';
+import { SkipSummary, skipMark, skipSummary, summaryText } from './summary';
 import { Action, GameEvent, GameState } from './types';
 
 // One input → one reply. Shared by the terminal, the chat mode and the browser.
@@ -13,6 +14,8 @@ export interface Reply {
   acted?: boolean;
   /** Set when the caller should save/load (handled by the CLI or browser). */
   command?: 'save' | 'load' | 'new';
+  /** After a WAIT: the timeskip summary (World Bible ch. 9). */
+  summary?: SkipSummary;
 }
 
 export function newGame(worldNumber = 1): { state: GameState; text: string } {
@@ -89,12 +92,12 @@ export function handleInput(s: GameState, raw: string): Reply {
     const asked = Number(w[2]);
     const days = Math.min(asked, maxSkipDays(s));
     const capped = asked > days ? `(Li can plan at most ${days} days ahead${li(s).status === 'slave' ? ' as a slave' : ''}: skipping ${days} days.)\n` : '';
-    const dayBefore = today(s);
+    const mark = skipMark(s);
     const r = skipDays(s, days, { night: w[3] ? 'train' : 'sleep' });
-    const passed = today(s) - dayBefore;
+    const passed = today(s) - mark.day;
+    const summary = passed > 0 ? skipSummary(s, mark, r.events, r.interrupted) : undefined;
     const head = capped + (r.interrupted ? `⏸ The days pass… until something happens:\n\n${r.interrupted}` : `⏩ ${passed} days pass in the usual routine.`);
-    const alerts = r.events.filter((e) => e.type === 'alert' || e.type === 'rumour').map((e) => `${e.type === 'rumour' ? '◆' : '⚠'} ${e.fact}`);
-    return { text: [head, ...alerts.slice(-3), '', shortDashboard(s), changesLine(before, noticeable(s)), '', optionsText(s)].filter((x) => x !== undefined).join('\n'), events: r.events, acted: true };
+    return { text: [head, '', summary ? summaryText(summary) : changesLine(before, noticeable(s)), '', shortDashboard(s), '', optionsText(s)].filter((x) => x !== undefined).join('\n'), events: r.events, acted: true, summary };
   }
 
   let action: Action | undefined;

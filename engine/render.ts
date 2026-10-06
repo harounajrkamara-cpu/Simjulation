@@ -1,6 +1,6 @@
-import { ageOn, formatDate } from './calendar';
+import { ageOn, dateFromIndex, formatDate, season } from './calendar';
 import { PLACES } from './data';
-import { has, li, met, options, today } from './engine';
+import { duelTemplate, has, li, met, options, today } from './engine';
 import { opinion, relSnapshot, visibleOpinion } from './relations';
 import { STAT_NAMES, WOUND_LABEL, capacityLabel, masteryLabel, rankLetter, rankScores, rankSummary } from './rules';
 import { GameEvent, GameState, STAT_KEYS } from './types';
@@ -101,17 +101,43 @@ export function relationsText(s: GameState): string {
   return ['== PEOPLE LI KNOWS ==', ...ids.map((id) => `${s.characters[id].name}: ${visibleOpinion(s, id)}`)].join('\n');
 }
 
+/** Li's journal in arcs (World Bible ch. 11 RECAP): one arc per season, entries by day. */
+export function journalArcs(s: GameState): { title: string; days: { label: string; lines: string[] }[] }[] {
+  const arcs: { title: string; days: { label: string; lines: string[] }[] }[] = [];
+  for (const j of s.journal) {
+    const d = dateFromIndex(j.day);
+    const title = `Year ${d.year} · ${season(d.month)}`;
+    if (arcs.at(-1)?.title !== title) arcs.push({ title, days: [] });
+    const days = arcs.at(-1)!.days;
+    const label = `Month ${d.month}, Day ${d.day}`;
+    if (days.at(-1)?.label !== label) days.push({ label, lines: [] });
+    days.at(-1)!.lines.push(j.text);
+  }
+  return arcs;
+}
+
+/** Trophies (World Bible ch. 11): every duel won against an officer. Name – Rank (men commanded) – place – date – Li's read of him. */
+export function trophies(s: GameState): string[] {
+  const out: string[] = [];
+  for (const e of s.events) {
+    const d = e.data as { duelEnd?: string; result?: string };
+    if (e.type !== 'story' || !d.duelEnd?.startsWith('officer_') || d.result !== 'won') continue;
+    const t = duelTemplate(d.duelEnd);
+    const rank = t.foe.id === 'officer_kogashira' ? 'Kogashira (10 men)' : 'Gochō (5 men)';
+    const date = dateFromIndex(e.day);
+    out.push(`${t.foe.name.replace(/^the /, 'A ')} – ${rank} – ${t.place} – Year ${date.year}, Month ${date.month}, Day ${date.day} – ${t.foe.estimate.split(' · ').at(-1)}`);
+  }
+  return out;
+}
+
 export function recap(s: GameState): string {
   if (!s.journal.length) return 'Li\'s journal is empty.';
-  let lastDay = -1;
   const lines = ['== LI\'S JOURNAL =='];
-  for (const j of s.journal) {
-    if (j.day !== lastDay) {
-      const m = Math.floor(j.day / 30) % 12 + 1;
-      lines.push(`— Month ${m}, Day ${(j.day % 30) + 1}`);
-      lastDay = j.day;
-    }
-    lines.push(`  ${j.text}`);
+  const won = trophies(s);
+  if (won.length) lines.push('Trophies:', ...won.map((t) => `  ${t}`));
+  for (const arc of journalArcs(s)) {
+    lines.push(`=== ${arc.title} ===`);
+    for (const d of arc.days) lines.push(`— ${d.label}`, ...d.lines.map((l) => `  ${l}`));
   }
   return lines.join('\n');
 }

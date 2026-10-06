@@ -100,6 +100,13 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
   | escape-minded (studies with Sukezō, trains at night, runs on the first good night) | **13** (Year 101, Month 2) | escape, hunted |
   | cautious (stays with the baggage, no levy) | not free in 4 years | levy offered again each summer; tips only ≈ 240 mon a year |
 
+### Phase 2 row, the rest (Oct 6, night) ✅
+- **Timeskip summary** (WB ch. 9, GE ch. 3 overlay): every WAIT that passes a day ends on a full-screen summary — how many days, from → to, why it stopped, **Li** (his routine: shifts worked, evenings of letters, nights of training, plus his journal lines), **his people** (new people, visible opinion changes like "likes Li → would stand by Li", rumour signs), **the world** (rumours at the fire, the contract, the levy), **changes** (▲▼). Same text in the terminal and chat mode (`== TIMESKIP ==`). Only what Li can know.
+- **Journal / RECAP in arcs** (WB ch. 11): grouped by year and season ("Year 100 · Spring"), newest first in the tab; **Trophies** at the top — every duel won against an officer as `Name – Rank (men) – place – date – Li's read of him`.
+- **Save slots** (WB ch. 11 "autosave every turn; save slots"): three lives in the browser, under Save file. Ironman: a slot is another life, never a way back in time; the active life autosaves every turn. An empty slot begins a new life (New life screen + prologue). Slot 1 keeps the old storage key, so existing saves stay.
+- **Evidence**: `npm test` **168 passed** (5 new in `tests/phase2c.test.ts`); typecheck clean; `npm run ui:check` passed at 1440 / 900 / 390 px — it now checks the timeskip summary at every size, the journal arcs and the three lives; screenshots `docs/screens/phase2/`.
+- **Phase 2 status**: all items of the row are built. Left for "done": the owner plays to freedom, and the open decisions below.
+
 ### Phase 2 — owner decisions needed
 1. **Escape is the fastest route (age 13).** Is that fine given its price (hunted, the band and Kaname/Sayo left behind, Stage 2 starting in Tatara)? Or raise the bar (e.g. stealth 35, or only in winter when the band is in quarters)?
 2. **Buying is very slow.** A strong player has ~3,400 of 15,000 mon when he is freed by merit; a cautious one earns ≈ 240 mon a year. Keep buying as a rare late route, or add a real way to earn (e.g. selling Sukezō's medicines, gambling at the fire)?
