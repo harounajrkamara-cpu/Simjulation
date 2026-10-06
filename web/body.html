@@ -23,7 +23,7 @@
         <label><input type="radio" name="ink" value="instant"> <span><b>Instant</b></span></label>
       </fieldset>
     </div>
-    <button id="begin" type="button" class="primary">Begin</button>
+    <div class="row"><button id="begin" type="button" class="primary">Begin</button><button id="nl-howto" type="button" class="quiet">How to play</button></div>
   </div>
 </div>
 <div id="prologue" class="overlay prologue" hidden role="dialog" aria-modal="true" aria-label="Prologue">
@@ -34,6 +34,16 @@
     <div class="pr-bar"><span id="pr-dots" class="pr-dots" aria-hidden="true"></span>
       <button id="pr-skip" type="button">Skip</button><button id="pr-next" type="button" class="primary">Continue</button></div>
   </div>
+</div>
+<div id="howto-box" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="ht-title">
+  <div class="overlay-inner">
+    <h1 id="ht-title">How to play</h1>
+    <ol id="ht-list" class="howto"></ol>
+    <button id="ht-close" type="button" class="primary">Back to the chronicle</button>
+  </div>
+</div>
+<div id="titlecard" class="overlay titlecard" hidden aria-live="polite">
+  <div class="tc-inner"><span id="tc-label" class="label"></span><span id="tc-title" class="tc-title"></span></div>
 </div>
 <div class="app">
   <header class="strip">
@@ -49,6 +59,7 @@
       <div><dt class="sr">Money</dt><dd id="s-money" class="gold"></dd></div>
     </dl>
     <div class="file">
+      <button id="howto" type="button">How to play</button>
       <button id="storyteller" type="button" aria-pressed="false">Storyteller: plain</button>
       <button id="savebtn" type="button">Save file</button>
       <button id="new" type="button">New life</button>
@@ -88,12 +99,14 @@
       <div id="log" class="log" aria-live="polite"></div>
       <div class="choose">
         <div id="duel" class="duel" hidden></div>
+        <div id="guide" class="guide" hidden><span class="label">Guide</span><span id="guide-text"></span><button id="guide-close" type="button" aria-label="Close this hint">×</button></div>
         <div id="opts" class="opts"></div>
         <form id="f" class="write">
           <label for="in">Or write it</label>
           <input id="in" autocomplete="off" placeholder="I ask Sukezō where we are">
           <button type="submit">Send</button>
         </form>
+        <div id="examples" class="examples" aria-label="Example lines"></div>
       </div>
     </main>
     <section id="tab-map" class="panel page" role="tabpanel" hidden></section>

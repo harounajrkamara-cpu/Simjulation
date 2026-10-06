@@ -29,6 +29,11 @@ async function passIntro(page, name, audit) {
     await page.screenshot({ path: `${out}/${name}-0-prologue.png` });
   }
   await page.click('#pr-skip');
+  // The chapter card follows the prologue (GE ch. 3b); a click ends it.
+  if (await page.waitForSelector('#titlecard:not([hidden])', { timeout: 3000 }).catch(() => null)) {
+    if (audit) { await page.waitForTimeout(900); await page.screenshot({ path: `${out}/${name}-0-chapter.png` }); }
+    await page.click('#titlecard');
+  } else problems.push(`${name}: no chapter card`);
 }
 
 /** Runs in the page: returns contrast, target, emoji and overflow problems for what is visible now. */

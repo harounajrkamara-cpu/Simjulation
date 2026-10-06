@@ -153,6 +153,31 @@ button { cursor: pointer; }
 #pr-next { padding: 0 28px; font-size: 17px; }
 @media (prefers-reduced-motion: no-preference) { .pr-text, .pr-quote { animation: ink .7s ease-out; } }
 
+/* Guide, examples, terms, why (GE ch. 8) */
+.guide { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 14px; border: 1px solid #5A4A2A; border-radius: 4px; background: #17140E; font-size: 15px; }
+.guide .label { font-size: 11px; letter-spacing: .3em; flex-shrink: 0; }
+.guide #guide-text { flex: 1; }
+.guide button { width: 44px; height: 44px; flex-shrink: 0; background: none; border: 0; color: var(--faded); font-size: 20px; }
+.examples { display: flex; flex-wrap: wrap; gap: 8px; }
+.examples button { min-height: 44px; padding: 0 14px; background: none; border: 1px dashed #5E6470; border-radius: 22px; color: var(--paper-2); font-size: 15px; font-style: italic; }
+.examples button:hover { border-color: var(--gold); }
+.term { position: relative; text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 3px; cursor: help; }
+.term .tip { display: none; position: absolute; left: 0; top: 100%; z-index: 5; width: min(320px, 80vw); margin-top: 6px; padding: 10px 12px; background: var(--ink-2); border: 1px solid #5A4A2A; border-radius: 4px; font-size: 14px; line-height: 1.45; font-style: normal; color: var(--paper-2); }
+.term .tip b { display: block; font-family: var(--display); color: var(--paper); }
+.term:hover .tip, .term:focus .tip { display: block; }
+.why { font-size: 15px; color: var(--faded); }
+.why summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: 4px; cursor: pointer; color: var(--gold); list-style: none; }
+.why summary::-webkit-details-marker { display: none; }
+.why p { margin: 8px 0 0; font-style: italic; }
+.overlay .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.quiet { min-height: 48px; padding: 0 20px; background: none; border: 1px solid var(--line-2); border-radius: 4px; color: var(--paper-2); font-size: 16px; }
+.howto { margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 14px; font-size: 18px; }
+.howto b { font-family: var(--display); color: var(--gold); }
+.titlecard { cursor: pointer; text-align: center; }
+.tc-inner { display: flex; flex-direction: column; gap: 18px; align-items: center; }
+.tc-title { font: 800 clamp(40px, 7vw, 88px)/1.05 var(--display); letter-spacing: .04em; }
+@media (prefers-reduced-motion: no-preference) { .titlecard:not([hidden]) .tc-inner { animation: ink .9s ease-out; } }
+
 /* Side panel */
 .side { width: 400px; flex-shrink: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 22px 26px; background: var(--ink-3); }
 .side-block { display: flex; flex-direction: column; gap: 8px; }

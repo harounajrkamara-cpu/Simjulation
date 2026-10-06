@@ -4,10 +4,12 @@ import { Narration, narrate, shouldNarrate, templateText } from '../ai/narrate';
 import { FactPacket, buildPacket } from '../ai/packet';
 import { fromSave, li, met, options, recordNote, toSave } from '../engine/engine';
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
+import { GameEvent } from '../engine/types';
 import { PROLOGUE } from '../engine/content';
 import { duelPanel } from '../engine/render';
 import { GameState } from '../engine/types';
 import { pageAdapter } from './ai-page';
+import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
 import {
   armyPage, chronicle, encyclopediaPage, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
 } from './panels';
@@ -90,7 +92,7 @@ function replyParts(text: string, newPeople: string[]): Parts {
   return parts;
 }
 
-const paraHtml = (p: { kind: string; text: string }) => `<p class="text ${p.kind}">${esc(p.text)}</p>`;
+const paraHtml = (p: { kind: string; text: string }) => `<p class="text ${p.kind}">${p.kind ? esc(p.text) : termify(esc(p.text), state)}</p>`;
 const chipsHtml = (chips: string[]) => (chips.length ? `<div class="chips">${chips.join('')}</div>` : '');
 
 /** Start a new turn in the log (older turns fade back). */
@@ -157,6 +159,7 @@ function refresh() {
   $('side-map').innerHTML = mapSvg(state);
   $('chronicle').innerHTML = chronicle(state);
   renderOptions();
+  renderGuide();
   if (tab !== 'story' && PAGES[tab]) { $(`tab-${tab}`).innerHTML = PAGES[tab]!(state); markSeen(tab); }
   dots();
 }
@@ -209,7 +212,17 @@ async function finish(reply: Reply, turn: HTMLElement, said: string | undefined,
     refresh();
     turn.scrollIntoView({ block: 'start' });
   }
+  addWhy(turn, said, events);
   persist();
+}
+
+/** "Why?" (ch. 8 rule 6, ch. 12b #11): what caused this turn's results, in words Li could know. */
+function addWhy(turn: HTMLElement, said: string | undefined, events: GameEvent[]) {
+  const lines = events.filter((e) => e.journal).map((e) => e.journal!);
+  if (!said && !lines.length) return;
+  if (!turn.querySelector('.chips') && !lines.length) return;
+  const cause = said ? `Because Li chose: ${said}.` : '';
+  turn.insertAdjacentHTML('beforeend', `<details class="why"><summary>Why?</summary><p>${esc([cause, ...lines.map((l) => `Li's journal: ${l}`)].filter(Boolean).join(' '))}</p></details>`);
 }
 
 async function narrateInto(turn: HTMLElement, packet: FactPacket) {
@@ -267,7 +280,9 @@ function persist() {
 
 async function send(raw: string, said = raw) {
   if (busy) return;
+  if (shownHint) markHint(shownHint); // a hint closes itself once the player acts (ch. 8 §4)
   const text = raw.trim();
+  if (!options(state).some((o) => o.key === text) && !COMMAND.test(text)) bumpFree();
   const before = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
   const isKey = options(state).some((o) => o.key === text);
   if (isKey || COMMAND.test(text) || !ai || !aiOn) {
@@ -330,8 +345,9 @@ function resume(): boolean {
 
 let note = '';
 
+let hadSave = false;
 function start(fresh = false) {
-  if (!fresh && resume()) return;
+  if (!fresh && resume()) { hadSave = true; return; }
   log.innerHTML = '';
   const g = newGame();
   state = g.state;
@@ -340,7 +356,58 @@ function start(fresh = false) {
   show(note ? `${note}\n\n${g.text}` : g.text);
   note = '';
   persist();
+  if (fresh || !hadSave) resetGuide();
   openNewLife(); // a new life starts with the settings and the prologue (GE ch. 8)
+}
+
+// ---------- GUIDE hints, example lines, How to play, title cards (GE ch. 3b, 8) ----------
+
+const GUIDE_KEY = 'sengoku-soldier-guide';
+let guideSeen = new Set<string>();
+let freeTurns = 0;
+let shownHint: string | undefined;
+try { const g = JSON.parse(localStorage.getItem(GUIDE_KEY) ?? '{}'); guideSeen = new Set(g.seen ?? []); freeTurns = g.free ?? 0; } catch { /* fresh */ }
+const saveGuide = () => { try { localStorage.setItem(GUIDE_KEY, JSON.stringify({ seen: [...guideSeen], free: freeTurns })); } catch { /* fine */ } };
+function resetGuide() { guideSeen = new Set(); freeTurns = 0; saveGuide(); }
+function markHint(id: string) { guideSeen.add(id); shownHint = undefined; saveGuide(); }
+function bumpFree() { freeTurns++; saveGuide(); }
+
+function renderGuide() {
+  const h = nextHint(state, settings.guide as Guidance, guideSeen);
+  shownHint = h?.id;
+  $('guide').hidden = !h;
+  if (h) $('guide-text').textContent = h.text;
+  // Example lines until the player has written freely three times (ch. 8 rule 5).
+  const ex = $('examples');
+  ex.innerHTML = freeTurns >= 3 || settings.guide === 'off' ? '' : exampleLines(state).map((l) => `<button type="button" data-line="${esc(l)}">${esc(l)}</button>`).join('');
+}
+$('guide-close').onclick = () => { if (shownHint) markHint(shownHint); renderGuide(); };
+$('examples').addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-line]');
+  if (b) { input.value = b.dataset.line!; input.focus(); }
+});
+
+function openHowTo() {
+  $('ht-list').innerHTML = HOW_TO_PLAY.map(([t, d]) => `<li><b>${esc(t)}.</b> ${esc(d)}</li>`).join('');
+  $('howto-box').hidden = false;
+  $('ht-close').focus();
+}
+$('howto').onclick = openHowTo;
+$('nl-howto').onclick = openHowTo;
+$('ht-close').onclick = () => { $('howto-box').hidden = true; };
+
+/** Full-screen brush title for 2–3 seconds; a click or key ends it (GE ch. 3b "title card"). */
+function titleCard(label: string, title: string, ms = 2600): Promise<void> {
+  const box = $('titlecard');
+  $('tc-label').textContent = label;
+  $('tc-title').textContent = title;
+  box.hidden = false;
+  return new Promise((done) => {
+    const end = () => { clearTimeout(t); box.hidden = true; box.onclick = null; document.removeEventListener('keydown', end); done(); };
+    const t = window.setTimeout(end, settings.ink === 'instant' ? 900 : ms);
+    box.onclick = end;
+    document.addEventListener('keydown', end, { once: true });
+  });
 }
 
 // ---------- New life and the prologue (GE ch. 8) ----------
@@ -388,7 +455,7 @@ function playPrologue() {
     $('pr-dots').innerHTML = PROLOGUE.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
     $('pr-next').textContent = i === PROLOGUE.length - 1 ? 'Begin the chronicle' : 'Continue';
   };
-  const close = () => { box.hidden = true; input.focus({ preventScroll: true }); };
+  const close = () => { box.hidden = true; titleCard('Chapter 1', 'The Red Crane').then(() => input.focus({ preventScroll: true })); };
   $('pr-next').onclick = () => { if (++i >= PROLOGUE.length) close(); else show(); };
   $('pr-skip').onclick = close;
   box.hidden = false;

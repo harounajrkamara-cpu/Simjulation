@@ -16,7 +16,7 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 | V1 ✅ | Engine catch-up | WB ch. 8, 11; GE ch. 7 | rumour spreading done; all engine text in third person; HELP/WAIT per ch. 11; replay test green |
 | V2 ✅ | War chronicle UI | GE ch. 3, 6 | Story tab + side panel + tabs (Army = outside view) match the reference screens at 1440 and 390 px; contrast and 44 px checks pass |
 | V3 ✅ | AI layer | GE ch. 5, 7 | interpreter (asks when unsure) + narrator + fact checker; claude.ai page mode, chat mode and no-AI mode; ink streaming; REWRITE / CORRECT; golden set ≥ 20 fact packets passes |
-| V4 🟡 | Onboarding | GE ch. 8 | New life → prologue → chapter card → first-week beats ✚ → WAIT lesson → Daisuke sparring ✚; GUIDE hints, example lines, "Why?", tooltips, How to play; ch. 8 time targets met in a Playwright run |
+| V4 ✅ | Onboarding | GE ch. 8 | New life → prologue → chapter card → first-week beats ✚ → WAIT lesson → Daisuke sparring ✚; GUIDE hints, example lines, "Why?", tooltips, How to play; ch. 8 time targets met in a Playwright run |
 | V5 | Big moments + pacing core | GE ch. 3b, 9 | 4 moment tiers; title card, duel overlay, legend screen; director phases with beat windows (slave stage); session-end summary |
 | V6 | Slice test | GE ch. 8–9; Numbers §4, §12 | Monte Carlo duel tests; determinism tests; **owner playtest**; fixes done |
 
@@ -45,11 +45,15 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 - **Evidence**: `npm test` 121 passed — the **narrator golden set** = 25 real moments of play (arrival, chores, every band member's talk, all five rumours, Gonza catching Li twice, night training, the story days, the raid start and its won/fled/lost endings, word spreading): no secret in any packet; the template passes the check; six planted mistakes (invented name, the name Hattori, a new number, an invented death, "you", stat words) and a dropped dialogue line are all caught; the loop is tested with a fake AI (accept, rewrite once, fall back). `npm run ui:check` also plays the AI path in Chromium with a fake Claude in the page (interpret → confirm → engine → narrate → Rewrite → refusal → saved notes). Code review (medium) found 4 issues, all fixed.
 - **Not proven yet**: the real Claude in the claude.ai viewer (no viewer in this sandbox) — the owner should try free text on the published page; how often real narrations pass the check first time. **Later**: engine use of tone, promises and lies (stored already); "any other action" resolution by skill vs difficulty (GE ch. 5 step 4) — today the interpreter maps only to actions the engine already has.
 
-### V4 progress (Oct 6) 🟡
+### V4 report (Oct 6) ✅
 - ✅ **New life screen** (way of play: Ironman; Story mode shown as "comes later" · Storyteller Claude / plain · Guidance full / light / off · Ink speed slow / fast / instant), remembered per browser; opens on every new life.
 - ✅ **Prologue**: 7 hand-written ink slides (`PROLOGUE` in `engine/content.ts`, only what Li knows), Skip / Continue / "Begin the chronicle".
 - ✅ `ui:check` walks New life → prologue → game at 1440 / 900 / 390 px (screens in `docs/screens/v4/`).
-- ⏳ Still to do: chapter card · first-week teaching beats ✚ (Gonza's chest Day 1 morning, the cook tent, first night, Sukezō's WAIT lesson Day 7) · Daisuke sparring bout (Month 1, ~Day 20) · GUIDE hint line (uses the Guidance setting) · example lines under the write box until 3 free-text turns · "Why?" on changes · nested tooltips · How to play page · ch. 8 time targets in a Playwright run.
+- ✅ Chapter card after the prologue ("Chapter 1 · The Red Crane"), reusable title card (click or key to end).
+- ✅ First-week beats ✚ as story events, with **story choices** that lapse when the part of the day ends: Gonza's chest (Day 1 morning; take it ⚠ or look away), the cook tent, the first night, Sukezō's WAIT lesson (Day 7 evening).
+- ✅ **Daisuke sparring bout** (Month 1, Day 20, Sasabe threshing floor; fight or walk past). Duel outcomes now live in each duel template (text, journal, growth, merit, relationships, memories, wound cap: sticks leave at worst Hurt). Winnable by reading him: 31 of 178 move lines win.
+- ✅ GUIDE hint line (one at a time, once per life, closes when the player acts; Light = only screen hints), example lines under the write box until 3 free-text turns, "Why?" on results (the choice + Li's journal lines), gold-underlined terms with tooltips (only learned Encyclopedia entries), How to play (strip + New life screen; six points).
+- Not done: measuring the ch. 8 real-time targets (needs a human playtest, V6).
 
 ## Phase 2 – Stage 1 complete: the slave arc (→ freedom, 8–12 h)
 Freedom routes, contract seasons, Year 100 story calendar, timeskip summary, Journal/RECAP, save slots. Done when simulated strong careers reach freedom at 13–15 and the owner has played to freedom.
