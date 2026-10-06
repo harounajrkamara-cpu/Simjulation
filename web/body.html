@@ -1,3 +1,40 @@
+<div id="newlife" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="nl-title">
+  <div class="overlay-inner">
+    <span class="seal big" aria-hidden="true">兵</span>
+    <h1 id="nl-title">How will Li's story be told?</h1>
+    <p class="lead">Everything is already chosen. Change what you like, or just begin.</p>
+    <div class="settings">
+      <fieldset><legend>Way of play</legend>
+        <label><input type="radio" name="way" value="ironman" checked> <span><b>Ironman</b><br><small>What happens, stays.</small></span></label>
+        <label class="off"><input type="radio" name="way" value="story" disabled> <span><b>Story mode</b><br><small>Return to save points (comes later).</small></span></label>
+      </fieldset>
+      <fieldset><legend>Storyteller</legend>
+        <label><input type="radio" name="ai" value="claude" checked> <span><b>Claude</b><br><small>Write anything. Uses your own Claude account; asks permission once.</small></span></label>
+        <label><input type="radio" name="ai" value="plain"> <span><b>Plain chronicle</b><br><small>Template text and numbered choices. Works offline.</small></span></label>
+      </fieldset>
+      <fieldset><legend>Guidance</legend>
+        <label><input type="radio" name="guide" value="full" checked> <span><b>Full hints</b></span></label>
+        <label><input type="radio" name="guide" value="light"> <span><b>Light</b></span></label>
+        <label><input type="radio" name="guide" value="off"> <span><b>Off</b></span></label>
+      </fieldset>
+      <fieldset><legend>Ink speed</legend>
+        <label><input type="radio" name="ink" value="slow"> <span><b>Slow ink</b></span></label>
+        <label><input type="radio" name="ink" value="fast" checked> <span><b>Fast</b></span></label>
+        <label><input type="radio" name="ink" value="instant"> <span><b>Instant</b></span></label>
+      </fieldset>
+    </div>
+    <button id="begin" type="button" class="primary">Begin</button>
+  </div>
+</div>
+<div id="prologue" class="overlay prologue" hidden role="dialog" aria-modal="true" aria-label="Prologue">
+  <div class="overlay-inner">
+    <span id="pr-label" class="label"></span>
+    <p id="pr-text" class="pr-text"></p>
+    <p id="pr-quote" class="pr-quote"></p>
+    <div class="pr-bar"><span id="pr-dots" class="pr-dots" aria-hidden="true"></span>
+      <button id="pr-skip" type="button">Skip</button><button id="pr-next" type="button" class="primary">Continue</button></div>
+  </div>
+</div>
 <div class="app">
   <header class="strip">
     <span class="seal" aria-hidden="true">兵</span>

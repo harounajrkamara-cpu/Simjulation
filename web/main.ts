@@ -4,6 +4,7 @@ import { Narration, narrate, shouldNarrate, templateText } from '../ai/narrate';
 import { FactPacket, buildPacket } from '../ai/packet';
 import { fromSave, li, met, options, recordNote, toSave } from '../engine/engine';
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
+import { PROLOGUE } from '../engine/content';
 import { duelPanel } from '../engine/render';
 import { GameState } from '../engine/types';
 import { pageAdapter } from './ai-page';
@@ -114,7 +115,7 @@ function show(text: string, said?: string, newPeople: string[] = []) {
 /** Ink: the approved narration appears word by word; a click finishes it (ch. 7). */
 function inkReveal(el: HTMLElement, text: string): Promise<void> {
   const words = text.split(/(\s+)/);
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = text; return Promise.resolve(); }
+  if (settings.ink === 'instant' || matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = text; return Promise.resolve(); }
   return new Promise((done) => {
     let i = 0;
     el.textContent = '';
@@ -123,7 +124,7 @@ function inkReveal(el: HTMLElement, text: string): Promise<void> {
       if (i >= words.length) return finish();
       el.append(words.slice(i, i + 3).join(''));
       i += 3;
-    }, 45);
+    }, settings.ink === 'slow' ? 110 : 45);
     el.addEventListener('click', finish);
   });
 }
@@ -339,6 +340,60 @@ function start(fresh = false) {
   show(note ? `${note}\n\n${g.text}` : g.text);
   note = '';
   persist();
+  openNewLife(); // a new life starts with the settings and the prologue (GE ch. 8)
+}
+
+// ---------- New life and the prologue (GE ch. 8) ----------
+
+interface Settings { ai: 'claude' | 'plain'; guide: 'full' | 'light' | 'off'; ink: 'slow' | 'fast' | 'instant' }
+const SETTINGS_KEY = 'sengoku-soldier-settings';
+function loadSettings(): Settings {
+  try { return { ai: 'claude', guide: 'full', ink: 'fast', ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }; }
+  catch { return { ai: 'claude', guide: 'full', ink: 'fast' }; }
+}
+let settings = loadSettings();
+aiOn = settings.ai === 'claude';
+
+function openNewLife() {
+  const box = $('newlife');
+  for (const [name, value] of Object.entries(settings)) {
+    const r = box.querySelector<HTMLInputElement>(`input[name="${name}"][value="${value}"]`);
+    if (r) r.checked = true;
+  }
+  box.hidden = false;
+  $('begin').focus();
+}
+
+$('begin').onclick = () => {
+  const box = $('newlife');
+  const pick = (name: string) => box.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value;
+  settings = { ai: (pick('ai') ?? 'claude') as Settings['ai'], guide: (pick('guide') ?? 'full') as Settings['guide'], ink: (pick('ink') ?? 'fast') as Settings['ink'] };
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* not kept: fine */ }
+  aiOn = settings.ai === 'claude';
+  setStoryteller();
+  box.hidden = true;
+  playPrologue();
+};
+
+function playPrologue() {
+  const box = $('prologue');
+  let i = 0;
+  const show = () => {
+    const slide = PROLOGUE[i];
+    $('pr-label').textContent = slide.label;
+    $('pr-text').textContent = slide.text;
+    $('pr-quote').textContent = slide.quote ?? '';
+    // Restart the ink animation for each slide.
+    for (const id of ['pr-text', 'pr-quote']) { const el = $(id); el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; }
+    $('pr-dots').innerHTML = PROLOGUE.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
+    $('pr-next').textContent = i === PROLOGUE.length - 1 ? 'Begin the chronicle' : 'Continue';
+  };
+  const close = () => { box.hidden = true; input.focus({ preventScroll: true }); };
+  $('pr-next').onclick = () => { if (++i >= PROLOGUE.length) close(); else show(); };
+  $('pr-skip').onclick = close;
+  box.hidden = false;
+  show();
+  $('pr-next').focus();
 }
 
 $('opts').addEventListener('click', (e) => {

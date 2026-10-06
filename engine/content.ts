@@ -154,3 +154,14 @@ export const ENCYCLOPEDIA: Entry[] = [
   { id: 'price', title: 'Li\'s price', text: 'Rokubei says fifteen ryō. Raizen paid eight for him.', needs: 'own_price_15' },
   { id: 'papers', title: 'The slave papers', text: 'Every slave\'s name and price, kept in Rokubei\'s iron box.', needs: 'papers_in_iron_box' },
 ];
+
+/** Prologue (Game Experience ch. 8): 7 hand-written ink slides, the same every time. Only what Li knows (WB 10.2). */
+export const PROLOGUE: { label: string; text: string; quote?: string }[] = [
+  { label: 'Four hundred years', text: 'For four hundred years, one Empire ruled the land from Amatsu-kyō.' },
+  { label: 'Year 0', text: 'Two princes, two crowns, one city on fire. The Burning.' },
+  { label: 'Seven crowns', text: 'Seven Wardens crowned themselves. Seven kingdoms.' },
+  { label: 'A hundred years', text: 'A hundred years of war. On the Kurose river, banners face each other across the water.' },
+  { label: 'A memory', text: 'Two swords crossed on a wall. A man\'s laugh.', quote: '"Little Dragon."' },
+  { label: 'A memory', text: 'Snow. A lantern burning in the dark. A coat with a white rock stitched on the shoulder, walking ahead.', quote: '"Never say that name, Li. Not to anyone."' },
+  { label: 'Year 100 · Spring', text: 'A boy carries a load behind a red crane banner, toward Kōri fort.' },
+];

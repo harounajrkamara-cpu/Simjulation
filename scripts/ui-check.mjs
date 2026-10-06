@@ -15,6 +15,22 @@ const VIEWS = [{ name: 'desktop', width: 1440, height: 900 }, { name: 'panel', w
 const TABS = ['map', 'li', 'army', 'people', 'journal', 'encyclopedia'];
 const problems = [];
 
+/** A new life opens with the New life screen and the prologue (GE ch. 8): check them, then go into the game. */
+async function passIntro(page, name, audit) {
+  const nl = await page.waitForSelector('#newlife:not([hidden])', { timeout: 5000 }).catch(() => null);
+  if (!nl) { problems.push(`${name}: no New life screen`); return; }
+  if (audit) { await page.waitForTimeout(400); for (const p of await page.evaluate(audit)) problems.push(`${name} / new life: ${p}`); await page.screenshot({ path: `${out}/${name}-0-newlife.png` }); }
+  await page.click('#begin');
+  await page.waitForSelector('#prologue:not([hidden])', { timeout: 3000 }).catch(() => problems.push(`${name}: no prologue`));
+  if (audit) {
+    for (let i = 0; i < 5; i++) await page.click('#pr-next');
+    await page.waitForTimeout(800);
+    for (const p of await page.evaluate(audit)) problems.push(`${name} / prologue: ${p}`);
+    await page.screenshot({ path: `${out}/${name}-0-prologue.png` });
+  }
+  await page.click('#pr-skip');
+}
+
 /** Runs in the page: returns contrast, target, emoji and overflow problems for what is visible now. */
 function audit() {
   const lum = (c) => {
@@ -43,7 +59,8 @@ function audit() {
   }
   for (const el of document.querySelectorAll('button, a[href], input, textarea, [role="tab"]')) {
     if (!visible(el) || el.closest('.sr')) continue;
-    const r = el.getBoundingClientRect();
+    // A radio or checkbox inside a label is clicked through its label: measure that.
+    const r = (el.matches('input[type=radio], input[type=checkbox]') && el.closest('label') || el).getBoundingClientRect();
     if (r.height < 44 || r.width < 44) found.push(`target ${Math.round(r.width)}×${Math.round(r.height)} < 44: "${(el.textContent || el.getAttribute('aria-label') || el.id).trim().slice(0, 30)}"`);
   }
   const emoji = document.body.innerText.replace(/⚠︎/g, '').match(/\p{Extended_Pictographic}/gu);
@@ -68,6 +85,7 @@ for (const v of VIEWS) {
   await page.goto(url);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await passIntro(page, v.name, audit);
   await page.waitForSelector('.opt');
   // Let the ink fade-in finish before measuring or taking a picture.
   const check = async (label) => { await page.waitForTimeout(700); for (const p of await page.evaluate(audit)) problems.push(`${v.name} / ${label}: ${p}`); };
@@ -111,6 +129,7 @@ const FAKE_CLAUDE = () => {
   await page.goto(url);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await passIntro(page, 'ai');
   await page.waitForSelector('#storyteller[aria-pressed="true"]', { timeout: 5000 }).catch(() => problems.push('ai: storyteller did not switch to Claude'));
   await page.fill('#in', 'I help Old Sukezō with the cooking and the wounded');
   await page.press('#in', 'Enter');
@@ -146,6 +165,7 @@ const FAKE_CLAUDE = () => {
   await page.goto(url);
   await page.evaluate(() => localStorage.setItem('sengoku-soldier-save', JSON.stringify({ game: 'sengoku-soldier', saveVersion: 1, dataVersion: 1, worldNumber: 1, hash: 'x', events: [] })));
   await page.reload();
+  await passIntro(page, 'old save');
   if (!(await page.waitForSelector('.opt', { timeout: 5000 }).catch(() => null))) problems.push('old save: no new game started');
   else if (!(await page.textContent('#log')).includes('A new life begins')) problems.push('old save: no note about the old save');
   await page.close();
