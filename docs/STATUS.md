@@ -3,10 +3,11 @@
 ## ▶ Start the next session with this (copy-paste)
 > Continue building Sengoku Soldier in the Simjulation repo on branch **`build/stage-1`** (push there; never to main; no PRs).
 > Read `CLAUDE.md`, `docs/STATUS.md`, `docs/MASTER_BUILD_PROMPT.md` and `docs/BUILD_PLAN.md` first, then only the chapters the milestone names.
-> Vertical slice V1–V6 done (owner playtest + one balance question open, see BUILD_PLAN V6). Phase 2 first version done (levy, border raids, three freedom routes; content is a proposal for owner review). Next: **finish Phase 2** (escape route, officer head, contract seasons, beats between raids, money earning) — see the Phase 2 report in BUILD_PLAN (`docs/GAME_EXPERIENCE.md` ch. 8: New life screen, 7-slide prologue, first-week teaching beats, Daisuke sparring bout, GUIDE hints, example lines, "Why?", tooltips, How to play). Then V5 (big moments + pacing core) and V6 (slice test).
+> Vertical slice V1–V6 done. Phase 2 (slave arc → freedom) is complete as a 📝 proposal: levy, border raids, officers at the ford, yearly contract, money, all four freedom routes (merit, officer head, buying, Raizen, escape), beats between raids — see "Phase 2 report" in BUILD_PLAN. Open for the owner: playtest, the C-vs-B balance question (BUILD_PLAN V6), and the Phase 2 questions (BUILD_PLAN Phase 2 "Owner decisions").
+> Next build work (only after the owner's answers, or if he says go): the rest of the Phase 2 row — timeskip summary screen, Journal/RECAP polish, save slots. Stage 2 (soldier life) needs owner design first, including where a runaway starts.
 > Verify with `npm test`, `npm run typecheck` and `npm run ui:check` (start `npm run web` first). Publish the game with `node scripts/build-artifact.mjs` and republish `dist-web/sengoku-soldier.html` to https://claude.ai/artifact/AcDN6DV8D9SC5dBJybhcdx (keep the `sample` capability). Update STATUS and BUILD_PLAN at the end.
 
-**Where things are (Oct 6):** code + newest docs on `build/stage-1` (V1–V3 done + UI feedback round). Design history on `design/world-bible`. `main` = old prototype. Plugins are enabled in `.claude/settings.json`; the playwright plugin needs Google Chrome (missing in cloud), so use `npm run ui:check` (playwright-core + /opt/pw-browsers Chromium). Owner feedback so far: loves the war chronicle; story and choices now scroll as one column (fixed Oct 6).
+**Where things are (Oct 6, evening):** code + newest docs on `build/stage-1`: V1–V6 done, Phase 2 complete (proposal), 163 tests. Design history on `design/world-bible`. `main` = old prototype. Plugins are enabled in `.claude/settings.json`; the playwright plugin needs Google Chrome (missing in cloud), so use `npm run ui:check` (playwright-core + /opt/pw-browsers Chromium). Owner feedback so far: loves the war chronicle; story and choices scroll as one column (fixed Oct 6).
 
 
 ## Where we are
@@ -23,7 +24,7 @@
   4. Court, kingdoms, full world
 
 ## Next step
-- **Building (Oct 5), branch `build/stage-1`:** V1 Engine catch-up ✅ (rumours, third person, WAIT rules; 32 tests) · V2 War chronicle UI ✅ (approved look, all tabs, phone layout, `npm run ui:check`) · V3 AI layer ✅ (interpreter, narrator, code fact check, golden set; Claude in the page + chat packet). **NEXT: V4 Onboarding** (`docs/BUILD_PLAN.md`); owner: try free text with Claude on the published page. Local play: `play` skill + `npm run turn` on `build/stage-1`.
+- **Building, branch `build/stage-1`:** V1–V6 ✅ (vertical slice) · Phase 2 ✅ complete as a 📝 proposal (Oct 6 evening: officers at the ford, yearly contract, money, escape to Tatara, beats between raids; 163 tests). **NEXT:** owner playtest + answers to the V6 balance question and the five Phase 2 questions (BUILD_PLAN), then the rest of the Phase 2 row (timeskip summary, RECAP, save slots). Local play: `play` skill + `npm run turn`.
 - Done: ch. 10, 12b, 13, 13b, 13c, numbers sheet v0.2. `docs/WORLD_ATLAS.md` v0.3 ✅ approved.
 - Done (Oct 5): full read + fact check of all files; consistency fixes applied; duel balance fix and army delegation rule approved (numbers sheet v0.3). **Design complete → build stage 1.**
 - Decided: crossbows exist (Tatara, the Smiths' Kingdom). The two giants stay close in size and both are internally divided.

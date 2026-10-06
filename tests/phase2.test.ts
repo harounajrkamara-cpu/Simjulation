@@ -43,9 +43,9 @@ describe('the Hagiwara levy and the border raids', () => {
 });
 
 describe('freedom (Numbers §12: a strong player is free at 13–15)', () => {
-  it('a strong career earns thirty merit in service and is freed by the merit law in time', () => {
+  it('a strong career is freed under the merit law (thirty merit or an officer\'s head) in time', () => {
     const c = strongCareer();
-    expect(c.merit).toBeGreaterThanOrEqual(30);
+    expect(['merit', 'officer head']).toContain(c.how);
     expect(c.freeAt).toBeDefined();
     expect(c.freeAt!.age).toBeGreaterThanOrEqual(13);
     expect(c.freeAt!.age).toBeLessThanOrEqual(15);
@@ -54,8 +54,8 @@ describe('freedom (Numbers §12: a strong player is free at 13–15)', () => {
   it('buying freedom: fifteen ryō paid to Rokubei', () => {
     const s = startGame();
     s.knowledge.push('own_price_15');
-    s.money = PRICE_MON + 5;
     toDay(s, 12, 'evening');
+    s.money = PRICE_MON + 5;
     const o = options(s).find((x) => x.action.kind === 'buy_freedom')!;
     expect(o.label).toBe('Pay Rokubei the price: fifteen ryō');
     handleInput(s, o.key);

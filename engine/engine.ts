@@ -1,6 +1,6 @@
 import { dateFromIndex, dayIndex, nextPart, seasonKey } from './calendar';
 import { BEATS, DUELS, DuelTemplate, Effect, RUMOURS, STORY as BASE_STORY, StoryEvent, setRestCheck } from './content';
-import { ARC, MERIT_FOR_FREEDOM, PRICE_MON, raidIndexOn, setRelField, skirmishTemplate } from './campaign';
+import { ARC, ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PAYDAY_TIP, PRICE_MON, SHARE_MIN_RESPECT, SHARE_PER_MERIT, STITCH_TIP, fordStory, inService, officerOf, officerTemplate, raidIndexOn, setRelField, skirmishTemplate } from './campaign';
 import { relValue } from './relations';
 import { restDone } from './director';
 import { DuelMove, DuelState, MOVE_LABEL, autoMove, duelRound } from './duel';
@@ -184,6 +184,7 @@ export function options(s: GameState): Option[] {
     const risk = knowsPatrol ? (gonzaPatrols(s) ? 'Gonza patrols tonight!' : 'Gonza does not patrol tonight') : 'Gonza sometimes walks the camp at night';
     opts.push({ label: 'Train in secret with two sticks', action: { kind: 'train', target: 'two_swords' }, test: '⚔️ two swords', risk });
     opts.push({ label: 'Train the body in secret (strength, endurance)', action: { kind: 'train', target: 'VAL' }, test: '⚔️ VAL', risk });
+    if (canTryEscape(s)) opts.push({ label: 'Run for Tatara, over the Black Hills', action: { kind: 'escape' }, test: 'stealth, endurance', risk: 'hunted; if caught, punished' });
   }
   for (const id of ['sayo', 'kaname', 'daisuke']) {
     if (isVisitingToday(s, id) && s.relations[id].lastTalkDay !== today(s)) opts.unshift({ label: `Talk to ${s.characters[id].name} (visiting today)`, action: { kind: 'talk', target: id } });
@@ -195,7 +196,7 @@ export function options(s: GameState): Option[] {
 
 function storyAt(s: GameState): StoryEvent[] {
   const raid = raidToday(s);
-  return STORY.filter((e) => e.part === s.date.part && !has(s, `story_${e.id}`) && (e.day === -1 ? !!e.when?.(s) : e.day === today(s))).concat(raid ? [raid] : []);
+  return STORY.filter((e) => e.part === s.date.part && !has(s, `story_${e.id}`) && (e.day === -1 ? !!e.when?.(s) : e.day === today(s) && (!e.when || e.when(s)))).concat(raid ? [raid] : []);
 }
 setRestCheck(restDone);
 setRelField((s, npc, f) => relValue(s.relations[npc], f, today(s)));
@@ -205,14 +206,19 @@ const STORY: StoryEvent[] = BASE_STORY.concat(ARC);
 
 /** A duel template by id, including the generated border skirmishes. */
 export function duelTemplate(id: string): DuelTemplate {
-  return DUELS[id] ?? skirmishTemplate(Number(id.replace('skirmish_', '')));
+  if (DUELS[id]) return DUELS[id];
+  return id.startsWith('officer_') ? officerTemplate(Number(id.replace('officer_', ''))) : skirmishTemplate(Number(id.replace('skirmish_', '')));
 }
+
+/** Fights at the ford count as Kurogane service (merit law). */
+const isFordFight = (id: string) => id.startsWith('skirmish_') || id.startsWith('officer_');
 
 /** Border raids at the ford while Li serves in the Hagiwara levy (fixed schedule, campaign.ts). */
 function raidToday(s: GameState): StoryEvent | undefined {
-  if (has(s, 'choice_levy') !== 3 || s.date.part !== 'morning') return undefined;
+  if (!inService(s) || li(s).status !== 'slave' || s.date.part !== 'morning') return undefined;
   const n = raidIndexOn(today(s));
-  if (n === undefined || has(s, `story_skirmish_${n}`)) return undefined;
+  if (n === undefined || has(s, `story_skirmish_${n}`) || has(s, `story_ford_${n}`)) return undefined;
+  if (officerOf(n)) return fordStory(n, today(s));
   return { id: `skirmish_${n}`, title: 'The ford', day: today(s), part: 'morning', text: 'Bells at dawn: Suiren boats at the ford.', journal: 'Suiren raiders came over the ford at dawn. The levy went to meet them.', duel: `skirmish_${n}` };
 }
 
@@ -223,6 +229,8 @@ export function storyDrafts(s: GameState): Draft[] {
     out.push({ type: 'story', fact: e.text, visible: true, journal: e.journal, data: { id: e.id, tier: e.tier, card: e.card } });
     if (e.id === 'nickname') out.push({ type: 'knowledge', fact: 'Li is called Kurose no Ryū', visible: false, data: { key: 'nickname_kurose_no_ryu' } });
     if (e.id.startsWith('freed_')) out.push(...freedom(s, e.id));
+    if (e.id.startsWith('contract_')) out.push(...contractPay(s));
+    out.push(...effectDrafts(s, e.effect));
     out.push({ type: 'flag', fact: `story ${e.id} done`, visible: false, data: { key: `story_${e.id}`, value: 1 } });
     for (const m of e.meet ?? []) out.push({ type: 'flag', fact: `met ${m}`, visible: false, data: { key: `met_${m}`, value: 1 } });
     if (e.duel) out.push(...startDuel(s, e.duel));
@@ -233,7 +241,36 @@ export function storyDrafts(s: GameState): Draft[] {
 
 /** The story choice open right now, if any (it lapses when the part of the day ends). */
 export function openChoice(s: GameState): StoryEvent | undefined {
-  return STORY.find((e) => e.choice && has(s, `choice_${e.choice.id}`) === 1);
+  const fixed = STORY.find((e) => e.choice && has(s, `choice_${e.choice.id}`) === 1);
+  if (fixed) return fixed;
+  const ford = Object.keys(s.flags).find((k) => /^choice_ford_\d+$/.test(k) && s.flags[k] === 1);
+  return ford ? choiceStory(ford.slice('choice_'.length)) : undefined;
+}
+
+/** The story event that owns a choice id (hand-written, or a generated ford with an officer). */
+function choiceStory(id: string): StoryEvent | undefined {
+  const fixed = STORY.find((e) => e.choice?.id === id);
+  if (fixed || !id.startsWith('ford_')) return fixed;
+  return fordStory(Number(id.slice('ford_'.length)), -1);
+}
+
+/** End of the raiding season: Raizen's share of the Kurogane reward for the merit earned since the last one. */
+function contractPay(s: GameState): Draft[] {
+  const owed = (s.flags.merit_service ?? 0) - (s.flags.merit_shared ?? 0);
+  if (owed <= 0 || li(s).status !== 'slave') return [];
+  const out: Draft[] = [{ type: 'flag', fact: 'reward shared', visible: false, data: { key: 'merit_shared', value: s.flags.merit_service ?? 0 } }];
+  if (relValue(s.relations.raizen, 'respect', today(s)) >= SHARE_MIN_RESPECT) {
+    const amount = owed * SHARE_PER_MERIT;
+    out.push({ type: 'money', fact: `Raizen gives Li part of the Kurogane reward for his ${owed} merit: ${amount} mon. "Slaves get nothing," he says. "This is not nothing. Don't drink it."`, visible: true, journal: `Raizen shared the Kurogane reward with me: ${amount} mon.`, data: { amount } });
+  } else {
+    out.push({ type: 'work', fact: 'Kurogane pays the reward for the levy\'s merit to the owners. Raizen keeps Li\'s share; slaves get none.', visible: true, data: {} });
+  }
+  return out;
+}
+
+/** Escape becomes possible once Li knows where the papers are and where a runaway is safe (WB 10.4 route 4). */
+function canTryEscape(s: GameState): boolean {
+  return li(s).status === 'slave' && s.knowledge.includes('tatara_refuge') && s.knowledge.includes('papers_in_iron_box');
 }
 
 function nextBeat(s: GameState, npc: string) {
@@ -275,6 +312,7 @@ export function resolve(s: GameState, a: Action): Draft[] {
     case 'chores': {
       out.push({ type: 'work', fact: 'Li hauls water, splits wood and cleans armour all through the ' + part + '.', visible: true, data: {} });
       out.push(...skill(s, 'camp_work', 0.1), ...skill(s, 'endurance', 0.05));
+      if (part === 'morning' && (s.date.day === 1 || s.date.day === 16) && c.status === 'slave') out.push({ type: 'money', fact: `A soldier with fresh pay tosses Li ${PAYDAY_TIP} mon for running an errand.`, visible: true, data: { amount: PAYDAY_TIP } });
       out.push({ type: 'flag', fact: 'chores done', visible: false, data: { key: 'chores_total', value: has(s, 'chores_total') + 1 } });
       if ((has(s, 'chores_total') + 1) % 10 === 0) out.push(rel('rokubei', 'trust', 2, 'Works hard without being told', 1095), rel('raizen', 'trust', 1, 'A slave who does his work', 1095));
       break;
@@ -282,6 +320,7 @@ export function resolve(s: GameState, a: Action): Draft[] {
     case 'help_sukezo': {
       out.push({ type: 'work', fact: 'Li helps Old Sukezō at the cooking fire and with a soldier\'s infected cut.', visible: true, data: {} });
       out.push(...skill(s, 'medicine', 0.15));
+      if (part === 'afternoon' && raidIndexOn(today(s)) !== undefined) out.push({ type: 'money', fact: `Levy men come back from the ford with cuts. One that Li stitches presses ${STITCH_TIP} mon into his hand.`, visible: true, data: { amount: STITCH_TIP } });
       if (s.relations.sukezo.lastTalkDay !== today(s)) out.push(rel('sukezo', 'affection', 1, 'Helped me', 1095));
       out.push({ type: 'flag', fact: 'chores done', visible: false, data: { key: 'chores_total', value: has(s, 'chores_total') + 1 } });
       break;
@@ -358,6 +397,7 @@ export function resolve(s: GameState, a: Action): Draft[] {
         : 'In the dark behind the horse lines Li moves through Raizen\'s steps with two sticks, again and again.', visible: true, data: {} });
       if (target === 'VAL') out.push(...growth(s, 'stat', 'VAL', 0.02, true, 'night training'), ...skill(s, 'endurance', 0.1));
       else out.push(...growth(s, 'style', 'two_swords', 0.02, true, 'night training'));
+      out.push(...skill(s, 'stealth', 0.05));
       out.push(...fatigue(s, c.fatigue + 1));
       out.push({ type: 'flag', fact: 'trained', visible: false, data: { key: 'trained_nights', value: has(s, 'trained_nights') + 1 } });
       break;
@@ -370,6 +410,9 @@ export function resolve(s: GameState, a: Action): Draft[] {
       break;
     case 'choose':
       out.push(...choose(s, a.target ?? ''));
+      break;
+    case 'escape':
+      out.push(...escape(s));
       break;
     case 'buy_freedom': {
       if (li(s).status !== 'slave' || s.money < PRICE_MON) return [{ type: 'alert', fact: 'Li does not have fifteen ryō.', visible: true, data: {} }];
@@ -385,7 +428,7 @@ export function resolve(s: GameState, a: Action): Draft[] {
 /** A story choice (GE ch. 8 teaching beats, later story): its outcome, or the duel it starts. */
 function choose(s: GameState, target: string): Draft[] {
   const [id, idx] = target.split(':');
-  const ev = STORY.find((e) => e.choice?.id === id);
+  const ev = choiceStory(id);
   const opt = ev?.choice?.options[Number(idx)];
   if (!ev || !opt || has(s, `choice_${id}`) !== 1) return [{ type: 'alert', fact: 'That chance has passed.', visible: true, data: {} }];
   const out: Draft[] = [{ type: 'flag', fact: `choice ${id} made`, visible: false, data: { key: `choice_${id}`, value: 3 + Number(idx) } }];
@@ -393,18 +436,58 @@ function choose(s: GameState, target: string): Draft[] {
   const res = opt.outcome!;
   out.push({ type: 'story', fact: res.fact, visible: true, journal: res.journal, data: { choice: id, option: Number(idx) } });
   if (res.skill) out.push(...skill(s, res.skill[0], res.skill[1]));
+  if (res.flag) out.push({ type: 'flag', fact: `flag ${res.flag[0]} = ${res.flag[1]}`, visible: false, data: { key: res.flag[0], value: res.flag[1] } });
+  if (res.money) out.push({ type: 'money', fact: `Li gets ${res.money} mon`, visible: true, data: { amount: res.money } });
   for (const r of res.rel ?? []) out.push(rel(r.npc, r.field, r.value, r.reason, r.fade));
   for (const m of res.memory ?? []) out.push({ type: 'memory', fact: `${s.characters[m.npc]?.name ?? m.npc} remembers`, visible: false, data: { ...m } });
   return out;
 }
 
 /** Li becomes free (WB 10.4 freedom routes). The end of stage 1. */
-function freedom(s: GameState, how: string): Draft[] {
+function freedom(s: GameState, how: string, role = 'a free youth of the Red Crane camp'): Draft[] {
   return [
-    { type: 'status', fact: 'Li is free', visible: true, data: { char: s.liId, status: 'free', role: 'a free youth of the Red Crane camp' } },
+    { type: 'status', fact: 'Li is free', visible: true, data: { char: s.liId, status: 'free', role } },
     { type: 'knowledge', fact: `freed: ${how}`, visible: false, data: { key: 'free' } },
     { type: 'knowledge', fact: 'stage 1 complete', visible: false, data: { key: 'stage1_complete' } },
   ];
+}
+
+/**
+ * Escape (WB 10.4 route 4, 📝 proposal): no dice. Li gets away if, on that night, Gonza does not walk the camp and Li
+ * is quiet enough, fit enough and fresh enough; the first check that fails says why he was caught.
+ */
+function escape(s: GameState): Draft[] {
+  if (!canTryEscape(s)) return [{ type: 'alert', fact: 'Li does not know where a runaway could go.', visible: true, data: {} }];
+  const c = li(s);
+  const withHachi = has(s, 'hachi_asked_promise') > 0 && s.characters.hachi?.alive;
+  const why = c.wound > ESCAPE_NEEDS.maxWound ? 'his wound opens on the first hill, and he cannot keep the pace'
+    : c.fatigue > ESCAPE_NEEDS.maxFatigue ? 'he is already worn out, and by dawn his legs give way'
+    : gonzaPatrols(s) ? 'Gonza is walking the camp tonight, and his torch finds Li at the horse lines'
+    : (c.skills.stealth ?? 0) < ESCAPE_NEEDS.stealth ? 'a sentry hears him behind the horse lines'
+    : (c.skills.endurance ?? 0) < ESCAPE_NEEDS.endurance ? 'the band\'s hunters run him down on the second day'
+    : undefined;
+  if (why) {
+    return [
+      { type: 'story', fact: `Li slips away in the dark, east toward the Black Hills. He is caught: ${why}. Gonza beats him in front of the band, and Rokubei writes it in the ledger.`, visible: true, journal: `I ran for Tatara and was caught: ${why}.`, data: { escape: 'caught', why } },
+      { type: 'wound', fact: 'Li is wounded', visible: true, data: { char: c.id, wound: Math.max(c.wound, 2) as Wound, healDays: HEAL_DAYS[2] } },
+      ...fatigue(s, 3),
+      rel('raizen', 'trust', -25, 'Tried to run', 1095, true),
+      rel('gonza', 'rivalry', 8, 'A runaway rat', 1095),
+      { type: 'memory', fact: 'The band remembers: the slave boy tried to run.', visible: false, data: { npc: 'raizen', what: 'The slave boy tried to run for Tatara.', source: 'saw', certainty: 100, weight: 60, key: 'li_ran' } },
+      { type: 'flag', fact: 'escape caught', visible: false, data: { key: 'escape_caught', value: has(s, 'escape_caught') + 1 } },
+    ];
+  }
+  const out: Draft[] = [
+    { type: 'story', fact: withHachi
+      ? 'On a night Gonza does not walk the camp, Li wakes Hachi with a hand over his mouth. They go out past the horse lines without a sound and walk east until the Black Hills hide the fires. Three days later, footsore and starving, they come down into a valley full of forge smoke. Nobody there asks whose they are.'
+      : 'On a night Gonza does not walk the camp, Li goes out past the horse lines without a sound and walks east until the Black Hills hide the fires. Three days later, footsore and starving, he comes down into a valley full of forge smoke. Nobody there asks whose he is.',
+    visible: true, journal: withHachi ? 'Legend: I ran with Hachi over the Black Hills into Tatara, where nobody owns anyone. The Red Crane will hunt us.' : 'Legend: I ran over the Black Hills into Tatara, where nobody owns anyone. The Red Crane will hunt me.',
+    data: { id: 'freed_escape', tier: 'legend', card: { label: 'Legend moment', title: 'Free', native: '自由', meaning: 'by his own feet, and hunted', witnesses: withHachi ? 'Seen by: Hachi' : 'Seen by: nobody' } } },
+    ...freedom(s, 'freed_escape', 'a runaway in Tatara, hunted by the Red Crane'),
+    { type: 'knowledge', fact: 'Li is hunted', visible: false, data: { key: 'hunted' } },
+  ];
+  if (withHachi) out.push({ type: 'status', fact: 'Hachi ran with Li', visible: true, data: { char: 'hachi', status: 'free', role: 'a runaway in Tatara, at Li\'s side' } }, { type: 'flag', fact: 'promise kept', visible: false, data: { key: 'hachi_ran_with_li', value: 1 } });
+  return out;
 }
 
 // ---------- duels (ch. 6a) ----------
@@ -474,7 +557,9 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
     }
   }
   if (res.merit) out.push({ type: 'flag', fact: `combat merit +${res.merit.amount} (${res.merit.why})`, visible: true, data: { key: 'merit_combat', value: has(s, 'merit_combat') + res.merit.amount } });
-  if (res.merit && d.id.startsWith('skirmish_')) out.push({ type: 'flag', fact: `merit in Kurogane service: ${has(s, 'merit_service') + res.merit.amount} of ${MERIT_FOR_FREEDOM}`, visible: true, data: { key: 'merit_service', value: has(s, 'merit_service') + res.merit.amount } });
+  if (res.money) out.push({ type: 'money', fact: `Li keeps ${res.money} mon`, visible: true, data: { amount: res.money } });
+  if (res.flag) out.push({ type: 'flag', fact: `flag ${res.flag[0]} = ${res.flag[1]}`, visible: false, data: { key: res.flag[0], value: res.flag[1] } });
+  if (res.merit && isFordFight(d.id)) out.push({ type: 'flag', fact: `merit in Kurogane service: ${has(s, 'merit_service') + res.merit.amount} of ${MERIT_FOR_FREEDOM}`, visible: true, data: { key: 'merit_service', value: has(s, 'merit_service') + res.merit.amount } });
   for (const r of res.rel ?? []) out.push(rel(r.npc, r.field, r.value, r.reason, r.fade));
   for (const m of res.memory ?? []) out.push({ type: 'memory', fact: `${s.characters[m.npc]?.name ?? m.npc} remembers the fight`, visible: false, data: { ...m } });
   for (const m of res.meet ?? []) out.push({ type: 'flag', fact: `met ${m}`, visible: false, data: { key: `met_${m}`, value: 1 } });
@@ -588,7 +673,7 @@ export function replay(worldNumber: number, events: GameEvent[]): GameState {
 }
 
 /** Bump when start data or rules change in a way that breaks old saves (ch. 12b #12). */
-export const DATA_VERSION = 4;
+export const DATA_VERSION = 5;
 
 export interface SaveFile {
   game: 'sengoku-soldier';

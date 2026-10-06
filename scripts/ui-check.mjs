@@ -193,6 +193,29 @@ const FAKE_CLAUDE = () => {
     await page.click('#lg-close');
     if (!(await page.textContent('#side-li')).includes('Kurose no Ryū')) problems.push('moments: nickname not on the Li card');
   }
+  // Phase 2: an officer at the ford — a title card, then the choice to go for him.
+  await load(fx.beforeFord);
+  await page.click('.opt[data-key="1"]');
+  if (await page.waitForSelector('#titlecard:not([hidden])', { timeout: 4000 }).catch(() => null)) { await page.waitForTimeout(900); await page.screenshot({ path: `${out}/moment-ford-card.png` }); if (await page.isVisible('#titlecard')) await page.click('#titlecard'); }
+  else problems.push('moments: no title card for the officer raid');
+  await page.waitForTimeout(500);
+  if (!(await page.textContent('.opt[data-key="1"]')).includes('Go for the Gochō')) problems.push('moments: no choice to go for the officer');
+  if (!(await page.textContent('#goals')).includes('officer')) problems.push('moments: the officer route is not in the Goals panel');
+  for (const p of await page.evaluate(audit)) problems.push(`moments / ford: ${p}`);
+  await page.screenshot({ path: `${out}/moment-ford.png` });
+  // Phase 2: running for Tatara — the legend screen names who saw it.
+  await load(fx.beforeEscape);
+  if (!(await page.textContent('#goals')).includes('Run for Tatara')) problems.push('moments: the escape route is not in the Goals panel');
+  await page.click('.opt:has-text("Run for Tatara")');
+  if (!(await page.waitForSelector('#legend:not([hidden])', { timeout: 5000 }).catch(() => null))) problems.push('moments: no legend screen for the escape');
+  else {
+    await page.waitForTimeout(1700);
+    if (!(await page.textContent('#lg-meta')).includes('Seen by')) problems.push('moments: escape legend lists the band as witnesses');
+    for (const p of await page.evaluate(audit)) problems.push(`moments / escape: ${p}`);
+    await page.screenshot({ path: `${out}/moment-escape.png` });
+    await page.click('#lg-close');
+    if (!(await page.textContent('#goals')).includes('hunted')) problems.push('moments: Goals do not say Li is hunted');
+  }
   await page.close();
 }
 

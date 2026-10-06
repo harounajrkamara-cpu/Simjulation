@@ -76,6 +76,9 @@ export interface DuelOutcome {
   grow: number;
   /** Combat merit for a witnessed deed (Numbers §6). */
   merit?: { amount: number; why: string };
+  /** Mon Li keeps (loot, a purse). */
+  money?: number;
+  flag?: [string, number];
   rel?: Rel[];
   memory?: Mem[];
   meet?: string[];
@@ -226,11 +229,13 @@ export interface StoryEvent {
   /** Moment tier (GE ch. 3b): title moments get a title card, legend moments the legend screen. */
   tier?: 'title' | 'legend';
   /** Big brush title shown on the card (defaults to the scene title). */
-  card?: { label: string; title: string; native?: string; meaning?: string };
+  card?: { label: string; title: string; native?: string; meaning?: string; witnesses?: string };
   /** A beat without a fixed day: fires at its part of the first day this holds (checked by the engine). */
   when?: (s: import('./types').GameState) => boolean;
   /** A choice this moment offers (shown first; it lapses when this part of the day ends). */
   choice?: { id: string; options: StoryOption[] };
+  /** What the moment changes (relations, knowledge, memories). */
+  effect?: Effect;
 }
 
 export interface StoryOption {
@@ -376,6 +381,9 @@ export const ENCYCLOPEDIA: Entry[] = [
   { id: 'suiren', title: 'Suiren, the Southern Giant', text: 'The biggest and richest kingdom, south across the Kurose. Li\'s family came from there: a land of lakes and a big city.', needs: 'came_from_suiren' },
   { id: 'red_crane', title: 'The Red Crane band', text: 'About 120 hired swords led by the rōnin Mikumo Raizen, "the Red Crane". Li is their slave.' },
   { id: 'contract', title: 'The Hagiwara contract', text: 'The Hagiwara pay the band for three seasons.', needs: 'contract_three_seasons' },
+  { id: 'contract_renewed', title: 'A year at a time', text: 'Each autumn, when the raiding season ends, Lord Hagiwara renews the band\'s contract for another year.', needs: 'story_contract_100' },
+  { id: 'levy', title: 'The Hagiwara levy', text: 'Men called up for the summer to hold the fords of the Kurose. In the levy a slave is in Kurogane service, and his deeds count under the merit law.', needs: 'story_levy_call' },
+  { id: 'tatara', title: 'Tatara, the Smiths\' Kingdom', text: 'East over the Black Hills. Its king forbids slavery: a runaway who reaches it is nobody\'s property.', needs: 'tatara_refuge' },
   { id: 'hagiwara', title: 'The Hagiwara', text: 'The border lords of Akaishi. They lost two thousand men last year and hired the band.' },
   { id: 'kori', title: 'Kōri fort', text: 'A border fort in Akaishi province, held by Commander Ishizue Gonroku. The band camps below its walls.', needs: 'story_inspection' },
   { id: 'sasabe', title: 'Sasabe', text: 'A village near the camp. Its people bring rice to the band.', needs: 'story_sasabe_rice' },

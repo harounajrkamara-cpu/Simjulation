@@ -1,6 +1,6 @@
 import { ageOn, formatDate } from '../engine/calendar';
 import { ENCYCLOPEDIA, STORY } from '../engine/content';
-import { MERIT_FOR_FREEDOM, PRICE_MON } from '../engine/campaign';
+import { ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PRICE_MON, inService } from '../engine/campaign';
 import { PLACES } from '../engine/data';
 import { has, li, met, today } from '../engine/engine';
 import { visibleOpinion } from '../engine/relations';
@@ -156,10 +156,18 @@ export function goalsHtml(s: GameState): string {
   const c = li(s);
   const routes: string[] = [];
   if (c.status === 'slave') {
-    if (has(s, 'kurogane_merit_law') || has(s, 'choice_levy') === 3) routes.push(`Merit in Kurogane service: ${s.flags.merit_service ?? 0} of ${MERIT_FOR_FREEDOM}${has(s, 'choice_levy') === 3 ? '' : ' (needs service)'}`);
+    const serving = inService(s);
+    if (has(s, 'kurogane_merit_law') || serving) {
+      routes.push(`Merit in Kurogane service: ${s.flags.merit_service ?? 0} of ${MERIT_FOR_FREEDOM}${serving ? '' : ' (needs service)'}`);
+      routes.push(`Or one enemy officer's head, Kogashira or higher, in Kurogane service${serving ? '' : ' (needs service)'}`);
+    }
     if (has(s, 'own_price_15')) routes.push(`His price: fifteen ryō · Li has ${s.money} of ${PRICE_MON} mon`);
+    if (has(s, 'tatara_refuge') && has(s, 'papers_in_iron_box')) {
+      const sk = c.skills;
+      routes.push(`Run for Tatara (hunted) · stealth ${Math.floor(sk.stealth ?? 0)} of ${ESCAPE_NEEDS.stealth} · endurance ${Math.floor(sk.endurance ?? 0)} of ${ESCAPE_NEEDS.endurance} · rested, unhurt, a night without Gonza`);
+    }
   }
-  const now = c.status === 'slave' ? 'Survive · Win his freedom' : 'Free. The first book of his life is closed.';
+  const now = c.status === 'slave' ? 'Survive · Win his freedom' : has(s, 'hunted') ? 'Free, and hunted. The first book of his life is closed.' : 'Free. The first book of his life is closed.';
   const later = c.status === 'slave' ? 'Find his mother and sisters · Learn why his father died' : 'Next: soldier life (stage 2) · Find his mother and sisters · Learn why his father died';
   return `<h2 class="label">Goals</h2><p class="goal-now">${now}</p>${routes.map((r) => `<p class="goal-route">${esc(r)}</p>`).join('')}<p class="goal-later">${later}</p>`;
 }

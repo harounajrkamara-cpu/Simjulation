@@ -421,7 +421,7 @@ function titleCard(label: string, title: string, ms = 2600): Promise<void> {
 
 // ---------- big moments and rest points (GE ch. 3b, 9) ----------
 
-interface Card { label: string; title: string; native?: string; meaning?: string }
+interface Card { label: string; title: string; native?: string; meaning?: string; witnesses?: string }
 
 /** Title cards for big story moments and the turn of a season; the legend screen for legend moments. */
 async function bigMoments(events: GameEvent[], seasonBefore: string) {
@@ -445,7 +445,8 @@ function legendScreen(c: Card, text: string, day: number): Promise<void> {
   $('lg-text').textContent = text.split(/(?<=\.)\s/)[0];
   $('lg-title').textContent = c.title;
   $('lg-meaning').textContent = c.meaning ? `— ${c.meaning} —` : '';
-  $('lg-meta').textContent = `Month ${Math.floor(day / 30) % 12 + 1}, Day ${(day % 30) + 1} · Heard by: ${witnesses.join(' · ')} and the men of the Red Crane. Written in the Journal.`;
+  const heard = c.witnesses ?? `Heard by: ${witnesses.join(' · ')} and the men of the Red Crane`;
+  $('lg-meta').textContent = `Month ${Math.floor(day / 30) % 12 + 1}, Day ${(day % 30) + 1} · ${heard}. Written in the Journal.`;
   const box = $('legend');
   box.hidden = false;
   $('lg-close').focus();

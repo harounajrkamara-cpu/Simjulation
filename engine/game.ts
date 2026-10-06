@@ -53,6 +53,8 @@ export function parseFreeText(s: GameState, input: string): { action?: Action; a
   if (want(/\b(letters?|lessons?|read(ing)?|study|write|writing)\b/)) matches.push({ kind: 'lesson' });
   if (want(/\b(listen(ing)?|rumou?rs?|fire|gossip)\b/)) matches.push({ kind: 'listen' });
   if (want(/\b(eat|food|meal)\b/)) matches.push({ kind: 'eat_with', target: 'hachi' });
+  if (want(/\b(run away|escape|tatara|black hills)\b/)) matches.push({ kind: 'escape' });
+  if (want(/\b(buy|pay)\b.*\b(freedom|free|price)\b/)) matches.push({ kind: 'buy_freedom' });
   const allowed = options(s).map((o) => o.action.kind);
   const fitting = matches.filter((a) => allowed.includes(a.kind));
   if (fitting.length === 1) return { action: fitting[0] };

@@ -163,7 +163,8 @@ export interface Action {
     | 'meet'
     | 'duel'
     | 'choose'
-    | 'buy_freedom';
+    | 'buy_freedom'
+    | 'escape';
   target?: string; // npc id, or training focus
 }
 
