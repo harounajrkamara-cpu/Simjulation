@@ -11,7 +11,8 @@
     "build:web": "vite build web --outDir ../dist-web --emptyOutDir",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "ui:check": "node scripts/ui-check.mjs"
+    "ui:check": "node scripts/ui-check.mjs",
+    "balance": "tsx scripts/balance.ts"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

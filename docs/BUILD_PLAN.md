@@ -18,7 +18,7 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 | V3 ✅ | AI layer | GE ch. 5, 7 | interpreter (asks when unsure) + narrator + fact checker; claude.ai page mode, chat mode and no-AI mode; ink streaming; REWRITE / CORRECT; golden set ≥ 20 fact packets passes |
 | V4 ✅ | Onboarding | GE ch. 8 | New life → prologue → chapter card → first-week beats ✚ → WAIT lesson → Daisuke sparring ✚; GUIDE hints, example lines, "Why?", tooltips, How to play; ch. 8 time targets met in a Playwright run |
 | V5 ✅ | Big moments + pacing core | GE ch. 3b, 9 | 4 moment tiers; title card, duel overlay, legend screen; director phases with beat windows (slave stage); session-end summary |
-| V6 | Slice test | GE ch. 8–9; Numbers §4, §12 | Monte Carlo duel tests; determinism tests; **owner playtest**; fixes done |
+| V6 ✅ (owner playtest open) | Slice test | GE ch. 8–9; Numbers §4, §12 | Monte Carlo duel tests; determinism tests; **owner playtest**; fixes done |
 
 ### V1 report (Oct 5) ✅
 - **Rumours** (`engine/rumours.ts`): every night at the fire each story moves one step along a fixed "who talks to whom" list (same place only; Hisame, Ishizue and Sayo pass nothing on). Witness → "told" (certainty −10), later steps → "rumour" (−20); weight ×0.75; stops below weight 25 or certainty 30. Each retelling: numbers ×1.25 (the Atlas legend check: 120 → 300 men in four retellings), details in [brackets] drop below certainty 60. Hearers' view of Li changes (scaled by certainty, fades in 30 days, Numbers §8); a cruel hearer (Gonza) resents good news (rivalry instead of respect). Li sees a sign when it reaches someone he knows (max 2 a night, ch. 12b #11).
@@ -62,6 +62,19 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 - **Title cards** for title-tier moments (Sticks at Sasabe, Fire on the river) and the turn of each season; **duel display** with two fighters, wound tracks, round and what Li has read; **"A good place to rest"** summary once the quiet after a peak begins (journal lines of the session, game saved).
 - **Evidence**: `npm test` 133 passed (new `tests/v5.test.ts`); `ui:check` loads saves made just before the raid and the nickname (`scripts/fixtures.ts`) and checks the title card, duel display and legend screen; screenshots in `docs/screens/v5/`.
 - **Later**: ceremonies (reward ceremony with witnesses) arrive with stage 2 promotions; more legend moments per ch. 3b as their deeds become possible.
+
+### V6 report (Oct 6) ✅ — owner playtest still open
+- **Full playthrough test** (`tests/v6.test.ts`): from the first morning through Gonza's chest, the cook tent, the inspection, the Sasabe youths, the WAIT lesson, Sayo's visit, the spar, the raid and the nickname, with no dead end; the save of the whole slice reloads to the same state. A player who skips quiet days needs **25 turns** for the chapter (one or two sessions, GE ch. 9).
+- **Balance** (`npm run balance`, `scripts/balance.ts`): every opponent in a fixed grid (strength × five fighting habits) against fixed player policies — no dice.
+  | Matchup | Measured | Target (Numbers §12) |
+  |---|---|---|
+  | C vs B, bad choices (always attack) | 1.9% | < 3% ✅ |
+  | C vs B, good choices (read, then answer his last move) | **3.1%** | 10–20% ⚠️ |
+  | C vs B, perfect reading (upper bound) | 54% | – |
+  | same rank | 48% | a real fight ✅ |
+  | D vs B (two ranks up) | 0% | none ✅ |
+- ⚠️ **Open balance question for the owner:** with ordinary good play a C beats a B about 3% of the time, below the 10–20% target. The result depends almost entirely on reading the opponent (0% to 54%). Options: (a) let observing reveal more (hint after 1 observe already exists; e.g. +observe bonus per Numbers §4), (b) raise the clash bonus, (c) accept 3% as "upsets are rare". Not changed: the Numbers Sheet is approved and changes need the owner.
+- **Determinism**: replay/hash tests across the whole slice. **Owner playtest**: still to do (the owner plays the published page).
 
 ## Phase 2 – Stage 1 complete: the slave arc (→ freedom, 8–12 h)
 Freedom routes, contract seasons, Year 100 story calendar, timeskip summary, Journal/RECAP, save slots. Done when simulated strong careers reach freedom at 13–15 and the owner has played to freedom.
