@@ -13,7 +13,7 @@ import { GameState } from '../engine/types';
 import { pageAdapter } from './ai-page';
 import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
 import {
-  armyPage, chronicle, encyclopediaPage, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
+  armyPage, chronicle, encyclopediaPage, goalsHtml, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
 } from './panels';
 
 // Browser mode: the war chronicle (Game Experience ch. 3, 6). Same engine and save format as the terminal and chat modes.
@@ -162,6 +162,7 @@ function refresh() {
   $('side-li').innerHTML = liCard(state);
   $('side-map').innerHTML = mapSvg(state);
   $('chronicle').innerHTML = chronicle(state);
+  $('goals').innerHTML = goalsHtml(state);
   renderOptions();
   renderGuide();
   if (tab !== 'story' && PAGES[tab]) { $(`tab-${tab}`).innerHTML = PAGES[tab]!(state); markSeen(tab); }
@@ -440,6 +441,7 @@ function legendScreen(c: Card, text: string, day: number): Promise<void> {
   // Witnesses: the band at the fire (Ishizue's men keep to the fort).
   const witnesses = ['raizen', 'gonza', 'rokubei', 'hisame', 'sukezo', 'hachi'].filter((id) => met(state, id) && state.characters[id].alive).map((id) => state.characters[id].name);
   $('lg-native').textContent = c.native ?? '';
+  $('legend').querySelector('.lg-seal')!.textContent = c.native?.endsWith('龍') ? '龍' : (c.native ?? '兵')[0];
   $('lg-text').textContent = text.split(/(?<=\.)\s/)[0];
   $('lg-title').textContent = c.title;
   $('lg-meaning').textContent = c.meaning ? `— ${c.meaning} —` : '';

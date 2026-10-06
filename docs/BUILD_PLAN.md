@@ -77,6 +77,13 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 - **Determinism**: replay/hash tests across the whole slice. **Owner playtest**: still to do (the owner plays the published page).
 
 ## Phase 2 – Stage 1 complete: the slave arc (→ freedom, 8–12 h)
+
+### Phase 2 report (Oct 6) 🟡 first version — content is a 📝 proposal for owner review
+- **Hagiwara levy** (Year 100, Month 4, Day 1): Raizen lends bearers to the levy; Li may step forward (⚠ real fighting) → official Kurogane service — or stay with the baggage.
+- **Border raids** on a fixed schedule (Atlas §9 border war; months 4–9, days 8 and 22, every year): a skirmish duel at the ford against a fixed rotation of five Suiren raiders (`engine/campaign.ts`); a witnessed win = 1 merit in service; wounds at worst Wounded.
+- **Freedom routes** (WB 10.4): merit law — **30 merit in service** frees Li (legend moment "Free · by the merit law of Kurogane", his paper burned, Kurogane pays Raizen 10 ryō); **buying** — "Pay Rokubei the price: fifteen ryō" (15,000 mon) in the evening once the price is known; **Raizen's word** — when his trust and respect pass 85. Each sets Li free (new `status` event), closes stage 1, and the Goals panel shows the routes with progress.
+- **Career simulation** (`scripts/career.ts`, test): a strong player (steps forward, trains at night, reads opponents) is **free at 15** (Year 103, Month 6; 42 skirmishes, 30 won) — inside the Numbers §12 target 13–15.
+- **Not yet**: escape (route 4, hunted, Tatara refuge), an officer's head (needs officers in the raids), the band's contract seasons ending, more hand-written beats between raids (people, rivals, Kaname, Sayo), money earning for the buy route, the timeskip summary screen. Stage 2 (soldier life) starts after freedom.
 Freedom routes, contract seasons, Year 100 story calendar, timeskip summary, Journal/RECAP, save slots. Done when simulated strong careers reach freedom at 13–15 and the owner has played to freedom.
 
 ## Phase 3 – Stage 2: soldier life · Phase 4 – Stage 3: land & family · Phase 5 – Stage 4: court & kingdoms + epilogue

@@ -1,5 +1,7 @@
 import { dateFromIndex, dayIndex, nextPart, seasonKey } from './calendar';
-import { BEATS, DUELS, Effect, RUMOURS, STORY, StoryEvent, setRestCheck } from './content';
+import { BEATS, DUELS, DuelTemplate, Effect, RUMOURS, STORY as BASE_STORY, StoryEvent, setRestCheck } from './content';
+import { ARC, MERIT_FOR_FREEDOM, PRICE_MON, raidIndexOn, setRelField, skirmishTemplate } from './campaign';
+import { relValue } from './relations';
 import { restDone } from './director';
 import { DuelMove, DuelState, MOVE_LABEL, autoMove, duelRound } from './duel';
 import { challengeFactor, rankLetter, rankScores, RANK_BANDS } from './rules';
@@ -67,6 +69,10 @@ export function apply(state: GameState, ev: GameEvent): void {
       break;
     case 'duel':
       state.duel = d.state ? structuredClone(d.state) : null;
+      break;
+    case 'status':
+      state.characters[d.char].status = d.status;
+      state.characters[d.char].role = d.role;
       break;
     case 'heard':
       state.relations[d.npc].heard.push(d.beat);
@@ -154,7 +160,7 @@ export function options(s: GameState): Option[] {
   if (s.duel && !s.duel.over) {
     const moves: Option[] = (['attack', 'counter', 'feint', 'observe'] as DuelMove[]).map((m, i) => ({ key: String(i + 1), label: MOVE_LABEL[m], action: { kind: 'duel', target: m }, test: '⚔️ VAL' }));
     moves.push({ key: '5', label: 'Let the fight play out (simulate)', action: { kind: 'duel', target: 'auto' } });
-    moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: DUELS[s.duel.id]?.fleeRisk ?? 'shame' });
+    moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: duelTemplate(s.duel.id).fleeRisk ?? 'shame' });
     return moves;
   }
   const part = s.date.part;
@@ -172,6 +178,7 @@ export function options(s: GameState): Option[] {
     opts.push({ label: 'Talk to someone (raizen, gonza, rokubei, hisame, sukezo, hachi…)', action: { kind: 'talk' } });
     opts.push({ label: 'Sit near the soldiers\' fire and listen', action: { kind: 'listen' }, test: '👂 rumours' });
     opts.push({ label: 'Rest', action: { kind: 'rest' } });
+    if (li(s).status === 'slave' && s.knowledge.includes('own_price_15') && s.money >= PRICE_MON) opts.unshift({ label: 'Pay Rokubei the price: fifteen ryō', action: { kind: 'buy_freedom' }, test: 'money' });
   } else {
     opts.push({ label: 'Sleep', action: { kind: 'sleep' } });
     const risk = knowsPatrol ? (gonzaPatrols(s) ? 'Gonza patrols tonight!' : 'Gonza does not patrol tonight') : 'Gonza sometimes walks the camp at night';
@@ -187,9 +194,27 @@ export function options(s: GameState): Option[] {
 // ---------- resolve ----------
 
 function storyAt(s: GameState): StoryEvent[] {
-  return STORY.filter((e) => e.part === s.date.part && !has(s, `story_${e.id}`) && (e.day === -1 ? !!e.when?.(s) : e.day === today(s)));
+  const raid = raidToday(s);
+  return STORY.filter((e) => e.part === s.date.part && !has(s, `story_${e.id}`) && (e.day === -1 ? !!e.when?.(s) : e.day === today(s))).concat(raid ? [raid] : []);
 }
 setRestCheck(restDone);
+setRelField((s, npc, f) => relValue(s.relations[npc], f, today(s)));
+
+/** Every hand-written story beat: chapter 1 and the slave arc (Phase 2). */
+const STORY: StoryEvent[] = BASE_STORY.concat(ARC);
+
+/** A duel template by id, including the generated border skirmishes. */
+export function duelTemplate(id: string): DuelTemplate {
+  return DUELS[id] ?? skirmishTemplate(Number(id.replace('skirmish_', '')));
+}
+
+/** Border raids at the ford while Li serves in the Hagiwara levy (fixed schedule, campaign.ts). */
+function raidToday(s: GameState): StoryEvent | undefined {
+  if (has(s, 'choice_levy') !== 3 || s.date.part !== 'morning') return undefined;
+  const n = raidIndexOn(today(s));
+  if (n === undefined || has(s, `story_skirmish_${n}`)) return undefined;
+  return { id: `skirmish_${n}`, title: 'The ford', day: today(s), part: 'morning', text: 'Bells at dawn: Suiren boats at the ford.', journal: 'Suiren raiders came over the ford at dawn. The levy went to meet them.', duel: `skirmish_${n}` };
+}
 
 /** Story beats that fire at the current moment (before the player acts). */
 export function storyDrafts(s: GameState): Draft[] {
@@ -197,6 +222,7 @@ export function storyDrafts(s: GameState): Draft[] {
   for (const e of storyAt(s)) {
     out.push({ type: 'story', fact: e.text, visible: true, journal: e.journal, data: { id: e.id, tier: e.tier, card: e.card } });
     if (e.id === 'nickname') out.push({ type: 'knowledge', fact: 'Li is called Kurose no Ryū', visible: false, data: { key: 'nickname_kurose_no_ryu' } });
+    if (e.id.startsWith('freed_')) out.push(...freedom(s, e.id));
     out.push({ type: 'flag', fact: `story ${e.id} done`, visible: false, data: { key: `story_${e.id}`, value: 1 } });
     for (const m of e.meet ?? []) out.push({ type: 'flag', fact: `met ${m}`, visible: false, data: { key: `met_${m}`, value: 1 } });
     if (e.duel) out.push(...startDuel(s, e.duel));
@@ -345,6 +371,13 @@ export function resolve(s: GameState, a: Action): Draft[] {
     case 'choose':
       out.push(...choose(s, a.target ?? ''));
       break;
+    case 'buy_freedom': {
+      if (li(s).status !== 'slave' || s.money < PRICE_MON) return [{ type: 'alert', fact: 'Li does not have fifteen ryō.', visible: true, data: {} }];
+      out.push({ type: 'money', fact: `Li pays ${PRICE_MON} mon`, visible: true, data: { amount: -PRICE_MON } });
+      out.push({ type: 'story', fact: 'Li counts fifteen ryō onto Rokubei\'s ledger, coin by coin. Rokubei counts them twice. Then he opens the iron box and hands Li his paper. "Burn it yourself," he says.', visible: true, journal: 'Legend: I bought my freedom with my own money, fifteen ryō, and burned my paper myself.', data: { id: 'freed_bought', tier: 'legend', card: { label: 'Legend moment', title: 'Free', native: '自由', meaning: 'bought with his own money' } } });
+      out.push(...freedom(s, 'freed_bought'));
+      break;
+    }
   }
   return out;
 }
@@ -365,12 +398,21 @@ function choose(s: GameState, target: string): Draft[] {
   return out;
 }
 
+/** Li becomes free (WB 10.4 freedom routes). The end of stage 1. */
+function freedom(s: GameState, how: string): Draft[] {
+  return [
+    { type: 'status', fact: 'Li is free', visible: true, data: { char: s.liId, status: 'free', role: 'a free youth of the Red Crane camp' } },
+    { type: 'knowledge', fact: `freed: ${how}`, visible: false, data: { key: 'free' } },
+    { type: 'knowledge', fact: 'stage 1 complete', visible: false, data: { key: 'stage1_complete' } },
+  ];
+}
+
 // ---------- duels (ch. 6a) ----------
 
 const rankIndex = (score: number) => RANK_BANDS.length - 1 - RANK_BANDS.findIndex(([min]) => score >= min);
 
 function startDuel(s: GameState, id: string): Draft[] {
-  const t = DUELS[id];
+  const t = duelTemplate(id);
   const c = li(s);
   const mastery = Math.max(0, ...Object.values(c.styles));
   const state: DuelState = {
@@ -390,10 +432,10 @@ function duelTurn(s: GameState, choice: string): Draft[] {
   const out: Draft[] = [];
   if (choice === 'flee') {
     d = { ...structuredClone(d), over: true, result: 'fled' };
-    out.push({ type: 'work', fact: DUELS[d.id].fleeText, visible: true, data: {} });
+    out.push({ type: 'work', fact: duelTemplate(d.id).fleeText, visible: true, data: {} });
   } else if (choice === 'yield') {
     d = { ...structuredClone(d), over: true, result: 'yielded' };
-    out.push({ type: 'work', fact: DUELS[d.id].yieldText, visible: true, data: {} });
+    out.push({ type: 'work', fact: duelTemplate(d.id).yieldText, visible: true, data: {} });
   } else {
     const auto = choice === 'auto';
     let guard = 0;
@@ -412,7 +454,7 @@ function duelTurn(s: GameState, choice: string): Draft[] {
 
 function duelEnd(s: GameState, d: DuelState): Draft[] {
   const c = li(s);
-  const t = DUELS[d.id];
+  const t = duelTemplate(d.id);
   const res = t.outcomes[d.result as keyof typeof t.outcomes];
   const out: Draft[] = [];
   const liWound = Math.min(t.maxWound, d.li.wound) as Wound;
@@ -432,6 +474,7 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
     }
   }
   if (res.merit) out.push({ type: 'flag', fact: `combat merit +${res.merit.amount} (${res.merit.why})`, visible: true, data: { key: 'merit_combat', value: has(s, 'merit_combat') + res.merit.amount } });
+  if (res.merit && d.id.startsWith('skirmish_')) out.push({ type: 'flag', fact: `merit in Kurogane service: ${has(s, 'merit_service') + res.merit.amount} of ${MERIT_FOR_FREEDOM}`, visible: true, data: { key: 'merit_service', value: has(s, 'merit_service') + res.merit.amount } });
   for (const r of res.rel ?? []) out.push(rel(r.npc, r.field, r.value, r.reason, r.fade));
   for (const m of res.memory ?? []) out.push({ type: 'memory', fact: `${s.characters[m.npc]?.name ?? m.npc} remembers the fight`, visible: false, data: { ...m } });
   for (const m of res.meet ?? []) out.push({ type: 'flag', fact: `met ${m}`, visible: false, data: { key: `met_${m}`, value: 1 } });
@@ -524,11 +567,8 @@ export function skipDays(s: GameState, days: number, plan: { night: 'sleep' | 't
     const r = takeAction(s, routineAction(s, plan));
     all.push(...r.events);
     const stories = r.events.filter((e) => e.type === 'story');
-    if (stories.length) return { events: all, interrupted: stories.map((e) => e.fact).join('\n\n') };
-    if (s.seasonKey !== season) {
-      const [year, name] = s.seasonKey.split('-');
-      return { events: all, interrupted: `The season turns: ${name}, Year ${year}.` };
-    }
+    const turned = s.seasonKey !== season ? `The season turns: ${s.seasonKey.split('-')[1]}, Year ${s.seasonKey.split('-')[0]}.` : '';
+    if (stories.length || turned) return { events: all, interrupted: [turned, ...stories.map((e) => e.fact)].filter(Boolean).join('\n\n') };
   }
   return { events: all };
 }

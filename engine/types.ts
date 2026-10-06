@@ -105,6 +105,7 @@ export type EventType =
   | 'rumour'
   | 'intent'
   | 'narration'
+  | 'status'
   | 'duel';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
@@ -161,7 +162,8 @@ export interface Action {
     | 'train'
     | 'meet'
     | 'duel'
-    | 'choose';
+    | 'choose'
+    | 'buy_freedom';
   target?: string; // npc id, or training focus
 }
 

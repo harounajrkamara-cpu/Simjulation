@@ -1,5 +1,6 @@
 import { ageOn, formatDate } from '../engine/calendar';
 import { ENCYCLOPEDIA, STORY } from '../engine/content';
+import { MERIT_FOR_FREEDOM, PRICE_MON } from '../engine/campaign';
 import { PLACES } from '../engine/data';
 import { has, li, met, today } from '../engine/engine';
 import { visibleOpinion } from '../engine/relations';
@@ -51,7 +52,7 @@ function ranks(s: GameState): string {
 export function liCard(s: GameState): string {
   const c = li(s);
   return `<div class="crest" aria-hidden="true">李</div>
-    <div class="who"><span class="name">Li</span><span class="sub">Age ${ageOn(c.born, s.date)} · slave of the Red Crane</span>${s.knowledge.includes('nickname_kurose_no_ryu') ? '<span class="sub gold">Called Kurose no Ryū by the band</span>' : ''}<div class="ranks">${ranks(s)}</div></div>`;
+    <div class="who"><span class="name">Li</span><span class="sub">Age ${ageOn(c.born, s.date)} · ${c.status === 'slave' ? 'slave of the Red Crane' : 'free'}</span>${s.knowledge.includes('nickname_kurose_no_ryu') ? '<span class="sub gold">Called Kurose no Ryū by the band</span>' : ''}<div class="ranks">${ranks(s)}</div></div>`;
 }
 
 /** The fogged ink map: only the places Li knows (ch. 6). Akaishi is Kurogane's southern border; Suiren lies south across the Kurose. */
@@ -104,7 +105,7 @@ export function liPage(s: GameState): string {
     <h2 class="label">Skills</h2><table class="table">${skills}</table>
     <h2 class="label">Training this season</h2><p>${esc(season)}</p>
     <h2 class="label">Traits</h2><p>${esc(c.traits.join(' · '))}</p>
-    <h2 class="label">Goals</h2><p>Survive · Win his freedom · Find his mother and sisters · Learn why his father died</p>`;
+    <div class="goals">${goalsHtml(s)}</div>`;
 }
 
 function personCard(s: GameState, id: string): string {
@@ -148,4 +149,17 @@ export function encyclopediaPage(s: GameState): string {
 export function mapPage(s: GameState): string {
   return `<h1>The land, as Li knows it</h1><p class="lead">Only Akaishi and the river. The rest of the seven kingdoms is fog until Li learns it.</p>
     <div style="max-width:760px">${mapSvg(s, true)}</div>`;
+}
+
+/** Goals panel (GE ch. 4): Li's goals and the freedom routes he knows, with visible progress. */
+export function goalsHtml(s: GameState): string {
+  const c = li(s);
+  const routes: string[] = [];
+  if (c.status === 'slave') {
+    if (has(s, 'kurogane_merit_law') || has(s, 'choice_levy') === 3) routes.push(`Merit in Kurogane service: ${s.flags.merit_service ?? 0} of ${MERIT_FOR_FREEDOM}${has(s, 'choice_levy') === 3 ? '' : ' (needs service)'}`);
+    if (has(s, 'own_price_15')) routes.push(`His price: fifteen ryō · Li has ${s.money} of ${PRICE_MON} mon`);
+  }
+  const now = c.status === 'slave' ? 'Survive · Win his freedom' : 'Free. The first book of his life is closed.';
+  const later = c.status === 'slave' ? 'Find his mother and sisters · Learn why his father died' : 'Next: soldier life (stage 2) · Find his mother and sisters · Learn why his father died';
+  return `<h2 class="label">Goals</h2><p class="goal-now">${now}</p>${routes.map((r) => `<p class="goal-route">${esc(r)}</p>`).join('')}<p class="goal-later">${later}</p>`;
 }

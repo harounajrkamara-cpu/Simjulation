@@ -164,7 +164,7 @@ describe('WAIT (World Bible ch. 9, Game Experience ch. 9 §6)', () => {
     const s = startGame();
     s.date = { year: 100, month: 3, day: 28, part: 'morning' }; // after the raid's day, near the end of spring
     const r = skipDays(s, 10, { night: 'sleep' });
-    expect(r.interrupted).toBe('The season turns: Summer, Year 100.');
+    expect(r.interrupted?.startsWith('The season turns: Summer, Year 100.')).toBe(true);
     expect(s.date.month).toBe(4);
   });
 

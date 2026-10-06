@@ -222,6 +222,7 @@ button { cursor: pointer; }
 .goals { margin-top: auto; padding: 14px; border: 1px solid var(--line-2); border-radius: 4px; display: flex; flex-direction: column; gap: 6px; }
 .goals p { margin: 0; font-size: 15px; }
 .goals .goal-later { color: var(--faded); }
+.goals .goal-route { font-size: 14px; color: var(--gold); }
 
 /* Map (ink lines, fog: only what Li knows) */
 .map { width: 100%; height: auto; display: block; background: var(--ink); border: 1px solid var(--line); border-radius: 4px; }
