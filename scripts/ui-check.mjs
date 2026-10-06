@@ -32,7 +32,7 @@ async function passIntro(page, name, audit) {
   // The chapter card follows the prologue (GE ch. 3b); a click ends it.
   if (await page.waitForSelector('#titlecard:not([hidden])', { timeout: 3000 }).catch(() => null)) {
     if (audit) { await page.waitForTimeout(900); await page.screenshot({ path: `${out}/${name}-0-chapter.png` }); }
-    await page.click('#titlecard');
+    if (await page.isVisible('#titlecard')) await page.click('#titlecard');
   } else problems.push(`${name}: no chapter card`);
 }
 
@@ -160,6 +160,39 @@ const FAKE_CLAUDE = () => {
   await page.screenshot({ path: `${out}/desktop-4-ai.png` });
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sengoku-soldier-save')).events.filter((e) => e.type === 'narration' || e.type === 'intent').length);
   if (saved < 3) problems.push(`ai: intents and narrations not stored in the save (${saved})`);
+  await page.close();
+}
+
+// Big moments (GE ch. 3b, V5): load saves made just before them, play one turn, and look.
+{
+  const { execFileSync } = await import('node:child_process');
+  const fx = JSON.parse(execFileSync('npx', ['tsx', 'scripts/fixtures.ts'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }));
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  page.on('pageerror', (e) => problems.push(`moments: page error: ${e.message}`));
+  await page.goto(url);
+  const load = async (save) => {
+    await page.evaluate((s) => { localStorage.setItem('sengoku-soldier-save', JSON.stringify(s)); localStorage.setItem('sengoku-soldier-settings', JSON.stringify({ ai: 'plain', guide: 'off', ink: 'fast' })); }, save);
+    await page.reload();
+    await page.waitForSelector('.opt');
+  };
+  // The raid: a title card, then the duel display.
+  await load(fx.beforeRaid);
+  await page.click('.opt[data-key="1"]');
+  if (!(await page.waitForSelector('#titlecard:not([hidden])', { timeout: 4000 }).catch(() => null))) problems.push('moments: no title card for the raid');
+  else { await page.waitForTimeout(900); await page.screenshot({ path: `${out}/moment-raid-card.png` }); if (await page.isVisible('#titlecard')) await page.click('#titlecard'); }
+  if (!(await page.waitForSelector('#duel:not([hidden]) .fighters', { timeout: 4000 }).catch(() => null))) problems.push('moments: no duel display');
+  else { await page.waitForTimeout(700); for (const p of await page.evaluate(audit)) problems.push(`moments / duel: ${p}`); await page.screenshot({ path: `${out}/moment-duel.png` }); }
+  // The nickname: the legend screen.
+  await load(fx.beforeNickname);
+  await page.click('.opt[data-key="1"]');
+  if (!(await page.waitForSelector('#legend:not([hidden])', { timeout: 5000 }).catch(() => null))) problems.push('moments: no legend screen for the nickname');
+  else {
+    await page.waitForTimeout(1700);
+    for (const p of await page.evaluate(audit)) problems.push(`moments / legend: ${p}`);
+    await page.screenshot({ path: `${out}/moment-legend.png` });
+    await page.click('#lg-close');
+    if (!(await page.textContent('#side-li')).includes('Kurose no Ryū')) problems.push('moments: nickname not on the Li card');
+  }
   await page.close();
 }
 

@@ -178,6 +178,32 @@ button { cursor: pointer; }
 .tc-title { font: 800 clamp(40px, 7vw, 88px)/1.05 var(--display); letter-spacing: .04em; }
 @media (prefers-reduced-motion: no-preference) { .titlecard:not([hidden]) .tc-inner { animation: ink .9s ease-out; } }
 
+/* Legend moment (GE ch. 3b staging, ch. 6 mockup): silence, letterbox, the name in gold brush, witnesses, a red seal. */
+.legend { background: #08090B; border-top: 64px solid #000; border-bottom: 64px solid #000; text-align: center; }
+.lg-inner { position: relative; display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 820px; }
+.lg-native { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); font: 800 clamp(90px, 16vw, 220px)/1 var(--display); color: var(--paper); opacity: .07; white-space: nowrap; pointer-events: none; }
+.lg-label { color: var(--risk); letter-spacing: .5em; }
+.lg-text { margin: 0; font-size: 20px; font-style: italic; line-height: 1.6; color: #B9B09B; }
+.lg-title { margin: 6px 0 0; font: 800 clamp(44px, 8vw, 92px)/1 var(--display); letter-spacing: .04em; text-transform: uppercase; }
+.lg-meaning { font: 400 24px var(--display); color: var(--gold); letter-spacing: .12em; }
+.lg-seal { width: 60px; height: 60px; font-size: 28px; transform: rotate(-4deg); }
+.lg-meta { margin: 0; font-size: 15px; color: var(--faded); }
+@media (prefers-reduced-motion: no-preference) { .legend:not([hidden]) .lg-title { animation: ink 1.6s ease-out; } }
+
+/* Duel display (GE ch. 3): two fighters facing each other, wound tracks */
+.fighters { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; }
+.fighter { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; }
+.fighter .name { font: 600 18px var(--display); color: var(--paper); }
+.fighter .sub { font-size: 14px; color: var(--faded); }
+.track { display: flex; gap: 4px; }
+.track i { flex: 1; height: 6px; border-radius: 2px; background: var(--line); }
+.track i.hit { background: var(--seal); }
+.vs { font: 800 22px var(--display); color: var(--risk); }
+.duel-meta { margin: 6px 0 0; font-size: 14px; color: var(--paper-2); }
+.rest { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 4px; background: var(--ink-2); }
+.rest .label { color: var(--gold); }
+.rest p { margin: 0; font-size: 15px; color: var(--paper-2); }
+
 /* Side panel */
 .side { width: 400px; flex-shrink: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 22px 26px; background: var(--ink-3); }
 .side-block { display: flex; flex-direction: column; gap: 8px; }

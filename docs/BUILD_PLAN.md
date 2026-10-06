@@ -17,7 +17,7 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 | V2 ✅ | War chronicle UI | GE ch. 3, 6 | Story tab + side panel + tabs (Army = outside view) match the reference screens at 1440 and 390 px; contrast and 44 px checks pass |
 | V3 ✅ | AI layer | GE ch. 5, 7 | interpreter (asks when unsure) + narrator + fact checker; claude.ai page mode, chat mode and no-AI mode; ink streaming; REWRITE / CORRECT; golden set ≥ 20 fact packets passes |
 | V4 ✅ | Onboarding | GE ch. 8 | New life → prologue → chapter card → first-week beats ✚ → WAIT lesson → Daisuke sparring ✚; GUIDE hints, example lines, "Why?", tooltips, How to play; ch. 8 time targets met in a Playwright run |
-| V5 | Big moments + pacing core | GE ch. 3b, 9 | 4 moment tiers; title card, duel overlay, legend screen; director phases with beat windows (slave stage); session-end summary |
+| V5 ✅ | Big moments + pacing core | GE ch. 3b, 9 | 4 moment tiers; title card, duel overlay, legend screen; director phases with beat windows (slave stage); session-end summary |
 | V6 | Slice test | GE ch. 8–9; Numbers §4, §12 | Monte Carlo duel tests; determinism tests; **owner playtest**; fixes done |
 
 ### V1 report (Oct 5) ✅
@@ -54,6 +54,14 @@ TypeScript on Node 22 · engine = pure library in `engine/` (Vitest) · `ai/` on
 - ✅ **Daisuke sparring bout** (Month 1, Day 20, Sasabe threshing floor; fight or walk past). Duel outcomes now live in each duel template (text, journal, growth, merit, relationships, memories, wound cap: sticks leave at worst Hurt). Winnable by reading him: 31 of 178 move lines win.
 - ✅ GUIDE hint line (one at a time, once per life, closes when the player acts; Light = only screen hints), example lines under the write box until 3 free-text turns, "Why?" on results (the choice + Li's journal lines), gold-underlined terms with tooltips (only learned Encyclopedia entries), How to play (strip + New life screen; six points).
 - Not done: measuring the ch. 8 real-time targets (needs a human playtest, V6).
+
+### V5 report (Oct 6) ✅
+- **Pacing director** (`engine/director.ts`): build-up → peak → fade → relax, computed from the event log (no dice); slave stage rests at least 3 days after a peak. It only times Li-local beats.
+- **Conditional story beats** (`day: -1` + `when`): fire at their part of the first day the condition holds, after the director's rest.
+- **First legend moment**: *Kurose no Ryū — the Dragon of the Kurose* (the approved ch. 6 mockup). Only if Li won the raid, the word reached ≥ 3 people, and the rest days passed; at the fire, in the evening. Legend screen (letterbox, giant name, 黒瀬の龍 behind it, red seal, date, the band as witnesses), journal "Legend:" line, nickname on Li's card. Never given to a boy who ran (test).
+- **Title cards** for title-tier moments (Sticks at Sasabe, Fire on the river) and the turn of each season; **duel display** with two fighters, wound tracks, round and what Li has read; **"A good place to rest"** summary once the quiet after a peak begins (journal lines of the session, game saved).
+- **Evidence**: `npm test` 133 passed (new `tests/v5.test.ts`); `ui:check` loads saves made just before the raid and the nickname (`scripts/fixtures.ts`) and checks the title card, duel display and legend screen; screenshots in `docs/screens/v5/`.
+- **Later**: ceremonies (reward ceremony with witnesses) arrive with stage 2 promotions; more legend moments per ch. 3b as their deeds become possible.
 
 ## Phase 2 – Stage 1 complete: the slave arc (→ freedom, 8–12 h)
 Freedom routes, contract seasons, Year 100 story calendar, timeskip summary, Journal/RECAP, save slots. Done when simulated strong careers reach freedom at 13–15 and the owner has played to freedom.

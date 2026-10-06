@@ -5,6 +5,8 @@ import { FactPacket, buildPacket } from '../ai/packet';
 import { fromSave, li, met, options, recordNote, toSave } from '../engine/engine';
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
 import { GameEvent } from '../engine/types';
+import { lastPeakDay, phase as directorPhase } from '../engine/director';
+import { WOUND_LABEL } from '../engine/rules';
 import { PROLOGUE } from '../engine/content';
 import { duelPanel } from '../engine/render';
 import { GameState } from '../engine/types';
@@ -135,9 +137,11 @@ function renderOptions() {
   const panel = duelPanel(state);
   const duel = $('duel');
   duel.hidden = !panel;
-  if (panel) {
-    const [head, ...rest] = panel.split('\n');
-    duel.innerHTML = `<strong>${esc(plain(head))}</strong>${esc(rest.join('\n'))}`;
+  if (panel && state.duel) {
+    const d = state.duel;
+    const track = (w: number) => `<span class="track" aria-label="${WOUND_LABEL[w as 0]}">${[0, 1, 2, 3].map((k) => `<i class="${k < w ? 'hit' : ''}"></i>`).join('')}</span>`;
+    const card = (name: string, f: typeof d.li, sub: string) => `<div class="fighter"><span class="name">${esc(name)}</span><span class="sub">${esc(WOUND_LABEL[f.wound])} · fatigue ${f.fatigue} of 3${sub ? ` · ${esc(sub)}` : ''}</span>${track(f.wound)}</div>`;
+    duel.innerHTML = `<strong>Round ${d.round + 1} of 10</strong><div class="fighters">${card('Li', d.li, d.li.observed ? `read him ${Math.min(3, d.li.observed)} of 3` : '')}<span class="vs" aria-hidden="true">対</span>${card(d.foe.name.replace(/^the /, 'The '), d.foe, d.estimate ?? '')}</div>${d.hint ? `<p class="duel-meta">What Li has read: ${esc(d.hint)}</p>` : ''}`;
   }
   $('opts').innerHTML = options(state).map((o) => {
     const t = [o.test ? esc(plain(o.test)) : '', o.risk ? `<span class="risk">⚠&#xFE0E; ${esc(o.risk)}</span>` : ''].filter(Boolean).join(' · ');
@@ -195,10 +199,11 @@ function setBusy(on: boolean) {
 }
 
 /** Show a resolved turn: narrated by Claude when it is a story moment, template text otherwise. */
-async function finish(reply: Reply, turn: HTMLElement, said: string | undefined, free: boolean, before: Set<string>) {
+async function finish(reply: Reply, turn: HTMLElement, said: string | undefined, free: boolean, before: Set<string>, seasonBefore = state.seasonKey) {
   const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !before.has(id)).map((id) => state.characters[id].name);
   const parts = replyParts(reply.text, newPeople);
   const events = reply.events ?? [];
+  await bigMoments(events, seasonBefore);
   const story = parts.paras.filter((p) => !p.kind);
   const notes = parts.paras.filter((p) => p.kind);
   if (ai && aiOn && reply.acted && shouldNarrate(events, free)) {
@@ -213,6 +218,7 @@ async function finish(reply: Reply, turn: HTMLElement, said: string | undefined,
     turn.scrollIntoView({ block: 'start' });
   }
   addWhy(turn, said, events);
+  restPoint(turn);
   persist();
 }
 
@@ -284,6 +290,7 @@ async function send(raw: string, said = raw) {
   const text = raw.trim();
   if (!options(state).some((o) => o.key === text) && !COMMAND.test(text)) bumpFree();
   const before = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
+  const seasonBefore = state.seasonKey;
   const isKey = options(state).some((o) => o.key === text);
   if (isKey || COMMAND.test(text) || !ai || !aiOn) {
     const r = handleInput(state, text);
@@ -291,7 +298,7 @@ async function send(raw: string, said = raw) {
     if (r.command === 'save') { persist(); return show('Saved in this browser. Use "Save file" to copy it somewhere safe.', said); }
     if (r.command === 'load') { if (!resume()) show('No saved game in this browser.', said); return; }
     setBusy(true);
-    await finish(r, newTurn(said), said, !isKey && !COMMAND.test(text), before);
+    await finish(r, newTurn(said), said, !isKey && !COMMAND.test(text), before, seasonBefore);
     return setBusy(false);
   }
   // Free text with Claude: interpret → (confirm) → engine → narrate.
@@ -316,13 +323,13 @@ async function send(raw: string, said = raw) {
     else { turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc(`That is not something Li can do here and now. ${(p.ask ?? '').replace('I did not understand that. ', '')}`.trim())}</p>`); refresh(); return setBusy(false); }
   }
   if (reading.kind === 'ask') { turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc(reading.question)}</p>`); refresh(); return setBusy(false); }
-  if (reading.kind === 'command') { await finish(handleInput(state, reading.command), turn, said, false, before); return setBusy(false); }
+  if (reading.kind === 'command') { await finish(handleInput(state, reading.command), turn, said, false, before, seasonBefore); return setBusy(false); }
   if (reading.risky || reading.confidence < 0.75) {
     // The game stays busy while the box is open, so no other turn can slip in before the answer.
     if (!(await confirmReading(turn, reading))) { turn.insertAdjacentHTML('beforeend', '<p class="text info">Then write it again, or pick an option.</p>'); setBusy(false); input.value = raw; input.focus(); return; }
   }
   recordNote(state, 'intent', `intent: ${reading.label}`, { input: text, action: reading.action, tone: reading.tone, says: reading.says, confidence: reading.confidence, by: teller });
-  await finish(handleAction(state, reading.action), turn, said, true, before);
+  await finish(handleAction(state, reading.action), turn, said, true, before, seasonBefore);
   setBusy(false);
 }
 
@@ -332,6 +339,7 @@ function resume(): boolean {
     if (!raw) return false;
     state = fromSave(JSON.parse(raw));
     seen = look(state);
+    sessionJournal = state.journal.length;
     log.innerHTML = '';
     const last = [...state.events].reverse().find((e) => e.type === 'narration');
     show(last ? `${(last.data as { text: string }).text}\n\nThe chronicle continues.` : 'The chronicle continues.');
@@ -408,6 +416,50 @@ function titleCard(label: string, title: string, ms = 2600): Promise<void> {
     box.onclick = end;
     document.addEventListener('keydown', end, { once: true });
   });
+}
+
+// ---------- big moments and rest points (GE ch. 3b, 9) ----------
+
+interface Card { label: string; title: string; native?: string; meaning?: string }
+
+/** Title cards for big story moments and the turn of a season; the legend screen for legend moments. */
+async function bigMoments(events: GameEvent[], seasonBefore: string) {
+  for (const e of events) {
+    if (e.type !== 'story') continue;
+    const d = e.data as { tier?: string; card?: Card };
+    if (d.tier === 'title' && d.card) await titleCard(d.card.label, d.card.title);
+    if (d.tier === 'legend' && d.card) await legendScreen(d.card, e.fact, e.day);
+  }
+  if (state.seasonKey !== seasonBefore) {
+    const [year, name] = state.seasonKey.split('-');
+    await titleCard('A new season', `${name} · Year ${year}`);
+  }
+}
+
+function legendScreen(c: Card, text: string, day: number): Promise<void> {
+  // Witnesses: the band at the fire (Ishizue's men keep to the fort).
+  const witnesses = ['raizen', 'gonza', 'rokubei', 'hisame', 'sukezo', 'hachi'].filter((id) => met(state, id) && state.characters[id].alive).map((id) => state.characters[id].name);
+  $('lg-native').textContent = c.native ?? '';
+  $('lg-text').textContent = text.split(/(?<=\.)\s/)[0];
+  $('lg-title').textContent = c.title;
+  $('lg-meaning').textContent = c.meaning ? `— ${c.meaning} —` : '';
+  $('lg-meta').textContent = `Month ${Math.floor(day / 30) % 12 + 1}, Day ${(day % 30) + 1} · Heard by: ${witnesses.join(' · ')} and the men of the Red Crane. Written in the Journal.`;
+  const box = $('legend');
+  box.hidden = false;
+  $('lg-close').focus();
+  return new Promise((done) => { $('lg-close').onclick = () => { box.hidden = true; done(); }; });
+}
+
+/** "A good place to rest" (GE ch. 9 §4): once the quiet after a peak begins, a short summary of the session. */
+let sessionJournal = 0;
+let restShownForPeak: number | undefined;
+function restPoint(turn: HTMLElement) {
+  const peak = lastPeakDay(state);
+  if (peak === undefined || restShownForPeak === peak || directorPhase(state) !== 'relax') return;
+  restShownForPeak = peak;
+  const lines = state.journal.slice(sessionJournal).slice(-4).map((j) => j.text);
+  sessionJournal = state.journal.length;
+  turn.insertAdjacentHTML('beforeend', `<aside class="rest"><span class="label">A good place to rest</span>${lines.map((l) => `<p>${esc(l)}</p>`).join('')}<p>The game is saved. Goals: survive · win his freedom.</p></aside>`);
 }
 
 // ---------- New life and the prologue (GE ch. 8) ----------

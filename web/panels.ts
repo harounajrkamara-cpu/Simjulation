@@ -51,7 +51,7 @@ function ranks(s: GameState): string {
 export function liCard(s: GameState): string {
   const c = li(s);
   return `<div class="crest" aria-hidden="true">李</div>
-    <div class="who"><span class="name">Li</span><span class="sub">Age ${ageOn(c.born, s.date)} · slave of the Red Crane</span><div class="ranks">${ranks(s)}</div></div>`;
+    <div class="who"><span class="name">Li</span><span class="sub">Age ${ageOn(c.born, s.date)} · slave of the Red Crane</span>${s.knowledge.includes('nickname_kurose_no_ryu') ? '<span class="sub gold">Called Kurose no Ryū by the band</span>' : ''}<div class="ranks">${ranks(s)}</div></div>`;
 }
 
 /** The fogged ink map: only the places Li knows (ch. 6). Akaishi is Kurogane's southern border; Suiren lies south across the Kurose. */
@@ -64,7 +64,7 @@ export function mapSvg(s: GameState, big = false): string {
     <path class="river" d="M20 114 Q96 96 170 110 Q240 124 344 104"></path>
     <circle class="here" cx="186" cy="97" r="5"></circle>
     <circle class="place" cx="150" cy="68" r="3"></circle>
-    ${sasabe ? '<circle class="place" cx="214" cy="84" r="3"></circle><text x="220" y="80">Sasabe</text>' : ''}
+    ${sasabe ? '<circle class="place" cx="226" cy="72" r="3"></circle><text x="232" y="68">Sasabe</text>' : ''}
     <text x="158" y="64">Akaishi</text>
     <text x="192" y="94">Kōri</text>
     <text x="40" y="70">Kurogane</text>
