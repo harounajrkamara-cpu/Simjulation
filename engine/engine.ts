@@ -153,11 +153,13 @@ export function options(s: GameState): Option[] {
   if (s.duel && !s.duel.over) {
     const moves: Option[] = (['attack', 'counter', 'feint', 'observe'] as DuelMove[]).map((m, i) => ({ key: String(i + 1), label: MOVE_LABEL[m], action: { kind: 'duel', target: m }, test: '⚔️ VAL' }));
     moves.push({ key: '5', label: 'Let the fight play out (simulate)', action: { kind: 'duel', target: 'auto' } });
-    moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: 'leaves Kaname alone' });
+    moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: DUELS[s.duel.id]?.fleeRisk ?? 'shame' });
     return moves;
   }
   const part = s.date.part;
   const opts: Omit<Option, 'key'>[] = [];
+  const open = openChoice(s);
+  if (open) open.choice!.options.forEach((o, i) => opts.push({ label: o.label, action: { kind: 'choose', target: `${open.choice!.id}:${i}` }, test: o.test, risk: o.risk }));
   const knowsPatrol = s.knowledge.includes('gonza_patrol');
   if (part === 'morning' || part === 'afternoon') {
     opts.push({ label: 'Do the chores in the camp', action: { kind: 'chores' }, test: 'camp work' });
@@ -195,8 +197,14 @@ export function storyDrafts(s: GameState): Draft[] {
     out.push({ type: 'flag', fact: `story ${e.id} done`, visible: false, data: { key: `story_${e.id}`, value: 1 } });
     for (const m of e.meet ?? []) out.push({ type: 'flag', fact: `met ${m}`, visible: false, data: { key: `met_${m}`, value: 1 } });
     if (e.duel) out.push(...startDuel(s, e.duel));
+    if (e.choice) out.push({ type: 'flag', fact: `choice ${e.choice.id} open`, visible: false, data: { key: `choice_${e.choice.id}`, value: 1 } });
   }
   return out;
+}
+
+/** The story choice open right now, if any (it lapses when the part of the day ends). */
+export function openChoice(s: GameState): StoryEvent | undefined {
+  return STORY.find((e) => e.choice && has(s, `choice_${e.choice.id}`) === 1);
 }
 
 function nextBeat(s: GameState, npc: string) {
@@ -331,7 +339,26 @@ export function resolve(s: GameState, a: Action): Draft[] {
     case 'duel':
       out.push(...duelTurn(s, a.target ?? 'attack'));
       break;
+    case 'choose':
+      out.push(...choose(s, a.target ?? ''));
+      break;
   }
+  return out;
+}
+
+/** A story choice (GE ch. 8 teaching beats, later story): its outcome, or the duel it starts. */
+function choose(s: GameState, target: string): Draft[] {
+  const [id, idx] = target.split(':');
+  const ev = STORY.find((e) => e.choice?.id === id);
+  const opt = ev?.choice?.options[Number(idx)];
+  if (!ev || !opt || has(s, `choice_${id}`) !== 1) return [{ type: 'alert', fact: 'That chance has passed.', visible: true, data: {} }];
+  const out: Draft[] = [{ type: 'flag', fact: `choice ${id} made`, visible: false, data: { key: `choice_${id}`, value: 3 + Number(idx) } }];
+  if (opt.duel) return out.concat(startDuel(s, opt.duel));
+  const res = opt.outcome!;
+  out.push({ type: 'story', fact: res.fact, visible: true, journal: res.journal, data: { choice: id, option: Number(idx) } });
+  if (res.skill) out.push(...skill(s, res.skill[0], res.skill[1]));
+  for (const r of res.rel ?? []) out.push(rel(r.npc, r.field, r.value, r.reason, r.fade));
+  for (const m of res.memory ?? []) out.push({ type: 'memory', fact: `${s.characters[m.npc]?.name ?? m.npc} remembers`, visible: false, data: { ...m } });
   return out;
 }
 
@@ -360,10 +387,10 @@ function duelTurn(s: GameState, choice: string): Draft[] {
   const out: Draft[] = [];
   if (choice === 'flee') {
     d = { ...structuredClone(d), over: true, result: 'fled' };
-    out.push({ type: 'work', fact: 'Li drops the sword and runs into the smoke.', visible: true, data: {} });
+    out.push({ type: 'work', fact: DUELS[d.id].fleeText, visible: true, data: {} });
   } else if (choice === 'yield') {
     d = { ...structuredClone(d), over: true, result: 'yielded' };
-    out.push({ type: 'work', fact: 'Li throws down the sword and raises his hands.', visible: true, data: {} });
+    out.push({ type: 'work', fact: DUELS[d.id].yieldText, visible: true, data: {} });
   } else {
     const auto = choice === 'auto';
     let guard = 0;
@@ -382,57 +409,30 @@ function duelTurn(s: GameState, choice: string): Draft[] {
 
 function duelEnd(s: GameState, d: DuelState): Draft[] {
   const c = li(s);
+  const t = DUELS[d.id];
+  const res = t.outcomes[d.result as keyof typeof t.outcomes];
   const out: Draft[] = [];
-  const liWound = Math.min(3, d.li.wound) as Wound;
+  const liWound = Math.min(t.maxWound, d.li.wound) as Wound;
   const foeRank = rankIndex((d.foe.val + d.foe.mastery) / 2);
   const myRank = rankIndex(rankScores(c).warrior);
   const ch = challengeFactor(foeRank - myRank);
   const age = liAge(s);
-  const grow = (base: number): Draft[] => {
-    const out2: Draft[] = [];
-    for (const [kind, key] of [['stat', 'VAL'], ['style', 'two_swords']] as const) {
-      const cur = kind === 'stat' ? c.stats.VAL : c.styles.two_swords ?? 0;
-      const g = r3(growthGain(base, age, cur, c.potential.VAL, ch));
-      if (g > 0) out2.push({ type: kind, fact: `duel growth: ${key} +${g}`, visible: false, data: kind === 'stat' ? { char: c.id, stat: 'VAL', amount: g } : { char: c.id, style: 'two_swords', amount: g } });
-    }
-    return out2;
-  };
   if (liWound !== c.wound) out.push({ type: 'wound', fact: `Li is ${liWound >= 3 ? 'badly wounded' : liWound === 2 ? 'wounded' : liWound === 1 ? 'hurt' : 'unhurt'}`, visible: true, data: { char: c.id, wound: liWound, healDays: HEAL_DAYS[liWound] } });
   out.push(...fatigue(s, Math.min(3, d.li.fatigue + 1)));
-  if (d.li.wound >= 3) out.push({ type: 'flag', fact: 'near-death', visible: false, data: { key: 'near_death', value: has(s, 'near_death') + 1 } });
-  switch (d.result) {
-    case 'won':
-      out.push({ type: 'story', fact: 'The raider goes down in the mud and does not get up. Kaname stares at Li, chest heaving. Across the square, Hisame lowers her bow: she saw all of it.', visible: true, journal: 'In the raid on Sasabe I brought down a Suiren raider who had Kaname trapped. Kaname and Hisame saw it.', data: {} });
-      out.push(...grow(1.0));
-      out.push({ type: 'flag', fact: 'combat merit +1 (witnessed kill of an enemy ashigaru)', visible: true, data: { key: 'merit_combat', value: has(s, 'merit_combat') + 1 } });
-      out.push(rel('kaname', 'respect', 15, 'Saved me in the raid', null), rel('kaname', 'affection', 10, 'Saved me in the raid', null), rel('kaname', 'trust', 10, 'Saved me in the raid', null));
-      out.push(rel('hisame', 'respect', 8, 'Fought like a soldier at Sasabe', 1095));
-      out.push(rel('raizen', 'respect', 5, 'Heard he brought down a raider', 1095));
-      out.push({ type: 'memory', fact: 'Hisame remembers the raid', visible: false, data: { npc: 'hisame', what: 'The slave boy brought down a Suiren raider [at Sasabe] [with a dropped sword].', source: 'saw', certainty: 100, weight: 60, key: 'li_raid_sasabe' } });
-      out.push({ type: 'memory', fact: 'Raizen hears of the raid', visible: false, data: { npc: 'raizen', what: 'Hisame says the slave boy killed a Suiren raider [at Sasabe].', source: 'told', certainty: 80, weight: 50, key: 'li_raid_sasabe', rel: { field: 'respect', value: 8 }, sign: '{name} has heard what Li did at Sasabe.' } });
-      out.push({ type: 'flag', fact: 'met kaname', visible: false, data: { key: 'met_kaname', value: 1 } });
-      break;
-    case 'lost':
-      out.push({ type: 'story', fact: 'The spear takes Li in the side and the world tilts. As he falls, an arrow hums out of the smoke and the raider drops beside him. The last thing Li sees is Hisame lowering her bow.', visible: true, journal: "In the raid on Sasabe a Suiren raider beat me. Hisame's arrow killed him before he could finish me.", data: {} });
-      out.push(...grow(0.5));
-      out.push(rel('kaname', 'affection', 6, 'Tried to save me', null), rel('kaname', 'respect', 5, 'Tried to save me', null));
-      out.push({ type: 'memory', fact: 'Hisame remembers saving the boy', visible: false, data: { npc: 'hisame', what: 'The slave boy attacked a raider to save the Sasabe girl. He lost, but he did not run.', source: 'saw', certainty: 100, weight: 50, key: 'li_raid_sasabe' } });
-      break;
-    case 'draw':
-      out.push({ type: 'story', fact: 'Neither of them can finish it. An arrow from the smoke ends the fight: Hisame.', visible: true, journal: 'In the raid on Sasabe I held off a raider until Hisame shot him.', data: {} });
-      out.push(...grow(0.5));
-      out.push(rel('kaname', 'respect', 8, 'Stood his ground', null));
-      break;
-    case 'fled':
-      out.push({ type: 'story', fact: 'Behind him Kaname screams, then curses. Later Li hears that Hisame\'s arrow saved her. Kaname will not look at him.', visible: true, journal: 'In the raid on Sasabe I ran. Hisame saved Kaname, not me.', data: {} });
-      out.push(rel('kaname', 'respect', -15, 'Ran when I needed help', 270), rel('kaname', 'affection', -15, 'Ran when I needed help', 270));
-      out.push({ type: 'memory', fact: 'Kaname remembers', visible: false, data: { npc: 'kaname', what: 'The mercenaries\' slave boy ran when a raider had Kaname trapped [in the burning barn].', source: 'saw', certainty: 100, weight: 60, key: 'li_ran_at_sasabe', rel: { field: 'respect', value: -10 }, sign: '{name} has heard that Li ran at Sasabe.' } });
-      break;
-    case 'yielded':
-      out.push({ type: 'story', fact: 'The raider laughs and kicks Li down. Then Hisame\'s arrow takes him in the throat.', visible: true, journal: 'In the raid on Sasabe I gave up. Hisame killed the raider.', data: {} });
-      out.push(rel('kaname', 'respect', -8, 'Gave up', 270));
-      break;
+  if (liWound >= 3) out.push({ type: 'flag', fact: 'near-death', visible: false, data: { key: 'near_death', value: has(s, 'near_death') + 1 } });
+  out.push({ type: 'story', fact: res.fact, visible: true, journal: res.journal, data: { duelEnd: d.id, result: d.result } });
+  if (res.grow > 0) {
+    for (const [kind, key] of [['stat', 'VAL'], ['style', 'two_swords']] as const) {
+      const cur = kind === 'stat' ? c.stats.VAL : c.styles.two_swords ?? 0;
+      const g = r3(growthGain(res.grow, age, cur, c.potential.VAL, ch));
+      if (g > 0) out.push({ type: kind, fact: `duel growth: ${key} +${g}`, visible: false, data: kind === 'stat' ? { char: c.id, stat: 'VAL', amount: g } : { char: c.id, style: 'two_swords', amount: g } });
+    }
   }
+  if (res.merit) out.push({ type: 'flag', fact: `combat merit +${res.merit.amount} (${res.merit.why})`, visible: true, data: { key: 'merit_combat', value: has(s, 'merit_combat') + res.merit.amount } });
+  for (const r of res.rel ?? []) out.push(rel(r.npc, r.field, r.value, r.reason, r.fade));
+  for (const m of res.memory ?? []) out.push({ type: 'memory', fact: `${s.characters[m.npc]?.name ?? m.npc} remembers the fight`, visible: false, data: { ...m } });
+  for (const m of res.meet ?? []) out.push({ type: 'flag', fact: `met ${m}`, visible: false, data: { key: `met_${m}`, value: 1 } });
+  out.push({ type: 'flag', fact: `duel ${d.id} done`, visible: false, data: { key: `duel_${d.id}_${d.result}`, value: 1 } });
   out.push({ type: 'duel', fact: 'duel over', visible: false, data: { state: null } });
   return out;
 }
@@ -457,6 +457,8 @@ export interface TurnResult {
 /** Advance time by one part and fire any story that starts then. */
 function advance(s: GameState): GameEvent[] {
   const to = nextPart(s.date);
+  const open = openChoice(s);
+  if (open) commit(s, [{ type: 'flag', fact: `choice ${open.choice!.id} lapsed`, visible: false, data: { key: `choice_${open.choice!.id}`, value: 2 } }]);
   const evs = commit(s, [{ type: 'time', fact: `time → ${to.year}/${to.month}/${to.day} ${to.part}`, visible: false, data: { to } }]);
   // Night falls: what was said at the fire moves one step further (rumours, ch. 8).
   if (to.part === 'night') evs.push(...commit(s, spreadDrafts(s, (id) => met(s, id))));

@@ -65,6 +65,22 @@ export const BEATS: Beat[] = [
   { id: 'z1', npc: 'ishizue', minOpinion: -100, text: 'Commander Ishizue does not answer slaves. A guard pushes Li back.' },
 ];
 
+type Rel = { npc: string; field: RelField; value: number; reason: string; fade: number | null };
+type Mem = { npc: string; what: string; source: 'saw' | 'told' | 'rumour'; certainty: number; weight: number; key?: string; rel?: { field: RelField; value: number }; sign?: string };
+
+/** How a duel ends (World Bible ch. 6a, defeat ladder ch. 12b #10): text, journal, growth, merit and who remembers what. */
+export interface DuelOutcome {
+  fact: string;
+  journal: string;
+  /** Base growth for VAL and style (Numbers §2): duel won 1.0, lost but survived 0.5. 0 = none. */
+  grow: number;
+  /** Combat merit for a witnessed deed (Numbers §6). */
+  merit?: { amount: number; why: string };
+  rel?: Rel[];
+  memory?: Mem[];
+  meet?: string[];
+}
+
 export interface DuelTemplate {
   id: string;
   place: string;
@@ -72,6 +88,13 @@ export interface DuelTemplate {
   foe: { id: string; name: string; val: number; mastery: number; wound: 0 | 1 | 2 | 3; fatigue: number; estimate: string };
   prefs: { attack: number; counter: number; feint: number; observe: number };
   surprise: boolean;
+  /** Worst wound this fight can leave (sparring with sticks: Hurt). */
+  maxWound: 1 | 2 | 3;
+  /** The immediate risk shown on "Run" (ch. 11). */
+  fleeRisk: string;
+  fleeText: string;
+  yieldText: string;
+  outcomes: Record<'won' | 'lost' | 'draw' | 'fled' | 'yielded', DuelOutcome>;
 }
 
 export const DUELS: Record<string, DuelTemplate> = {
@@ -82,6 +105,111 @@ export const DUELS: Record<string, DuelTemplate> = {
     foe: { id: 'suiren_levy', name: 'the Suiren raider', val: 22, mastery: 20, wound: 2, fatigue: 1, estimate: 'Suiren levy with a spear · Warrior E? · bleeding from the thigh' },
     prefs: { attack: 3, counter: 1, feint: 1, observe: 0 },
     surprise: true,
+    maxWound: 3,
+    fleeRisk: 'leaves Kaname alone',
+    fleeText: 'Li drops the sword and runs into the smoke.',
+    yieldText: 'Li throws down the sword and raises his hands.',
+    outcomes: {
+      won: {
+        fact: 'The raider goes down in the mud and does not get up. Kaname stares at Li, chest heaving. Across the square, Hisame lowers her bow: she saw all of it.',
+        journal: 'In the raid on Sasabe I brought down a Suiren raider who had Kaname trapped. Kaname and Hisame saw it.',
+        grow: 1.0,
+        merit: { amount: 1, why: 'witnessed kill of an enemy ashigaru' },
+        rel: [
+          { npc: 'kaname', field: 'respect', value: 15, reason: 'Saved me in the raid', fade: null },
+          { npc: 'kaname', field: 'affection', value: 10, reason: 'Saved me in the raid', fade: null },
+          { npc: 'kaname', field: 'trust', value: 10, reason: 'Saved me in the raid', fade: null },
+          { npc: 'hisame', field: 'respect', value: 8, reason: 'Fought like a soldier at Sasabe', fade: 1095 },
+          { npc: 'raizen', field: 'respect', value: 5, reason: 'Heard he brought down a raider', fade: 1095 },
+        ],
+        memory: [
+          { npc: 'hisame', what: 'The slave boy brought down a Suiren raider [at Sasabe] [with a dropped sword].', source: 'saw', certainty: 100, weight: 60, key: 'li_raid_sasabe' },
+          { npc: 'raizen', what: 'Hisame says the slave boy killed a Suiren raider [at Sasabe].', source: 'told', certainty: 80, weight: 50, key: 'li_raid_sasabe', rel: { field: 'respect', value: 8 }, sign: '{name} has heard what Li did at Sasabe.' },
+        ],
+        meet: ['kaname'],
+      },
+      lost: {
+        fact: 'The spear takes Li in the side and the world tilts. As he falls, an arrow hums out of the smoke and the raider drops beside him. The last thing Li sees is Hisame lowering her bow.',
+        journal: "In the raid on Sasabe a Suiren raider beat me. Hisame's arrow killed him before he could finish me.",
+        grow: 0.5,
+        rel: [
+          { npc: 'kaname', field: 'affection', value: 6, reason: 'Tried to save me', fade: null },
+          { npc: 'kaname', field: 'respect', value: 5, reason: 'Tried to save me', fade: null },
+        ],
+        memory: [{ npc: 'hisame', what: 'The slave boy attacked a raider to save the Sasabe girl. He lost, but he did not run.', source: 'saw', certainty: 100, weight: 50, key: 'li_raid_sasabe' }],
+      },
+      draw: {
+        fact: 'Neither of them can finish it. An arrow from the smoke ends the fight: Hisame.',
+        journal: 'In the raid on Sasabe I held off a raider until Hisame shot him.',
+        grow: 0.5,
+        rel: [{ npc: 'kaname', field: 'respect', value: 8, reason: 'Stood his ground', fade: null }],
+      },
+      fled: {
+        fact: 'Behind him Kaname screams, then curses. Later Li hears that Hisame\'s arrow saved her. Kaname will not look at him.',
+        journal: 'In the raid on Sasabe I ran. Hisame saved Kaname, not me.',
+        grow: 0,
+        rel: [
+          { npc: 'kaname', field: 'respect', value: -15, reason: 'Ran when I needed help', fade: 270 },
+          { npc: 'kaname', field: 'affection', value: -15, reason: 'Ran when I needed help', fade: 270 },
+        ],
+        memory: [{ npc: 'kaname', what: 'The mercenaries\' slave boy ran when a raider had Kaname trapped [in the burning barn].', source: 'saw', certainty: 100, weight: 60, key: 'li_ran_at_sasabe', rel: { field: 'respect', value: -10 }, sign: '{name} has heard that Li ran at Sasabe.' }],
+      },
+      yielded: {
+        fact: 'The raider laughs and kicks Li down. Then Hisame\'s arrow takes him in the throat.',
+        journal: 'In the raid on Sasabe I gave up. Hisame killed the raider.',
+        grow: 0,
+        rel: [{ npc: 'kaname', field: 'respect', value: -8, reason: 'Gave up', fade: 270 }],
+      },
+    },
+  },
+  // Game Experience ch. 8 (owner decision 2): a low-stakes stick bout that teaches the duel screen before the raid.
+  spar: {
+    id: 'spar',
+    place: 'the threshing floor at Sasabe',
+    intro: 'Daisuke tosses Li a stick and takes another. "Mercenaries\' slave. Show me what you learned carrying their spears." The village boys make a ring. Kaname watches from the well, arms crossed.',
+    foe: { id: 'daisuke_spar', name: 'Daisuke', val: 20, mastery: 10, wound: 0, fatigue: 0, estimate: 'strong farm boy with a stick · Warrior E? · swings hard' },
+    prefs: { attack: 4, counter: 0, feint: 1, observe: 0 },
+    surprise: false,
+    maxWound: 1,
+    fleeRisk: 'the village boys will laugh',
+    fleeText: 'Li drops the stick and walks out of the ring.',
+    yieldText: 'Li lowers the stick and steps back.',
+    outcomes: {
+      won: {
+        fact: 'Daisuke lands on his back in the chaff. The ring goes quiet. Then he laughs, red in the face, and takes Li\'s hand to get up. "Again, next time," he says.',
+        journal: 'I beat Daisuke with sticks at Sasabe in front of the village boys. He wants a rematch.',
+        grow: 1.0,
+        rel: [
+          { npc: 'daisuke', field: 'respect', value: 10, reason: 'Beat me fairly in front of others', fade: null },
+          { npc: 'daisuke', field: 'rivalry', value: 10, reason: 'Beat me fairly in front of others', fade: null },
+          { npc: 'kaname', field: 'respect', value: 5, reason: 'Beat Daisuke with a stick', fade: 270 },
+        ],
+      },
+      lost: {
+        fact: 'Daisuke\'s stick cracks across Li\'s ribs and he goes down in the chaff. The boys cheer. Daisuke grins down at him. "Not bad. For a slave."',
+        journal: 'Daisuke beat me with sticks at Sasabe. Not bad, he said. For a slave.',
+        grow: 0.5,
+        rel: [{ npc: 'daisuke', field: 'respect', value: 3, reason: 'Did not run from a fight', fade: 270 }],
+      },
+      draw: {
+        fact: 'Neither boy gives way until both are gasping. An old man shouts that the rice will not carry itself, and the ring breaks up.',
+        journal: 'Daisuke and I fought with sticks until we could barely stand. Nobody won.',
+        grow: 0.5,
+        rel: [{ npc: 'daisuke', field: 'respect', value: 6, reason: 'Held his own', fade: 270 }],
+      },
+      fled: {
+        fact: 'The boys hoot as Li walks away. Daisuke shouts after him that slaves were born to run.',
+        journal: 'I walked away from Daisuke\'s stick fight. The boys laughed.',
+        grow: 0,
+        rel: [{ npc: 'daisuke', field: 'respect', value: -6, reason: 'Walked away', fade: 270 }],
+      },
+      yielded: {
+        fact: 'Daisuke snorts and throws his stick down. "No fun," he says.',
+        journal: 'I gave up in Daisuke\'s stick fight.',
+        grow: 0,
+        rel: [{ npc: 'daisuke', field: 'respect', value: -3, reason: 'Gave up', fade: 270 }],
+      },
+    },
   },
 };
 
@@ -95,6 +223,17 @@ export interface StoryEvent {
   journal: string;
   meet?: string[];
   duel?: string;
+  /** A choice this moment offers (shown first; it lapses when this part of the day ends). */
+  choice?: { id: string; options: StoryOption[] };
+}
+
+export interface StoryOption {
+  label: string;
+  test?: string;
+  risk?: string;
+  /** Starts this duel instead of an outcome. */
+  duel?: string;
+  outcome?: DuelOutcome & { skill?: [string, number] };
 }
 
 export const STORY: StoryEvent[] = [
@@ -102,6 +241,50 @@ export const STORY: StoryEvent[] = [
     id: 'arrival', title: "Under Kōri fort", day: 0, part: 'morning',
     text: 'The Red Crane band reaches Kōri fort in Akaishi province, on the Kurogane side of the Kurose river. Lord Hagiwara has hired the band after losing two thousand men last year. Across the river, Suiren banners hang still in the cold spring air.',
     journal: 'Year 100, spring. We reached Kōri fort on the Kurose. Across the river: Suiren banners.',
+  },
+  {
+    id: 'chest', title: "Gonza's chest", day: 0, part: 'morning',
+    text: 'Gonza drops an iron-bound chest on Hachi\'s thin shoulders. "Carry it to the fort, mouse." Hachi staggers under it.',
+    journal: 'On the first day Gonza loaded Hachi like a mule.',
+    choice: {
+      id: 'chest',
+      options: [
+        {
+          label: 'Take the chest from Hachi', test: 'endurance', risk: 'Gonza will notice',
+          outcome: {
+            fact: 'Li slides under the chest and takes the weight. Hachi stares at him. Gonza\'s face goes red to the ear he still has, but he only spits in the dirt.',
+            journal: 'I carried the chest for Hachi. Gonza saw it.',
+            grow: 0,
+            skill: ['endurance', 0.2],
+            rel: [
+              { npc: 'hachi', field: 'affection', value: 5, reason: 'Took my load from Gonza', fade: 1095 },
+              { npc: 'hachi', field: 'trust', value: 4, reason: 'Took my load from Gonza', fade: 1095 },
+              { npc: 'gonza', field: 'rivalry', value: 3, reason: 'A slave who crossed me', fade: 270 },
+            ],
+            memory: [{ npc: 'gonza', what: 'The slave boy took the load I gave the other one.', source: 'saw', certainty: 100, weight: 30, key: 'li_defied_gonza' }],
+          },
+        },
+        {
+          label: 'Look away and keep quiet',
+          outcome: {
+            fact: 'Li looks at the ground. Hachi carries the chest alone, knees shaking, all the way up to the fort.',
+            journal: 'I kept my head down while Hachi carried the chest.',
+            grow: 0,
+            rel: [{ npc: 'hachi', field: 'affection', value: -2, reason: 'Let me carry it alone', fade: 60 }],
+          },
+        },
+      ],
+    },
+  },
+  {
+    id: 'cook_tent', title: 'The cook tent', day: 0, part: 'afternoon',
+    text: 'Old Sukezō waves Li into the cook tent. Steam, smoke, onions. "New fort, new masters, same onions," the old man says. "Ask, if you want to know something. In here the walls listen less."',
+    journal: 'Sukezō says I can ask him things in the cook tent.',
+  },
+  {
+    id: 'first_night', title: 'The first night', day: 0, part: 'night',
+    text: 'The band sleeps by the horse lines under a cold sky. Under the straw, where Li hid them, two sticks wait. Somewhere a guard coughs.',
+    journal: 'First night at Kōri. My sticks are hidden under the straw.',
   },
   {
     id: 'inspection', title: "Paid dogs", day: 1, part: 'afternoon',
@@ -120,6 +303,31 @@ export const STORY: StoryEvent[] = [
     text: 'A small party rides into the camp: the Hagiwara steward and a girl of about thirteen in a fine riding coat, Lord Hagiwara\'s daughter Sayo. She asks more questions than the steward likes.',
     journal: 'Lord Hagiwara\'s daughter Sayo visited the camp. She asks a lot of questions.',
     meet: ['sayo'],
+  },
+  {
+    id: 'wait_lesson', title: 'Days alike', day: 6, part: 'evening',
+    text: 'Sukezō stirs the pot without looking up. "Camp days are all alike, boy. Plan them, and keep your strength for the days that are not."',
+    journal: 'Sukezō says to plan the days that are alike, and to save my strength for the ones that are not.',
+  },
+  {
+    id: 'spar', title: 'Sticks at Sasabe', day: 19, part: 'afternoon',
+    text: 'Rokubei sends Li to Sasabe with the empty rice sacks. On the threshing floor Daisuke blocks the way, a stick in each hand, and grins.',
+    journal: 'Daisuke stopped me at Sasabe with two sticks.',
+    choice: {
+      id: 'spar',
+      options: [
+        { label: 'Take a stick and fight him', test: 'VAL', risk: 'bruises, and the boys are watching', duel: 'spar' },
+        {
+          label: 'Walk past him',
+          outcome: {
+            fact: 'Li walks past with the sacks. Daisuke laughs at his back and the village boys laugh with him.',
+            journal: 'I walked past Daisuke\'s challenge. They laughed.',
+            grow: 0,
+            rel: [{ npc: 'daisuke', field: 'respect', value: -4, reason: 'Would not fight me', fade: 270 }],
+          },
+        },
+      ],
+    },
   },
   {
     id: 'raid', title: "Fire on the river", day: 35, part: 'night',

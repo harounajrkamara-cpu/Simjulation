@@ -160,7 +160,8 @@ export interface Action {
     | 'sleep'
     | 'train'
     | 'meet'
-    | 'duel';
+    | 'duel'
+    | 'choose';
   target?: string; // npc id, or training focus
 }
 

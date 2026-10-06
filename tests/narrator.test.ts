@@ -152,6 +152,7 @@ describe('the narrator loop with a fake AI', () => {
 
   it('routine turns stay template text; people and story get the narrator', () => {
     const s = startGame();
+    s.date = { year: 100, month: 1, day: 12, part: 'morning' }; // a quiet day
     expect(shouldNarrate(handleAction(s, { kind: 'chores' }).events!, false)).toBe(false);
     expect(shouldNarrate(handleAction(s, { kind: 'chores' }).events!, true)).toBe(true);
     expect(shouldNarrate(GOLDEN.find((m) => m.name === 'raid begins') ? s.events : [], false)).toBe(true);
@@ -169,6 +170,8 @@ describe('the narrator loop with a fake AI', () => {
 
 describe('the interpreter reads only possible actions (GE ch. 5)', () => {
   const s = startGame();
+  s.date = { year: 100, month: 1, day: 12, part: 'morning' }; // a quiet day: only the routine options
+  s.flags.choice_chest = 2; // the first-morning choice has lapsed
   const { choices } = choicesFor(s);
   it('offers the engine options and commands', () => {
     expect(choices.map((c) => c.id)).toEqual(expect.arrayContaining(['opt:1', 'opt:2', 'opt:3', 'cmd:STATUS', 'wait:N']));
