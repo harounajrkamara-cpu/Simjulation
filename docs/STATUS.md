@@ -1,5 +1,14 @@
 # Project status
 
+## ▶ Start the next session with this (copy-paste)
+> Continue building Sengoku Soldier in the Simjulation repo on branch **`build/stage-1`** (push there; never to main; no PRs).
+> Read `CLAUDE.md`, `docs/STATUS.md`, `docs/MASTER_BUILD_PROMPT.md` and `docs/BUILD_PLAN.md` first, then only the chapters the milestone names.
+> Next milestone: **V4 Onboarding** (`docs/GAME_EXPERIENCE.md` ch. 8: New life screen, 7-slide prologue, first-week teaching beats, Daisuke sparring bout, GUIDE hints, example lines, "Why?", tooltips, How to play). Then V5 (big moments + pacing core) and V6 (slice test).
+> Verify with `npm test`, `npm run typecheck` and `npm run ui:check` (start `npm run web` first). Publish the game with `node scripts/build-artifact.mjs` and republish `dist-web/sengoku-soldier.html` to https://claude.ai/artifact/AcDN6DV8D9SC5dBJybhcdx (keep the `sample` capability). Update STATUS and BUILD_PLAN at the end.
+
+**Where things are (Oct 6):** code + newest docs on `build/stage-1` (V1–V3 done + UI feedback round). Design history on `design/world-bible`. `main` = old prototype. Plugins are enabled in `.claude/settings.json`; the playwright plugin needs Google Chrome (missing in cloud), so use `npm run ui:check` (playwright-core + /opt/pw-browsers Chromium). Owner feedback so far: loves the war chronicle; story and choices now scroll as one column (fixed Oct 6).
+
+
 ## Where we are
 - **Game Experience Bible (Oct 5):** `docs/GAME_EXPERIENCE.md` ch. 1–7 ✅, **ch. 8 Onboarding ✅** (approved with 6 fixes, applied), **ch. 9 Pacing ✅**, **ch. 10 ✅** — Game Experience Bible complete (v1.0). Local play with Claude: `play` skill + chat mode (`.claude/skills/play/`). Ch. 8 example screens (New life · prologue slide · first free text) added as row 2 of the style canvas. Visual style example: https://claude.ai/artifact/SYrfY3m7VaNDTs5GC3TJpK (approved). Owner installed plugins (frontend-design, Design, code-review, playwright) locally; turned on for the claude.ai account and enabled for this repo in `.claude/settings.json` (Oct 5).
 - **Stage 1 build started (Oct 5):** new engine in `engine/`, playable in browser (`npm run web`), terminal (`npm run play`) and chat (`npm run turn`). M0–M3 and M5 done (duel engine + Sasabe raid), M4 partly. Online page: https://claude.ai/artifact/AcDN6DV8D9SC5dBJybhcdx. Continues with **build plan v2** (vertical slice V1–V6), see `docs/BUILD_PLAN.md`.
