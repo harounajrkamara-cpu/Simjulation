@@ -11,7 +11,7 @@ mkdirSync(out, { recursive: true });
 const local = ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome', '/opt/pw-browsers/chromium/chrome-linux/chrome'].find(existsSync);
 const browser = await chromium.launch(process.env.CHROMIUM_PATH || local ? { executablePath: process.env.CHROMIUM_PATH || local } : {});
 
-const VIEWS = [{ name: 'desktop', width: 1440, height: 900 }, { name: 'phone', width: 390, height: 844 }];
+const VIEWS = [{ name: 'desktop', width: 1440, height: 900 }, { name: 'panel', width: 900, height: 1000 }, { name: 'phone', width: 390, height: 844 }];
 const TABS = ['map', 'li', 'army', 'people', 'journal', 'encyclopedia'];
 const problems = [];
 
@@ -49,6 +49,12 @@ function audit() {
   const emoji = document.body.innerText.replace(/⚠︎/g, '').match(/\p{Extended_Pictographic}/gu);
   if (emoji) found.push(`emoji in the interface: ${[...new Set(emoji)].join(' ')}`);
   if (document.documentElement.scrollWidth > innerWidth + 1) found.push(`horizontal page scroll: ${document.documentElement.scrollWidth} > ${innerWidth}`);
+  // The story column scrolls as one: nothing inside it may have its own scroll area (owner, Oct 6).
+  const panel = document.querySelector('#tab-story');
+  if (panel && !panel.hidden) for (const el of panel.querySelectorAll('*')) {
+    const st = getComputedStyle(el);
+    if (/(auto|scroll)/.test(st.overflowY) && el.scrollHeight > el.clientHeight + 1) found.push(`second scroll area inside the story: ${el.className || el.tagName}`);
+  }
   return found;
 }
 

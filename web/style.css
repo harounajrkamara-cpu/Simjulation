@@ -19,6 +19,13 @@
 }
 
 [hidden] { display: none !important; }
+/* Scrollbars in the ink style: thin, dark, gold on hover. */
+* { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 6px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: #6F5A34; background-clip: padding-box; }
+::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--ink); color: var(--paper); font: 18px/1.65 var(--body); -webkit-font-smoothing: antialiased; }
@@ -37,7 +44,11 @@ button { cursor: pointer; }
 .chapter { display: flex; flex-direction: column; line-height: 1.2; }
 .chapter-title { font: 600 18px var(--display); }
 .facts { flex: 1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 22px; margin: 0; font-size: 15px; color: var(--paper-2); }
-.facts dd { margin: 0; }
+.facts dd { margin: 0; white-space: nowrap; }
+@media (max-width: 1180px) {
+  .facts { order: 3; flex-basis: 100%; justify-content: flex-start; gap: 2px 22px; }
+  .file { margin-left: auto; }
+}
 .file { display: flex; gap: 8px; }
 .file button, .savebox button { min-height: 44px; padding: 0 14px; background: none; border: 1px solid var(--line-2); border-radius: 4px; font-size: 15px; color: var(--paper-2); }
 .file button:hover, .savebox button:hover { border-color: var(--gold); color: var(--paper); }
@@ -58,7 +69,8 @@ button { cursor: pointer; }
 /* Body: story column + side panel */
 .body { flex: 1; min-height: 0; display: flex; }
 .panel { flex: 1; min-width: 0; }
-.story-panel { display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+/* One scroll for the story column: the story, then the choices right under it (no separate scroll areas). */
+.story-panel { display: block; overflow-y: auto; overscroll-behavior: contain; border-right: 1px solid var(--line); }
 
 .scene { position: relative; height: 128px; flex-shrink: 0; overflow: hidden; background: var(--ink-2); border-bottom: 1px solid var(--line); }
 .ridge { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -72,7 +84,7 @@ button { cursor: pointer; }
 .scene-text { position: absolute; left: 48px; bottom: 18px; display: flex; flex-direction: column; gap: 2px; }
 .scene-title { font: 600 30px/1.15 var(--display); }
 
-.log { flex: 1; min-height: 0; overflow-y: auto; padding: 26px 48px 12px; display: flex; flex-direction: column; gap: 22px; }
+.log { padding: 26px 48px 18px; display: flex; flex-direction: column; gap: 22px; }
 .turn { display: flex; flex-direction: column; gap: 12px; max-width: 760px; }
 .turn.old { opacity: .62; }
 .said { margin: 0; font-style: italic; color: var(--faded); font-size: 16px; }
@@ -86,7 +98,7 @@ button { cursor: pointer; }
 .chip.down { color: var(--risk); }
 .chip.new { color: var(--gold); }
 
-.choose { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 16px 48px 20px; background: var(--ink-3); border-top: 1px solid var(--line); max-height: 52%; overflow-y: auto; }
+.choose { display: flex; flex-direction: column; gap: 8px; padding: 18px 48px 28px; background: var(--ink-3); border-top: 1px solid var(--line); min-height: 40%; }
 .duel { padding: 12px 16px; border: 1px solid var(--seal); border-radius: 4px; background: #1C1313; font-size: 15px; white-space: pre-line; color: var(--paper-2); }
 .duel strong { display: block; font: 600 17px var(--display); color: var(--paper); margin-bottom: 4px; }
 .opts { display: flex; flex-direction: column; gap: 8px; }
@@ -185,10 +197,10 @@ button { cursor: pointer; }
   .tabs { padding: 0 8px; }
   .tabs button { padding: 0 12px; font-size: 15px; }
   /* The page scrolls as a whole on a phone; the choices stay pinned at the bottom. */
+  /* On a phone the whole page scrolls as one. */
   .app { height: auto; min-height: 100dvh; }
-  .body, .story-panel { display: block; }
-  .log { overflow: visible; }
-  .choose { position: sticky; bottom: 0; max-height: 48vh; box-shadow: 0 -12px 24px var(--ink); }
+  .body { display: block; }
+  .story-panel { overflow: visible; }
   .scene { height: 84px; }
   .scene-text { left: 16px; bottom: 12px; }
   .scene-title { font-size: 23px; }
