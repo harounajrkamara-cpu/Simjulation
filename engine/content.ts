@@ -217,12 +217,18 @@ export interface StoryEvent {
   id: string;
   /** Scene header title (GE ch. 6). */
   title: string;
-  day: number; // day index (Year 100, Month 1, Day 1 = 0)
+  day: number; // day index (Year 100, Month 1, Day 1 = 0); -1 = no fixed day (uses `when`)
   part: 'morning' | 'afternoon' | 'evening' | 'night';
   text: string;
   journal: string;
   meet?: string[];
   duel?: string;
+  /** Moment tier (GE ch. 3b): title moments get a title card, legend moments the legend screen. */
+  tier?: 'title' | 'legend';
+  /** Big brush title shown on the card (defaults to the scene title). */
+  card?: { label: string; title: string; native?: string; meaning?: string };
+  /** A beat without a fixed day: fires at its part of the first day this holds (checked by the engine). */
+  when?: (s: import('./types').GameState) => boolean;
   /** A choice this moment offers (shown first; it lapses when this part of the day ends). */
   choice?: { id: string; options: StoryOption[] };
 }
@@ -310,7 +316,7 @@ export const STORY: StoryEvent[] = [
     journal: 'Sukezō says to plan the days that are alike, and to save my strength for the ones that are not.',
   },
   {
-    id: 'spar', title: 'Sticks at Sasabe', day: 19, part: 'afternoon',
+    id: 'spar', title: 'Sticks at Sasabe', day: 19, part: 'afternoon', tier: 'title', card: { label: 'A challenge', title: 'Sticks at Sasabe' },
     text: 'Rokubei sends Li to Sasabe with the empty rice sacks. On the threshing floor Daisuke blocks the way, a stick in each hand, and grins.',
     journal: 'Daisuke stopped me at Sasabe with two sticks.',
     choice: {
@@ -330,12 +336,27 @@ export const STORY: StoryEvent[] = [
     },
   },
   {
-    id: 'raid', title: "Fire on the river", day: 35, part: 'night',
+    id: 'raid', title: "Fire on the river", tier: 'title', card: { label: 'Month 2 · Night', title: 'Fire on the river' }, day: 35, part: 'night',
     text: 'Bells in the dark. Fire on the river: Suiren raiders have crossed the Kurose and hit Sasabe. Raizen\'s band runs for the village; Li runs behind with a bundle of arrows. Sasabe is smoke, screams and burning thatch.',
     journal: 'Month 2, night: Suiren raiders crossed the Kurose and attacked Sasabe. The band ran to help.',
     duel: 'raid',
   },
+  {
+    // GE ch. 3b legend moment: the first nickname, earned by a witnessed deed and given by the world (owner ✅).
+    // Waits for the deed, for word to spread, and for the director's quiet days after the raid (GE ch. 9).
+    id: 'nickname', title: 'A name at the fire', day: -1, part: 'evening', tier: 'legend',
+    card: { label: 'Legend moment', title: 'Kurose no Ryū', native: '黒瀬の龍', meaning: 'the Dragon of the Kurose' },
+    when: (s) => (s.flags.duel_raid_won ?? 0) > 0
+      && s.memories.filter((m) => m.key === 'li_raid_sasabe').length >= 3
+      && restDoneFor(s),
+    text: 'Across the fire, a Red Crane spearman lifts his cup toward Li. He does not say the boy\'s name. He says the other one, the one the camp has been whispering since the night at Sasabe. "Kurose no Ryū." Others take it up, half laughing, half not. Hachi grins so wide his face could split.',
+    journal: 'Legend: at the fire, the band called me Kurose no Ryū, the Dragon of the Kurose, for the raider at Sasabe.',
+  },
 ];
+
+/** Set by the engine: the director's "rest done" check (kept out of content to avoid an import cycle). */
+let restDoneFor: (s: import('./types').GameState) => boolean = () => true;
+export function setRestCheck(f: (s: import('./types').GameState) => boolean) { restDoneFor = f; }
 
 /** Rumours heard around the fire (Atlas §14), in fixed order. */
 export const RUMOURS: string[] = [

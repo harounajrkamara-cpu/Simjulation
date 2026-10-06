@@ -1,5 +1,6 @@
 import { dateFromIndex, dayIndex, nextPart, seasonKey } from './calendar';
-import { BEATS, DUELS, Effect, RUMOURS, STORY, StoryEvent } from './content';
+import { BEATS, DUELS, Effect, RUMOURS, STORY, StoryEvent, setRestCheck } from './content';
+import { restDone } from './director';
 import { DuelMove, DuelState, MOVE_LABEL, autoMove, duelRound } from './duel';
 import { challengeFactor, rankLetter, rankScores, RANK_BANDS } from './rules';
 import { createWorld } from './data';
@@ -186,14 +187,16 @@ export function options(s: GameState): Option[] {
 // ---------- resolve ----------
 
 function storyAt(s: GameState): StoryEvent[] {
-  return STORY.filter((e) => e.day === today(s) && e.part === s.date.part && !has(s, `story_${e.id}`));
+  return STORY.filter((e) => e.part === s.date.part && !has(s, `story_${e.id}`) && (e.day === -1 ? !!e.when?.(s) : e.day === today(s)));
 }
+setRestCheck(restDone);
 
 /** Story beats that fire at the current moment (before the player acts). */
 export function storyDrafts(s: GameState): Draft[] {
   const out: Draft[] = [];
   for (const e of storyAt(s)) {
-    out.push({ type: 'story', fact: e.text, visible: true, journal: e.journal, data: { id: e.id } });
+    out.push({ type: 'story', fact: e.text, visible: true, journal: e.journal, data: { id: e.id, tier: e.tier, card: e.card } });
+    if (e.id === 'nickname') out.push({ type: 'knowledge', fact: 'Li is called Kurose no Ryū', visible: false, data: { key: 'nickname_kurose_no_ryu' } });
     out.push({ type: 'flag', fact: `story ${e.id} done`, visible: false, data: { key: `story_${e.id}`, value: 1 } });
     for (const m of e.meet ?? []) out.push({ type: 'flag', fact: `met ${m}`, visible: false, data: { key: `met_${m}`, value: 1 } });
     if (e.duel) out.push(...startDuel(s, e.duel));
