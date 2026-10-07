@@ -25,13 +25,15 @@ const SHORT_PLACE: Record<string, string> = { kori_camp: 'Kōri camp, Akaishi', 
 export function placeShort(s: GameState): string {
   if (s.duel && !s.duel.over && s.duel.place) return s.duel.place.split(',')[0];
   const loc = li(s).location;
-  return (SHORT_PLACE[loc] ?? PLACES[loc]).split(',')[0];
+  return (SHORT_PLACE[loc] ?? PLACES[loc] ?? loc).split(',')[0];
 }
 
 export function scene(s: GameState): { label: string; title: string; day: boolean } {
   const story = [...STORY].reverse().find((e) => e.day === today(s) && has(s, `story_${e.id}`));
   const part = s.date.part;
-  const title = s.duel && !s.duel.over ? 'Sasabe burns' : story?.title ?? PART_TITLE[part];
+  const gmScene = s.flags.gm_mode ? [...s.events].reverse().find((e) => e.type === 'scene') : undefined;
+  const gmTitle = (gmScene?.data as { title?: string } | undefined)?.title;
+  const title = s.duel && !s.duel.over ? (s.flags.gm_mode ? 'A fight' : 'Sasabe burns') : gmTitle ?? story?.title ?? PART_TITLE[part];
   return { label: `${placeShort(s)} · ${part}`, title, day: part === 'morning' || part === 'afternoon' };
 }
 
@@ -39,7 +41,7 @@ export function strip(s: GameState) {
   const c = li(s);
   return {
     date: formatDate(s.date),
-    place: s.duel && !s.duel.over && s.duel.place ? s.duel.place : SHORT_PLACE[c.location] ?? PLACES[c.location],
+    place: s.duel && !s.duel.over && s.duel.place ? s.duel.place : SHORT_PLACE[c.location] ?? PLACES[c.location] ?? c.location,
     cond: `${WOUND_LABEL[c.wound]} · Fatigue ${c.fatigue}/3`,
     money: `${s.money} mon`,
   };
@@ -78,11 +80,11 @@ export function mapSvg(s: GameState, big = false): string {
 }
 
 export function chronicle(s: GameState): string {
-  const evs = s.events.filter((e) => e.visible && (e.type === 'story' || e.type === 'rumour')).slice(-5).reverse();
+  const evs = s.events.filter((e) => e.visible && (e.type === 'story' || e.type === 'rumour' || e.type === 'scene')).slice(-5).reverse();
   if (!evs.length) return '<li class="empty">Nothing yet.</li>';
   return evs.map((e) => {
     const when = e.day === today(s) ? `Today · ${e.part}` : `Day ${e.day + 1} · ${e.part}`;
-    const first = e.fact.split(/(?<=[.!?])\s/)[0];
+    const first = e.type === 'scene' ? String((e.data as { summary?: string }).summary ?? '') : e.fact.split(/(?<=[.!?])\s/)[0];
     return `<li><span class="when">${e.type === 'rumour' ? 'Heard' : esc(when)}</span><span class="${e.type === 'rumour' ? 'rumour' : ''}">${esc(first)}</span></li>`;
   }).join('');
 }
@@ -139,7 +141,8 @@ export function journalPage(s: GameState): string {
 }
 
 export function knownEntries(s: GameState) {
-  return ENCYCLOPEDIA.filter((e) => !e.needs || has(s, e.needs) > 0);
+  const lore = (s.gm?.lore ?? []).map((l, i) => ({ id: `gm_${i}`, title: l.title, text: l.text }));
+  return ENCYCLOPEDIA.filter((e) => !e.needs || has(s, e.needs) > 0).concat(lore);
 }
 
 export function encyclopediaPage(s: GameState): string {

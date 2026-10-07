@@ -5,11 +5,13 @@ import { FactPacket, buildPacket } from '../ai/packet';
 import { fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
 import { SkipSummary, summaryText } from '../engine/summary';
+import { gmOn, lastFightResult, startGmGame } from '../engine/gm';
+import { gmTurn } from '../ai/gm';
+import { changesLine, duelPanel, noticeable } from '../engine/render';
 import { GameEvent } from '../engine/types';
 import { lastPeakDay, phase as directorPhase } from '../engine/director';
 import { WOUND_LABEL } from '../engine/rules';
 import { PROLOGUE } from '../engine/content';
-import { duelPanel } from '../engine/render';
 import { GameState } from '../engine/types';
 import { pageAdapter } from './ai-page';
 import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
@@ -150,6 +152,10 @@ function renderOptions() {
     const card = (name: string, f: typeof d.li, sub: string) => `<div class="fighter"><span class="name">${esc(name)}</span><span class="sub">${esc(WOUND_LABEL[f.wound])} · fatigue ${f.fatigue} of 3${sub ? ` · ${esc(sub)}` : ''}</span>${track(f.wound)}</div>`;
     duel.innerHTML = `<strong>Round ${d.round + 1} of 10</strong><div class="fighters">${card('Li', d.li, d.li.observed ? `read him ${Math.min(3, d.li.observed)} of 3` : '')}<span class="vs" aria-hidden="true">対</span>${card(d.foe.name.replace(/^the /, 'The '), d.foe, d.estimate ?? '')}</div>${d.hint ? `<p class="duel-meta">What Li has read: ${esc(d.hint)}</p>` : ''}`;
   }
+  if (gmMode()) {
+    $('opts').innerHTML = gmChoices().map((t, k) => `<button type="button" class="opt" data-key="${esc(t)}"${busy ? ' disabled' : ''}><span class="k">${k + 1}</span><span class="l">${esc(t)}</span></button>`).join('');
+    return;
+  }
   $('opts').innerHTML = options(state).map((o) => {
     const t = [o.test ? esc(plain(o.test)) : '', o.risk ? `<span class="risk">⚠&#xFE0E; ${esc(o.risk)}</span>` : ''].filter(Boolean).join(' · ');
     return `<button type="button" class="opt" data-key="${esc(o.key)}"${busy ? ' disabled' : ''}><span class="k">${esc(o.key)}</span><span class="l">${esc(o.label)}</span>${t ? `<span class="t">${t}</span>` : ''}</button>`;
@@ -204,6 +210,50 @@ function setBusy(on: boolean) {
   busy = on;
   document.querySelector('.choose')!.classList.toggle('busy', on);
   $('opts').querySelectorAll('button').forEach((b) => ((b as HTMLButtonElement).disabled = on));
+}
+
+/** One Game Master turn (owner decision Oct 7): Claude writes the scene, the code checks and records it. */
+async function gmStep(text?: string, said = text) {
+  if (!ai) {
+    show('Game Master mode needs Claude, and Claude is only here when this page is opened on claude.ai. Start a New life and pick "Classic chronicle" to play without it.', said);
+    return;
+  }
+  setBusy(true);
+  const turn = newTurn(said);
+  turn.insertAdjacentHTML('beforeend', '<p class="text ink wet">The ink is still wet…</p>');
+  turn.scrollIntoView({ block: 'start' });
+  const before = noticeable(state);
+  const metBefore = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
+  const statusBefore = li(state).status;
+  const seasonBefore = state.seasonKey;
+  try {
+    const r = await gmTurn(ai, state, text);
+    turn.querySelector('.wet')?.remove();
+    const p = document.createElement('p');
+    p.className = 'text';
+    turn.appendChild(p);
+    await inkReveal(p, r.turn.scene);
+    const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !metBefore.has(id)).map((id) => state.characters[id].name);
+    const ch = changesLine(before, noticeable(state));
+    turn.insertAdjacentHTML('beforeend', chipsHtml(replyParts(ch, newPeople).chips));
+    const why = [said ? `Because Li chose: ${said}.` : '', r.turn.journal ? `Li's journal: ${r.turn.journal}` : '', r.notes.length ? `The rules held: ${r.notes.join('; ')}.` : ''].filter(Boolean);
+    if (why.length) turn.insertAdjacentHTML('beforeend', `<details class="why"><summary>Why?</summary><p>${esc(why.join(' '))}</p></details>`);
+    refresh();
+    await bigMoments(r.events, seasonBefore);
+    if (li(state).status !== statusBefore) {
+      const how = state.knowledge.includes('hunted') ? 'by his own feet, and hunted' : 'his paper burned';
+      await legendScreen({ label: 'Legend moment', title: 'Free', native: '自由', meaning: how }, r.turn.scene, state.events.at(-1)!.day);
+    }
+    if (r.duelId) await titleCard('A fight', state.duel?.foe.name.replace(/^the /, 'The ') ?? 'A fight');
+  } catch (e) {
+    turn.querySelector('.wet')?.remove();
+    if (errorCode(e) === 'bad_answer') turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc((e as Error).message)} Try again.</p>`);
+    else aiFailed(e, turn);
+    if (text) input.value = text;
+  }
+  refresh();
+  persist();
+  setBusy(false);
 }
 
 /** Show a resolved turn: narrated by Claude when it is a story moment, template text otherwise. */
@@ -295,10 +345,15 @@ function persist() {
   try { localStorage.setItem(slotKey(slot), JSON.stringify(toSave(state))); localStorage.setItem(SLOT_KEY, String(slot)); } catch { /* storage blocked: the game still runs */ }
 }
 
+/** Game Master mode outside a fight: Claude runs the turn. */
+const gmMode = () => gmOn(state) && !(state.duel && !state.duel.over);
+const gmChoices = () => state.gm?.suggestions?.length ? state.gm.suggestions : ['I look around and wait for what comes'];
+
 async function send(raw: string, said = raw) {
   if (busy) return;
   if (shownHint) markHint(shownHint); // a hint closes itself once the player acts (ch. 8 §4)
   const text = raw.trim();
+  if (gmMode() && !/^(HELP|STATUS|INFOCHAR|RELATIONS|RECAP|LOG|SAVE|LOAD|NEW)\b/i.test(text)) return gmStep(text, said);
   if (!options(state).some((o) => o.key === text) && !COMMAND.test(text)) bumpFree();
   const before = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
   const seasonBefore = state.seasonKey;
@@ -310,7 +365,10 @@ async function send(raw: string, said = raw) {
     if (r.command === 'load') { if (!resume()) show('No saved game in this browser.', said); return; }
     setBusy(true);
     await finish(r, newTurn(said), said, !isKey && !COMMAND.test(text), before, seasonBefore);
-    return setBusy(false);
+    setBusy(false);
+    // A fight the Game Master started is over: Claude tells what happens next, true to the result.
+    if (gmOn(state) && !state.duel && lastFightResult(state)) await gmStep();
+    return;
   }
   // Free text with Claude: interpret → (confirm) → engine → narrate.
   const teller = ai.name; // ai can become null mid-turn after a permanent error
@@ -352,8 +410,9 @@ function resume(): boolean {
     seen = look(state);
     sessionJournal = state.journal.length;
     log.innerHTML = '';
-    const last = [...state.events].reverse().find((e) => e.type === 'narration');
-    show(last ? `${(last.data as { text: string }).text}\n\nThe chronicle continues.` : 'The chronicle continues.');
+    const last = [...state.events].reverse().find((e) => e.type === 'narration' || e.type === 'scene');
+    const lastText = last?.type === 'scene' ? last.fact : (last?.data as { text?: string } | undefined)?.text;
+    show(lastText ? `${lastText}\n\nThe chronicle continues.` : 'The chronicle continues.');
     return true;
   } catch (e) {
     // No game state may exist yet: start() shows this note together with the new game.
@@ -491,11 +550,11 @@ function restPoint(turn: HTMLElement) {
 
 // ---------- New life and the prologue (GE ch. 8) ----------
 
-interface Settings { ai: 'claude' | 'plain'; guide: 'full' | 'light' | 'off'; ink: 'slow' | 'fast' | 'instant' }
+interface Settings { mode: 'gm' | 'classic'; ai: 'claude' | 'plain'; guide: 'full' | 'light' | 'off'; ink: 'slow' | 'fast' | 'instant' }
 const SETTINGS_KEY = 'sengoku-soldier-settings';
 function loadSettings(): Settings {
-  try { return { ai: 'claude', guide: 'full', ink: 'fast', ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }; }
-  catch { return { ai: 'claude', guide: 'full', ink: 'fast' }; }
+  try { return { mode: 'gm', ai: 'claude', guide: 'full', ink: 'fast', ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }; }
+  catch { return { mode: 'gm', ai: 'claude', guide: 'full', ink: 'fast' }; }
 }
 let settings = loadSettings();
 aiOn = settings.ai === 'claude';
@@ -513,18 +572,26 @@ function openNewLife() {
 $('begin').onclick = () => {
   const box = $('newlife');
   const pick = (name: string) => box.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value;
-  settings = { ai: (pick('ai') ?? 'claude') as Settings['ai'], guide: (pick('guide') ?? 'full') as Settings['guide'], ink: (pick('ink') ?? 'fast') as Settings['ink'] };
+  settings = { mode: (pick('mode') ?? 'gm') as Settings['mode'], ai: (pick('ai') ?? 'claude') as Settings['ai'], guide: (pick('guide') ?? 'full') as Settings['guide'], ink: (pick('ink') ?? 'fast') as Settings['ink'] };
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* not kept: fine */ }
   aiOn = settings.ai === 'claude';
   setStoryteller();
   box.hidden = true;
+  // A new life in Game Master mode: the same world, Claude runs it. Without Claude here, the classic chronicle plays.
+  if (settings.mode === 'gm' && ai && !gmOn(state)) {
+    state = startGmGame();
+    seen = look(state);
+    log.innerHTML = '';
+    persist();
+    refresh();
+  }
   playPrologue();
 };
 
 function playPrologue() {
   const box = $('prologue');
   let i = 0;
-  const show = () => {
+  const showSlide = () => {
     const slide = PROLOGUE[i];
     $('pr-label').textContent = slide.label;
     $('pr-text').textContent = slide.text;
@@ -534,11 +601,18 @@ function playPrologue() {
     $('pr-dots').innerHTML = PROLOGUE.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
     $('pr-next').textContent = i === PROLOGUE.length - 1 ? 'Begin the chronicle' : 'Continue';
   };
-  const close = () => { box.hidden = true; titleCard('Chapter 1', 'The Red Crane').then(() => input.focus({ preventScroll: true })); };
-  $('pr-next').onclick = () => { if (++i >= PROLOGUE.length) close(); else show(); };
+  const close = () => {
+    box.hidden = true;
+    titleCard('Chapter 1', 'The Red Crane').then(() => {
+      input.focus({ preventScroll: true });
+      if (gmOn(state) && !state.gm?.scenes.length) gmStep(); // Claude opens the story
+      else if (settings.mode === 'gm' && !ai && !gmOn(state)) show('Game Master mode needs Claude, which is only here when the page is opened on claude.ai. The classic chronicle plays instead.');
+    });
+  };
+  $('pr-next').onclick = () => { if (++i >= PROLOGUE.length) close(); else showSlide(); };
   $('pr-skip').onclick = close;
   box.hidden = false;
-  show();
+  showSlide();
   $('pr-next').focus();
 }
 
@@ -557,6 +631,7 @@ document.addEventListener('keydown', (e) => {
   if (tab !== 'story' || busy || e.ctrlKey || e.metaKey || e.altKey || !/^[1-9]$/.test(e.key)) return;
   if (document.activeElement === input && input.value) return;
   if (document.activeElement instanceof HTMLTextAreaElement) return;
+  if (gmMode()) { const t = gmChoices()[Number(e.key) - 1]; if (t) { e.preventDefault(); send(t); } return; }
   const o = options(state).find((x) => x.key === e.key);
   if (o) { e.preventDefault(); send(o.key, o.label); }
 });

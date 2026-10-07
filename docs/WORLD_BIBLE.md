@@ -2,6 +2,9 @@
 
 Status per chapter: ✅ approved · 📝 proposal · ⏳ not started
 
+### ✅ Owner decision (Oct 7): Claude is the Game Master
+The game felt like a fixed menu, not a living world. From now on **Claude runs the world**: the player can try anything, people act on their own plans, the story moves scene by scene and skips dull time itself. **The code is the memory and the referee**: every person, promise, wound, coin and storyline is stored as an event (saves replay, nothing is forgotten), every number Claude proposes is checked against fixed limits, freedom needs a real route, and fights are decided by the duel engine. The hand-written chapter stays as the offline "Classic chronicle". Where this book says "the AI only narrates", Game Master mode overrides it.
+
 ### Core principle: no dice ✅
 - **Deterministic wherever the player acts**: duels, battles, conversations, promotions — same situation, same outcome.
 - **The world runs on hidden causes, not luck**: weather, harvests, disease, disasters follow seasons and conditions (neglect, war, overpopulation). Causes are not shown in advance, so events still feel surprising, but nothing is pure chance.

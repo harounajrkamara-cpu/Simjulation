@@ -106,7 +106,13 @@ export type EventType =
   | 'intent'
   | 'narration'
   | 'status'
-  | 'duel';
+  | 'duel'
+  // Game Master mode (Claude runs the world, code keeps the memory and checks the numbers):
+  | 'scene'
+  | 'person'
+  | 'place'
+  | 'thread'
+  | 'lore';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {
@@ -145,6 +151,24 @@ export interface GameState {
   nextSeq: number;
   /** Active duel, if any (ch. 6a). */
   duel?: import('./duel').DuelState | null;
+  /** Game Master mode memory (kept by events, so saves replay it). */
+  gm?: GmMemory;
+}
+
+/** What the Game Master (Claude) has added to the world. Code keeps it; Claude reads it back every turn. */
+export interface GmMemory {
+  /** Every scene's one-line summary: the story so far. */
+  scenes: { day: number; text: string }[];
+  /** Open and closed storylines. */
+  threads: { id: string; text: string; open: boolean; day: number }[];
+  /** Encyclopedia entries Li has learned in play. */
+  lore: { title: string; text: string }[];
+  /** People's own plans (public goal + hidden secret), by character id. */
+  agendas: Record<string, { goal: string; secret?: string }>;
+  /** Fights the Game Master started (duel templates by id). */
+  duels: Record<string, import('./content').DuelTemplate>;
+  /** What Li can do next, suggested by the last scene. */
+  suggestions: string[];
 }
 
 /** Canonical action (ch. 12b #1): what the engine resolves, stored with the event log. */

@@ -15,7 +15,7 @@ If the owner wants to **play** ("let's play", a game action), use the `play` ski
 - Design goes chapter by chapter: propose → research (games, professionals) → owner approves → write to the World Bible → commit and push.
 - Before proposing anything, re-read the relevant World Bible chapters and check for contradictions with every other chapter.
 - Be honest: say clearly when an idea of the owner is not the best, with reasons and sources. Do not just agree.
-- Core principles: code owns numbers, the AI only narrates; deterministic (no dice); the world runs on hidden causes; Li cannot die (hidden rule).
+- Core principles: **Claude is the Game Master** (owner decision Oct 7: Claude runs the story and the people, the player can write anything, the story moves scene by scene); **code is the memory and the referee** (every change is an event, so nothing is forgotten; it checks every number Claude proposes; fights run in the duel engine, no dice); the world runs on hidden causes; Li cannot die (hidden rule). The classic hand-written chronicle stays as an offline mode.
 - Build in stages; each stage must be playable before the next starts.
 - Never commit secrets (keys only in `.env`, git-ignored). The old Google key from the AI Studio export was blanked in `legacy/server.ts` and **revoked by the owner (Oct 5)**; it still exists in `main`'s first commit, which is harmless now. Never restore anything from `legacy/server.ts`.
 - Update `docs/STATUS.md` at the end of every work session.

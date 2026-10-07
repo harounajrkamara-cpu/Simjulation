@@ -69,10 +69,42 @@ export function apply(state: GameState, ev: GameEvent): void {
       break;
     case 'duel':
       state.duel = d.state ? structuredClone(d.state) : null;
+      if (d.template) gmMemOf(state).duels[d.template.id] = structuredClone(d.template);
       break;
     case 'status':
       state.characters[d.char].status = d.status;
       state.characters[d.char].role = d.role;
+      if (d.alive === false) state.characters[d.char].alive = false;
+      break;
+    case 'scene': {
+      const g = gmMemOf(state);
+      g.scenes.push({ day: ev.day, text: d.summary });
+      g.suggestions = d.suggestions ?? [];
+      break;
+    }
+    case 'person': {
+      state.characters[d.id] = {
+        id: d.id, name: d.name, born: { year: 80, month: 1, day: 1 }, role: d.role, status: 'free', stats: { LEA: 20, VAL: 20, INT: 20, POL: 20 },
+        potential: { LEA: 30, VAL: 30, INT: 30, POL: 30 }, styles: {}, skills: {}, wound: 0, healDays: 0, fatigue: 0, traits: [],
+        location: state.characters[state.liId].location, alive: true, desc: d.desc, publicRank: '?',
+      };
+      state.relations[d.id] = { base: d.base, mods: [], heard: [], lastTalkDay: -1 };
+      state.flags[`met_${d.id}`] = 1;
+      gmMemOf(state).agendas[d.id] = { goal: d.goal, secret: d.secret };
+      break;
+    }
+    case 'place':
+      state.characters[d.char].location = d.place;
+      break;
+    case 'thread': {
+      const g = gmMemOf(state);
+      if (d.agenda) { g.agendas[d.agenda.npc] = { goal: d.agenda.goal, secret: d.agenda.secret }; break; }
+      const t = g.threads.find((x) => x.id === d.id);
+      if (t) { t.open = d.open; t.text = d.text || t.text; } else g.threads.push({ id: d.id, text: d.text, open: d.open, day: ev.day });
+      break;
+    }
+    case 'lore':
+      gmMemOf(state).lore.push({ title: d.title, text: d.text });
       break;
     case 'heard':
       state.relations[d.npc].heard.push(d.beat);
@@ -84,6 +116,17 @@ export function apply(state: GameState, ev: GameEvent): void {
   if (ev.journal) state.journal.push({ day: ev.day, text: ev.journal });
   state.events.push(ev);
   state.nextSeq = ev.seq + 1;
+}
+
+/** Game Master memory, created on first use (kept by events). */
+function gmMemOf(state: GameState) {
+  if (!state.gm) state.gm = { scenes: [], threads: [], lore: [], agendas: {}, duels: {}, suggestions: [] };
+  return state.gm;
+}
+
+/** Record drafts as events now (used by the Game Master layer). */
+export function commitDrafts(state: GameState, drafts: Draft[]): GameEvent[] {
+  return commit(state, drafts);
 }
 
 function commit(state: GameState, drafts: Draft[]): GameEvent[] {
@@ -160,7 +203,7 @@ export function options(s: GameState): Option[] {
   if (s.duel && !s.duel.over) {
     const moves: Option[] = (['attack', 'counter', 'feint', 'observe'] as DuelMove[]).map((m, i) => ({ key: String(i + 1), label: MOVE_LABEL[m], action: { kind: 'duel', target: m }, test: '⚔️ VAL' }));
     moves.push({ key: '5', label: 'Let the fight play out (simulate)', action: { kind: 'duel', target: 'auto' } });
-    moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: duelTemplate(s.duel.id).fleeRisk ?? 'shame' });
+    moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: duelTemplate(s.duel.id, s).fleeRisk ?? 'shame' });
     return moves;
   }
   const part = s.date.part;
@@ -205,8 +248,9 @@ setRelField((s, npc, f) => relValue(s.relations[npc], f, today(s)));
 const STORY: StoryEvent[] = BASE_STORY.concat(ARC);
 
 /** A duel template by id, including the generated border skirmishes. */
-export function duelTemplate(id: string): DuelTemplate {
+export function duelTemplate(id: string, s?: GameState): DuelTemplate {
   if (DUELS[id]) return DUELS[id];
+  if (s?.gm?.duels[id]) return s.gm.duels[id];
   return id.startsWith('officer_') ? officerTemplate(Number(id.replace('officer_', ''))) : skirmishTemplate(Number(id.replace('skirmish_', '')));
 }
 
@@ -225,6 +269,7 @@ function raidToday(s: GameState): StoryEvent | undefined {
 /** Story beats that fire at the current moment (before the player acts). */
 export function storyDrafts(s: GameState): Draft[] {
   const out: Draft[] = [];
+  if (s.flags.gm_mode) return out; // Game Master mode: Claude runs the story
   for (const e of storyAt(s)) {
     out.push({ type: 'story', fact: e.text, visible: true, journal: e.journal, data: { id: e.id, tier: e.tier, card: e.card } });
     if (e.id === 'nickname') out.push({ type: 'knowledge', fact: 'Li is called Kurose no Ryū', visible: false, data: { key: 'nickname_kurose_no_ryu' } });
@@ -495,7 +540,7 @@ function escape(s: GameState): Draft[] {
 const rankIndex = (score: number) => RANK_BANDS.length - 1 - RANK_BANDS.findIndex(([min]) => score >= min);
 
 function startDuel(s: GameState, id: string): Draft[] {
-  const t = duelTemplate(id);
+  const t = duelTemplate(id, s);
   const c = li(s);
   const mastery = Math.max(0, ...Object.values(c.styles));
   const state: DuelState = {
@@ -515,10 +560,10 @@ function duelTurn(s: GameState, choice: string): Draft[] {
   const out: Draft[] = [];
   if (choice === 'flee') {
     d = { ...structuredClone(d), over: true, result: 'fled' };
-    out.push({ type: 'work', fact: duelTemplate(d.id).fleeText, visible: true, data: {} });
+    out.push({ type: 'work', fact: duelTemplate(d.id, s).fleeText, visible: true, data: {} });
   } else if (choice === 'yield') {
     d = { ...structuredClone(d), over: true, result: 'yielded' };
-    out.push({ type: 'work', fact: duelTemplate(d.id).yieldText, visible: true, data: {} });
+    out.push({ type: 'work', fact: duelTemplate(d.id, s).yieldText, visible: true, data: {} });
   } else {
     const auto = choice === 'auto';
     let guard = 0;
@@ -537,7 +582,7 @@ function duelTurn(s: GameState, choice: string): Draft[] {
 
 function duelEnd(s: GameState, d: DuelState): Draft[] {
   const c = li(s);
-  const t = duelTemplate(d.id);
+  const t = duelTemplate(d.id, s);
   const res = t.outcomes[d.result as keyof typeof t.outcomes];
   const out: Draft[] = [];
   const liWound = Math.min(t.maxWound, d.li.wound) as Wound;
@@ -559,7 +604,7 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   if (res.merit) out.push({ type: 'flag', fact: `combat merit +${res.merit.amount} (${res.merit.why})`, visible: true, data: { key: 'merit_combat', value: has(s, 'merit_combat') + res.merit.amount } });
   if (res.money) out.push({ type: 'money', fact: `Li keeps ${res.money} mon`, visible: true, data: { amount: res.money } });
   if (res.flag) out.push({ type: 'flag', fact: `flag ${res.flag[0]} = ${res.flag[1]}`, visible: false, data: { key: res.flag[0], value: res.flag[1] } });
-  if (res.merit && isFordFight(d.id)) out.push({ type: 'flag', fact: `merit in Kurogane service: ${has(s, 'merit_service') + res.merit.amount} of ${MERIT_FOR_FREEDOM}`, visible: true, data: { key: 'merit_service', value: has(s, 'merit_service') + res.merit.amount } });
+  if (res.merit && (isFordFight(d.id) || (d.id.startsWith('gm_') && inService(s)))) out.push({ type: 'flag', fact: `merit in Kurogane service: ${has(s, 'merit_service') + res.merit.amount} of ${MERIT_FOR_FREEDOM}`, visible: true, data: { key: 'merit_service', value: has(s, 'merit_service') + res.merit.amount } });
   for (const r of res.rel ?? []) out.push(rel(r.npc, r.field, r.value, r.reason, r.fade));
   for (const m of res.memory ?? []) out.push({ type: 'memory', fact: `${s.characters[m.npc]?.name ?? m.npc} remembers the fight`, visible: false, data: { ...m } });
   for (const m of res.meet ?? []) out.push({ type: 'flag', fact: `met ${m}`, visible: false, data: { key: `met_${m}`, value: 1 } });
@@ -617,8 +662,8 @@ export function takeAction(s: GameState, a: Action): TurnResult {
   const refused = drafts.length > 0 && drafts.every((d) => d.type === 'alert') && !drafts.some((d) => d.journal);
   const events = commit(s, drafts);
   if (refused) return { events, refused };
-  // During a duel, time stands still until it ends.
-  if (wasDuel && s.duel) return { events, refused };
+  // During a duel, time stands still until it ends. In Game Master mode Claude moves time after the fight.
+  if (wasDuel && (s.duel || s.flags.gm_mode)) return { events, refused };
   return { events: events.concat(advance(s)), refused };
 }
 

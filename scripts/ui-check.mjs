@@ -138,7 +138,7 @@ const FAKE_CLAUDE = () => {
   page.on('pageerror', (e) => problems.push(`ai: page error: ${e.message}`));
   await page.addInitScript(FAKE_CLAUDE);
   await page.goto(url);
-  await page.evaluate(() => localStorage.clear());
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem('sengoku-soldier-settings', JSON.stringify({ mode: 'classic', ai: 'claude', guide: 'full', ink: 'fast' })); });
   await page.reload();
   await passIntro(page, 'ai');
   await page.waitForSelector('#storyteller[aria-pressed="true"]', { timeout: 5000 }).catch(() => problems.push('ai: storyteller did not switch to Claude'));
@@ -166,6 +166,60 @@ const FAKE_CLAUDE = () => {
   await page.screenshot({ path: `${out}/desktop-4-ai.png` });
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sengoku-soldier-save')).events.filter((e) => e.type === 'narration' || e.type === 'intent').length);
   if (saved < 3) problems.push(`ai: intents and narrations not stored in the save (${saved})`);
+  await page.close();
+}
+
+// Game Master mode (owner decision Oct 7) with a stand-in Claude: opening scene, a new person, a fight the code runs,
+// and Claude telling what happens after it.
+const FAKE_GM = () => {
+  let n = 0;
+  const scenes = [
+    { title: 'Under Kōri fort', scene: 'The band reaches Kōri fort in a cold wind. A woman with a sake cart watches Li with sharp eyes.', summary: 'The band arrives; Tomoe the sake seller notices Li.', journal: 'We reached Kōri fort. A sake seller called Tomoe watched me.', days: 0, part: 'afternoon',
+      changes: [{ kind: 'person', id: 'tomoe', name: 'Tomoe', role: 'sake seller', desc: 'A sharp-eyed woman with a sake cart.', goal: 'Sell sake to the band', secret: 'Spies for the steward' }, { kind: 'lore', title: 'Sake carts', text: 'Sellers who follow every army.' }, { kind: 'relation', npc: 'hachi', field: 'trust', delta: 3, reason: 'Li stayed close' }],
+      suggestions: ['I ask Tomoe who she is', 'I help Hachi with the horses', 'I watch Raizen'] },
+    { title: 'A drunk spearman', scene: 'A drunk spearman shoves Hachi into the mud and turns on Li, laughing.', summary: 'A drunk spearman picks a fight.', days: 0,
+      fight: { foe: 'A drunk spearman', rank: 'F', look: 'swaying, a spear shaft', deadly: false }, suggestions: [] },
+    { title: 'After the fight', scene: 'The spearman sits in the mud. Hachi stares at Li. Tomoe laughs and pours a cup for nobody.', summary: 'Li stood up to the spearman.', journal: 'I fought a drunk spearman for Hachi.', days: 2,
+      changes: [{ kind: 'relation', npc: 'hachi', field: 'affection', delta: 5, reason: 'Stood up for me' }], suggestions: ['I thank Tomoe', 'I check on Hachi'] },
+  ];
+  const sample = async () => ({ text: 'unused' });
+  sample.json = async (prompt) => { if (!prompt.includes('You are the Game Master')) return { choice: 'none', confidence: 0 }; return scenes[Math.min(n++, scenes.length - 1)]; };
+  window.claude = { use: async (name) => (name === 'sample' ? sample : null) };
+};
+for (const v of VIEWS.filter((x) => x.name !== 'panel')) {
+  const page = await browser.newPage({ viewport: { width: v.width, height: v.height } });
+  page.on('pageerror', (e) => problems.push(`gm ${v.name}: page error: ${e.message}`));
+  await page.addInitScript(FAKE_GM);
+  await page.goto(url);
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem('sengoku-soldier-settings', JSON.stringify({ mode: 'gm', ai: 'claude', guide: 'off', ink: 'instant' })); });
+  await page.reload();
+  await passIntro(page, `gm ${v.name}`);
+  if (!(await page.waitForSelector('.turn .text:has-text("sake cart")', { timeout: 8000 }).catch(() => null))) { problems.push(`gm ${v.name}: no opening scene from the Game Master`); await page.close(); continue; }
+  await page.waitForTimeout(600);
+  if (!(await page.textContent('#opts')).includes('I ask Tomoe who she is')) problems.push(`gm ${v.name}: suggestions are not the options`);
+  if (!(await page.textContent('.turn:last-child')).includes('New: Tomoe')) problems.push(`gm ${v.name}: new person not shown`);
+  for (const p of await page.evaluate(audit)) problems.push(`gm ${v.name} / scene: ${p}`);
+  await page.screenshot({ path: `${out}/gm-${v.name}-1-scene.png` });
+  await page.fill('#in', 'I walk over to Hachi');
+  await page.press('#in', 'Enter');
+  if (await page.waitForSelector('#titlecard:not([hidden])', { timeout: 5000 }).catch(() => null)) { if (await page.isVisible('#titlecard')) await page.click('#titlecard'); }
+  if (!(await page.waitForSelector('#duel:not([hidden]) .fighters', { timeout: 5000 }).catch(() => null))) problems.push(`gm ${v.name}: the fight did not start in the duel display`);
+  else {
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: `${out}/gm-${v.name}-2-fight.png` });
+    for (let g = 0; g < 12 && (await page.isVisible('#duel')); g++) { await page.click('.opt[data-key="3"]'); await page.waitForTimeout(150); }
+    if (!(await page.waitForSelector('.turn .text:has-text("sits in the mud")', { timeout: 8000 }).catch(() => null))) problems.push(`gm ${v.name}: no scene after the fight`);
+  }
+  await page.click('[data-tab="people"]');
+  if (!(await page.textContent('#tab-people')).includes('Tomoe')) problems.push(`gm ${v.name}: Tomoe missing in People`);
+  await page.click('[data-tab="encyclopedia"]');
+  if (!(await page.textContent('#tab-encyclopedia')).includes('Sake carts')) problems.push(`gm ${v.name}: lore missing in the Encyclopedia`);
+  await page.click('[data-tab="story"]');
+  await page.reload();
+  await page.waitForSelector('.opt', { timeout: 5000 }).catch(() => null);
+  if (!(await page.textContent('#log')).includes('sits in the mud')) problems.push(`gm ${v.name}: the last scene is not shown after reload`);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${out}/gm-${v.name}-3-after.png` });
   await page.close();
 }
 

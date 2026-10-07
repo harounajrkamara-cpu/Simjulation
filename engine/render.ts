@@ -11,7 +11,7 @@ const i = (x: number) => Math.floor(x);
 
 export function shortDashboard(s: GameState): string {
   const c = li(s);
-  const place = s.duel && !s.duel.over && s.duel.place ? s.duel.place : PLACES[c.location];
+  const place = s.duel && !s.duel.over && s.duel.place ? s.duel.place : PLACES[c.location] ?? c.location;
   const inDuel = s.duel && !s.duel.over;
   const wound = inDuel ? s.duel!.li.wound : c.wound;
   const fat = inDuel ? s.duel!.li.fatigue : c.fatigue;
@@ -122,7 +122,7 @@ export function trophies(s: GameState): string[] {
   for (const e of s.events) {
     const d = e.data as { duelEnd?: string; result?: string };
     if (e.type !== 'story' || !d.duelEnd?.startsWith('officer_') || d.result !== 'won') continue;
-    const t = duelTemplate(d.duelEnd);
+    const t = duelTemplate(d.duelEnd, s);
     const rank = t.foe.id === 'officer_kogashira' ? 'Kogashira (10 men)' : 'Gochō (5 men)';
     const date = dateFromIndex(e.day);
     out.push(`${t.foe.name.replace(/^the /, 'A ')} – ${rank} – ${t.place} – Year ${date.year}, Month ${date.month}, Day ${date.day} – ${t.foe.estimate.split(' · ').at(-1)}`);
