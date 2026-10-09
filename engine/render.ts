@@ -28,6 +28,30 @@ export function noticeable(s: GameState): Record<string, number> {
   return snap;
 }
 
+/** Li's exact stats, styles and skills (fractions included), to show progress that has not reached a whole point yet. */
+export function growthSnapshot(s: GameState): Record<string, number> {
+  const c = li(s);
+  const snap: Record<string, number> = {};
+  for (const k of STAT_KEYS) snap[k] = c.stats[k];
+  for (const [k, v] of Object.entries(c.styles)) snap[`style:${k}`] = v;
+  for (const [k, v] of Object.entries(c.skills)) snap[`skill:${k}`] = v;
+  return snap;
+}
+
+/** How far toward the next whole point, 0–99 (rounded, so 14.62 shows 62). */
+export const pctToNext = (v: number) => Math.min(99, Math.round((v - Math.floor(v)) * 100));
+
+/** Progress toward the next whole point (owner vision Oct 10: growth must feel rewarding without fake numbers). Whole-point
+ * changes are already in changesLine; this shows only the quiet ones, biggest first, at most `max`. */
+export function progressChips(before: Record<string, number>, after: Record<string, number>, max = 3): string[] {
+  return Object.keys(after)
+    .map((k) => ({ k, b: before[k] ?? 0, a: after[k] }))
+    .filter((x) => x.a - x.b >= 0.005 && Math.floor(x.a + 1e-9) === Math.floor(x.b + 1e-9))
+    .sort((x, y) => (y.a - y.b) - (x.a - x.b) || x.k.localeCompare(y.k))
+    .slice(0, max)
+    .map(({ k, a }) => `↗ ${k.replace('style:', '').replace('skill:', '').replace('_', ' ')} ${pctToNext(a)}% to ${Math.floor(a) + 1}`);
+}
+
 export function changesLine(before: Record<string, number>, after: Record<string, number>): string {
   const parts: string[] = [];
   for (const k of Object.keys(after)) {

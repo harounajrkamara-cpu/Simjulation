@@ -3,7 +3,7 @@ import { ENCYCLOPEDIA, STORY } from '../engine/content';
 import { ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PRICE_MON, inService } from '../engine/campaign';
 import { PLACES } from '../engine/data';
 import { has, li, met, today } from '../engine/engine';
-import { journalArcs, trophies } from '../engine/render';
+import { journalArcs, pctToNext, trophies } from '../engine/render';
 import { visibleOpinion } from '../engine/relations';
 import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '../engine/rules';
 import { GameState, STAT_KEYS } from '../engine/types';
@@ -92,6 +92,23 @@ export function chronicle(s: GameState): string {
 }
 
 const bar = (v: number) => `<span class="bar" aria-hidden="true"><i style="width:${Math.min(100, v)}%"></i></span>`;
+
+const UNLOCKS = [30, 50, 70, 100];
+
+/** "Growing" (owner vision Oct 10): every stat and style with its bar toward the next whole point, and the next style unlock. */
+export function growthHtml(s: GameState): string {
+  const c = li(s);
+  const row = (name: string, v: number, note = '') => {
+    const pct = pctToNext(v);
+    return `<li><span class="g-name">${esc(name)}</span><span class="g-val">${Math.floor(v)} → ${Math.floor(v) + 1}</span>${bar(pct)}<span class="g-pct">${pct}%</span>${note ? `<span class="g-note">${esc(note)}</span>` : ''}</li>`;
+  };
+  const stats = STAT_KEYS.map((k) => row(k, c.stats[k])).join('');
+  const styles = Object.entries(c.styles).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k, v]) => {
+    const next = UNLOCKS.find((u) => u > v);
+    return row(k.replace('_', ' '), v, next ? `unlock at ${next}` : '');
+  }).join('');
+  return `<ul class="growth">${stats}${styles}</ul>`;
+}
 
 export function liPage(s: GameState): string {
   const c = li(s);

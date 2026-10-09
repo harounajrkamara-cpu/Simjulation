@@ -8,7 +8,7 @@ import { SkipSummary, summaryText } from '../engine/summary';
 import { GmChange, gmApplyFix, gmOn, gmRewind, lastFightResult } from '../engine/gm';
 import { GmFixProposal, GmPlay, gmFix, gmSkip, gmTurn } from '../ai/gm';
 import { CHILDHOOD, TIME_JUMP, beginLife } from '../engine/prologue';
-import { changesLine, duelPanel, noticeable } from '../engine/render';
+import { changesLine, duelPanel, growthSnapshot, noticeable, progressChips } from '../engine/render';
 import { GameEvent } from '../engine/types';
 import { lastPeakDay, phase as directorPhase } from '../engine/director';
 import { WOUND_LABEL } from '../engine/rules';
@@ -17,7 +17,7 @@ import { GameState } from '../engine/types';
 import { pageAdapter, pageDownload } from './ai-page';
 import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
 import {
-  armyPage, chronicle, encyclopediaPage, goalsHtml, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
+  armyPage, chronicle, encyclopediaPage, goalsHtml, growthHtml, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
 } from './panels';
 
 // Browser mode: the war chronicle (Game Experience ch. 3, 6). Same engine and save format as the terminal and chat modes.
@@ -105,6 +105,9 @@ function replyParts(text: string, newPeople: string[]): Parts {
 }
 
 const paraHtml = (p: { kind: string; text: string }) => `<p class="text ${p.kind}">${p.kind ? esc(p.text) : termify(esc(p.text), state)}</p>`;
+const growChips = (before: Record<string, number>) => progressChips(before, growthSnapshot(state)).map((c) => `<span class="chip grow">${esc(c)}</span>`);
+/** Exact stats when the current turn began (for the progress chips). */
+let fineMark: Record<string, number> = {};
 const chipsHtml = (chips: string[]) => (chips.length ? `<div class="chips">${chips.join('')}</div>` : '');
 
 /** Start a new turn in the log (older turns fade back). */
@@ -174,6 +177,7 @@ function refresh() {
   $('scene-title').textContent = sc.title;
   document.querySelector('.scene')!.classList.toggle('day', sc.day);
   $('side-li').innerHTML = liCard(state);
+  $('side-grow').innerHTML = growthHtml(state);
   $('side-map').innerHTML = mapSvg(state);
   $('chronicle').innerHTML = chronicle(state);
   $('goals').innerHTML = goalsHtml(state);
@@ -229,13 +233,14 @@ async function gmStep(text?: string, said = text) {
   turn.insertAdjacentHTML('beforeend', '<p class="text ink wet">The ink is still wet…</p>');
   turn.scrollIntoView({ block: 'start' });
   const before = noticeable(state);
+  const fine = growthSnapshot(state);
   const metBefore = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
   const statusBefore = li(state).status;
   const seasonBefore = state.seasonKey;
   try {
     const r = await gmTurn(ai, state, text);
     turn.querySelector('.wet')?.remove();
-    await paintPlay(turn, r, said, before, metBefore, true);
+    await paintPlay(turn, r, said, before, metBefore, true, fine);
     refresh();
     await afterPlays(r.events, r.turn.scene, seasonBefore, statusBefore, !!r.duelId);
   } catch (e) {
@@ -250,14 +255,14 @@ async function gmStep(text?: string, said = text) {
 }
 
 /** One Game Master scene in the log: the story (inked or at once), its chips, the GM's out-of-character note, "Why?". */
-async function paintPlay(turn: HTMLElement, r: GmPlay, said: string | undefined, before: ReturnType<typeof noticeable>, metBefore: Set<string>, ink: boolean) {
+async function paintPlay(turn: HTMLElement, r: GmPlay, said: string | undefined, before: ReturnType<typeof noticeable>, metBefore: Set<string>, ink: boolean, fine: Record<string, number>) {
   const p = document.createElement('p');
   p.className = 'text';
   turn.appendChild(p);
   if (ink) await inkReveal(p, r.turn.scene);
   else p.innerHTML = termify(esc(r.turn.scene), state);
   const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !metBefore.has(id)).map((id) => state.characters[id].name);
-  turn.insertAdjacentHTML('beforeend', chipsHtml(replyParts(changesLine(before, noticeable(state)), newPeople).chips));
+  turn.insertAdjacentHTML('beforeend', chipsHtml([...replyParts(changesLine(before, noticeable(state)), newPeople).chips, ...growChips(fine)]));
   if (r.turn.gmNote) turn.insertAdjacentHTML('beforeend', `<p class="text gmnote">Game Master: ${esc(r.turn.gmNote)}</p>`);
   const why = [said ? `Because Li chose: ${said}.` : '', r.turn.journal ? `Li's journal: ${r.turn.journal}` : '', r.notes.length ? `The rules held: ${r.notes.join('; ')}.` : ''].filter(Boolean);
   if (why.length) turn.insertAdjacentHTML('beforeend', `<details class="why"><summary>Why?</summary><p>${esc(why.join(' '))}</p></details>`);
@@ -312,13 +317,15 @@ async function runSkip(until: string, plan: string) {
   const events: GameEvent[] = [];
   let last: GmPlay | undefined;
   let prev = before;
+  let prevFine = growthSnapshot(state);
   let metPrev = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
   try {
     const plays = await gmSkip(ai, state, { until, plan }, (r) => {
       events.push(...r.events);
       last = r;
-      paintPlay(newTurn(), r, undefined, prev, metPrev, false);
+      paintPlay(newTurn(), r, undefined, prev, metPrev, false, prevFine);
       prev = noticeable(state);
+      prevFine = growthSnapshot(state);
       metPrev = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
       refresh();
       persist();
@@ -418,6 +425,7 @@ async function finish(reply: Reply, turn: HTMLElement, said: string | undefined,
   // After a WAIT the summary gets its own screen; the turn keeps only its changes line.
   const text = reply.summary ? reply.text.replace(summaryText(reply.summary), reply.summary.changes ? `Changes: ${reply.summary.changes}` : '') : reply.text;
   const parts = replyParts(text, newPeople);
+  parts.chips.push(...growChips(fineMark));
   const events = reply.events ?? [];
   await bigMoments(events, seasonBefore);
   if (reply.summary) await skipScreen(reply.summary);
@@ -507,6 +515,7 @@ const gmChoices = () => state.gm?.suggestions?.length ? state.gm.suggestions : [
 
 async function send(raw: string, said = raw) {
   if (busy) return;
+  fineMark = growthSnapshot(state);
   if (shownHint) markHint(shownHint); // a hint closes itself once the player acts (ch. 8 §4)
   const text = raw.trim();
   if (gmMode() && !/^(HELP|STATUS|INFOCHAR|RELATIONS|RECAP|LOG|SAVE|LOAD|NEW)\b/i.test(text)) return gmStep(text, said);

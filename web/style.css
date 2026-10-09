@@ -329,3 +329,13 @@ button { cursor: pointer; }
 .slot b { font-family: var(--display); color: var(--paper); }
 .slot.on { border-color: var(--gold); cursor: default; }
 .slot:not(.on):hover { border-color: var(--gold); }
+
+/* Growing (owner vision Oct 10): progress toward the next whole point. */
+.growth { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.growth li { display: grid; grid-template-columns: 92px 64px 1fr 40px; align-items: center; gap: 8px; color: var(--paper-2); }
+.growth .g-name { color: var(--paper); text-transform: capitalize; }
+.growth .g-val, .growth .g-pct { font-variant-numeric: tabular-nums; }
+.growth .g-pct { text-align: right; color: var(--faded); }
+.growth .bar { width: auto; margin: 0; }
+.growth .g-note { grid-column: 1 / -1; font-size: 13px; color: var(--gold); margin-top: -4px; }
+.chip.grow { color: var(--gold); border-style: dashed; }
