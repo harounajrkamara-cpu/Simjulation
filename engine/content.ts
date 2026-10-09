@@ -392,13 +392,24 @@ export const ENCYCLOPEDIA: Entry[] = [
   { id: 'papers', title: 'The slave papers', text: 'Every slave\'s name and price, kept in Rokubei\'s iron box.', needs: 'papers_in_iron_box' },
 ];
 
-/** Prologue (Game Experience ch. 8): 7 hand-written ink slides, the same every time. Only what Li knows (WB 10.2). */
-export const PROLOGUE: { label: string; text: string; quote?: string }[] = [
-  { label: 'Four hundred years', text: 'For four hundred years, one Empire ruled the land from Amatsu-kyō.' },
-  { label: 'Year 0', text: 'Two princes, two crowns, one city on fire. The Burning.' },
-  { label: 'Seven crowns', text: 'Seven Wardens crowned themselves. Seven kingdoms.' },
-  { label: 'A hundred years', text: 'A hundred years of war. On the Kurose river, banners face each other across the water.' },
-  { label: 'A memory', text: 'Two swords crossed on a wall. A man\'s laugh.', quote: '"Little Dragon."' },
-  { label: 'A memory', text: 'Snow. A lantern burning in the dark. A coat with a white rock stitched on the shoulder, walking ahead.', quote: '"Never say that name, Li. Not to anyone."' },
-  { label: 'Year 100 · Spring', text: 'A boy carries a load behind a red crane banner, toward Kōri fort.' },
+/** One still of the opening: a label, the narration, an optional line in big brush letters, and a light. */
+export interface Slide { label: string; text: string; quote?: string; mood?: 'ember' | 'snow' | 'title' }
+
+/**
+ * The opening film (GE ch. 8, owner vision Oct 10): the Empire, the Burning, seven kingdoms, a hundred years of war, the
+ * legend of the Twin Demon as the world tells it (only the official story), then the snow and a small boy. Hand-written,
+ * the same every time. It never names the Twin Demon, never ties him to Li and never shows who killed him (WB 10.1).
+ * The playable night that follows lives in prologue.ts.
+ */
+export const PROLOGUE: Slide[] = [
+  { label: 'Four hundred years', text: 'For four hundred years, one Empire ruled the land from Amatsu-kyō. Seven Wardens kept its seven great regions in the Emperor\'s name.' },
+  { label: 'Year 0', text: 'Then the last Emperor died without an heir the court would accept. Two princes, two crowns, one city on fire.', quote: 'The Burning.', mood: 'ember' },
+  { label: 'Seven crowns', text: 'From the ashes, the seven Wardens crowned themselves. Kurogane, Suiren, Hayate, Ushio, Takane, Tatara, Kitakaze: seven kingdoms, and the ruins of the capital between them.' },
+  { label: 'A hundred years', text: 'A hundred years of war. Whoever unites the seven will be the new Empire. No one has come close.' },
+  { label: 'A legend', text: 'In Suiren, the Southern Giant, a peasant\'s son rose from the lowest rank through the border wars. He fought with two swords, and his enemies gave him a name.', quote: '"The Twin Demon."' },
+  { label: 'Year 90 · The Kurose', text: 'On the Kurose, the river between Suiren and Kurogane, the Twin Demon broke a Kurogane army. Kurogane veterans still curse the name.' },
+  { label: 'Year 95', text: 'Five years later, on a night road home from war, the Twin Demon fell in an ambush.', quote: '"Kurogane raiders," the songs say.', mood: 'ember' },
+  { label: 'Year 95 · Month 8', text: 'Far to the north, the snow comes early to the mountains.', mood: 'snow' },
+  { label: 'A mountain pass', text: 'A narrow road above the clouds. A lantern, carried low. A small boy, seven years old, walking in the snow behind his mother.', mood: 'snow' },
+  { label: 'Sengoku Soldier', text: '', quote: 'One boy. Seven kingdoms at war. A father\'s name he must not say.', mood: 'title' },
 ];

@@ -112,7 +112,9 @@ export type EventType =
   | 'person'
   | 'place'
   | 'thread'
-  | 'lore';
+  | 'lore'
+  // A fix after the player's "Something's wrong" report, or a rewind of broken scenes (text only; read back by engine/gm.ts):
+  | 'correction';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {

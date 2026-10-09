@@ -7,6 +7,8 @@ import { journalArcs, trophies } from '../engine/render';
 import { visibleOpinion } from '../engine/relations';
 import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '../engine/rules';
 import { GameState, STAT_KEYS } from '../engine/types';
+import { STANCE_LABEL, Stance, publicWorld } from '../engine/world-public';
+import { WORLD_CSS, liPoint, worldSvg } from './world-map';
 
 // The war chronicle's tabs and side panel (Game Experience ch. 3, 6). Only what Li can know is shown.
 
@@ -150,9 +152,54 @@ export function encyclopediaPage(s: GameState): string {
   return `<h1>Encyclopedia</h1><p class="lead">What Li has learned about the world. It grows as he learns more.</p>${list}`;
 }
 
+const KEY_SVG: Record<string, string> = {
+  war: '<path class="b-war" d="M2 6 L26 6"></path><path class="x-war" d="M10 2 L18 10 M18 2 L10 10"></path>',
+  truce: '<path class="b-truce" d="M2 6 L26 6"></path>',
+  tension: '<path class="b-tension" d="M2 6 L26 6"></path>',
+  cap: '<rect class="cap" x="11" y="3" width="6" height="6"></rect>',
+  li: '<circle cx="14" cy="6" r="4.5" fill="#C8452F"></circle>',
+};
+const key = (k: string, label: string) => `<span><svg viewBox="0 0 28 12" aria-hidden="true">${KEY_SVG[k]}</svg>${label}</span>`;
+
+/** "The world" (zoomed out): the public state of the land, even what Li is too low to know. Never a hidden truth. */
+export function worldView(s: GameState): string {
+  const w = publicWorld(s.date);
+  const name = (id: string) => w.kingdoms.find((k) => k.id === id)?.name ?? w.free.find((f) => f.id === id)?.name ?? id;
+  const ties = (id: string) => w.relations.filter((r) => (r.a === id || r.b === id) && ['war', 'truce', 'tension'].includes(r.stance))
+    .map((r) => `${r.stance === 'war' ? 'At war with' : r.stance === 'truce' ? 'Truce with' : 'Tension with'} ${name(r.a === id ? r.b : r.a)}`);
+  const stance = (st: Stance) => `<b class="${st === 'war' ? 'st-war' : st === 'truce' ? 'st-truce' : 'st-other'}">${STANCE_LABEL[st]}</b>`;
+  const kingdoms = w.kingdoms.map((k) => `<article class="wcard c-${k.id}"><h3>${esc(k.name)} <span class="sub">${esc(k.epithet)}</span></h3>
+    <p>Capital: ${esc(k.capital)}</p><p>${esc(k.ruler)}</p><p>${esc(k.land)}</p><p>${esc(k.knownFor)}</p><p class="size">${esc(k.size)}</p>
+    ${ties(k.id).length ? `<p>${esc(ties(k.id).join(' · '))}</p>` : ''}</article>`).join('');
+  const free = w.free.map((f) => `<article class="wcard"><h3>${esc(f.name)} <span class="sub">${esc(f.epithet)}</span></h3><p>${esc(f.text)}</p></article>`).join('');
+  const relations = w.relations.map((r) => `<tr><th>${esc(name(r.a))} and ${esc(name(r.b))}</th><td>${stance(r.stance)} · ${esc(r.text)}</td></tr>`).join('');
+  const titles = w.titles.map((t) => `<article class="wcard c-${t.kingdom}"><h3>${esc(t.name)} <span class="sub">${esc(name(t.kingdom))}</span></h3><p>${esc(t.text)}</p>
+    <ol>${t.seats.map((x) => x.holder ? `<li><b>${esc(x.holder)}</b>${x.known ? `, "${esc(x.known)}"` : ''}. ${esc(x.text)}</li>` : `<li class="open">${esc(x.text)}</li>`).join('')}</ol></article>`).join('');
+  const famous = w.famous.map((f) => `<li><b>${esc(f.name)}</b>, ${esc(f.known)}. ${esc(f.text)}</li>`).join('');
+  const legends = w.legends.map((l) => `<tr><th>${esc(l.when)}</th><td><b>${esc(l.title)}</b>. ${esc(l.text)}</td></tr>`).join('');
+  return `<p class="lead">The land as everyone knows it in Year ${w.year}: what any merchant, monk or soldier could tell. Li may not know all of it yet.</p>
+    <div class="mv-map">${worldSvg(w, liPoint(w, li(s).location))}</div>
+    <p class="mv-key">${key('war', 'At war')}${key('truce', 'Truce')}${key('tension', 'Tension')}${key('cap', 'Capital')}${key('li', 'Li')}</p>
+    <h2 class="label">The seven kingdoms</h2><div class="grid">${kingdoms}</div>
+    <h2 class="label">War and peace</h2><table class="table">${relations}</table>
+    <h2 class="label">Free lands</h2><div class="grid">${free}</div>
+    <h2 class="label">Great titles</h2><div class="grid">${titles}</div>
+    <h2 class="label">Famous names</h2><div class="wcard mv-famous"><ul>${famous}</ul></div>
+    <h2 class="label">Remembered battles</h2><table class="table mv-years">${legends}</table>`;
+}
+
+/** Two views (owner): Li's eyes (default, fogged, only what Li knows) and the world (public state). CSS switches them, no script. */
 export function mapPage(s: GameState): string {
-  return `<h1>The land, as Li knows it</h1><p class="lead">Only Akaishi and the river. The rest of the seven kingdoms is fog until Li learns it.</p>
-    <div style="max-width:760px">${mapSvg(s, true)}</div>`;
+  return `<div class="mapviews"><style>${WORLD_CSS}</style>
+    <h1>The land</h1>
+    <fieldset class="mv-switch"><legend>Map view</legend>
+      <label><input type="radio" name="mapview" id="mv-li" value="li" checked>Li's eyes</label>
+      <label><input type="radio" name="mapview" id="mv-world" value="world">The world</label>
+    </fieldset>
+    <section class="mv-li" aria-label="Li's eyes"><p class="lead">As Li knows it: only Akaishi and the river. The rest of the seven kingdoms is fog until Li learns it.</p>
+      <div class="mv-map">${mapSvg(s, true)}</div></section>
+    <section class="mv-world" aria-label="The world">${worldView(s)}</section>
+  </div>`;
 }
 
 /** Goals panel (GE ch. 4): Li's goals and the freedom routes he knows, with visible progress. */

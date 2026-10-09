@@ -2,11 +2,11 @@ import { ageOn, dateFromIndex, dayIndex, formatDate, seasonKey } from './calenda
 import { inService, MERIT_FOR_FREEDOM, PRICE_MON } from './campaign';
 import { DuelOutcome, DuelTemplate } from './content';
 import { PLACES } from './data';
-import { commitDrafts, has, li, met, today } from './engine';
+import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
-import { Draft, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
+import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
 
 // Game Master mode (owner decision, Oct 7): Claude runs the world — any action, people with their own plans, the story
 // moves scene by scene. The code is the memory and the referee: it keeps every person, promise, wound and coin as events
@@ -34,6 +34,10 @@ export interface GmTurn {
   fight?: GmFight;
   /** 3–4 things Li could do next. */
   suggestions?: string[];
+  /** Time skip: something important happened or the target is reached, so the skip stops here. */
+  stop?: boolean;
+  /** One short out-of-character line to the player (e.g. why a wish could not be granted). Shown apart from the scene. */
+  gmNote?: string;
 }
 
 export interface GmFight {
@@ -66,7 +70,31 @@ export type GmChange =
   | { kind: 'knowledge'; key: string }
   | { kind: 'service'; reason: string }
   | { kind: 'dies'; npc: string; reason: string }
-  | { kind: 'freedom'; route: 'merit' | 'head' | 'bought' | 'raizen' | 'escape' };
+  | { kind: 'freedom'; route: 'merit' | 'head' | 'bought' | 'raizen' | 'escape' }
+  /** Only in a fix ("Something's wrong"): a corrected fact line the memory keeps from now on. */
+  | { kind: 'fact'; what: string; text: string };
+
+/** Claude's answer to the player's "Something's wrong" report. */
+export interface GmFixProposal {
+  /** Plain words to the player, out of character. */
+  explanation: string;
+  /** Corrections: the same kinds as a scene, plus "fact". Checked by the same referee. */
+  changes: GmChange[];
+  /** Scenes to take back (0 = none, at most 3), only when the last scene(s) broke the facts. */
+  rewindScenes: number;
+}
+
+/** Knowledge keys Claude records when a long goal moves (the code gates some of them). */
+export const GOAL_KEYS = {
+  zone: 'shinken_no_ryu',
+  name: 'said_hattori',
+  lead: 'family_lead',
+  alive: 'family_alive',
+  found: 'family_found',
+  lie: 'father_lie',
+  truth: 'father_truth',
+  killers: 'father_killers',
+} as const;
 
 // ---------- limits (the referee) ----------
 
@@ -85,9 +113,10 @@ const RANK_SCORE: Record<GmFight['rank'], number> = { F: 10, E: 22, D: 37, C: 52
 const OFFICER_MERIT: Record<NonNullable<GmFight['officer']>, number> = { 'Gochō': 3, 'Kogashira': 3, 'Gojū-gashira': 10, 'Hyakunin-gashira': 10 };
 
 export const gmOn = (s: GameState) => (s.flags.gm_mode ?? 0) > 0;
+/** Read-only view of the Game Master memory. Never creates it: only events do (engine.ts), so reading cannot change the
+ * state (a fresh game read before its first scene must still match its own replay, or the save would not load). */
 export function gmMem(s: GameState): GmMemory {
-  if (!s.gm) s.gm = { scenes: [], threads: [], lore: [], agendas: {}, duels: {}, suggestions: [] };
-  return s.gm;
+  return s.gm ?? { scenes: [], threads: [], lore: [], agendas: {}, duels: {}, suggestions: [] };
 }
 
 // ---------- what Claude knows: the people's own plans and the hidden truths ----------
@@ -132,6 +161,100 @@ function reasonsOf(s: GameState, npc: string): string[] {
   return s.relations[npc].mods.slice(-4).map((m) => `${m.reason} (${m.field} ${m.value > 0 ? '+' : ''}${m.value})`);
 }
 
+// ---------- long goals (replace fixed "promised moments": chances keep coming, nothing is forced) ----------
+
+export interface GmGoal {
+  n: number;
+  title: string;
+  done: boolean;
+  /** Status for Claude (may name hidden things: Game Master memory only, never UI text). */
+  status: string;
+  /** Storylines Claude opened as chances toward this goal (thread ids goal<n>_…). */
+  chances: { id: string; text: string; open: boolean; day: number }[];
+}
+
+const knows = (s: GameState, key: string) => s.knowledge.includes(key);
+
+/** A deadly fight the code decided (blood), or merit from combat. */
+function foughtForReal(s: GameState): boolean {
+  if (has(s, 'merit_combat') > 0) return true;
+  return s.events.some((e) => {
+    const id = (e.data as { duelEnd?: string }).duelEnd;
+    return e.type === 'story' && !!id && id.startsWith('gm_') && (s.gm?.duels[id]?.maxWound ?? 0) >= 3;
+  });
+}
+
+/** Li's five long goals, with a status derived from the state wherever the code can tell. */
+export function gmLongGoals(s: GameState): GmGoal[] {
+  const c = li(s);
+  const K = GOAL_KEYS;
+  const fought = foughtForReal(s);
+  const zone = knows(s, K.zone);
+  const chances = (n: number) => (s.gm?.threads ?? []).filter((t) => t.id.startsWith(`goal${n}`));
+  const family = knows(s, K.found) ? 'DONE: Li has found them.'
+    : knows(s, K.alive) ? `Li knows they are alive. Next: find them (record "${K.found}").`
+    : knows(s, K.lead) ? `Li has a lead that they may be alive. Next: proof that they live (record "${K.alive}").`
+    : `No lead yet. ${c.status === 'slave' ? 'Plant an early LEAD during the slave years' : 'Bring a LEAD'} (a rumour, a crest, a traveller): a lead, never the full truth or where they are (record "${K.lead}").`;
+  const father = knows(s, K.killers) ? 'DONE: Li knows the truth and the people behind it.'
+    : knows(s, K.truth) ? `Li knows it was murder by people of his father's own side. Next: who (record "${K.killers}").`
+    : knows(s, K.lie) ? `Li has heard the official story (Kurogane raiders). Next: the truth (record "${K.truth}").`
+    : `Li knows only that his father, a soldier, was killed. Record "${K.lie}" when he hears the official story, "${K.truth}" when he learns it was murder, "${K.killers}" when he knows who.`;
+  const goals: Omit<GmGoal, 'n' | 'chances'>[] = [
+    { title: 'Breaking the chains (freedom)', done: c.status !== 'slave', status: c.status !== 'slave' ? `DONE: Li is free (${c.role}).` : 'OPEN: Li is a slave; the routes are under FREEDOM ROUTES.' },
+    {
+      title: 'Blood and the Zone', done: fought && zone,
+      status: `First real battle: ${fought ? 'fought' : 'not yet (a deadly fight the code runs)'}. SHINKEN NO RYŪ (SECRET, Li's hidden gift): ${zone ? 'woken' : `asleep; it can wake only at a true near-death moment (Li badly wounded, near-death moments so far: ${has(s, 'near_death')}); when it truly wakes, record "${K.zone}"`}.`,
+    },
+    { title: 'The name', done: knows(s, K.name), status: knows(s, K.name) ? 'DONE: Li has said the name Hattori aloud; the fuse in HIDDEN TRUTHS is lit.' : `OPEN: the world has never heard "Hattori" from Li's own mouth. Only the player can make Li say it; when he does, record "${K.name}".` },
+    { title: 'Home (his mother and sisters)', done: knows(s, K.found), status: family },
+    { title: 'His father\'s death (the truth and the people behind it)', done: knows(s, K.killers), status: father },
+  ];
+  return goals.map((g, k) => ({ ...g, n: k + 1, chances: chances(k + 1) }));
+}
+
+function longGoalsText(s: GameState): string {
+  const goals = gmLongGoals(s);
+  const next = goals.find((g) => !g.done);
+  const lines = goals.map((g) => {
+    const last = g.chances.length ? Math.max(...g.chances.map((t) => t.day)) : undefined;
+    const open = g.chances.filter((t) => t.open).map((t) => `[${t.id}] ${t.text}`);
+    const ch = g.done ? '' : `\n   Chances: ${open.join(' · ') || 'none open'}${last === undefined ? ' (none offered yet)' : ` (last one opened ${today(s) - last} days ago)`}.`;
+    return `${g.n}. ${g.title}${g === next ? '  ← NEXT' : ''}: ${g.status}${ch}`;
+  });
+  return `LONG GOALS (keep a CHANCE toward the NEXT open goal coming; the player can miss or lose it; a missed chance returns later in another form; nothing is guaranteed, nothing is forced. Track each chance as a storyline with id goal1_… to goal5_; record progress with the knowledge keys named here):\n${lines.join('\n')}`;
+}
+
+/** Corrections from the player's reports and rewinds: true from now on, they override the story so far. */
+function correctionsText(s: GameState): string {
+  const facts = new Map<string, string>();
+  const reports: string[] = [];
+  for (const e of s.events) {
+    if (e.type !== 'correction') continue;
+    const d = e.data as { what?: string; text?: string; rewind?: number; report?: string; explanation?: string; changed?: number };
+    const when = formatDate(dateFromIndex(e.day, e.part));
+    if (d.what) { facts.delete(d.what.toLowerCase()); facts.set(d.what.toLowerCase(), `${d.what}: ${d.text}`); }
+    else if (d.rewind) reports.push(`${when}: the last ${d.rewind} scene(s) were taken back because they broke the facts (the player reported: "${d.report}"). Do not repeat that mistake.`);
+    else if (d.report !== undefined) reports.push(`${when}: the player reported "${d.report}". ${d.changed ? 'Corrected' : 'Nothing changed'}: ${d.explanation}`);
+  }
+  if (!facts.size && !reports.length) return '';
+  return [
+    'CORRECTIONS (true now; they override anything above that disagrees):',
+    ...[...facts.values()].slice(-20).map((x) => `- ${x}`),
+    ...reports.slice(-6).map((x) => `- ${x}`),
+  ].join('\n');
+}
+
+/** What the referee cut from the last scene, so Claude does not build on it. */
+function refereeText(s: GameState): string {
+  let k = s.events.length - 1;
+  const notes: string[] = [];
+  for (; k >= 0 && s.events[k].type !== 'scene'; k--) {
+    const d = s.events[k].data as { gmNotes?: string[]; gmSecretNotes?: string[]; fix?: boolean };
+    if (s.events[k].type === 'alert' && !d.fix) notes.unshift(...(d.gmNotes ?? []), ...(d.gmSecretNotes ?? []));
+  }
+  return notes.length ? `THE CODE CUT FROM YOUR LAST SCENE (it did not happen as written; build on what was recorded):\n${notes.map((x) => `- ${x}`).join('\n')}` : '';
+}
+
 /** Everything the Game Master needs, as one text. Hidden truths are marked SECRET: Claude must not reveal them. */
 export function gmMemoryText(s: GameState): string {
   const c = li(s);
@@ -169,11 +292,14 @@ export function gmMemoryText(s: GameState): string {
     `Merit: combat ${has(s, 'merit_combat')}, in Kurogane service ${has(s, 'merit_service')} of ${MERIT_FOR_FREEDOM}. In the Hagiwara levy: ${inService(s) ? 'yes' : 'no'}.`,
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
     `FREEDOM ROUTES:\n${freedomRoutes.map((x) => `- ${x}`).join('\n')}`,
+    longGoalsText(s),
     `PEOPLE LI KNOWS:\n${people || '(none)'}`,
     unmet ? `PEOPLE NEARBY LI HAS NOT MET YET:\n${unmet}` : '',
     `OPEN STORYLINES:\n${g.threads.filter((t) => t.open).map((t) => `- [${t.id}] ${t.text}`).join('\n') || '(none yet: start some)'}`,
     `STORY SO FAR:\n${story.join('\n') || '(the story begins now)'}`,
     `LI'S LAST JOURNAL LINES:\n${s.journal.slice(-8).map((j) => `- ${j.text}`).join('\n') || '(none)'}`,
+    correctionsText(s),
+    refereeText(s),
     soon.length ? `WORLD CLOCK (fixed dates the world keeps; weave them in when they come):\n${soon.join('\n')}` : '',
     `HIDDEN TRUTHS (SECRET — never reveal them unless Li truly discovers them in play):\n${GM_SECRETS.map((x) => `- ${x}`).join('\n')}`,
   ].filter(Boolean).join('\n\n');
@@ -185,6 +311,8 @@ export interface GmResult {
   drafts: Draft[];
   /** Changes the code refused or cut down, with the reason (shown under "Why?" and sent back to Claude). */
   notes: string[];
+  /** Refusals that name hidden things: sent back to Claude only, never shown to the player. */
+  secretNotes?: string[];
   /** A fight the code has started. */
   duelId?: string;
 }
@@ -219,6 +347,8 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
       deadly: f.deadly !== false, witnessedEnemy: f.witnessedEnemy === true, place: str(f.place, 80) || undefined,
     } : undefined,
     suggestions: Array.isArray(o.suggestions) ? o.suggestions.map((x) => str(x, 120)).filter(Boolean).slice(0, 4) : [],
+    stop: o.stop === true,
+    gmNote: str(o.gmNote, 240) || undefined,
   };
 }
 
@@ -247,16 +377,54 @@ function trainDrafts(s: GameState, focus: string, days: number): { drafts: Draft
 /** Check every change against the limits and turn the scene into events. Nothing here uses chance. */
 export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   const c = li(s);
-  const g = gmMem(s);
   const notes: string[] = [];
+  const secretNotes: string[] = [];
+  const drafts: Draft[] = [];
+  drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null } });
+  if (t.place) drafts.push({ type: 'place', fact: `Li is at ${t.place}`, visible: false, data: { char: c.id, place: t.place } });
+  drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false));
+
+  let duelId: string | undefined;
+  if (t.fight) {
+    duelId = `gm_${s.nextSeq}`;
+    drafts.push(...gmDuelStart(s, duelId, t.fight));
+  }
+  return { drafts, notes, secretNotes, duelId };
+}
+
+/** The player's own words (this turn or any earlier scene) named Hattori: only then can Li have said it. */
+const playerSaidName = (s: GameState, said?: string) => [said, ...s.events.filter((e) => e.type === 'scene').map((e) => (e.data as { said?: unknown }).said)]
+  .some((x) => typeof x === 'string' && /hattori/i.test(splitWishes(x).action));
+
+/** Words in (round brackets) are the player's wishes to the Game Master for the story; the rest is what Li does. */
+export function splitWishes(said: string): { action: string; wishes: string[] } {
+  const wishes: string[] = [];
+  let action = '';
+  let cur = '';
+  let depth = 0;
+  for (const ch of said) {
+    if (ch === '(' || ch === '（') { if (depth++ === 0) { cur = ''; continue; } }
+    else if ((ch === ')' || ch === '）') && depth > 0) { if (--depth === 0) { wishes.push(cur); continue; } }
+    if (depth) cur += ch;
+    else action += ch;
+  }
+  if (depth) wishes.push(cur);
+  return {
+    action: action.replace(/\s+/g, ' ').replace(/\s+([.,!?;:])/g, '$1').trim(),
+    wishes: wishes.map((w) => w.replace(/\s+/g, ' ').trim()).filter(Boolean),
+  };
+}
+
+/** The referee for a list of changes (a scene's, or a fix's when `facts` is true). */
+function checkChanges(s: GameState, changes: GmChange[], notes: string[], secretNotes: string[], said: string | undefined, facts: boolean): Draft[] {
+  const c = li(s);
+  const g = gmMem(s);
   const drafts: Draft[] = [];
   const known = (id: string) => !!s.characters[id] && id !== s.liId;
   const newPeople = new Set<string>();
+  const worstWound = Math.max(c.wound, ...changes.filter((x) => x && x.kind === 'wound').map((x) => Math.min(GM_LIMITS.maxWound, num((x as { level?: unknown }).level))));
 
-  drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null } });
-  if (t.place) drafts.push({ type: 'place', fact: `Li is at ${t.place}`, visible: false, data: { char: c.id, place: t.place } });
-
-  for (const ch of t.changes ?? []) {
+  for (const ch of changes) {
     const x = ch as Record<string, unknown>;
     switch (ch.kind) {
       case 'person': {
@@ -334,7 +502,16 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
       }
       case 'knowledge': {
         const key = slug(str(x.key, 40));
+        if (key === GOAL_KEYS.zone && worstWound < 3) { secretNotes.push('SHINKEN NO RYŪ wakes only at a true near-death moment (Li is not badly wounded): not recorded'); break; }
+        if (key === GOAL_KEYS.name && !playerSaidName(s, said)) { secretNotes.push('Li says the name Hattori only when the player writes it: not recorded'); break; }
         if (key && !s.knowledge.includes(key)) drafts.push({ type: 'knowledge', fact: `Li learns: ${key}`, visible: false, data: { key } });
+        break;
+      }
+      case 'fact': {
+        const what = str(x.what, 80);
+        const text = str(x.text, 300);
+        if (!facts) secretNotes.push('fact corrections come only from the player\'s report');
+        else if (what && text) drafts.push({ type: 'correction', fact: `Correction: ${what}: ${text}`, visible: false, data: { what, text } });
         break;
       }
       case 'service': {
@@ -355,13 +532,7 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
         notes.push(`unknown change "${String(x.kind)}" ignored`);
     }
   }
-
-  let duelId: string | undefined;
-  if (t.fight) {
-    duelId = `gm_${s.nextSeq}`;
-    drafts.push(...gmDuelStart(s, duelId, t.fight));
-  }
-  return { drafts, notes, duelId };
+  return drafts;
 }
 
 /** Freedom only when a real route holds (World Bible 10.4). */
@@ -466,13 +637,131 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   return out;
 }
 
+/** The longest skip one scene may make now (GE ch. 9 §6). */
+export const gmDayCap = (s: GameState) => (li(s).status === 'slave' ? GM_LIMITS.daysSlave : GM_LIMITS.daysFree);
+
+const NUMBER_WORDS: Record<string, number> = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, few: 3 };
+const UNIT_DAYS: Record<string, number> = { day: 1, week: 7, month: 30, season: 90, year: 360 };
+
+/** Days left to a time-skip target the code can read ("until Li is 14", "until Year 101", "for 3 months"); undefined when only Claude can tell ("until the next battle"). */
+export function skipDaysLeft(s: GameState, until: string, startDay: number): number | undefined {
+  const t = until.toLowerCase();
+  const age = t.match(/\b(?:is|turns?|aged?|ages)\s+(\d{1,2})\b/);
+  if (age) {
+    const b = li(s).born;
+    return dayIndex({ year: b.year + Number(age[1]), month: b.month, day: b.day, part: 'morning' }) - today(s);
+  }
+  const year = t.match(/\byear\s+(\d{3})\b/);
+  if (year) return dayIndex({ year: Number(year[1]), month: 1, day: 1, part: 'morning' }) - today(s);
+  const dur = t.match(/\b(\d{1,3}|an?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|few)\s+(day|week|month|season|year)s?\b/);
+  if (dur) return startDay + (NUMBER_WORDS[dur[1]] ?? Number(dur[1])) * UNIT_DAYS[dur[2]] - today(s);
+  return undefined;
+}
+
 /** Record one scene: checked changes as events, then the time that passes (unless a fight starts now). */
 export function gmApply(s: GameState, t: GmTurn, said?: string): GmResult & { events: import('./types').GameEvent[] } {
   const r = checkGmTurn(s, t, said);
   const events = commitDrafts(s, r.drafts);
   if (!r.duelId) events.push(...commitDrafts(s, gmTimeDrafts(s, t.days ?? 0, t.part)));
-  if (r.notes.length) events.push(...commitDrafts(s, [{ type: 'alert', fact: `The rules held: ${r.notes.join('; ')}.`, visible: false, data: { gmNotes: r.notes } }]));
+  events.push(...commitDrafts(s, refereeDrafts(r.notes, r.secretNotes ?? [])));
   return { ...r, events };
+}
+
+/** The referee's notes as one hidden alert (the secret ones only in data, for Claude). */
+function refereeDrafts(notes: string[], secretNotes: string[], extra: Record<string, unknown> = {}): Draft[] {
+  if (!notes.length && !secretNotes.length) return [];
+  return [{ type: 'alert', fact: notes.length ? `The rules held: ${notes.join('; ')}.` : 'The rules held.', visible: false, data: { gmNotes: notes, ...(secretNotes.length ? { gmSecretNotes: secretNotes } : {}), ...extra } }];
+}
+
+// ---------- "Something's wrong": fixes and rewinds (Ironman stays: fair losses and bad choices are never undone) ----------
+
+/** Turn Claude's raw fix answer into a safe proposal; the rewind is capped (≤ 3, never across a fight the code decided). */
+export function parseGmFix(raw: unknown, s: GameState): GmFixProposal | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const o = raw as Record<string, unknown>;
+  let explanation = str(o.explanation, 800);
+  if (!explanation) return undefined;
+  const changes = Array.isArray(o.changes) ? (o.changes.filter((x) => x && typeof x === 'object' && typeof (x as { kind?: unknown }).kind === 'string') as GmChange[]).slice(0, 12) : [];
+  const want = clamp(Math.floor(num(o.rewindScenes)), 0, 3);
+  const rewindScenes = Math.min(want, gmRewindLimit(s.events));
+  if (rewindScenes < want && rewindScenes < s.events.filter((e) => e.type === 'scene').length) explanation += ' A fight is never taken back: the story can only go back to the scene after it.';
+  return { explanation, changes, rewindScenes };
+}
+
+/** Record a fix: checked corrections (reason "Correction: …") and a visible note. Does not rewind: do that first (gmRewind). */
+export function gmApplyFix(s: GameState, p: GmFixProposal, report: string): GameEvent[] {
+  const notes: string[] = [];
+  const secretNotes: string[] = [];
+  const corr = (x: string) => (/^correction:/i.test(x) ? x : `Correction: ${x}`);
+  const changes = (p.changes ?? []).filter((x) => x && typeof x === 'object').map((x) => {
+    const r = (x as { reason?: unknown }).reason;
+    return (typeof r === 'string' && r.trim() ? { ...x, reason: corr(r.trim()) } : x) as GmChange;
+  });
+  const fixes = checkChanges(s, changes, notes, secretNotes, undefined, true).map((d) => ({ ...d, fact: corr(d.fact), data: { ...d.data, correction: true } }));
+  const explanation = str(p.explanation, 800) || 'The memory was checked.';
+  const changed = fixes.length + Math.max(0, Math.floor(num(p.rewindScenes)));
+  const note: Draft = {
+    type: 'correction', visible: true,
+    fact: changed ? `Correction: ${explanation}` : `Report checked, nothing changed: ${explanation}`,
+    data: { report: str(report, 300), explanation, changed },
+  };
+  return commitDrafts(s, [note, ...fixes, ...refereeDrafts(notes, secretNotes, { fix: true })]);
+}
+
+const sceneIndexes = (events: GameEvent[]) => events.flatMap((e, k) => (e.type === 'scene' ? [k] : []));
+
+/** The event log without the last N scenes (everything from the Nth-last scene event on is removed). */
+export function gmRewindEvents(events: GameEvent[], scenes: number): GameEvent[] {
+  const n = Math.max(0, Math.floor(scenes));
+  const idx = sceneIndexes(events);
+  if (!n || !idx.length) return events.slice();
+  return events.slice(0, idx[Math.max(0, idx.length - n)]);
+}
+
+/** How many of the last scenes can be taken back without undoing a fight the code decided (Ironman). */
+export function gmRewindLimit(events: GameEvent[], max = 3): number {
+  const idx = sceneIndexes(events);
+  let n = 0;
+  for (let k = idx.length - 1; k >= 0 && n < max; k--, n++) {
+    if (events.slice(idx[k]).some((e) => e.type === 'story' && (e.data as { duelEnd?: string }).duelEnd)) break;
+  }
+  return n;
+}
+
+/** The record a rewind leaves: append it (commitDrafts) to the rewound game so the rewind itself is logged. */
+export function gmRewindNote(report: string, scenes: number): Draft {
+  const n = Math.max(0, Math.floor(scenes));
+  return {
+    type: 'correction', visible: true,
+    fact: `Correction: the last ${n === 1 ? 'scene was' : `${n} scenes were`} taken back because ${n === 1 ? 'it' : 'they'} broke the facts.`,
+    data: { rewind: n, report: str(report, 300) },
+  };
+}
+
+/** Take back the last N scenes (capped by gmRewindLimit) and log it: returns the rebuilt game (the old one is unchanged). */
+export function gmRewind(s: GameState, scenes: number, report: string): GameState {
+  const n = Math.min(Math.max(0, Math.floor(scenes)), gmRewindLimit(s.events));
+  if (!n) return s;
+  const back = replay(s.worldNumber, gmRewindEvents(s.events, n));
+  commitDrafts(back, [gmRewindNote(report, n)]);
+  return back;
+}
+
+/** The last scenes in full with what the code recorded after each (for a fix: Claude compares them with the report). */
+export function gmRecentScenes(s: GameState, n = 3): string {
+  const idx = sceneIndexes(s.events).slice(-n);
+  return idx.map((start, k) => {
+    const end = k + 1 < idx.length ? idx[k + 1] : s.events.length;
+    const e = s.events[start];
+    const d = e.data as { title?: string | null; said?: string | null };
+    const rec = s.events.slice(start + 1, end).filter((x) => !['time', 'duel', 'work'].includes(x.type)).slice(0, 30).map((x) => x.fact);
+    return [
+      `SCENE ${k - idx.length} (${formatDate(dateFromIndex(e.day, e.part))}${d.title ? `, "${d.title}"` : ''})${k === idx.length - 1 ? ' — the newest' : ''}`,
+      d.said ? `The player wrote: ${d.said}` : '',
+      e.fact,
+      `Recorded by the code: ${rec.join('; ') || 'nothing'}`,
+    ].filter(Boolean).join('\n');
+  }).join('\n\n');
 }
 
 /** A new life in Game Master mode: the same world, no fixed story beats; Claude opens the first scene. */
