@@ -6,6 +6,7 @@ import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { storyWindow } from './recaps';
 import { careerText, deedDrafts, promotionDrafts, serveDrafts } from './gm-career';
+import { stageDayCap, stageText } from './stages';
 import { opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
 import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
@@ -110,8 +111,6 @@ export const GM_LIMITS = {
   skillDelta: 1.5,
   maxWound: 3, // Badly wounded; Li is never killed (hidden rule)
   trainPerDay: 0.02, // same base as night training (Numbers §2), capped per season
-  daysSlave: 30, // longest skip: slave 1 month, soldier 1 season (GE ch. 9 §6)
-  daysFree: 90,
 } as const;
 
 /** Warrior score Li guesses for each rank letter (Numbers §1 bands, middle of the band). */
@@ -296,6 +295,7 @@ export function gmMemoryText(s: GameState): string {
     `Li's voice: quiet, watchful, stubborn; hides his anger; protective of the weak; fears fire at night. He must never say the name Hattori.`,
     `Merit: combat ${has(s, 'merit_combat')}, in Kurogane service ${has(s, 'merit_service')} of ${MERIT_FOR_FREEDOM}. In the Hagiwara levy: ${inService(s) ? 'yes' : 'no'}.`,
     careerText(s),
+    stageText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
     `FREEDOM ROUTES:\n${freedomRoutes.map((x) => `- ${x}`).join('\n')}`,
     longGoalsText(s),
@@ -635,7 +635,7 @@ function gmDuelStart(s: GameState, id: string, f: GmFight): Draft[] {
 /** Time passes between scenes: healing, rest, the season (same healing as playing the days). */
 export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   const c = li(s);
-  const max = c.status === 'slave' ? GM_LIMITS.daysSlave : GM_LIMITS.daysFree;
+  const max = stageDayCap(s);
   const n = clamp(Math.round(days), 0, max);
   const out: Draft[] = [];
   if (n > 0) {
@@ -656,7 +656,7 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
 }
 
 /** The longest skip one scene may make now (GE ch. 9 §6). */
-export const gmDayCap = (s: GameState) => (li(s).status === 'slave' ? GM_LIMITS.daysSlave : GM_LIMITS.daysFree);
+export const gmDayCap = (s: GameState) => stageDayCap(s);
 
 const NUMBER_WORDS: Record<string, number> = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, few: 3 };
 const UNIT_DAYS: Record<string, number> = { day: 1, week: 7, month: 30, season: 90, year: 360 };

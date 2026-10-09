@@ -48,7 +48,7 @@ ANSWER WITH JSON ONLY:
   "scene": "the story text",
   "summary": "one line for the memory: what happened and what changed",
   "journal": "one line in Li's own voice, 'I ...', only what Li knows",
-  "days": <whole days until the next scene starts: 0 for the same day, up to 30 while Li is a slave>,
+  "days": <whole days until the next scene starts: 0 for the same day, up to the longest skip of his LIFE STAGE>,
   "part": "morning|afternoon|evening|night (when the next scene starts)",
   "place": "where Li is, short (optional)",
   "changes": [
