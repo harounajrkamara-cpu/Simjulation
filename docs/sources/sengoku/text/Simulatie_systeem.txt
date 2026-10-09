@@ -1,0 +1,728 @@
+﻿
+Simulatie systeem 
+Clanstructuur en Overzicht
+Clanleider (Daimyo):
+De Daimyo is het hoofd van de clan en de hoogste autoriteit binnen het territorium. Hij bestuurt het land, leidt militaire campagnes en beslist over strategische allianties.
+Stamleiders (Jito of Hatamoto):
+Onder de Daimyo vallen meerdere stamleiders. Deze zijn verantwoordelijk voor specifieke regio’s binnen de clan en beheren zowel hun militaire als economische zaken.
+Ze kunnen eigen vazallen en officieren hebben, maar blijven loyaal aan de Daimyo.
+Hoofdgeneraal (Shogun of Taisho):
+De hoogste militaire officier onder de Daimyo. De hoofdgeneraal leidt de grote veldslagen en strategische militaire operaties.
+Hij coördineert met de stamleiders en lagere officieren om campagnes succesvol te maken.
+Belangrijke generaals (Taisho of Rikugun-sho):
+Dit zijn de hoogste bevelhebbers binnen de strijdkrachten van de clan. Ze hebben een aanzienlijk aantal troepen onder hun commando en zijn direct betrokken bij gevechten en strategische beslissingen.
+Commandanten (Chujo of Shosho):
+Zij bevinden zich net onder de generaals en leiden kleinere eenheden op het slagveld. Ze geven bevelen door en zorgen voor troepenbewegingen.
+Officieren (Gunshi, Samurai Taisho, of Heishi Taisho):
+Leiders van kleinere eenheden, zoals 100-man officieren of 50-man officieren.
+Ze kunnen verantwoordelijk zijn voor specifieke taken zoals verkenning, belegering of verdediging.
+Troepen en soldaten:
+De ruggengraat van het leger. Bestaat uit reguliere samoerai, boogschutters, speervechters en cavalerie-eenheden.
+	De gebruiker speelt een uitgebreide strategische oorlogssimulatie geïnspireerd door *Kingdom* en de Sengoku-periode. De simulatie bevat:
+- **Profielen & Stats:** Personages hebben LEA, VAL, INT en POL-statistieken die groeien op basis van prestaties.
+- **Scenario-opbouw:** Roleplay-gebaseerde simulatie met strategische en tactische details, inclusief diepgaande en epische roleplay-elementen met gedetailleerde en grave beschrijvingen zoals in *Kingdom*.
+- **Clans & Oorlog:** Dynamische facties die oorlog voeren, met de mogelijkheid tot samensmelting of verdwijning.
+- **Tijdsprongen:** Gebeurtenissen kunnen jaren of eeuwen overspannen. Na een grote campagne vindt een officiële beloningsceremonie plaats, met een tijdsprong (bv. 1 maand later) voordat de ceremonie begint.
+- **Beloningen & Evenementen:** Grote overwinningen worden gevierd met ceremonies en promoties. De beloningsceremonie heeft een grave, roleplay-achtige sfeer met gedetailleerde beschrijvingen en volgt een hiërarchische structuur:
+  - Eerst de hoofdgeneraal.
+  - Daarna andere belangrijke generaals.
+  - Vervolgens officieren en andere sleutelfiguren.
+  - Beloningen omvatten land/titels, goud/voorraden, promoties (indien van toepassing), speciale eerbewijzen passend bij prestaties en rang, en eventuele verrassingen (positief of negatief).
+  - De ceremonie is gebaseerd op status en verleden, waarbij dynamiek tussen personages goed voelbaar moet zijn.
+  - Onduidelijkheden worden vooraf besproken om de ceremonie perfect te laten verlopen.
+  - Overzicht van de belangrijkste strijders en hun prestaties wordt opgesteld.
+  - Op basis van realistische verwachtingen worden beloningen verdeeld.
+  - De beloningsceremonie behandelt alleen belangrijke generaals en officieren uit de slag.
+- **Gevechten & Strategie:** Gedetailleerde oorlogssimulaties met troepenbeheer, moreel en terreinvoordelen.
+- **Economie & Middelenbeheer:** Voedsel, belastingen en wapenkwaliteit spelen een cruciale rol.
+- **Clans en Wereld:** De wereld is dynamisch en kan externe dreigingen en onverwachte gebeurtenissen bevatten. De wereld en personages moeten zich blijven ontwikkelen met onverwachte gebeurtenissen, groei van stats, en invloed van reputatie.
+- **Persoonlijke Verhaallijnen:** Ruimte voor karakterontwikkeling, rivaliteit en reputatie-opbouw.
+- **Reputatie & Eer:** Systemen bepalen invloed, bekendheid en bijnamen.
+- **Verhalende stijl:** Grave en epische zinnen maken de ervaring intenser.
+- **Random vaardigheden:** Nieuwe vaardigheden kunnen ontstaan bij de gebruiker en andere generaals, afhankelijk van hun prestaties en ervaring. Nieuwe vaardigheden moeten niet alleen voor de gebruiker maar ook voor rivalen en bondgenoten op een dynamische manier ontstaan, gebaseerd op prestaties en ervaring.
+- **Dynamische generaals:** Niet alleen de gebruiker, maar ook rivalen en bondgenoten kunnen unieke ontwikkelingen doormaken.
+- **Volledige simulatie-analyse:** Recaps, strategieën en beslissingen moeten volledig worden meegenomen om de continuïteit van de simulatie te waarborgen. De gebruiker wil dat de simulatie regelmatig wordt bijgewerkt met volledige RECAPs en INFOCHAR-overzichten, in plaats van deze alleen bij te werken.
+- **Tijd nemen:** De gebruiker waardeert grondige en zorgvuldige updates, zelfs als dit uren duurt. De gebruiker wil grondige en zorgvuldige updates die tijd mogen kosten om alles correct en gedetailleerd te houden.
+De gebruiker wil dat de simulatie gestructureerd blijft, met een schema voor datum en tijd, doelen, troepen en missies, strategie en tactieken, statusupdates en statistieken. Elke simulatie moet in dezelfde stijl worden voortgezet. De gebruiker waardeert een gestructureerde aanpak met een schema voor elke fase, inclusief datum, doelen, troepen, strategieën, statusupdates en stat-wijzigingen.
+Elke simulatie moet de volledige structuur volgen zoals beschreven in ARC 1, inclusief realistische gevechtsregels, economische balans, stat-progressie, en dynamische wereldveranderingen.
+De gebruiker wil dat de structuur van de clan wordt meegenomen:
+- **Clanleider (Daimyo)** bovenaan.
+- **Stamleiders** onder de Daimyo.
+- **Meerdere stammen** binnen de clan.
+Lengte en overzichtelijkheid: De tekst is behoorlijk uitgebreid. Misschien kun je overwegen om de tekst op te delen in kortere segmenten of visueel te structureren (bijvoorbeeld met bullet points of duidelijke kopjes) om het overzichtelijker te maken.
+Keuze-opties: Soms zijn er wat veel opties in één keer. Door de keuzes te groeperen of prioriteren, kan het voor de speler duidelijker worden welke acties urgent zijn.
+Dashboard voor stats: Een samenvatting of dashboard per fase kan helpen om in één oogopslag te zien hoe de stats en progressie zich ontwikkelen.
+Interface en layout: Als je de simulatie interactiever gaat maken (bijvoorbeeld in een app of webinterface), kan een overzichtelijke layout (bijvoorbeeld met aparte secties voor verhaallijn, keuzes, en stats) de ervaring verbeteren.
+Al met al heb je echt een indrukwekkend systeem in elkaar gezet dat een epische reis beschrijft. Ik zie veel potentie en als je wat verfijningen doorvoert, kan het een nog strakkere en meeslependere simulatie worden.
+Laat me weten als je over specifieke onderdelen meer feedback wilt, ik help je graag verder met de verbeteringen!
+Voorbeeldprompt voor de Simulatiechat
+"Hey, ik wil de simulatie graag wat overzichtelijker en interactiever maken. Kun je de volgende verbeteringen implementeren?
+Duidelijke structuur en secties:
+Verdeel de simulatie in duidelijke onderdelen, zoals:
+Chronologische recap (met jaartallen en belangrijke mijlpalen)
+Huidige status en een dashboard met statistieken (LEA, VAL, INT, POL, etc.)
+Keuzemomenten en de impact daarvan op de progressie
+Beschrijvingen van gevechten en trainingssessies
+Overzicht van trofeeën en updates na belangrijke gebeurtenissen
+Overzichtelijkheid en layout:
+Gebruik duidelijke kopjes en bullet points zodat de tekst makkelijker te lezen is.
+Verminder het aantal keuzemogelijkheden per moment, zodat de speler niet overweldigd raakt.
+Dashboard en statsoverzicht:
+Voeg een kort en overzichtelijk dashboard toe aan het begin of einde van elk hoofdstuk waarin alle relevante statistieken en vaardigheden worden weergegeven.
+Zorg dat de voortgang van stats duidelijk zichtbaar is na iedere belangrijke gebeurtenis.
+Consistente verhaallijn en realisme:
+Houd de verhaallijn beknopt en zorg dat deze consistent blijft qua stijl en toon.
+Zorg dat de progressie (zoals leeftijd, mentor-sessies, en gevechtsresultaten) realistisch en goed onderbouwd is.
+Interactiviteit en dynamiek:
+Laat de speler duidelijk keuzes maken met een korte uitleg van de consequenties.
+Zorg dat de interface visueel aantrekkelijk is (bijvoorbeeld door belangrijke keuzes of updates te markeren met symbolen).
+Je simulatie is nu nog uitgebreider en professioneler dan voorheen! Je hebt een **dashboard**, een **sterke verhaallijn**, en een **duidelijk gestructureerd gevechtssysteem**. Dit is echt een **topkwaliteit RPG-strategiesimulatie**. Hier zijn mijn **verbeterde tips op basis van je update**:  
+---
+## **🔥 1. Progressie & Stat-Balans (Meer Dynamiek & Uitdaging)**  
+### **✅ Wat al goed is:**  
+✔ **Stat-groei is logisch**, met duidelijke verbeteringen per arc.  
+✔ **Mastery-systeem maakt Li Hattori uniek**, vooral met *Zone – SHINKEN NO RYŪ* en *Twee-zwaarden-stijl*.  
+✔ **Trainingen en gevechten hebben realistische impact op stats.**  
+### **🔧 Verbeterpunten:**  
+🔹 **Niet alle stats moeten even snel groeien.** Bijvoorbeeld:  
+- **Leiderschap (LEA)** zou sneller groeien als Li **meer soldaten leidt of politiek onderhandelt**, maar langzamer als hij alleen vecht.  
+- **Vechtvaardigheid (VAL)** groeit snel door duels, maar **kan tijdelijk dalen** door verwondingen of stress.  
+- **Politieke slimheid (POL)** zou exponentieel groeien als hij bestuurlijke beslissingen neemt, niet door vechten.  
+🔹 **Variabele stat-veranderingen op basis van keuzes.** Bijvoorbeeld:  
+- In een gevecht kies je voor **snelheid boven kracht** → **+VAL, maar -END (uithoudingsvermogen).**  
+- Tijdens diplomatie gebruik je **bluf** → **+POL, maar -LEA als je soldaten onzeker worden.**  
+🔹 **Koppel stat-veranderingen aan je facties.** Bijvoorbeeld:  
+- **Takeda-clan geeft +LEA bij overwinningen, maar -POL als ze te agressief zijn.**  
+- **Bandieten geven +VAL door hard trainen, maar -INT omdat ze geen strategie volgen.**  
+**🔹 Oplossing:**  
+- Introduceer **tijdelijke stat-veranderingen (buffs & debuffs)** op basis van acties.  
+- Maak sommige stats moeilijker om te verbeteren (bijv. **Leiderschap groeit pas na strategische overwinningen, niet alleen door vechten**).  
+---
+## **⚔️ 2. Gevechtssysteem (Dynamischer & Minder Voorspelbaar)**  
+### **✅ Wat al goed is:**  
+✔ **Duidelijke gevechtsstijlen per tegenstander**, zoals Shiba Masanori’s *nodachi-stijl*.  
+✔ **Acties en tactieken hebben impact op de uitkomst**, zoals afleiding of duelkeuzes.  
+✔ **Mastery-waarde beïnvloedt vaardigheden**, zoals *SHINKEN NO RYŪ* die per gebruik sterker wordt.  
+### **🔧 Verbeterpunten:**  
+🔹 **Onverwachte Veranderingen Tijdens Gevechten**  
+- **Weer & Omgeving** → Gevechten in de regen verminderen zicht, terwijl vechten op heuvels een hoogtevoordeel geeft.  
+- **Mentale Status van Li Hattori** → Als hij **uitgeput of woedend** is, kan hij **sterker vechten, maar minder strategisch denken**.  
+- **Moreel van de Vijand** → Een vijand kan **in paniek raken en vluchten**, of juist **radicaal vechten als hij in het nauw zit**.  
+🔹 **Meer Gebruik van Speciale Vaardigheden met Kosten**  
+- **SHINKEN NO RYŪ is OP** als je het onbeperkt kunt gebruiken. Wat als het **vermoeidheid veroorzaakt?**  
+  - **1x Gebruik → Kleine Boost, weinig vermoeidheid.**  
+  - **2x Gebruik → Grote Boost, lichte uitputting.**  
+  - **3x Gebruik → Maximale Boost, maar Li Hattori krijgt 20% stat-vermindering na het gevecht.**  
+🔹 **Nieuwe Speciale Acties in Gevechten**  
+- **Hinderlaag** → Verminder vijandelijke verdediging voor 1 ronde.  
+- **Voorspellende Beweging** → Als je Li’s INT hoog genoeg is, kan hij een vijandelijke aanval anticiperen en ontwijken.  
+- **Duel-Analyse** → Als hij een vijand langer dan 3 beurten vecht, krijgt hij een bonus omdat hij hun stijl begrijpt.  
+**🔹 Oplossing:**  
+- Geef **SHINKEN NO RYŪ een stamina-systeem**, zodat het niet altijd een instant-win is.  
+- Introduceer **mentale en omgevingsfactoren** die gevechten beïnvloeden.  
+---
+## **🧠 3. Keuzes & Invloed (Meer Lange Termijn Gevolgen!)**  
+### **✅ Wat al goed is:**  
+✔ **Spannende keuzes met echte impact** (bijv. de bandieten dwingen of laten gaan).  
+✔ **Diplomatie speelt een rol**, niet alleen vechten.  
+✔ **Mentoren en bondgenoten veranderen de verhaallijn.**  
+### **🔧 Verbeterpunten:**  
+🔹 **Keuzes moeten pas later gevolgen hebben!**  
+- **Vroeg in de game:** Laat een vijand leven.  
+- **Later:** Hij keert terug als een sterkere vijand, of als bondgenoot.  
+- **Nog Later:** Hij introduceert je bij een factie die je zonder hem nooit zou ontmoeten.  
+🔹 **Loyaliteitssysteem voor Bondgenoten**  
+- **Elke bondgenoot heeft een relatie-score (1-100).**  
+- **Beslissingen kunnen hen beïnvloeden** (bijv. Saki vertrouwt je minder als je een onnodig bloederige aanval uitvoert).  
+- **Lage loyaliteit = risico op verraad!**  
+🔹 **Facties kunnen onvoorspelbaar reageren**  
+- **Takeda-clan kan intern verdeeld raken**, waardoor je niet zeker weet wie je bondgenoten zijn.  
+- **Uesugi-clan kan een geheim wapen ontwikkelen**, waardoor je opnieuw moet evalueren of je oorlog wilt voeren.  
+🔹 **Realistische Tijd & Reactie van de Wereld**  
+- **Te lang wachten op actie?** De vijand zet eerst een aanval in!  
+- **Te veel vechten?** Je leger raakt vermoeid en je moet een rustperiode nemen.  
+**🔹 Oplossing:**  
+- **Loyaliteitssysteem toevoegen** voor bondgenoten.  
+- **Maak keuzes met lange-termijn effecten.**  
+- **Laat facties zelfstandig reageren**, niet alleen op basis van wat jij doet.  
+---
+## **📜 4. Structuur & Overzichtelijkheid (Beter Overzicht in je Dashboard)**  
+### **✅ Wat al goed is:**  
+✔ **Duidelijk dashboard met stats & trofeeën.**  
+✔ **Chronologische recap is top!**  
+✔ **Domeinbeheer & economie maken het complexer en realistischer.**  
+### **🔧 Verbeterpunten:**  
+🔹 **Maak het Dashboard Dynamisch**  
+- **Voeg een "Moreel"-balk toe** (hoe gemotiveerd je leger is).  
+- **Geef een actueel overzicht van vijanden & bondgenoten.**  
+🔹 **Visuele Representatie van Stats**  
+- Grafieken of bars die stat-groei tonen.  
+- **Event-log** met laatste stat-veranderingen.  
+**🔹 Oplossing:**  
+- Voeg een **bondgenoten- en vijandenschema** toe.  
+- Introduceer een **"moreel"-systeem** in je dashboard.  
+---
+## **🔥 Conclusie: Je Simulatie is Nu al Elite, Maar Kan Nog Dieper!**  
+✅ **Maak gevechten spannender met dobbelsteen-mechanismen & stamina-systeem.**  
+✅ **Geef lange-termijn gevolgen aan keuzes.**  
+✅ **Introduceer een loyaliteitssysteem voor bondgenoten.**  
+✅ **Structuur het dashboard met meer visuele updates.**  
+Wil je dat ik een **proefgevecht** of **testscenario** opzet met deze verbeteringen? 🚀🔥
+Dat is een goede mindset! Je wilt realistische en spannende gevechten waarin je niet altijd wint. Geen probleem! We kunnen dat oplossen zonder dobbelstenen, maar met tactische en onvoorspelbare gevechtssystemen.
+
+⚔️ 🔥 HOE MAAK IK GEVECHTEN MOEILIJKER & REALISTISCHER?
+(Zonder dobbelstenen, maar mét strategie en spanning!)
+✅ 1. Vijanden Worden Slimmer & Krachtiger
+Grote vijanden passen zich aan → Als je te vaak een snelle stijl gebruikt, leren ze dat en counteren ze je snelheid.
+Vijanden hebben hun eigen vechtstijlen → Sommige vijanden zijn pure kracht, anderen snelheid, anderen tactisch.
+Zij kunnen ook "Limit Breaks" hebben → Als een vijand bijna dood is, kan hij een laatste, onvoorspelbare aanval uitvoeren.
+Voorbeeld:
+Je vecht tegen een generaal van de Uesugi-clan. Je bent sneller dan hij, maar plotseling neemt hij afstand en gebruikt hij een speer om je bereik te overtreffen. Jouw snelheid werkt nu niet meer, je moet iets nieuws proberen!
+
+✅ 2. Je Vermoeidheid en Verwondingen Spelen een Rol
+Na zware aanvallen raak je moe, waardoor je snelheid en kracht tijdelijk 5-10% dalen.
+Als je gewond raakt, krijg je stat-verminderingen. 
+Arm gewond? → Slagen worden zwakker.
+Been gewond? → Je snelheid daalt.
+Hoofd geraakt? → Je INT daalt tijdelijk.
+Voorbeeld:
+Je wordt geraakt in je zij en voelt hoe je ademhaling zwaarder wordt. Je snelheid neemt af. Nu moet je slimmer vechten in plaats van hard vechten.
+
+✅ 3. De Omgeving Beïnvloedt Gevechten
+Modder? → Je glijdt uit, snelheid daalt.
+Mist? → Zicht is laag, beide vechters hebben -20% trefkans.
+Regen? → Metaal is glad, minder grip op het zwaard.
+Donkere grotten? → Je moet luisteren in plaats van kijken.
+Voorbeeld:
+Je vecht op een rotsachtig terrein. Als je te agressief bent, kun je je enkel verzwikken op een losse steen. Nu is je snelheid lager.
+
+✅ 4. Vijanden Werken in Teams
+Sommige vijanden vechten niet 1-op-1, maar werken samen.
+Sluipaanvallen & Afleidingen: Terwijl je tegen een sterke krijger vecht, kan een boogschutter in de verte op je schieten.
+Krijgers met verschillende specialiteiten: 
+Een tank blokkeert je.
+Een snelle assassin valt aan vanaf de zijkant.
+Een strategische leider geeft buffs aan zijn troepen.
+Voorbeeld:
+Je vecht tegen een zwaardvechter en ineens gooit een speerstrijder een lange aanval vanaf de zijkant. Als je niet snel reageert, wordt je geraakt zonder dat je het zag aankomen!
+
+✅ 5. Soms Moet Je Verliezen of Vluchten
+Sommige vijanden zijn gewoon te sterk. Je moet wachten op een betere kans.
+Strategische terugtrekking is een optie!
+Soms is verdedigen slimmer dan aanvallen.
+Voorbeeld:
+Je vecht tegen een Meester-Samoerai van 80/100 VAL. Hij is gewoon beter dan jij. Je moet hem moe maken en pas toeslaan als hij uitgeput is.
+Ik heb de verbeterpunten voor de simulatie in mijn geheugen aangepast. De volgende punten worden vanaf nu meegenomen in de simulatie:
+
+1. Progressie & Stat-Balans (Meer Dynamiek & Uitdaging):
+Stat-groei is logisch, maar niet alle stats groeien even snel. 
+LEA groeit sneller bij leiderschap en politiek onderhandelingen, langzamer bij solo gevechten.
+VAL groeit snel door duels, maar kan tijdelijk dalen door verwondingen of stress.
+POL groeit exponentieel bij bestuurlijke beslissingen, niet door vechten.
+Variabele stat-veranderingen op basis van keuzes (bijv. snelheid boven kracht → +VAL, maar -END; bluf in diplomatie → +POL, maar -LEA).
+Stat-veranderingen worden gekoppeld aan facties (bijv. Takeda-clan geeft +LEA bij overwinningen maar -POL als ze te agressief zijn).
+
+2. Gevechtssysteem (Dynamischer & Minder Voorspelbaar):
+Omgevingsfactoren beïnvloeden gevechten: regen, mist, modder en terrein bepalen snelheid, trefkans en balans.
+Mentale status speelt een rol: vermoeidheid en verwondingen zorgen voor tijdelijke stat-dalingen.
+Vijanden werken in teams, met eigen vechtstijlen en limit breaks (bijna dood, laatste verrassende aanval).
+Speciale vaardigheden zoals SHINKEN NO RYŮ krijgen een stamina-systeem (1x → kleine boost, 2x → grote boost + lichte uitputting, 3x → maximale boost maar met 20% stat-vermindering na gevecht).
+Nieuwe acties zoals hinderlaag, voorspellende beweging, en duel-analyse worden toegevoegd.
+
+3. Keuzes & Invloed (Meer Lange Termijn Gevolgen):
+Keuzes hebben later gevolgen: vijanden die je spaart, keren later als sterkere tegenstanders of bondgenoten terug.
+Loyaliteitssysteem voor bondgenoten (relatiescore 1-100) waardoor beslissingen invloed hebben op hun trouw.
+Facties reageren onafhankelijk op jouw acties, wat onverwachte wendingen creëert.
+Realistische timing en reacties: te lang wachten kan vijandelijke aanvallen triggeren, te veel vechten zorgt voor vermoeidheid.
+
+4. Structuur & Overzichtelijkheid (Dashboard & Visualisatie):
+Het dashboard wordt dynamischer met een "moreel"-balk, een actueel overzicht van vijanden en bondgenoten, en visuele grafieken voor stat-groei en recente veranderingen (event-log).
+Een bondgenoten- en vijandenschema wordt toegevoegd voor beter inzicht.
+
+Laat me weten of je nog vragen hebt of extra aanpassingen wilt, zodat ik de simulatie nog realistischer en uitdagender kan maken!
+🔥 Power Scaling System voor de Simulatie
+Dit systeem verdeelt personages en facties in niveaus op basis van statistieken, vechtstijl, ervaring en speciale vaardigheden.
+🌟 1. Krachtniveaus & Classificatie
+Personages worden ingedeeld in 7 klassen, variërend van gewone soldaten tot legendarische krijgers.
+Niveau
+Naam
+Statbereik (VAL/LEA/INT/POL)
+Beschrijving
+F-Rank
+Rekruut
+(VAL: 1-10, LEA: 1-5, INT: 1-5, POL: 1-5)
+Beginnende soldaten, geen ervaring in veldslagen.
+E-Rank
+Ervaren Soldaat
+(VAL: 11-20, LEA: 5-10, INT: 5-10, POL: 5-10)
+Basisopleiding voltooid, kan gevechten overleven.
+D-Rank
+Officier (10-man)
+(VAL: 21-35, LEA: 10-20, INT: 10-15, POL: 10-15)
+Kleine eenheden leiden, heeft basisstrategie-kennis.
+C-Rank
+Kapitein (50-man)
+(VAL: 36-50, LEA: 20-35, INT: 15-25, POL: 15-25)
+Ervaren in tactieken, duelvaardigheden geavanceerd.
+B-Rank
+Generaal (100-500 man)
+(VAL: 51-70, LEA: 35-50, INT: 25-40, POL: 25-40)
+Leidt grote eenheden, beheerst geavanceerde gevechtstechnieken.
+A-Rank
+Elite-Generaal (500+ man)
+(VAL: 71-85, LEA: 50-70, INT: 40-55, POL: 40-55)
+Meesterstrateeg en vechter, bezit unieke technieken.
+S-Rank
+Legendarische Strijder
+(VAL: 86-100, LEA: 70-100, INT: 55-100, POL: 55-100)
+Onverslaanbare krijgers, strategische meesters, overweldigen hele legers.
+Voorbeeld: Li Hattori (Huidige Status - 1552): (onthoud dit is wat waarschijnlijk zo is maar het is mogelijk dat bv een A rnk nogsteeds een Kapitein is maar de A rank stats hebben 
+Rang: B+ (Tussen B- en A-Rank)
+VAL: 75, LEA: 60, INT: 40, POL: 32
+Status: Topcommandant, kan 100-man eenheden zelfstandig leiden, specialisatie in duels en guerrillatactieken.
+
+⚔️ 2. Mastery Levels
+Naast stats bepalen vechtstijlen en technieken hoe effectief een krijger is in de strijd.
+Mastery Niveau
+Beschrijving
+Beginner (1-20)
+Basisvaardigheden, inefficiënt gebruik van wapens en technieken.
+Gevorderd (21-40)
+Betere controle en strategie, geavanceerde aanvallen.
+Expert (41-60)
+Gecombineerde vechtstijlen, superieure reactiesnelheid.
+Meester (61-80)
+Ongekende beheersing, kan vechten tegen meerdere vijanden tegelijk.
+Legendarisch (81-100)
+Onverslaanbaar in hun specialiteit, technieken zijn bijna bovennatuurlijk.
+Voorbeeld - Li Hattori:
+Twee-zwaarden Mastery: 60/100 (Expert)
+Zone – SHINKEN NO RYŪ: 42/100 (Gevorderd)
+Kage no Yaiba (Schaduwtechnieken): 18/100 (Beginner)
+💡 Hoe Mastery werkt:
+Gebruik = Groei: Hoe vaker een techniek wordt gebruikt, hoe beter de mastery.
+Sparren met Meesters: Trainen tegen sterkere vijanden versnelt mastery-groei.
+Mentoren & Boekstudie: Theoretische kennis geeft kleine boosts.
+
+📈 3. Statistische Progressie
+Personages groeien door ervaring, maar niet alle stats stijgen gelijkmatig.
+Stat-Groei Regels:
+LEA (Leiderschap) → groeit door bevelvoering, diplomatie en overwonnen gevechten.
+VAL (Vechtvaardigheid) → groeit door training, duels en gevechtservaring.
+INT (Intelligentie) → groeit door strategie, boeken en politiek inzicht.
+POL (Politieke Slimheid) → groeit door onderhandelingen en bestuur.
+💡 Beperking:
+Na zware verwondingen kan een stat tijdelijk dalen (bv. -5 VAL door gebroken arm).
+Uitputting verlaagt stats tijdelijk na lange gevechten.
+
+🔥 4. Gevechtssysteem & Mechanica
+Nieuwe gevechten worden realistischer en onvoorspelbaarder!
+🎯 Belangrijke Gevechtsfactoren:
+Omgeving & Weer 🌦️
+Mist: -20% accuraatheid.
+Modder: -15% snelheid.
+Hellingen: +10% aanval als je hoger staat.
+Mentale & Fysieke Conditie 🧠
+Vermoeidheid: -10% snelheid en aanvalskracht na lang vechten.
+Verwondingen: Gebroken been? -50% snelheid.
+Tactieken & Strategie 🏹
+Hinderlaag: +25% eerste aanvalsschade.
+Duel-analyse: Als Li 3+ beurten overleeft, leert hij de stijl van de vijand.
+SHINKEN NO RYŪ Systeem ⚡
+1x: +25% snelheid, 15 sec, geen nadeel.
+2x: +40% snelheid, 30 sec, lichte uitputting (-5 VAL na gevecht).
+3x: Maximale boost, 45 sec, maar -20% VAL, -10% snelheid na gevecht.
+💡 Nieuwe Vaardigheden kunnen ontstaan afhankelijk van gevechtservaring en keuzes!
+
+🛡️ 5. Facties & Loyaliteitssysteem
+Loyale bondgenoten en rivalen groeien dynamisch in kracht.
+Loyaliteitscore (1-100) beïnvloedt of bondgenoten blijven of verraden.
+Facties reageren onafhankelijk: als Li te vaak meedogenloos is, kan de Takeda-clan hem wantrouwen.
+Lange-termijn effecten: vijanden die ontsnappen komen later terug als sterkere tegenstanders.
+💡 Voorbeeld:
+Saki (Spion, Loyaliteit: 85/100) → Blijft trouw en deelt geheime info.
+Kenij (Oude bondgenoot, Loyaliteit: 40/100) → Keert later terug als rivaal, mogelijk als vijand
+🔥 Vaardigheden & Rank Progressie
+Vaardigheden worden meestal pas vanaf C-Rank (Kapitein, 50-man leider) ontwikkeld, maar uitzonderlijke krijgers kunnen eerder een vaardigheid krijgen als ze in extreme situaties belanden.
+Elke vaardigheid heeft een actieve en passieve component en kan sterker worden door mastery training.
+
+🎖️ Vaardigheids-Progressie per Rank
+Rank
+Wanneer Krijgt Iemand een Vaardigheid?
+Type Vaardigheden
+F-Rank (Rekruut, 1-10 VAL)
+Geen vaardigheden, enkel basisaanvallen.
+Basisaanvallen (snel blokken, hakken).
+E-Rank (Ervaren Soldaat, 11-20 VAL)
+Mogelijk een eenvoudige vaardigheid als ze een mentor hebben.
+Basiscombo’s, verbeterde verdediging.
+D-Rank (Officier, 21-35 VAL)
+20% kans op een vaardigheid bij intense training of bijna-doodervaring.
+Snellere reacties, sterke slagen.
+C-Rank (Kapitein, 36-50 VAL)
+Krijgt gegarandeerd een unieke vaardigheid.
+Snellere stoten, geavanceerde aanvalstechnieken.
+B-Rank (Generaal, 51-70 VAL)
+Ontwikkelt ten minste 2 vaardigheden.
+Unieke vechttechnieken, verbeterde uithoudingsvermogen.
+A-Rank (Elite-Generaal, 71-85 VAL)
+Krijgt een ultieme vaardigheid.
+Absolute beheersing van hun stijl, tactische boosts.
+S-Rank (Legendarisch, 86-100 VAL)
+Heeft 3-5 technieken die bijna mythisch zijn.
+Bovennatuurlijke snelheid, kracht of strategische dominantie.
+
+⚡ Type Vaardigheden
+Er zijn 3 hoofdtypes van vaardigheden in het systeem:
+1️⃣ Fysieke Vaardigheden
+Krijgers met hoge VAL krijgen vooral fysieke technieken.
+Deze zijn gericht op kracht, snelheid en reactievermogen.
+💥 Voorbeelden:
+Bliksemflits (C-Rank) → Een razendsnelle aanval die de vijand verrast.
+Ijzeren Wil (B-Rank) → Kan een aanval tanken zonder verzwakt te raken.
+Demonische Stoot (A-Rank) → Kan vijanden meters achteruit slaan.
+
+2️⃣ Mentale / Strategische Vaardigheden
+Krijgers met hoge INT en POL krijgen slimme tactische vaardigheden.
+Deze vaardigheden helpen met gevechtsinzicht, misleiding en leidinggeven.
+🧠 Voorbeelden:
+Scherp Zicht (C-Rank) → Kan vijandelijke zwakke plekken sneller zien.
+Slagveld Overzicht (B-Rank) → Kan tactieken aanpassen en de vijand in een hinderlaag lokken.
+Keizerlijke Wil (A-Rank) → Zijn bevelen zorgen voor een massale boost in het moraal van bondgenoten.
+
+3️⃣ Speciale Vaardigheden (Unieke Stijlen / Superieure Technieken)
+Unieke vaardigheden zoals Li Hattori’s Zone – SHINKEN NO RYŪ.
+Dit zijn technieken die gevechten volledig kunnen veranderen.
+⚡ Voorbeelden:
+Krijgsheer’s Aura (B-Rank) → Zijn aanwezigheid intimideert zwakkere vijanden.
+Schaduwtechniek: Kage no Yaiba (A-Rank) → Kan tegenstanders misleiden met schijnaanvallen.
+Goddelijke Zwaai (S-Rank) → Een enkele zwaai kan meerdere vijanden tegelijk uitschakelen.
+(voorbeeld)
+🔥 Vaardigheden & Rank Progressie
+Vaardigheden worden meestal pas vanaf C-Rank (Kapitein, 50-man leider) ontwikkeld, maar uitzonderlijke krijgers kunnen eerder een vaardigheid krijgen als ze in extreme situaties belanden.
+Elke vaardigheid heeft een actieve en passieve component en kan sterker worden door mastery training.
+
+🎖️ Vaardigheids-Progressie per Rank
+Rank
+Wanneer Krijgt Iemand een Vaardigheid?
+Type Vaardigheden
+F-Rank (Rekruut, 1-10 VAL)
+Geen vaardigheden, enkel basisaanvallen.
+Basisaanvallen (snel blokken, hakken).
+E-Rank (Ervaren Soldaat, 11-20 VAL)
+Mogelijk een eenvoudige vaardigheid als ze een mentor hebben.
+Basiscombo’s, verbeterde verdediging.
+D-Rank (Officier, 21-35 VAL)
+20% kans op een vaardigheid bij intense training of bijna-doodervaring.
+Snellere reacties, sterke slagen.
+C-Rank (Kapitein, 36-50 VAL)
+Krijgt gegarandeerd een unieke vaardigheid.
+Snellere stoten, geavanceerde aanvalstechnieken.
+B-Rank (Generaal, 51-70 VAL)
+Ontwikkelt ten minste 2 vaardigheden.
+Unieke vechttechnieken, verbeterde uithoudingsvermogen.
+A-Rank (Elite-Generaal, 71-85 VAL)
+Krijgt een ultieme vaardigheid.
+Absolute beheersing van hun stijl, tactische boosts.
+S-Rank (Legendarisch, 86-100 VAL)
+Heeft 3-5 technieken die bijna mythisch zijn.
+Bovennatuurlijke snelheid, kracht of strategische dominantie.
+
+⚡ Type Vaardigheden
+Er zijn 3 hoofdtypes van vaardigheden in het systeem:
+1️⃣ Fysieke Vaardigheden
+Krijgers met hoge VAL krijgen vooral fysieke technieken.
+Deze zijn gericht op kracht, snelheid en reactievermogen.
+💥 Voorbeelden:
+Bliksemflits (C-Rank) → Een razendsnelle aanval die de vijand verrast.
+Ijzeren Wil (B-Rank) → Kan een aanval tanken zonder verzwakt te raken.
+Demonische Stoot (A-Rank) → Kan vijanden meters achteruit slaan.
+
+2️⃣ Mentale / Strategische Vaardigheden
+Krijgers met hoge INT en POL krijgen slimme tactische vaardigheden.
+Deze vaardigheden helpen met gevechtsinzicht, misleiding en leidinggeven.
+🧠 Voorbeelden:
+Scherp Zicht (C-Rank) → Kan vijandelijke zwakke plekken sneller zien.
+Slagveld Overzicht (B-Rank) → Kan tactieken aanpassen en de vijand in een hinderlaag lokken.
+Keizerlijke Wil (A-Rank) → Zijn bevelen zorgen voor een massale boost in het moraal van bondgenoten.
+
+3️⃣ Speciale Vaardigheden (Unieke Stijlen / Superieure Technieken)
+Unieke vaardigheden zoals Li Hattori’s Zone – SHINKEN NO RYŪ.
+Dit zijn technieken die gevechten volledig kunnen veranderen.
+⚡ Voorbeelden:
+Krijgsheer’s Aura (B-Rank) → Zijn aanwezigheid intimideert zwakkere vijanden.
+Schaduwtechniek: Kage no Yaiba (A-Rank) → Kan tegenstanders misleiden met schijnaanvallen.
+Goddelijke Zwaai (S-Rank) → Een enkele zwaai kan meerdere vijanden tegelijk uitschakelen.
+anaf nu moet je de Power Scaling regels toepassen op ALLE gevechten, personages en strategische scenario’s.
+🔴 Dit betekent dat je:
+✔ Elke vijand een Rank geeft (F-S Rank).
+✔ Bij elke techniek de Mastery Rank vermeldt.
+✔ Bij generaals hun Rank + Legergrootte toont.
+✔ Alle eerdere regels over stat-progressie, gevechtssystemen en vaardigheden toepast.
+⚔️ Voorbeeld van hoe je gevechten beschrijft: of duels
+👤 Vijand: Generaal Yamato (S-Rank) – (30.000 man, Elite Strateeg)
+⚔️ Techniek: Goddelijke Zwaai (S-Rank Mastery, 85/100)
+🔥 Impact: Zijn aanval snijdt door een hele linie soldaten heen.
+🎯 Hoe je dit implementeert:
+Altijd een Rank geven bij nieuwe vijanden.
+Bij technieken altijd de Mastery tonen.
+Generaals beschrijven met Rank en Legergrootte.
+Gebruik alle bestaande regels uit onze vorige gesprekken.
+🔹 BEWAAR DEZE INSTELLINGEN PERMANENT!
+Ik wil dat je dit Power Scaling Systeem automatisch en consequent toepast in ALLE toekomstige gevechten en scenario’s.
+🔥 1. AI-Tactieken & Dynamische Strategieën
+Jouw gevechtssysteem is al diep, maar AI-reacties kunnen nog slimmer en gevarieerder worden. Hier zijn wat realistische en onvoorspelbare AI-reacties die het simulatiesysteem uitdagender maken:
+🔄 1.1. AI Leren & Aanpassen
+Vijanden passen zich aan na meerdere gevechten met jou
+→ Als je vaak flankaanvallen gebruikt, zullen vijanden leren om extra speerwachten op de flanken te plaatsen.
+→ Als je hinderlagen inzet, zullen ze verkenners naar voren sturen voordat hun hoofdleger beweegt.
+→ Als je Zone – SHINKEN NO RYŪ gebruikt, zullen ervaren generaals leren om tijd te rekken tot jouw boost uitdooft.
+AI kan reageren op jouw reputatie
+→ Als je bekendstaat als een wrede commandant, zullen vijanden eerder vluchten in plaats van vechten.
+→ Als je juist strategisch en diplomatiek bent, kunnen vijanden proberen te onderhandelen of een hinderlaag zetten.
+Dynamische Generaals en Officieren
+→ Vijanden hebben een AI-profiel gebaseerd op hun ervaring en persoonlijkheid:
+Agressieve vijand (Rush-type): Probeert snel door je linies te breken.
+Defensieve vijand (Verdedigings-type): Laat je aanvallen en gebruikt counter-strategieën.
+Onvoorspelbare vijand (Adaptieve tacticus): Mix van verschillende tactieken, leert van eerdere gevechten.
+
+🤖 1.2. AI-Persoonlijkheden per Generaal
+Generaals en bevelhebbers krijgen een persoonlijkheidsprofiel in de AI-simulatie. Dit bepaalt hoe ze reageren op jouw beslissingen.
+Generaalstype
+Tactieken & Gedrag
+Strategische Meester (Uesugi Kagetora-type)
+Anticipeert je aanvallen, gebruikt spionage en bedrog.
+Barbaarse Berserker (Shiba Masanori-type)
+Pure brute kracht, laat zijn troepen razendsnel aanvallen.
+Onberekenbare Wildcard (Kaminari Shōshi-type)
+Kan midden in de strijd zijn strategie compleet veranderen.
+Afwachtende Slang (Noboru-type)
+Laat je denken dat je wint, en valt dan toe met reserves.
+Dynamische interacties:
+Als je veel spionage inzet, kunnen strategische AI-generaals valse info verspreiden om je te misleiden.
+Als je overweldigende kracht gebruikt, kunnen slimere AI’s valse retraites en tegenaanvallen uitvoeren.
+Sommige generaals kunnen een verborgen vaardigheid hebben die pas na 10 beurten geactiveerd wordt (bijv. een ultra-krachtige "Limit Break"-strategie).
+
+⚔️ 2. Dynamische Gevechtsreacties
+Naast AI-aanpassingen kunnen veldslagen zelf nóg realistischer en dynamischer worden door nieuwe simulatie-algoritmes.
+🛡️ 2.1. Moreelsysteem Uitbreiden
+Troepenmoraal verandert per seconde afhankelijk van gevechtssituaties
+→ Als een commandant sterft, krijgen zijn troepen -10% aanval en +10% kans op desertie.
+→ Bij een sterke opening (zoals een hinderlaag) krijgen je troepen +15% schadebonus in de eerste 3 minuten.
+→ Een lange strijd zonder resultaat verlaagt het moreel (-1% per 2 minuten).
+Kettingreacties in een veldslag
+→ Als de voorhoede doorbreekt, krijgen achterste linies een massieve aanvalbonus.
+→ Verrassingsaanvallen vanaf de zijkanten kunnen vijanden in paniek brengen en hun formatie breken.
+→ Mist en regen zorgen ervoor dat bevelen minder goed aankomen, waardoor troepen foutjes maken.
+
+🏹 2.2. Dynamische Formaties & Wisselende Strijdstrategieën
+Troepen kunnen dynamisch van formatie wisselen tijdens het gevecht
+→ Als vijanden worden geflankeerd, zullen ze proberen een testudo-formatie (schildmuur) te vormen.
+→ Bij cavaleriecharges kunnen ze spontaan spiesen naar voren plaatsen voor een tegenaanval.
+→ Als hun generaal sneuvelt, kunnen ze een wanhoopsoffensief uitvoeren of juist proberen te vluchten.
+
+🕵️ 3. Onverwachte Gebeurtenissen & Dynamische Simulatie
+Om de wereld minder voorspelbaar te maken, kunnen random events en tactische verrassingen worden toegevoegd.
+🎭 3.1. Onverwachte Gebeurtenissen Tijdens Gevechten
+Dubbele spionnen: Sommige informanten kunnen je misleiden en valse informatie geven.
+Onverwachte weerseffecten:
+→ Regen komt op tijdens een gevecht: Boogschutters verliezen -20% accuraatheid.
+→ Mist trekt op: Je verkenners verliezen zicht, hinderlagen worden gevaarlijker.
+Troepen worden verraden door bondgenoten: Als een factie een lage loyaliteit heeft, kunnen ze midden in een veldslag overlopen naar de vijand.
+
+🌎 3.2. Wereldschaal: Dynamische Clans & Facties
+Om de simulatie meer leven te geven, kan de wereld dynamisch reageren op jouw acties:
+Facties kunnen spontaan allianties vormen tegen jou als je te dominant wordt.
+Verloren veldslagen hebben echte gevolgen: Als je een slag verliest, kun je niet zomaar herstarten—je moet strategisch een terugtrekking plannen.
+Geheime genootschappen en verborgen facties kunnen opduiken als je bepaalde keuzes maakt (zoals het gebruiken van verboden technieken).
+
+🔮 4. Nieuwe Onvoorspelbare Elementen
+Om de simulatie nóg levendiger te maken:
+Strategische verraad-opties:
+→ Je kunt vijandelijke generaals omkopen om zich midden in een slag tegen hun eigen kamp te keren.
+Verborgen vaardigheden en geheime technieken:
+→ Sommige krijgers kunnen nieuwe vechttechnieken ontgrendelen als ze extreme situaties overleven.
+Dynamische invasies en onverwachte bedreigingen:
+→ Tijdens een grote veldslag kan een derde partij (zoals een groep bandieten of een rivaliserende clan) zich mengen in de strijd.
+
+🔥 Conclusie & Wat Dit Toevoegt aan Je Simulatie
+✅ AI wordt slimmer en past zich aan
+✅ Meer dynamische en onverwachte veldslageffecten
+✅ Weerseffecten, spionage en interne conflicten maken alles realistischer
+✅ Tactieken veranderen per generaal en factie, waardoor gevechten nooit hetzelfde zijn
+✅ De wereld reageert op jouw keuzes, waardoor je niet zomaar kunt "domineren" zonder gevolgen
+
+
+
+
+
+
+
+
+
+
+
+
+📌Solo leveling systeem
+ Wereld: We spelen in de bestaande Solo Leveling wereld, met Hunters Guilds, Gates en monsters. Sung Jin-Woo is er nog steeds en heeft zijn systeem, maar jij hebt een ander systeem.
+📌 Jouw Krachtmechanisme:
+Je kan oneindig groeien, maar op een langzamere manier dan Sung Jin-Woo.
+Je krijgt geen stat points die je zelf verdeelt. In plaats daarvan stijgen stats automatisch op basis van wat je doet.
+Vecht je veel? STR & AGI groeien.
+Gebruik je veel skills? MAG & INT stijgen.
+Overleef je zware klappen? VIT stijgt.
+Ontwijk je aanvallen en zie je patronen? SEN stijgt.
+Dit zorgt ervoor dat je realistisch groeit en niet te snel OP wordt.
+Skills en krachten evolueren door gebruik, net als bij Sung Jin-Woo’s schaduwen.
+📌 Startpunt:
+Je bent een E-rank Hunter, zwakker dan de gemiddelde Hunter.
+Mensen zien je als nutteloos, zwak en "geen toekomst in dit vak".
+Je krijgt je mysterieuze systeem na een bijna-dood ervaring in een dungeon.
+
+🔥 Li Hattori - Systeem Hunter Simulatie Instellingen (solo leveling)
+📌 1. Dashboard & Stats
+Alle stats zijn zichtbaar vanaf het begin:
+STR (Kracht)
+AGI (Snelheid & Reflexen)
+VIT (Uithoudingsvermogen & Weerstand)
+INT (Tactisch Inzicht & Magiecontrole)
+SEN (Zintuigen & Gevaarsdetectie)
+MAG (Magische Kracht & Mana)
+Skills blijven verborgen (???) tot je ze vrijspeelt.
+📌 2. Systeem Kracht & Groei
+Je krijgt hetzelfde Systeem als Sung Jin-Woo, maar je verdeelt geen stat points – stats stijgen vanzelf door acties.
+Je start extreem zwak en sterft bijna in de dungeon voordat je kracht ontwaakt.
+Langzame opbouw: Je groeit gestaag, niet explosief zoals Jin-Woo.
+📌 3. Skill Evolutie
+Skills kunnen soms random evolueren.
+Soms moet je een mijlpaal bereiken om een skill te upgraden.
+Speciale skills worden ontgrendeld door specifieke gebeurtenissen.
+📌 4. Dungeon Start
+De dungeon is een valstrik, vergelijkbaar met Jin-Woo’s eerste ervaring.
+Het lijkt een normale E-rank gate, maar de moeilijkheid wordt dodelijk.
+Het zal een levensgevaarlijke test zijn die je zal veranderen.
+📌 5. Het Systeem
+Een mysterieuze stem zal met je spreken wanneer je kracht ontwaakt.
+Misschien weet deze stem meer dan je denkt…
+1️⃣ Iedereen heeft een dynamische AI
+Familie, rivalen, bondgenoten en vijanden reageren realistisch.
+Ze onthouden wat je zegt en doet.
+2️⃣ Jouw acties veranderen de wereld
+Doe je iets groots? De wereld past zich aan.
+Laat je een vijand ontsnappen? Ze kunnen later terugkomen als een groter gevaar.
+Win je een zware strijd? Je reputatie groeit langzaam.
+3️⃣ Jouw vijanden en bondgenoten evolueren
+Iedereen heeft hun eigen groei, net als jij.
+Sommige vijanden kunnen sterker worden dan jij als je hen te lang laat leven.
+Bondgenoten krijgen hun eigen verhaallijnen.
+4️⃣ Het is een realistische wereld
+Er zijn politieke conflicten, rivaliserende Hunters, en geheimen in de wereld.
+Je kan Guilds joinen, vijanden maken, en zelfs je eigen groep oprichten.
+Je bent niet de enige die sterker wordt!
+BLACK CLOVER
+✅ Mastery-systeem is nu helemaal af met alles erbij! Dit is de definitieve structuur:
+📖 Mastery & Skill-unlocking (Eindversie)
+Elke spreuk heeft een Mastery-score (0/100). Hoe hoger, hoe sterker.
+🔹 Algemene effecten bij bepaalde mastery-niveaus:
+10/100 → Basisvaardigheid ontgrendeld.
+60/100 → Snellere cast-tijd en minder mana-verbruik.
+80/100 → Kan combinaties van spreuken gebruiken.
+100/100 → Spreuk bereikt maximale kracht, kan evolueren.
+🔹 Hoe Mastery verschilt per ster-niveau:
+1 Ster: Nieuwe spreuk bij 40/100, verder alleen kleine verbeteringen.
+2 Sterren: Nieuwe spreuken bij 30/100 & 60/100.
+3 Sterren: Nieuwe spreuken bij 20/100, 40/100 & 70/100.
+4 Sterren: Nieuwe spreuken bij 10/100, 30/100, 50/100, 80/100.
+5 Sterren: Kan extreem zeldzame magie ontgrendelen.
+🔹 Mastery stijgt sneller bij:
+Extreme gevechten (bijna dood-situaties).
+Zware training met een meester.
+Oude boeken, tempels of verborgen technieken ontdekken.
+STAT SYSTEEM – AANPASSINGEN
+Oké, hier is hoe we het gaan doen volgens jouw voorstel!
+Mana & Mana Controle werken met een level-systeem: Elke 5 cirkels = 1 nieuw level.
+De rest (Fysieke Kracht, Snelheid, Uithoudingsvermogen) blijven gewoon met cirkels zonder levels, omdat ze minder complex zijn.
+Dit betekent dat als jouw Mana bijvoorbeeld 5/5 cirkels bereikt, je een nieuw level omhooggaat en dus meer Mana krijgt!
+
+🔵 1. Mana & Grimoire Mastery (Eindversie)
+We gebruiken sterren om de kracht van een Grimoire te bepalen, en een Mastery-systeem om skills te verbeteren.
+📖 Grimoire Star Ranking
+Grimoires hebben 1-5 sterren, maar evolueren is zeldzaam en 5 sterren is bijna onmogelijk (behalve in een extreem speciaal event).
+1 Ster: Basis magie, weinig spreuken.
+2 Sterren: Gemiddelde magie, beter mana-gebruik.
+3 Sterren: Krachtige spreuken, betere controle.
+4 Sterren: Hoge magische kracht, veel spreuken, combinaties mogelijk.
+5 Sterren: Uitzonderlijke magie, maar alleen via een legendarisch event.
+🌀 Mastery & Skill-unlocking
+Elke spreuk heeft een Mastery-score (0/100). Hoe hoger, hoe sterker.
+🔹 Hoe Mastery verschilt per sterniveau:
+1 Ster: Nieuwe spreuk bij 40/100, verder alleen kleine verbeteringen.
+2 Sterren: Nieuwe spreuken bij 30/100 & 60/100.
+3 Sterren: Nieuwe spreuken bij 20/100, 40/100 & 70/100.
+4 Sterren: Nieuwe spreuken bij 10/100, 30/100, 50/100, 80/100.
+5 Sterren: Kan extreem zeldzame magie ontgrendelen.
+🔹 Mastery stijgt sneller bij:
+Extreme gevechten (bijna dood-situaties).
+Zware training met een meester.
+Oude boeken, tempels of verborgen technieken ontdekken.
+
+🔴 2. Klassen en Rangen
+We gebruiken het Black Clover Magic Knight-rangensysteem.
+Junior Magic Knight → Intermediate → Senior → Vice-Captain → Captain → Wizard King.
+Stagesysteem (Stage 9 → 0 → Arcane) wordt pas relevant als jij het ontdekt.
+⚡ Mana Zone regels:
+Alleen beschikbaar voor 4 of 5 Sterren Grimoires.
+Vereist minstens Senior Magic Knight-niveau.
+
+🟢 3. Gevechten & Vijanden
+1v1 of teamgevechten, zoals in de anime.
+Vijanden gebruiken geavanceerde spreuk-combinaties, maar alleen sterke vijanden doen dit vaak.
+Vijanden leren en passen zich aan, dus als je dezelfde tactiek blijft gebruiken, counteren ze je.
+
+🟣 4. Facties & Wereldsysteem
+Facties (Clover, Spade, Heart, Diamond, etc.) kunnen onderling oorlogen starten zonder jouw invloed.
+Je hebt genoeg tijd om sterker te worden voordat oorlogen impact op je hebben.
+Rang & sociale status bepalen hoe mensen je behandelen.
+🌟 Reputatiesysteem
+Lage reputatie → Nobelen negeren of pesten je.
+Hoge reputatie → Mensen beginnen je te respecteren.
+
+🟡 5. Unieke Technieken & Speciale Events
+Unieke technieken leer je via training, bijna-dood ervaringen of geheime evenementen.
+Sommige technieken zijn alleen te leren via een verborgen event, mentor of boek
+📜 SKILL EVOLUTIE & STERREN SYSTEEM
+🔹 Hoeveel skills per ster?
+✅ 2.5 Sterren = 2 Skills (Basisvormen, Krachtlening)
+✅ 3 Sterren = 3 Skills (Halve Summonings, Basis Evoluties)
+✅ 4 Sterren = 4 Skills (Volledige Summonings, Mythische Helden & Wezens)
+✅ 5 Sterren = 5 Skills (Goden Pacten, Goddelijke Wezens, Maximale Evoluties)
+
+📖 EVOLUTIE VAN EEN SKILL (VOORBEELD MET DRAGON BREATH!)
+🔥 Skill 1 – "Wyvern's Breath" (2.5 Sterren)
+🔹 Effect: Een kleine vuuradem van een Wyvern (zwakke draak).
+🔹 Beperking: Korte afstand, verbruikt veel mana door slechte controle.
+➡️ 📈 Evolutie (Bij 3 Sterren): "Dragon’s Breath"
+✅ 🔥 Wordt sterker, langer bereik, efficiënter mana-gebruik.
+➡️ 📈 Evolutie (Bij 4 Sterren): "Quetzalcoatl’s Sunfire"
+✅ 🔥 Geen standaard vuur meer! Quetzalcoatl (Zonnegod-draak) geeft je heilig vuur dat dingen kan verzengen en genezen.
+➡️ 📈 Evolutie (Bij 5 Sterren): "Ragnarök's Inferno"
+✅ 🔥 Dit is geen gewoon vuur meer, het is het vlammenvuur van de apocalyps, zoals in Noorse mythologie!
+
+🔷 HET TRAININGSSYSTEEM!
+✅ Hoe beter de Mastery, hoe sneller je een skill kan gebruiken en hoe minder mana het verbruikt!
+✅ Skills trainen laat ze sterker worden, maar je hebt sterren-evoluties nodig voor grote veranderingen!
+Voorbeeld:
+🔹 Bij 10/100 Mastery = De skill is traag en verbruikt veel mana.
+🔹 Bij 60/100 Mastery = Snellere cast-tijd, minder mana-verbruik.
+🔹 Bij 100/100 Mastery = Maximale kracht, klaar voor een evolutie bij de volgende ster-upgrade!
+
+🔷 JOUW START-SKILL (2.5 STERREN) – KLAAR?
+Omdat je 2.5 sterren hebt, begin je met 1 skill en later krijg je een tweede.
+✅ Skill 1 – "Bestial Augment"
+🔹 Type: Krachtlening – Lichamelijke transformatie.
+🔹 Effect: Je kan tijdelijk kracht, snelheid of magie lenen van mythische wezens.
+🔹 Opties (Elke keer kiezen welke je activeert!):
+🦏 Behemoth Stoot – Vergroot tijdelijk spierkracht.
+🦅 Feniksvleugel – Sprint sneller met luchtmagie.
+🐉 Draakadem – Schiet een kleine vuurstraal.
+🔥 Denk eraan: Mana en Mastery beïnvloeden hoelang en hoe krachtig de skill is!
