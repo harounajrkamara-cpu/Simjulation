@@ -1,6 +1,7 @@
 import { AiAdapter } from './adapter';
 import { GmFixProposal, GmResult, GmTurn, gmApply, gmDayCap, gmMemoryText, gmRecentScenes, lastFightResult, parseGmFix, parseGmTurn, skipDaysLeft, splitWishes } from '../engine/gm';
 import { today } from '../engine/engine';
+import { checkGmScene, factFixPrompt } from '../engine/factcheck';
 import { GameEvent, GameState } from '../engine/types';
 
 export type { GmFixProposal } from '../engine/gm';
@@ -103,13 +104,28 @@ const parseJson = (raw: unknown): unknown => (typeof raw === 'string' ? JSON.par
 /** Ask, check (one retry if the answer is not usable), record. `record` is what the scene stores as the player's words. */
 async function play(ai: AiAdapter, s: GameState, said: string | undefined, signal: AbortSignal | undefined, task?: string, maxDays?: number, record = said): Promise<GmPlay> {
   let problem = '';
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const extra = problem ? [`Your last answer could not be used: ${problem}. Answer again with valid JSON in the format above.`] : [];
-    const raw = await ai.ask(gmPrompt(s, said, extra, task), { json: true, tier: 'complex', signal });
-    let parsed: unknown;
-    try { parsed = parseJson(raw); } catch { problem = 'it was not JSON'; continue; }
-    const turn = parseGmTurn(parsed);
-    if (!turn) { problem = 'the "scene" text was missing'; continue; }
+  let facts: string | undefined; // one rewrite when the scene broke the facts (engine/factcheck.ts)
+  let first: GmTurn | undefined;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const extra = facts ? [facts] : problem ? [`Your last answer could not be used: ${problem}. Answer again with valid JSON in the format above.`] : [];
+    let turn: GmTurn | undefined;
+    try {
+      const raw = await ai.ask(gmPrompt(s, said, extra, task), { json: true, tier: 'complex', signal });
+      let parsed: unknown;
+      try { parsed = parseJson(raw); } catch { problem = 'it was not JSON'; }
+      turn = parsed === undefined ? undefined : parseGmTurn(parsed);
+      if (parsed !== undefined && !turn) problem = 'the "scene" text was missing';
+    } catch (e) {
+      if (!first) throw e;
+    }
+    // The rewrite failed or was unusable: the first scene stands (the problems were already logged to Claude).
+    if (!turn && first) turn = first;
+    if (!turn) continue;
+    if (!first) {
+      const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
+      const found = checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames);
+      if (found.length) { first = turn; facts = factFixPrompt(found); continue; }
+    }
     if (maxDays !== undefined && (turn.days ?? 0) > maxDays) turn.days = maxDays;
     const r = gmApply(s, turn, record);
     return { ...r, turn };
