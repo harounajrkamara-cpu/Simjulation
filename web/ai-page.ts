@@ -22,3 +22,24 @@ export async function pageAdapter(): Promise<AiAdapter | null> {
     },
   };
 }
+
+/**
+ * Offer a file to the player: on claude.ai through the `downloads` capability (the viewer confirms), elsewhere with a
+ * plain browser download. Resolves with a short word for the button, or rejects with the reason.
+ */
+export async function pageDownload(filename: string, data: string): Promise<string> {
+  const claude = (window as unknown as { claude?: { use?: (name: string) => Promise<unknown> } }).claude;
+  const d = claude?.use ? ((await claude.use('downloads')) as { save(o: { filename: string; data: string }): Promise<unknown> } | null) : null;
+  if (d) {
+    try { await d.save({ filename, data }); return 'Saved'; }
+    catch (e) { const code = (e as { code?: string })?.code; if (code === 'declined') return 'Not saved'; throw e; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  return 'Downloaded';
+}

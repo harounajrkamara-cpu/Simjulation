@@ -143,7 +143,7 @@ button { cursor: pointer; }
 .settings input { accent-color: var(--seal); margin-top: 6px; }
 .primary { align-self: flex-start; min-height: 48px; padding: 0 40px; background: var(--seal); border: 0; border-radius: 4px; color: var(--seal-ink); font: 600 20px var(--display); letter-spacing: .12em; }
 .prologue .overlay-inner { width: min(760px, 100%); min-height: 60vh; justify-content: center; }
-.pr-text { margin: 0; font-size: clamp(22px, 3vw, 28px); line-height: 1.6; font-style: italic; color: var(--paper-2); }
+.pr-text { white-space: pre-line; margin: 0; font-size: clamp(22px, 3vw, 28px); line-height: 1.6; font-style: italic; color: var(--paper-2); }
 .pr-quote { margin: 0; font: 600 clamp(26px, 4vw, 40px)/1.35 var(--display); }
 .pr-bar { display: flex; align-items: center; gap: 12px; margin-top: 24px; }
 .pr-dots { flex: 1; display: flex; gap: 8px; }
@@ -152,6 +152,28 @@ button { cursor: pointer; }
 #pr-skip { min-height: 44px; padding: 0 18px; background: none; border: 0; color: var(--faded); letter-spacing: .14em; }
 #pr-next { padding: 0 28px; font-size: 17px; }
 @media (prefers-reduced-motion: no-preference) { .pr-text, .pr-quote { animation: ink .7s ease-out; } }
+/* Film moods and the playable night (owner vision Oct 10). */
+.prologue.ember { background: radial-gradient(ellipse at 50% 115%, #3A1810 0%, #08090B 62%); }
+.prologue.snow { background: radial-gradient(ellipse at 50% -10%, #1E242C 0%, #08090B 65%); }
+.prologue.title .pr-quote { font-size: clamp(30px, 5vw, 52px); text-align: center; }
+.prologue.title .pr-text, .prologue.title .label { text-align: center; }
+.pr-ask { margin: 8px 0 0; font: 600 18px var(--display); color: var(--gold); }
+.pr-opts { display: flex; flex-direction: column; gap: 8px; }
+.pr-opts button { min-height: 48px; padding: 10px 16px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; text-align: left; font-size: 17px; color: var(--paper); }
+.pr-opts button:hover { border-color: var(--gold); }
+.pr-then { margin: 0; font-size: 18px; font-style: italic; color: var(--paper-2); }
+
+/* Game Master tools: skip ahead, something's wrong, the GM's out-of-character note. */
+.tools { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+.tools button { min-height: 44px; padding: 0 14px; background: none; border: 1px solid var(--line-2); border-radius: 4px; color: var(--paper-2); font-size: 15px; }
+.tools button:hover { border-color: var(--gold); color: var(--paper); }
+.tools .quiet-tool { color: var(--faded); border-style: dashed; }
+.toolbox label { display: flex; flex-direction: column; gap: 4px; font-size: 15px; color: var(--faded); }
+.toolbox input, .toolbox textarea { min-height: 44px; padding: 8px 12px; background: var(--ink); border: 1px solid var(--line-2); border-radius: 4px; font-size: 16px; color: var(--paper); }
+.toolbox textarea { min-height: 88px; }
+.toolbox ul { margin: 0; padding-left: 20px; font-size: 15px; color: var(--paper-2); }
+.toolbox .examples button { font-size: 14px; }
+.text.gmnote { font-size: 15px; font-style: italic; color: var(--faded); padding-left: 14px; border-left: 2px dashed var(--line-2); }
 
 /* Guide, examples, terms, why (GE ch. 8) */
 .guide { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 14px; border: 1px solid #5A4A2A; border-radius: 4px; background: #17140E; font-size: 15px; }

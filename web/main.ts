@@ -5,15 +5,16 @@ import { FactPacket, buildPacket } from '../ai/packet';
 import { fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
 import { SkipSummary, summaryText } from '../engine/summary';
-import { gmOn, lastFightResult, startGmGame } from '../engine/gm';
-import { gmTurn } from '../ai/gm';
+import { GmChange, gmApplyFix, gmOn, gmRewind, lastFightResult } from '../engine/gm';
+import { GmFixProposal, GmPlay, gmFix, gmSkip, gmTurn } from '../ai/gm';
+import { CHILDHOOD, TIME_JUMP, beginLife } from '../engine/prologue';
 import { changesLine, duelPanel, noticeable } from '../engine/render';
 import { GameEvent } from '../engine/types';
 import { lastPeakDay, phase as directorPhase } from '../engine/director';
 import { WOUND_LABEL } from '../engine/rules';
-import { PROLOGUE } from '../engine/content';
+import { PROLOGUE, Slide } from '../engine/content';
 import { GameState } from '../engine/types';
-import { pageAdapter } from './ai-page';
+import { pageAdapter, pageDownload } from './ai-page';
 import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
 import {
   armyPage, chronicle, encyclopediaPage, goalsHtml, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
@@ -178,6 +179,9 @@ function refresh() {
   $('goals').innerHTML = goalsHtml(state);
   renderOptions();
   renderGuide();
+  $('tools').hidden = !(ai && gmOn(state));
+  $<HTMLButtonElement>('skipbtn').disabled = busy || !gmMode();
+  $<HTMLButtonElement>('wrongbtn').disabled = busy;
   if (tab !== 'story' && PAGES[tab]) { $(`tab-${tab}`).innerHTML = PAGES[tab]!(state); markSeen(tab); }
   dots();
 }
@@ -210,6 +214,8 @@ function setBusy(on: boolean) {
   busy = on;
   document.querySelector('.choose')!.classList.toggle('busy', on);
   $('opts').querySelectorAll('button').forEach((b) => ((b as HTMLButtonElement).disabled = on));
+  $<HTMLButtonElement>('skipbtn').disabled = on || !gmMode();
+  $<HTMLButtonElement>('wrongbtn').disabled = on;
 }
 
 /** One Game Master turn (owner decision Oct 7): Claude writes the scene, the code checks and records it. */
@@ -229,22 +235,9 @@ async function gmStep(text?: string, said = text) {
   try {
     const r = await gmTurn(ai, state, text);
     turn.querySelector('.wet')?.remove();
-    const p = document.createElement('p');
-    p.className = 'text';
-    turn.appendChild(p);
-    await inkReveal(p, r.turn.scene);
-    const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !metBefore.has(id)).map((id) => state.characters[id].name);
-    const ch = changesLine(before, noticeable(state));
-    turn.insertAdjacentHTML('beforeend', chipsHtml(replyParts(ch, newPeople).chips));
-    const why = [said ? `Because Li chose: ${said}.` : '', r.turn.journal ? `Li's journal: ${r.turn.journal}` : '', r.notes.length ? `The rules held: ${r.notes.join('; ')}.` : ''].filter(Boolean);
-    if (why.length) turn.insertAdjacentHTML('beforeend', `<details class="why"><summary>Why?</summary><p>${esc(why.join(' '))}</p></details>`);
+    await paintPlay(turn, r, said, before, metBefore, true);
     refresh();
-    await bigMoments(r.events, seasonBefore);
-    if (li(state).status !== statusBefore) {
-      const how = state.knowledge.includes('hunted') ? 'by his own feet, and hunted' : 'his paper burned';
-      await legendScreen({ label: 'Legend moment', title: 'Free', native: '自由', meaning: how }, r.turn.scene, state.events.at(-1)!.day);
-    }
-    if (r.duelId) await titleCard('A fight', state.duel?.foe.name.replace(/^the /, 'The ') ?? 'A fight');
+    await afterPlays(r.events, r.turn.scene, seasonBefore, statusBefore, !!r.duelId);
   } catch (e) {
     turn.querySelector('.wet')?.remove();
     if (errorCode(e) === 'bad_answer') turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc((e as Error).message)} Try again.</p>`);
@@ -254,6 +247,169 @@ async function gmStep(text?: string, said = text) {
   refresh();
   persist();
   setBusy(false);
+}
+
+/** One Game Master scene in the log: the story (inked or at once), its chips, the GM's out-of-character note, "Why?". */
+async function paintPlay(turn: HTMLElement, r: GmPlay, said: string | undefined, before: ReturnType<typeof noticeable>, metBefore: Set<string>, ink: boolean) {
+  const p = document.createElement('p');
+  p.className = 'text';
+  turn.appendChild(p);
+  if (ink) await inkReveal(p, r.turn.scene);
+  else p.innerHTML = termify(esc(r.turn.scene), state);
+  const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !metBefore.has(id)).map((id) => state.characters[id].name);
+  turn.insertAdjacentHTML('beforeend', chipsHtml(replyParts(changesLine(before, noticeable(state)), newPeople).chips));
+  if (r.turn.gmNote) turn.insertAdjacentHTML('beforeend', `<p class="text gmnote">Game Master: ${esc(r.turn.gmNote)}</p>`);
+  const why = [said ? `Because Li chose: ${said}.` : '', r.turn.journal ? `Li's journal: ${r.turn.journal}` : '', r.notes.length ? `The rules held: ${r.notes.join('; ')}.` : ''].filter(Boolean);
+  if (why.length) turn.insertAdjacentHTML('beforeend', `<details class="why"><summary>Why?</summary><p>${esc(why.join(' '))}</p></details>`);
+}
+
+/** After Game Master scenes: title cards, a freedom legend, the start of a fight. */
+async function afterPlays(events: GameEvent[], scene: string, seasonBefore: string, statusBefore: string, fight: boolean) {
+  await bigMoments(events, seasonBefore);
+  if (li(state).status !== statusBefore) {
+    const how = state.knowledge.includes('hunted') ? 'by his own feet, and hunted' : 'his paper burned';
+    await legendScreen({ label: 'Legend moment', title: 'Free', native: '自由', meaning: how }, scene, state.events.at(-1)!.day);
+  }
+  if (fight) await titleCard('A fight', state.duel?.foe.name.replace(/^the /, 'The ') ?? 'A fight');
+}
+
+// ---------- Game Master tools: Skip ahead, Something's wrong (owner vision Oct 10) ----------
+
+const toolbox = $('toolbox');
+const closeTools = () => { toolbox.hidden = true; toolbox.innerHTML = ''; };
+
+function openSkip() {
+  if (busy || !ai || !gmMode()) return;
+  const next = Math.floor(liAge(state)) + 1;
+  toolbox.innerHTML = `<p class="text info">Skip ahead: the story runs on, scene by scene, with Li's plan, and stops at anything important.</p>
+    <label>Until when?<input id="sk-until" list="sk-until-list" autocomplete="off" placeholder="until something important happens"></label>
+    <datalist id="sk-until-list"><option value="until Li is ${next}"><option value="until the next battle"><option value="until something important happens"><option value="for three months"></datalist>
+    <label>What does Li do meanwhile?<input id="sk-plan" autocomplete="off" placeholder="I do my work and train with the sticks every night"></label>
+    <div class="row"><button type="button" class="yes">Skip</button><button type="button" class="no">Cancel</button></div>`;
+  toolbox.hidden = false;
+  const until = toolbox.querySelector<HTMLInputElement>('#sk-until')!;
+  const plan = toolbox.querySelector<HTMLInputElement>('#sk-plan')!;
+  toolbox.querySelector<HTMLButtonElement>('.no')!.onclick = closeTools;
+  toolbox.querySelector<HTMLButtonElement>('.yes')!.onclick = () => {
+    const u = until.value.trim() || 'until something important happens';
+    const p = plan.value.trim() || 'his usual work and routine';
+    closeTools();
+    runSkip(u, p);
+  };
+  until.focus();
+}
+
+async function runSkip(until: string, plan: string) {
+  if (!ai || busy) return;
+  setBusy(true);
+  const head = newTurn(`Skip ahead ${until}. ${plan}`);
+  head.insertAdjacentHTML('beforeend', '<p class="text info wet">The days pass…</p>');
+  head.scrollIntoView({ block: 'start' });
+  const from = strip(state).date;
+  const before = noticeable(state);
+  const seasonBefore = state.seasonKey;
+  const statusBefore = li(state).status;
+  const events: GameEvent[] = [];
+  let last: GmPlay | undefined;
+  let prev = before;
+  let metPrev = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
+  try {
+    const plays = await gmSkip(ai, state, { until, plan }, (r) => {
+      events.push(...r.events);
+      last = r;
+      paintPlay(newTurn(), r, undefined, prev, metPrev, false);
+      prev = noticeable(state);
+      metPrev = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
+      refresh();
+      persist();
+    });
+    head.querySelector('.wet')?.remove();
+    const why = last?.duelId ? 'a fight begins' : last?.turn.stop ? 'something important' : 'the skip has run its course';
+    head.insertAdjacentHTML('beforeend', `<p class="text info">From ${esc(from)} to ${esc(strip(state).date)} in ${plays.length} scene${plays.length === 1 ? '' : 's'}. It stopped: ${why}.</p>`);
+    head.insertAdjacentHTML('beforeend', chipsHtml(replyParts(changesLine(before, noticeable(state)), []).chips));
+    refresh();
+    if (last) await afterPlays(events, last.turn.scene, seasonBefore, statusBefore, !!last.duelId);
+  } catch (e) {
+    head.querySelector('.wet')?.remove();
+    if (errorCode(e) === 'bad_answer') head.insertAdjacentHTML('beforeend', `<p class="text info">${esc((e as Error).message)} The scenes before it are kept.</p>`);
+    else aiFailed(e, head);
+  }
+  refresh();
+  persist();
+  setBusy(false);
+}
+
+const who = (id: string) => state.characters[id]?.name ?? id;
+
+/** A proposed correction in plain words. Hidden values (the five relation numbers, plans, memories) stay without numbers. */
+function changeText(c: GmChange): string {
+  const x = c as Record<string, unknown>;
+  const why = typeof x.reason === 'string' && x.reason ? ` (${x.reason})` : '';
+  switch (c.kind) {
+    case 'fact': return `${c.what}: ${c.text}`;
+    case 'relation': return `${who(c.npc)}'s ${c.field} toward Li ${c.delta >= 0 ? 'rises' : 'falls'}${why}`;
+    case 'money': return `Money ${c.amount >= 0 ? '+' : ''}${c.amount} mon${why}`;
+    case 'wound': return `Li's condition: ${WOUND_LABEL[Math.max(0, Math.min(3, Math.round(c.level))) as 0 | 1 | 2 | 3]}${why}`;
+    case 'fatigue': return 'Li\'s tiredness is corrected';
+    case 'person': return `${c.name} is added to the people Li knows`;
+    case 'dies': return `${who(c.npc)} is dead${why}`;
+    case 'thread': return `Storyline: ${c.text}`;
+    case 'lore': return `Encyclopedia: ${c.title}`;
+    case 'memory': return `What ${who(c.npc)} remembers about Li is corrected`;
+    case 'agenda': return `${who(c.npc)}'s own plans are corrected`;
+    case 'knowledge': return 'Something Li knows is corrected';
+    case 'train': return `Training is corrected (${c.focus})`;
+    case 'skill': return `A skill is corrected (${c.skill})`;
+    default: return `A correction (${c.kind})`;
+  }
+}
+
+function openWrong() {
+  if (busy || !ai || !gmOn(state)) return;
+  toolbox.innerHTML = `<p class="text info">Tell the Game Master what is wrong, in plain words. Real errors get fixed; a fair loss or a bad choice stays (no going back in time).</p>
+    <label>What is wrong?<textarea id="wr-text" placeholder="Hachi talked in the last scene, but he died last month."></textarea></label>
+    <div class="row"><button type="button" class="yes">Check it</button><button type="button" class="no">Cancel</button></div>`;
+  toolbox.hidden = false;
+  const area = toolbox.querySelector<HTMLTextAreaElement>('#wr-text')!;
+  toolbox.querySelector<HTMLButtonElement>('.no')!.onclick = closeTools;
+  toolbox.querySelector<HTMLButtonElement>('.yes')!.onclick = () => { if (area.value.trim()) runWrong(area.value.trim()); };
+  area.focus();
+}
+
+async function runWrong(report: string) {
+  if (!ai || busy) return;
+  setBusy(true);
+  toolbox.innerHTML = '<p class="text info wet">The Game Master checks the memory…</p>';
+  let p: GmFixProposal;
+  try {
+    p = await gmFix(ai, state, report);
+  } catch (e) {
+    const code = errorCode(e);
+    toolbox.innerHTML = `<p class="text info">${esc(code === 'bad_answer' ? (e as Error).message : 'Claude did not answer this time. Try again later.')}</p><div class="row"><button type="button" class="no">Close</button></div>`;
+    toolbox.querySelector<HTMLButtonElement>('.no')!.onclick = closeTools;
+    return setBusy(false);
+  }
+  const list = p.changes.map((c) => `<li>${esc(changeText(c))}</li>`).join('');
+  const act = p.changes.length > 0 || p.rewindScenes > 0;
+  toolbox.innerHTML = `<p class="text">${esc(p.explanation)}</p>${list ? `<ul>${list}</ul>` : ''}
+    ${p.rewindScenes ? `<p class="text alert">Bug fix: the last ${p.rewindScenes === 1 ? 'scene is' : `${p.rewindScenes} scenes are`} taken back and the story goes on from before ${p.rewindScenes === 1 ? 'it' : 'them'}.</p>` : ''}
+    <div class="row">${act ? '<button type="button" class="yes">Apply the fix</button>' : ''}<button type="button" class="no">${act ? 'Cancel' : 'Close'}</button></div>`;
+  setBusy(false);
+  toolbox.querySelector<HTMLButtonElement>('.no')!.onclick = closeTools;
+  const yes = toolbox.querySelector<HTMLButtonElement>('.yes');
+  if (!yes) return;
+  yes.onclick = () => {
+    closeTools();
+    const rewound = p.rewindScenes > 0;
+    if (rewound) state = gmRewind(state, p.rewindScenes, report);
+    const ev = gmApplyFix(state, p, report);
+    persist();
+    if (rewound) {
+      log.innerHTML = '';
+      const lastScene = [...state.events].reverse().find((e) => e.type === 'scene');
+      show(`${lastScene ? `${lastScene.fact}\n\n` : ''}${ev[0]?.fact ?? 'Corrected.'}`);
+    } else show(ev[0]?.fact ?? 'Corrected.', `Something's wrong: ${report}`);
+  };
 }
 
 /** Show a resolved turn: narrated by Claude when it is a story moment, template text otherwise. */
@@ -577,43 +733,90 @@ $('begin').onclick = () => {
   aiOn = settings.ai === 'claude';
   setStoryteller();
   box.hidden = true;
-  // A new life in Game Master mode: the same world, Claude runs it. Without Claude here, the classic chronicle plays.
-  if (settings.mode === 'gm' && ai && !gmOn(state)) {
-    state = startGmGame();
-    seen = look(state);
-    log.innerHTML = '';
-    persist();
-    refresh();
-  }
   playPrologue();
 };
 
+/**
+ * The opening (owner vision Oct 10): the film, the playable night of Year 95 (five small choices that colour the moment
+ * and Li's first journal lines, never the outcome), "Five years later", then the new life begins with those memories:
+ * Game Master mode when Claude is here, the classic chronicle otherwise. Skip keeps the choices made so far, canon for the rest.
+ */
 function playPrologue() {
   const box = $('prologue');
+  type Step = { slide: Slide } | { scene: number };
+  const steps: Step[] = [...PROLOGUE.map((slide) => ({ slide })), ...CHILDHOOD.map((_, scene) => ({ scene })), ...TIME_JUMP.map((slide) => ({ slide }))];
+  const picks: (number | undefined)[] = [];
   let i = 0;
-  const showSlide = () => {
-    const slide = PROLOGUE[i];
-    $('pr-label').textContent = slide.label;
-    $('pr-text').textContent = slide.text;
-    $('pr-quote').textContent = slide.quote ?? '';
-    // Restart the ink animation for each slide.
+  let after: string | undefined; // what happened after a pick, shown before moving on
+  const opts = $('pr-opts');
+  const paint = (label: string, text: string, quote: string, mood?: string) => {
+    box.className = `overlay prologue${mood ? ` ${mood}` : ''}`;
+    $('pr-label').textContent = label;
+    $('pr-text').textContent = text;
+    $('pr-quote').textContent = quote;
+    // Restart the ink animation for each step.
     for (const id of ['pr-text', 'pr-quote']) { const el = $(id); el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; }
-    $('pr-dots').innerHTML = PROLOGUE.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
-    $('pr-next').textContent = i === PROLOGUE.length - 1 ? 'Begin the chronicle' : 'Continue';
   };
-  const close = () => {
+  const showStep = () => {
+    const st = steps[i];
+    let choosing = false;
+    if ('slide' in st) paint(st.slide.label, st.slide.text, st.slide.quote ?? '', st.slide.mood);
+    else {
+      const sc = CHILDHOOD[st.scene];
+      if (after !== undefined) paint(sc.label, after, '', 'snow');
+      else {
+        paint(sc.label, sc.text, sc.quote ?? '', 'snow');
+        choosing = true;
+        $('pr-ask').textContent = sc.ask;
+        opts.innerHTML = sc.options.map((o, k) => `<button type="button" data-k="${k}">${esc(o.label)}</button>`).join('');
+      }
+    }
+    $('pr-ask').hidden = !choosing;
+    opts.hidden = !choosing;
+    if (!choosing) opts.innerHTML = '';
+    $('pr-next').hidden = choosing;
+    $('pr-dots').innerHTML = steps.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
+    $('pr-next').textContent = i === steps.length - 1 ? 'Begin the chronicle' : 'Continue';
+    (choosing ? opts.querySelector<HTMLButtonElement>('button') : $('pr-next'))?.focus();
+  };
+  opts.onclick = (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-k]');
+    const st = steps[i];
+    if (!b || !('scene' in st)) return;
+    const sc = CHILDHOOD[st.scene];
+    const k = Number(b.dataset.k);
+    picks[st.scene] = k;
+    after = [sc.options[k].text, sc.then].filter(Boolean).join('\n\n');
+    showStep();
+  };
+  const close = (skipped: boolean) => {
     box.hidden = true;
+    box.className = 'overlay prologue';
+    // The new life begins here, with the night's memories first.
+    const gm = settings.mode === 'gm' && !!ai;
+    const life = beginLife({ gm, picks, skipped });
+    state = life.state;
+    seen = look(state);
+    recent.length = 0;
+    log.innerHTML = '';
+    if (life.text) show(life.text);
+    persist();
+    refresh();
     titleCard('Chapter 1', 'The Red Crane').then(() => {
       input.focus({ preventScroll: true });
       if (gmOn(state) && !state.gm?.scenes.length) gmStep(); // Claude opens the story
-      else if (settings.mode === 'gm' && !ai && !gmOn(state)) show('Game Master mode needs Claude, which is only here when the page is opened on claude.ai. The classic chronicle plays instead.');
+      else if (settings.mode === 'gm' && !ai) show('Game Master mode needs Claude, which is only here when the page is opened on claude.ai. The classic chronicle plays instead.');
     });
   };
-  $('pr-next').onclick = () => { if (++i >= PROLOGUE.length) close(); else showSlide(); };
-  $('pr-skip').onclick = close;
+  $('pr-next').onclick = () => {
+    const st = steps[i];
+    if ('scene' in st && after === undefined) return; // a choice first
+    after = undefined;
+    if (++i >= steps.length) close(false); else showStep();
+  };
+  $('pr-skip').onclick = () => close(true);
   box.hidden = false;
-  showSlide();
-  $('pr-next').focus();
+  showStep();
 }
 
 $('opts').addEventListener('click', (e) => {
@@ -626,6 +829,8 @@ $('f').addEventListener('submit', (e) => {
 });
 document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => (b.onclick = () => openTab(b.dataset.tab as Tab)));
 storyteller.onclick = () => { aiOn = !aiOn; setStoryteller(); };
+$('skipbtn').onclick = openSkip;
+$('wrongbtn').onclick = openWrong;
 // Number keys pick an option while the input is empty (desktop speed).
 document.addEventListener('keydown', (e) => {
   if (tab !== 'story' || busy || e.ctrlKey || e.metaKey || e.altKey || !/^[1-9]$/.test(e.key)) return;
@@ -679,6 +884,12 @@ $('slots').addEventListener('click', (e) => {
   start();
 });
 $('closesave').onclick = () => { box.hidden = true; };
+$('downloadsave').onclick = async () => {
+  const b = $<HTMLButtonElement>('downloadsave');
+  try { b.textContent = await pageDownload(`sengoku-soldier-life-${slot}-year-${state.date.year}.json`, JSON.stringify(toSave(state))); }
+  catch { b.textContent = 'Not possible here: use Copy'; }
+  setTimeout(() => { b.textContent = 'Download save'; }, 3000);
+};
 $('copysave').onclick = async () => {
   try { await navigator.clipboard.writeText(saveText.value); $('copysave').textContent = 'Copied'; }
   catch { saveText.focus(); saveText.select(); $('copysave').textContent = 'Press Ctrl+C to copy'; }
