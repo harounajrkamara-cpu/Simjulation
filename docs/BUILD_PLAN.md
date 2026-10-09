@@ -125,6 +125,10 @@ Freedom routes, contract seasons, Year 100 story calendar, timeskip summary, Jou
 - **Not proven yet:** the real Claude in the claude.ai page (only the owner can run it) — scene quality, speed (the "complex" model tier; a scene may take 10–40 s), and how often Claude's JSON needs the one retry. **Trade-off:** Claude now sees the hidden truths so it can run the world; it is told never to reveal them early.
 - **Next:** owner plays Game Master mode → tune the rules prompt and limits from his notes; chat-mode play with the same memory (`npm run turn`) if he wants it; a "previously on" line at session start; stage 2 content as world facts for Claude instead of scripts.
 
+## VISIE wave 1 (Oct 10, owner vision `docs/VISIE.md`) ✅ built, owner playtest open
+Wishes in (brackets), five long goals, early family lead, chained Skip ahead, Something's wrong with logged bug rewinds, the opening film + playable night + time jump, the public world map, Download save. Evidence: `npm test` 221 passed (new: `tests/gm2.test.ts`, `tests/opening.test.ts`, `tests/map.test.ts`); typecheck clean; clicked through at 1440 px (film moods, the night's five choices → first journal lines, classic start without Claude, both map views); published as page version 12. Not proven: the real Claude in Skip ahead and Something's wrong (only on claude.ai).
+**Next (waves 2–3):** scene fact-check before showing · battle engine (WB 6b, Numbers §5) · ranks/merit/pay and land/domain modules (drafts exist, uncommitted) · life-stage director + world facts per stage · chapter recaps + model mix · progress bars · reward ceremonies · career-pace report.
+
 ## Phase 3 – Stage 2: soldier life · Phase 4 – Stage 3: land & family · Phase 5 – Stage 4: court & kingdoms + epilogue
 Each phase gets its own milestone table at its start (spec → plan → tasks). Details: GE ch. 10 Part B.
 
