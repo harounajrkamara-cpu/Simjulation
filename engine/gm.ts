@@ -5,6 +5,7 @@ import { PLACES } from './data';
 import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { storyWindow } from './recaps';
+import { careerText, deedDrafts, promotionDrafts, serveDrafts } from './gm-career';
 import { opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
 import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
@@ -73,7 +74,11 @@ export type GmChange =
   | { kind: 'dies'; npc: string; reason: string }
   | { kind: 'freedom'; route: 'merit' | 'head' | 'bought' | 'raizen' | 'escape' }
   /** Only in a fix ("Something's wrong"): a corrected fact line the memory keeps from now on. */
-  | { kind: 'fact'; what: string; text: string };
+  | { kind: 'fact'; what: string; text: string }
+  /** Career (engine/gm-career.ts): a deed with witnesses, a promotion when a post opens, serving another kingdom. */
+  | { kind: 'deed'; deed: string; amount?: number; reason: string }
+  | { kind: 'promotion'; reason: string; sponsor?: string }
+  | { kind: 'serve'; kingdom: string };
 
 /** Claude's answer to the player's "Something's wrong" report. */
 export interface GmFixProposal {
@@ -290,6 +295,7 @@ export function gmMemoryText(s: GameState): string {
     `Skills: ${Object.entries(c.skills).map(([k, v]) => `${k} ${i(v)}`).join(', ')}. Traits: ${c.traits.join(', ')}.`,
     `Li's voice: quiet, watchful, stubborn; hides his anger; protective of the weak; fears fire at night. He must never say the name Hattori.`,
     `Merit: combat ${has(s, 'merit_combat')}, in Kurogane service ${has(s, 'merit_service')} of ${MERIT_FOR_FREEDOM}. In the Hagiwara levy: ${inService(s) ? 'yes' : 'no'}.`,
+    careerText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
     `FREEDOM ROUTES:\n${freedomRoutes.map((x) => `- ${x}`).join('\n')}`,
     longGoalsText(s),
@@ -423,6 +429,8 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
   const drafts: Draft[] = [];
   const known = (id: string) => !!s.characters[id] && id !== s.liId;
   const newPeople = new Set<string>();
+  let deeds = 0;
+  const pendingMerit: Record<string, number> = {};
   const worstWound = Math.max(c.wound, ...changes.filter((x) => x && x.kind === 'wound').map((x) => Math.min(GM_LIMITS.maxWound, num((x as { level?: unknown }).level))));
 
   for (const ch of changes) {
@@ -528,6 +536,15 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       }
       case 'freedom':
         drafts.push(...freedomCheck(s, String(x.route), notes));
+        break;
+      case 'deed':
+        { const d = deedDrafts(s, x, deeds, notes, pendingMerit); if (d.length) deeds++; drafts.push(...d); }
+        break;
+      case 'promotion':
+        drafts.push(...promotionDrafts(s, x, notes));
+        break;
+      case 'serve':
+        drafts.push(...serveDrafts(s, String(x.kingdom ?? ''), notes));
         break;
       default:
         notes.push(`unknown change "${String(x.kind)}" ignored`);

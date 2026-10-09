@@ -66,7 +66,10 @@ ANSWER WITH JSON ONLY:
     {"kind":"knowledge","key":"short_key (the long goals name theirs)"},
     {"kind":"service","reason":"Li joins the Hagiwara levy (Kurogane service)"},
     {"kind":"dies","npc":"<id>","reason":"..."},
-    {"kind":"freedom","route":"merit|head|bought|raizen|escape"}
+    {"kind":"freedom","route":"merit|head|bought|raizen|escape"},
+    {"kind":"deed","deed":"standard|first_over_wall|saved_officer|scouting|objective|won|low_losses|withdrawal|steady_morale|supply_kept|disobeyed_paid_off|disobeyed_failed|negotiation|intelligence|governance|civilians","amount":<only for negotiation/intelligence/civilians>,"reason":"what Li did and who saw it"},
+    {"kind":"promotion","reason":"why a post is free now (an officer fell, a new unit, a reward ceremony)","sponsor":"<id of a superior, needed from Sanbyakunin-shō up>"},
+    {"kind":"serve","kingdom":"kurogane|suiren|hayate|ushio|takane|tatara|kitakaze"}
   ],
   "fight": null or {"foe":"who","rank":"F|E|D|C|B|A (how strong he looks)","look":"what Li sees","officer":"Gochō|Kogashira|null","deadly":true,"witnessedEnemy":true,"place":"where"},
   "suggestions": ["3 or 4 short things Li could do next, written as 'I ...'"],

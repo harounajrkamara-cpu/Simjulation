@@ -21,6 +21,9 @@ const ACTS = 'says|said|asks|asked|answers|replies|whispers|shouts|laughs|smiles
 const outsideQuotes = (t: string) => t.replace(/"[^"]*"|“[^”]*”/g, '""');
 const sentences = (t: string) => t.split(/(?<=[.!?])\s+/);
 const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Word edges that understand ō and ū (a plain \b does not). Use with the u flag. */
+const B = '(?<![\\p{L}\\p{N}_])';
+const E = '(?![\\p{L}\\p{N}_])';
 
 /** Edit distance, capped (cheap; only short words are compared). */
 function distance(a: string, b: string): number {
@@ -73,9 +76,9 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
   }
 
   // 4. Li's rank and status, when the scene names them directly ("Li the Kogashira", "Kogashira Li", "Li, a free man").
-  const rank = RANK_TITLES.find((r) => new RegExp(`\\b${esc(r)}\\b`, 'i').test(li.role));
+  const rank = RANK_TITLES.find((r) => new RegExp(`${B}${esc(r)}${E}`, 'iu').test(li.role));
   for (const r of RANK_TITLES) {
-    const said = new RegExp(`\\bLi,?\\s+(?:the|a|an)\\s+${esc(r)}\\b|\\b${esc(r)}\\s+Li\\b`, 'iu');
+    const said = new RegExp(`\\bLi,?\\s+(?:the|a|an)\\s+${esc(r)}${E}|${B}${esc(r)}\\s+Li\\b`, 'iu');
     if (said.test(prose) && r !== rank) { problems.push({ kind: 'rank', text: `Li is not a ${r} (he is ${li.status === 'slave' ? 'a slave' : li.role}).` }); break; }
   }
   if (li.status === 'slave' && /\bLi,?\s+(?:a|now a)\s+free\s+(?:man|boy)\b|\bLi\s+is\s+(?:now\s+)?free\b/i.test(prose)) {

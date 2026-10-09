@@ -57,7 +57,7 @@ function ranks(s: GameState): string {
 export function liCard(s: GameState): string {
   const c = li(s);
   return `<div class="crest" aria-hidden="true">李</div>
-    <div class="who"><span class="name">Li</span><span class="sub">Age ${ageOn(c.born, s.date)} · ${c.status === 'slave' ? 'slave of the Red Crane' : 'free'}</span>${s.knowledge.includes('nickname_kurose_no_ryu') ? '<span class="sub gold">Called Kurose no Ryū by the band</span>' : ''}<div class="ranks">${ranks(s)}</div></div>`;
+    <div class="who"><span class="name">Li</span><span class="sub">Age ${ageOn(c.born, s.date)} · ${c.status === 'slave' ? 'slave of the Red Crane' : esc(c.role || 'free')}</span>${s.knowledge.includes('nickname_kurose_no_ryu') ? '<span class="sub gold">Called Kurose no Ryū by the band</span>' : ''}<div class="ranks">${ranks(s)}</div></div>`;
 }
 
 /** The fogged ink map: only the places Li knows (ch. 6). Akaishi is Kurogane's southern border; Suiren lies south across the Kurose. */
