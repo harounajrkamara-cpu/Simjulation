@@ -156,7 +156,9 @@ export function journalPage(s: GameState): string {
   const trophyHtml = won.length ? `<h2 class="label">Trophies</h2><ul class="trophies">${won.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
   const arcs = journalArcs(s).reverse().map((a) => `<h2 class="label">${esc(a.title)}</h2>${a.days.slice().reverse().map((d) =>
     `<section><h3>${esc(d.label)}</h3>${d.lines.map((l) => `<p>${esc(l)}</p>`).join('')}</section>`).join('')}`).join('');
-  return `<h1>Journal</h1><p class="lead">In Li's own words. Only what he knows, and he can be wrong.</p>${trophyHtml}<div class="journal">${arcs}</div>`;
+  const chapters = (s.gm?.chapters ?? []).map((c, k) => `<section class="chapter"><h3>Chapter ${k + 1} · ${esc(c.title)}</h3><p>${esc(c.text)}</p></section>`).reverse().join('');
+  const chapterHtml = chapters ? `<h2 class="label">Chapters</h2><div class="journal">${chapters}</div>` : '';
+  return `<h1>Journal</h1><p class="lead">In Li's own words. Only what he knows, and he can be wrong.</p>${chapterHtml}${trophyHtml}<div class="journal">${arcs}</div>`;
 }
 
 export function knownEntries(s: GameState) {

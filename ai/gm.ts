@@ -1,6 +1,7 @@
-import { AiAdapter } from './adapter';
+import { AiAdapter, ModelTier } from './adapter';
 import { GmFixProposal, GmResult, GmTurn, gmApply, gmDayCap, gmMemoryText, gmRecentScenes, lastFightResult, parseGmFix, parseGmTurn, skipDaysLeft, splitWishes } from '../engine/gm';
-import { today } from '../engine/engine';
+import { commitDrafts, today } from '../engine/engine';
+import { chapterDraft, chapterDue, chapterPrompt } from '../engine/recaps';
 import { checkGmScene, factFixPrompt } from '../engine/factcheck';
 import { GameEvent, GameState } from '../engine/types';
 
@@ -102,7 +103,7 @@ export interface GmPlay extends GmResult { turn: GmTurn; events: GameEvent[] }
 const parseJson = (raw: unknown): unknown => (typeof raw === 'string' ? JSON.parse(raw) : raw);
 
 /** Ask, check (one retry if the answer is not usable), record. `record` is what the scene stores as the player's words. */
-async function play(ai: AiAdapter, s: GameState, said: string | undefined, signal: AbortSignal | undefined, task?: string, maxDays?: number, record = said): Promise<GmPlay> {
+async function play(ai: AiAdapter, s: GameState, said: string | undefined, signal: AbortSignal | undefined, task?: string, maxDays?: number, record = said, tier: ModelTier = gmTier(s, said)): Promise<GmPlay> {
   let problem = '';
   let facts: string | undefined; // one rewrite when the scene broke the facts (engine/factcheck.ts)
   let first: GmTurn | undefined;
@@ -110,7 +111,7 @@ async function play(ai: AiAdapter, s: GameState, said: string | undefined, signa
     const extra = facts ? [facts] : problem ? [`Your last answer could not be used: ${problem}. Answer again with valid JSON in the format above.`] : [];
     let turn: GmTurn | undefined;
     try {
-      const raw = await ai.ask(gmPrompt(s, said, extra, task), { json: true, tier: 'complex', signal });
+      const raw = await ai.ask(gmPrompt(s, said, extra, task), { json: true, tier, signal });
       let parsed: unknown;
       try { parsed = parseJson(raw); } catch { problem = 'it was not JSON'; }
       turn = parsed === undefined ? undefined : parseGmTurn(parsed);
@@ -176,7 +177,7 @@ export async function gmSkip(ai: AiAdapter, s: GameState, opts: GmSkipOptions, o
     if (left !== undefined && left <= 0) break;
     let p: GmPlay;
     try {
-      p = await play(ai, s, undefined, opts.signal, skipTask(s, opts, k, max, today(s) - start, left, plan, wishes), left, record);
+      p = await play(ai, s, undefined, opts.signal, skipTask(s, opts, k, max, today(s) - start, left, plan, wishes), left, record, 'default');
     } catch (e) {
       if (opts.signal?.aborted) break;
       throw e;
@@ -227,4 +228,29 @@ export async function gmFix(ai: AiAdapter, s: GameState, report: string, signal?
     problem = 'the "explanation" was missing';
   }
   throw Object.assign(new Error(`The Game Master's answer could not be used (${problem}).`), { code: 'bad_answer' });
+}
+
+// ---------- the smart model mix and chapter recaps (owner vision Oct 10) ----------
+
+/**
+ * Which model writes a scene: the strongest for the moments that carry the story (the opening, the aftermath of a fight
+ * the code decided, a turn with wishes or a long move of the player's), the default tier for the rest. Skips use default.
+ */
+export function gmTier(s: GameState, said?: string): ModelTier {
+  if (!s.gm?.scenes.length || lastFightResult(s)) return 'complex';
+  if (said && (splitWishes(said).wishes.length > 0 || said.length > 120)) return 'complex';
+  return 'default';
+}
+
+/** Close the chapter when it is due: Claude writes its recap once; it is recorded and never rewritten. Nothing when not due. */
+export async function gmChapter(ai: AiAdapter, s: GameState, signal?: AbortSignal): Promise<GameEvent[]> {
+  if (!chapterDue(s)) return [];
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const raw = await ai.ask(chapterPrompt(s), { json: true, tier: 'default', signal });
+    let parsed: unknown;
+    try { parsed = parseJson(raw); } catch { continue; }
+    const d = chapterDraft(s, parsed);
+    if (d) return commitDrafts(s, [d]);
+  }
+  return [];
 }

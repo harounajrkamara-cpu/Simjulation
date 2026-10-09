@@ -106,6 +106,11 @@ export function apply(state: GameState, ev: GameEvent): void {
     case 'lore':
       gmMemOf(state).lore.push({ title: d.title, text: d.text });
       break;
+    case 'chapter': {
+      const g = gmMemOf(state);
+      (g.chapters ??= []).push({ title: d.title, text: d.text, from: d.from, to: ev.day, scenes: g.scenes.length });
+      break;
+    }
     case 'heard':
       state.relations[d.npc].heard.push(d.beat);
       state.relations[d.npc].lastTalkDay = ev.day;

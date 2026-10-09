@@ -4,6 +4,7 @@ import { DuelOutcome, DuelTemplate } from './content';
 import { PLACES } from './data';
 import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
+import { storyWindow } from './recaps';
 import { opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
 import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
@@ -273,10 +274,9 @@ export function gmMemoryText(s: GameState): string {
     ].filter(Boolean).join('\n');
   }).join('\n');
   const unmet = Object.keys(s.characters).filter((id) => id !== s.liId && !met(s, id) && s.characters[id].alive).map((id) => `- ${s.characters[id].name} [id: ${id}] — ${s.characters[id].role}. ${s.characters[id].desc}`).join('\n');
-  const scenes = g.scenes;
-  const story = scenes.length > 40
-    ? [`(Earlier, in Li's journal:) ${s.journal.slice(0, -30).map((j) => j.text).join(' ')}`, ...scenes.slice(-40).map((x) => `${formatDate(dateFromIndex(x.day))}: ${x.text}`)]
-    : scenes.map((x) => `${formatDate(dateFromIndex(x.day))}: ${x.text}`);
+  // All chapter recaps, then the scenes after them in full (engine/recaps.ts): nothing falls out of Claude's view.
+  const window = storyWindow(s);
+  const story = window.scenes;
   const soon = WORLD_CLOCK.filter((w) => w.day >= today(s) - 2 && w.day <= today(s) + 60).map((w) => `- ${formatDate(dateFromIndex(w.day))}: ${w.what}`);
   const freedomRoutes = c.status === 'slave' ? [
     `Merit law: 30 merit in Kurogane service (now ${has(s, 'merit_service')}${inService(s) ? '' : '; Li is NOT in service yet'}) or the head of an enemy Kogashira or higher taken in service (only through a fight the code runs).`,
@@ -296,7 +296,8 @@ export function gmMemoryText(s: GameState): string {
     `PEOPLE LI KNOWS:\n${people || '(none)'}`,
     unmet ? `PEOPLE NEARBY LI HAS NOT MET YET:\n${unmet}` : '',
     `OPEN STORYLINES:\n${g.threads.filter((t) => t.open).map((t) => `- [${t.id}] ${t.text}`).join('\n') || '(none yet: start some)'}`,
-    `STORY SO FAR:\n${story.join('\n') || '(the story begins now)'}`,
+    window.chapters.length ? `CHAPTERS SO FAR (written once, the story before the scenes below):\n${window.chapters.join('\n')}` : '',
+    `STORY SO FAR${window.chapters.length ? ' (since the last chapter)' : ''}:\n${story.join('\n') || '(the story begins now)'}`,
     `LI'S LAST JOURNAL LINES:\n${s.journal.slice(-8).map((j) => `- ${j.text}`).join('\n') || '(none)'}`,
     correctionsText(s),
     refereeText(s),

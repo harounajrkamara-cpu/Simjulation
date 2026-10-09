@@ -6,7 +6,7 @@ import { fromSave, li, liAge, met, options, recordNote, toSave } from '../engine
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
 import { SkipSummary, summaryText } from '../engine/summary';
 import { GmChange, gmApplyFix, gmOn, gmRewind, lastFightResult } from '../engine/gm';
-import { GmFixProposal, GmPlay, gmFix, gmSkip, gmTurn } from '../ai/gm';
+import { GmFixProposal, GmPlay, gmChapter, gmFix, gmSkip, gmTurn } from '../ai/gm';
 import { CHILDHOOD, TIME_JUMP, beginLife } from '../engine/prologue';
 import { changesLine, duelPanel, growthSnapshot, noticeable, progressChips } from '../engine/render';
 import { GameEvent } from '../engine/types';
@@ -251,6 +251,7 @@ async function gmStep(text?: string, said = text) {
   }
   refresh();
   persist();
+  await maybeChapter();
   setBusy(false);
 }
 
@@ -276,6 +277,18 @@ async function afterPlays(events: GameEvent[], scene: string, seasonBefore: stri
     await legendScreen({ label: 'Legend moment', title: 'Free', native: '自由', meaning: how }, scene, state.events.at(-1)!.day);
   }
   if (fight) await titleCard('A fight', state.duel?.foe.name.replace(/^the /, 'The ') ?? 'A fight');
+}
+
+/** Close a chapter when it is due: Claude writes its recap once (never rewritten), a title card names it. Silent on failure. */
+async function maybeChapter() {
+  if (!ai || !gmOn(state)) return;
+  try {
+    const ev = await gmChapter(ai, state);
+    if (!ev.length) return;
+    persist();
+    refresh();
+    await titleCard(`Chapter ${state.gm?.chapters?.length ?? 1} closes`, (ev[0].data as { title: string }).title);
+  } catch { /* the chapter closes next time */ }
 }
 
 // ---------- Game Master tools: Skip ahead, Something's wrong (owner vision Oct 10) ----------
@@ -343,6 +356,7 @@ async function runSkip(until: string, plan: string) {
   }
   refresh();
   persist();
+  await maybeChapter();
   setBusy(false);
 }
 

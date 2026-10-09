@@ -114,7 +114,9 @@ export type EventType =
   | 'thread'
   | 'lore'
   // A fix after the player's "Something's wrong" report, or a rewind of broken scenes (text only; read back by engine/gm.ts):
-  | 'correction';
+  | 'correction'
+  // A chapter recap, written once by the Game Master (engine/recaps.ts):
+  | 'chapter';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {
@@ -171,6 +173,8 @@ export interface GmMemory {
   duels: Record<string, import('./content').DuelTemplate>;
   /** What Li can do next, suggested by the last scene. */
   suggestions: string[];
+  /** Chapter recaps (owner vision Oct 10): written once by Claude every ~20 scenes, never rewritten. `scenes` = scene count at its end. */
+  chapters?: { title: string; text: string; from: number; to: number; scenes: number }[];
 }
 
 /** Canonical action (ch. 12b #1): what the engine resolves, stored with the event log. */
