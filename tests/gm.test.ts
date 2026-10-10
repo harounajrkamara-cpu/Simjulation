@@ -71,6 +71,12 @@ describe('Game Master mode: the code referees', () => {
     const r = gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'raizen' }] }));
     expect(li(s).status).toBe('slave');
     expect(r.notes.join(' ')).toMatch(/must both reach 85/);
+    // Owner decision (VISIE Phase 2 #1): only in winter quarters, and only when Li can make it.
+    expect(gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'escape' }] })).notes.join(' ')).toMatch(/only slip away in winter quarters/);
+    s.date.month = 10;
+    expect(gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'escape' }] })).notes.join(' ')).toMatch(/not quiet enough/);
+    li(s).skills.stealth = 30;
+    li(s).skills.endurance = 45;
     gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'escape' }] }));
     expect(li(s).status).toBe('free');
     expect(s.knowledge).toContain('hunted');

@@ -90,6 +90,9 @@ describe('long goals: chances keep coming, nothing is forced', () => {
 
   it('freedom is done once Li is no longer a slave, and the next goal moves up', () => {
     const s = startGmGame();
+    s.date.month = 10; // winter quarters, and able to run (VISIE Phase 2 #1)
+    s.characters[s.liId].skills.stealth = 30;
+    s.characters[s.liId].skills.endurance = 45;
     gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'escape' }] }));
     expect(gmLongGoals(s)[0].done).toBe(true);
     const mem = gmMemoryText(s);

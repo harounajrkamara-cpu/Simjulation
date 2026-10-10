@@ -1,5 +1,5 @@
 import { ageOn, dateFromIndex, dayIndex, formatDate, seasonKey } from './calendar';
-import { inService, MERIT_FOR_FREEDOM, PRICE_MON } from './campaign';
+import { ESCAPE_NEEDS, inService, MERIT_FOR_FREEDOM, PRICE_MON } from './campaign';
 import { DuelOutcome, DuelTemplate } from './content';
 import { PLACES } from './data';
 import { commitDrafts, has, li, met, replay, today } from './engine';
@@ -300,7 +300,7 @@ export function gmMemoryText(s: GameState): string {
     `Merit law: 30 merit in Kurogane service (now ${has(s, 'merit_service')}${inService(s) ? '' : '; Li is NOT in service yet'}) or the head of an enemy Kogashira or higher taken in service (only through a fight the code runs).`,
     `Buying: Raizen's price is 15 ryō = ${PRICE_MON} mon (Li has ${s.money} mon). Rokubei keeps the papers.`,
     'Raizen sets him free: needs Raizen\'s trust and respect both 85+.',
-    'Escape: to Tatara over the Black Hills (no slavery there); hunted afterwards.',
+    'Escape: to Tatara over the Black Hills (no slavery there); hunted afterwards. Only in winter quarters (Months 10–12), and only when Li is fit and quiet enough (the code checks).',
   ] : ['Li is free.'];
   return [
     `DATE: ${formatDate(s.date)}  ·  PLACE: ${PLACES[c.location] ?? c.location}`,
@@ -626,8 +626,18 @@ function freedomCheck(s: GameState, route: string, notes: string[]): Draft[] {
       if (rv('trust') >= 85 && rv('respect') >= 85) return free('raizen', 'a free youth of the Red Crane camp');
       notes.push(`not free yet: Raizen's trust ${Math.floor(rv('trust'))} and respect ${Math.floor(rv('respect'))} must both reach 85`);
       return [];
-    case 'escape':
+    case 'escape': {
+      // Owner decision (VISIE, Phase 2 #1): escape stays possible but only in winter quarters (Months 10–12), when the
+      // band is idle and the watch is thin, and only when Li can make it (the classic chronicle's bar).
+      if (s.date.month < 10) { notes.push('not free: a slave can only slip away in winter quarters (Months 10–12), when the band is idle and the watch is thin'); return []; }
+      const lack = c.wound > ESCAPE_NEEDS.maxWound ? 'he is too badly hurt to run'
+        : c.fatigue > ESCAPE_NEEDS.maxFatigue ? 'he is worn out before he starts'
+        : (c.skills.stealth ?? 0) < ESCAPE_NEEDS.stealth ? 'he is not quiet enough yet to pass the sentries'
+        : (c.skills.endurance ?? 0) < ESCAPE_NEEDS.endurance ? 'he could not outrun the band\'s hunters yet'
+        : undefined;
+      if (lack) { notes.push(`the escape fails: ${lack}`); return []; }
       return free('escape', 'a runaway, hunted by the Red Crane', [{ type: 'knowledge', fact: 'Li is hunted', visible: false, data: { key: 'hunted' } }]);
+    }
     default:
       notes.push(`unknown freedom route "${route}"`);
       return [];
