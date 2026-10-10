@@ -84,7 +84,7 @@ export function opening(): FilmSpec {
       { dur: 7000, caption: 'In Suiren a peasant\'s son rose with two swords. They called him the Twin Demon.' },
       { dur: 4500, caption: 'In Year 95 he fell on a night road. "Kurogane raiders," the songs say.' },
       { dur: 6000 },
-      { dur: 6000, cues: [{ at: 400, fn: () => shakuhachi(4.5) }] },
+      { dur: 6000, speak: "One boy. Seven kingdoms at war. A father's name he must not say.", cues: [{ at: 400, fn: () => shakuhachi(4.5) }] },
     ],
   };
 }
@@ -113,7 +113,7 @@ export function firstBattle(d: { name: string; numbers: string }): FilmSpec {
       { dur: 2500 },
       { dur: 2500 },
       { dur: 2000, cues: [{ at: 0, fn: () => warCry(2) }] },
-      { dur: 3000, cues: [{ at: 0, fn: () => taiko(true) }, flashAt(0), clearImpact(500)] },
+      { dur: 3000, speak: `${d.name}. ${d.numbers}.`, cues: [{ at: 0, fn: () => taiko(true) }, flashAt(0), clearImpact(500)] },
     ],
   };
 }
@@ -150,7 +150,7 @@ export function zone(): FilmSpec {
       { dur: 1000, cues: [{ at: 0, fn: heartbeat }] },
       { dur: 1500 },
       { dur: 1000 },
-      { dur: 3000, cues: [{ at: 0, fn: bladeRing }, { at: 0, fn: () => taiko(false) }, flashAt(0), clearImpact(400)] },
+      { dur: 3000, speak: 'Shinken no Ryū.', cues: [{ at: 0, fn: bladeRing }, { at: 0, fn: () => taiko(false) }, flashAt(0), clearImpact(400)] },
     ],
   };
 }
@@ -183,7 +183,7 @@ export function promotion(d: { rank: string; men: string; line: string }): FilmS
   return {
     id: 'card', svg: `${defs}<rect width="1600" height="900" fill="#0E1014"/>`, waitAtEnd: true,
     html: `<div class="fl-paper sh1"><p class="fl-kicker">Promotion</p>${brushTitle(d.rank, 'fl-brush--rank', 0.2)}<p class="fl-men">${esc(d.men)}</p><p class="fl-line">${esc(d.line)}</p>${seal('昇', 1.1)}</div>`,
-    shots: [{ dur: 2500, cues: [{ at: 1100, fn: () => taiko(false) }] }],
+    shots: [{ dur: 2500, speak: `Promotion. ${d.rank}, ${d.men}. ${d.line}`, cues: [{ at: 1100, fn: () => taiko(false) }] }],
   };
 }
 
@@ -194,7 +194,7 @@ export function death(d: { name: string; line: string }): FilmSpec {
     id: 'death', svg: `${defs}<rect width="1600" height="900" fill="#08090B"/><path class="fl-petal" d="M0 0 c8 -10 20 -10 24 0 c-4 10 -16 10 -24 0z"/>`,
     waitAtEnd: true, holdMs: 2000,
     html: `<div class="fl-death sh1"><p class="fl-vname">${esc(d.name)}</p><p class="fl-line">${esc(d.line)}</p></div>`,
-    shots: [{ dur: 5000 }],
+    shots: [{ dur: 5000, speak: d.line }],
   };
 }
 
@@ -206,6 +206,6 @@ export function chapterEnd(d: { n: number; title: string; text: string }): FilmS
     id: 'chapter', waitAtEnd: true,
     svg: `${defs}<path class="fl-wipe" d="M-100 450 C300 380 700 520 1100 430 S1500 470 1700 440"/>`,
     html: `<div class="fl-paper fl-paper--chapter sh1"><p class="fl-kicker">Chapter ${d.n}</p>${brushTitle(d.title, 'fl-brush--rank', 0.2)}<p class="fl-line">${esc(first)}</p></div>`,
-    shots: [{ dur: 3000, cues: [{ at: 0, fn: swish }] }],
+    shots: [{ dur: 3000, speak: `Chapter ${d.n}. ${d.title}. ${first}`, cues: [{ at: 0, fn: swish }] }],
   };
 }

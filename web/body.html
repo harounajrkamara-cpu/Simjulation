@@ -84,6 +84,7 @@
     <div class="file">
       <button id="howto" type="button">How to play</button>
       <button id="storyteller" type="button" aria-pressed="false">Storyteller: plain</button>
+      <button id="narratorbtn" type="button" aria-pressed="false">Narrator: off</button>
       <button id="savebtn" type="button">Save file</button>
       <button id="new" type="button">New life</button>
     </div>
@@ -99,6 +100,16 @@
     <button role="tab" type="button" data-tab="encyclopedia" aria-selected="false">Encyclopedia</button>
   </nav>
 
+  <div id="narratorbox" class="savebox narratorbox" hidden>
+    <p class="note">The narrator reads the story aloud with a voice from this computer. The most natural voices are listed first.</p>
+    <div class="row">
+      <label><input id="nr-on" type="checkbox"> Read the story aloud</label>
+      <label>Voice <select id="nr-voice"></select></label>
+      <label>Speed <select id="nr-rate"><option value="0.85">Slow</option><option value="1">Normal</option><option value="1.15">Quick</option><option value="1.3">Fast</option></select></label>
+      <button id="nr-test" type="button">Test</button>
+      <button id="nr-close" type="button">Close</button>
+    </div>
+  </div>
   <div id="savebox" class="savebox" hidden>
     <p class="note">Three lives can be kept in this browser. Each is its own story: switching never undoes anything.</p>
     <div id="slots" class="slots" aria-label="Lives"></div>

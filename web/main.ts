@@ -21,6 +21,7 @@ import { pageAdapter, pageDownload } from './ai-page';
 import * as Film from './films/runtime';
 import * as Scenes from './films/scenes';
 import { loadFromCloud, saveToCloud } from './cloud-save';
+import { narrate as speak, narratorAvailable, narratorOn, narratorRate, narratorVoice, setNarrator, stopNarrator, voices } from './narrator';
 import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
 import {
   armyPage, chronicle, encyclopediaPage, goalsHtml, growthHtml, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
@@ -286,6 +287,7 @@ async function paintPlay(turn: HTMLElement, r: GmPlay, said: string | undefined,
   const p = document.createElement('p');
   p.className = 'text';
   turn.appendChild(p);
+  speak(r.turn.scene, ink); // a skip queues its scenes; a turn starts fresh
   if (ink) await inkReveal(p, r.turn.scene);
   else p.innerHTML = termify(esc(r.turn.scene), state);
   const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !metBefore.has(id)).map((id) => state.characters[id].name);
@@ -515,6 +517,7 @@ async function finish(reply: Reply, turn: HTMLElement, said: string | undefined,
     await narrateInto(turn, packet);
   } else {
     turn.insertAdjacentHTML('beforeend', story.concat(notes).map(paraHtml).join('') + chipsHtml(parts.chips));
+    speak(story.map((p) => p.text).join(' '));
     refresh();
     turn.scrollIntoView({ block: 'start' });
   }
@@ -545,6 +548,7 @@ async function narrateInto(turn: HTMLElement, packet: FactPacket) {
     n = { text: templateText(packet), source: 'template', problems: [] };
   }
   el.classList.remove('wet');
+  speak(n.text);
   await inkReveal(el, n.text);
   recordNote(state, 'narration', `narration (${n.source})`, { text: n.text, source: n.source, problems: n.problems });
   recent.push(n.text);
@@ -618,6 +622,7 @@ const gmMode = () => gmOn(state) && !(state.duel && !state.duel.over);
 const gmChoices = () => state.gm?.suggestions?.length ? state.gm.suggestions : ['I look around and wait for what comes'];
 
 async function send(raw: string, said = raw) {
+  stopNarrator();
   if (busy) return;
   fineMark = growthSnapshot(state);
   if (shownHint) markHint(shownHint); // a hint closes itself once the player acts (ch. 8 §4)
@@ -963,6 +968,30 @@ $('f').addEventListener('submit', (e) => {
 });
 document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => (b.onclick = () => openTab(b.dataset.tab as Tab)));
 storyteller.onclick = () => { aiOn = !aiOn; setStoryteller(); };
+
+// ---------- the narrator (web/narrator.ts) ----------
+const narratorBtn = $<HTMLButtonElement>('narratorbtn');
+const setNarratorBtn = () => { narratorBtn.textContent = narratorOn() ? 'Narrator: on' : 'Narrator: off'; narratorBtn.setAttribute('aria-pressed', String(narratorOn())); };
+function fillVoices() {
+  const sel = $<HTMLSelectElement>('nr-voice');
+  const vs = voices();
+  sel.innerHTML = vs.length ? vs.map((v) => `<option value="${esc(v.voiceURI)}">${esc(v.name)} (${esc(v.lang)})</option>`).join('') : '<option value="">No English voice found on this device</option>';
+  sel.value = narratorVoice();
+}
+narratorBtn.hidden = !narratorAvailable();
+setNarratorBtn();
+if (narratorAvailable()) window.speechSynthesis.onvoiceschanged = fillVoices;
+narratorBtn.onclick = () => {
+  fillVoices();
+  $<HTMLInputElement>('nr-on').checked = narratorOn();
+  $<HTMLSelectElement>('nr-rate').value = String(narratorRate());
+  $('narratorbox').hidden = false;
+};
+$('nr-on').onchange = () => { setNarrator({ on: $<HTMLInputElement>('nr-on').checked }); setNarratorBtn(); };
+$('nr-voice').onchange = () => setNarrator({ voice: $<HTMLSelectElement>('nr-voice').value });
+$('nr-rate').onchange = () => setNarrator({ rate: Number($<HTMLSelectElement>('nr-rate').value) || 1 });
+$('nr-test').onclick = () => { if (!narratorOn()) { setNarrator({ on: true }); $<HTMLInputElement>('nr-on').checked = true; setNarratorBtn(); } speak('Li carries the water past the horse lines. Somewhere in the dark, a guard coughs.'); };
+$('nr-close').onclick = () => { $('narratorbox').hidden = true; };
 $('skipbtn').onclick = openSkip;
 $('wrongbtn').onclick = openWrong;
 // Number keys pick an option while the input is empty (desktop speed).

@@ -1,5 +1,6 @@
 import { esc } from './fx';
 import { Playing, isMuted, setMuted, unlockSound } from './sound';
+import { narrate } from '../narrator';
 
 // The film runtime (docs/FILMS.md, Build system). One overlay; a film is a list of shots with durations. The runtime
 // sets data-shot on the overlay, CSS starts that shot's animations, cues fire sounds at fixed times. Click or tap = the
@@ -12,6 +13,8 @@ export interface Shot {
   dur: number;
   /** Narration under the picture (plain text). */
   caption?: string;
+  /** What the narrator reads for this shot when there is no caption (a title card). */
+  speak?: string;
   /** Sounds and class changes at fixed times inside the shot. */
   cues?: Cue[];
 }
@@ -86,6 +89,7 @@ export function play(spec: FilmSpec): Promise<void> {
       el.dataset.shot = String(n + 1);
       caption.textContent = s.caption ?? '';
       caption.classList.toggle('is-on', !!s.caption);
+      if (s.speak ?? s.caption) narrate((s.speak ?? s.caption)!);
       for (const c of s.cues ?? []) cueTimers.push(window.setTimeout(c.fn, c.at));
       const last = n === spec.shots.length - 1;
       if (!(last && spec.waitAtEnd)) timer = window.setTimeout(() => (last ? end() : show(n + 1)), s.dur);

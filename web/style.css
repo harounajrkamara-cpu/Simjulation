@@ -344,3 +344,10 @@ button { cursor: pointer; }
 .table.battle { font-size: 14px; margin-top: 6px; }
 .table.battle th, .table.battle td { padding: 4px 8px 4px 0; width: auto; }
 .table.battle .src { color: var(--faded); font-style: italic; }
+
+/* Narrator settings (owner request, Oct 10) */
+.narratorbox .row { align-items: center; gap: 14px; }
+.narratorbox label { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 15px; color: var(--paper-2); }
+.narratorbox select { min-height: 40px; max-width: 320px; padding: 0 10px; background: var(--ink); border: 1px solid var(--line-2); border-radius: 4px; color: var(--paper); }
+.narratorbox input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--seal); }
+#narratorbtn[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
