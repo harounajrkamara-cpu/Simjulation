@@ -127,7 +127,7 @@ Freedom routes, contract seasons, Year 100 story calendar, timeskip summary, Jou
 
 ## VISIE wave 1 (Oct 10, owner vision `docs/VISIE.md`) ✅ built, owner playtest open
 Wishes in (brackets), five long goals, early family lead, chained Skip ahead, Something's wrong with logged bug rewinds, the opening film + playable night + time jump, the public world map, Download save. Evidence: `npm test` 221 passed (new: `tests/gm2.test.ts`, `tests/opening.test.ts`, `tests/map.test.ts`); typecheck clean; clicked through at 1440 px (film moods, the night's five choices → first journal lines, classic start without Claude, both map views); published as page version 12. Not proven: the real Claude in Skip ahead and Something's wrong (only on claude.ai).
-**Next (waves 2–3):** scene fact-check before showing · battle engine (WB 6b, Numbers §5) · ranks/merit/pay and land/domain modules (drafts exist, uncommitted) · life-stage director + world facts per stage · chapter recaps + model mix · progress bars · reward ceremonies · career-pace report.
+**Waves 2–3 (Oct 10) ✅ built:** fact-check before showing · Growing panel and progress chips · chapter recaps and the model mix · ranks, merit, promotion, ceremonies, titles · life stages · battles (WB 6b) · land and domain · everyone grows · account saves. 284 tests; published as page version 15. **Next:** owner playtest with Claude on the page; the Phase 2 decisions from VISIE; the career-pace report; owner answers on the battle stall drain and the domain PROVISIONAL numbers.
 
 ## Phase 3 – Stage 2: soldier life · Phase 4 – Stage 3: land & family · Phase 5 – Stage 4: court & kingdoms + epilogue
 Each phase gets its own milestone table at its start (spec → plan → tasks). Details: GE ch. 10 Part B.
