@@ -118,7 +118,9 @@ export type EventType =
   // A chapter recap, written once by the Game Master (engine/recaps.ts):
   | 'chapter'
   // A battle's state after its start or a phase (engine/gm-battle.ts); null data clears it:
-  | 'battle';
+  | 'battle'
+  // Li's land after a grant, an order, a project or a month (engine/gm-domain.ts):
+  | 'domain';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {
@@ -159,6 +161,8 @@ export interface GameState {
   duel?: import('./duel').DuelState | null;
   /** A battle in progress or just ended (engine/battle.ts), kept by 'battle' events. */
   battle?: import('./battle').BattleState | null;
+  /** Li's land (engine/domain.ts), kept by 'domain' events. */
+  domain?: import('./domain').Domain | null;
   /** Game Master mode memory (kept by events, so saves replay it). */
   gm?: GmMemory;
 }

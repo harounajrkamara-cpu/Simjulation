@@ -439,10 +439,8 @@ export function endMonth(d: Domain, year: number, month: number, war = false): S
     x.standing -= desert.standing; x.levies -= desert.levies;
     events.push(ev('desertion', `${desert.standing + desert.levies} unpaid men slipped away in the night.`, { standing: desert.standing, levies: desert.levies }));
   }
-  x.arrears = {
-    standing: unpaid.standing - desert.standing > 0 ? Math.min(x.arrears.standing, unpaid.standing - desert.standing) + (unpaid.standing - desert.standing > x.arrears.standing ? 0 : 0) || unpaid.standing - desert.standing : 0,
-    levies: unpaid.levies - desert.levies,
-  };
+  // Men still unpaid carry over; next month they desert (after the grace months).
+  x.arrears = { standing: unpaid.standing - desert.standing, levies: unpaid.levies - desert.levies };
   return { domain: x, events };
 }
 

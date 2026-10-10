@@ -74,6 +74,9 @@ ANSWER WITH JSON ONLY:
     {"kind":"deed","deed":"standard|first_over_wall|saved_officer|scouting|objective|won|low_losses|withdrawal|steady_morale|supply_kept|disobeyed_paid_off|disobeyed_failed|negotiation|intelligence|governance|civilians","amount":<only for negotiation/intelligence/civilians>,"reason":"what Li did and who saw it"},
     {"kind":"promotion","reason":"why a post is free now (an officer fell, a new unit, a reward ceremony)","sponsor":"<id of a superior, needed from Sanbyakunin-shō up>"},
     {"kind":"serve","kingdom":"kurogane|suiren|hayate|ushio|takane|tatara|kitakaze"},
+    {"kind":"land","koku":<size>,"name":"the land's name","reason":"who grants it and why (land only from Sanbyakunin-shō up)"},
+    {"kind":"project","project":"watchtower|barracks|farmland|market|roads|smithy|walls|school|shrine"},
+    {"kind":"domain","tax":<40..60>,"manager":"<id of who runs the land, or li>","standing":<men under arms>,"relief":true|false,"maintain":true|false},
     {"kind":"battle","name":"the battle's name","place":"where","sector":"left|center|right (where Li's unit stands)","ally":[{"sector":"left|center|right|reserve","name":"unit","commander":"name","lea":<0..100>,"quality":"levy|ashigaru|veteran|elite","men":<number>,"cavalry":<0..1>,"ground":<0..0.6 high ground or walls>}],"enemy":[same shape]}
   ],
   "fight": null or {"foe":"who","rank":"F|E|D|C|B|A (how strong he looks)","look":"what Li sees","officer":"Gochō|Kogashira|null","deadly":true,"witnessedEnemy":true,"place":"where"},

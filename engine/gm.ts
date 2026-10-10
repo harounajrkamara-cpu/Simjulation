@@ -8,6 +8,7 @@ import { storyWindow } from './recaps';
 import { careerText, deedDrafts, promotionDrafts, serveDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
 import { battleClearDrafts, battleStartDrafts, battleText } from './gm-battle';
+import { domainMonthDrafts, domainOrderDrafts, domainText, landDrafts, projectDrafts } from './gm-domain';
 import { opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
 import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
@@ -82,7 +83,11 @@ export type GmChange =
   | { kind: 'promotion'; reason: string; sponsor?: string }
   | { kind: 'serve'; kingdom: string }
   /** Armies meet (engine/gm-battle.ts): Claude sets the field, the code runs the phases with the player's orders. */
-  | { kind: 'battle'; name: string; place?: string; sector?: string; ally: unknown[]; enemy: unknown[] };
+  | { kind: 'battle'; name: string; place?: string; sector?: string; ally: unknown[]; enemy: unknown[] }
+  /** Li's land (engine/gm-domain.ts): a grant, a project, big orders. */
+  | { kind: 'land'; koku: number; name?: string; reason?: string }
+  | { kind: 'project'; project: string }
+  | { kind: 'domain'; tax?: number; manager?: string; standing?: number; relief?: boolean; maintain?: boolean };
 
 /** Claude's answer to the player's "Something's wrong" report. */
 export interface GmFixProposal {
@@ -299,6 +304,7 @@ export function gmMemoryText(s: GameState): string {
     `Merit: combat ${has(s, 'merit_combat')}, in Kurogane service ${has(s, 'merit_service')} of ${MERIT_FOR_FREEDOM}. In the Hagiwara levy: ${inService(s) ? 'yes' : 'no'}.`,
     careerText(s),
     stageText(s),
+    domainText(s),
     battleText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
     `FREEDOM ROUTES:\n${freedomRoutes.map((x) => `- ${x}`).join('\n')}`,
@@ -436,6 +442,9 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
   const newPeople = new Set<string>();
   let deeds = 0;
   const pendingMerit: Record<string, number> = {};
+  // Land changes in one scene build on each other.
+  let land = s.domain;
+  const trackLand = (ds: Draft[]) => { for (const d of ds) if (d.type === 'domain') land = (d.data as { domain: GameState['domain'] }).domain; return ds; };
   const worstWound = Math.max(c.wound, ...changes.filter((x) => x && x.kind === 'wound').map((x) => Math.min(GM_LIMITS.maxWound, num((x as { level?: unknown }).level))));
 
   for (const ch of changes) {
@@ -554,6 +563,15 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       case 'battle':
         drafts.push(...battleStartDrafts(s, x, notes));
         break;
+      case 'land':
+        drafts.push(...trackLand(landDrafts(s, x, notes, land)));
+        break;
+      case 'project':
+        drafts.push(...trackLand(projectDrafts(s, x, notes, land)));
+        break;
+      case 'domain':
+        drafts.push(...trackLand(domainOrderDrafts(s, x, notes, land)));
+        break;
       default:
         notes.push(`unknown change "${String(x.kind)}" ignored`);
     }
@@ -656,6 +674,8 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
     if (wound !== c.wound || left !== c.healDays) out.push({ type: 'wound', fact: wound < c.wound ? (wound === 0 ? 'Li\'s wound has healed' : 'Li\'s wound is better') : 'healing', visible: wound < c.wound, data: { char: c.id, wound, healDays: left } });
     if (c.fatigue > 0) out.push({ type: 'fatigue', fact: 'Li is rested', visible: false, data: { char: c.id, value: 0 } });
   }
+  // Li's land runs on by itself through every month that ends in these days.
+  out.push(...domainMonthDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.
   const later = part && PARTS.indexOf(part) > PARTS.indexOf(s.date.part);
   const to = dateFromIndex(today(s) + n, n > 0 ? part ?? 'morning' : later ? part! : s.date.part);

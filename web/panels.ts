@@ -8,6 +8,7 @@ import { visibleOpinion } from '../engine/relations';
 import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '../engine/rules';
 import { GameState, STAT_KEYS } from '../engine/types';
 import { STANCE_LABEL, Stance, publicWorld } from '../engine/world-public';
+import { domainLines } from '../engine/gm-domain';
 import { WORLD_CSS, liPoint, worldSvg } from './world-map';
 
 // The war chronicle's tabs and side panel (Game Experience ch. 3, 6). Only what Li can know is shown.
@@ -126,6 +127,7 @@ export function liPage(s: GameState): string {
     <h2 class="label">Fighting styles</h2><table class="table">${styles}</table>
     <h2 class="label">Skills</h2><table class="table">${skills}</table>
     <h2 class="label">Training this season</h2><p>${esc(season)}</p>
+    ${s.domain ? `<h2 class="label">Li's land</h2><ul class="chronicle">${domainLines(s).map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}
     <h2 class="label">Traits</h2><p>${esc(c.traits.join(' · '))}</p>
     <div class="goals">${goalsHtml(s)}</div>`;
 }

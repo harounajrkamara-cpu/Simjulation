@@ -10,6 +10,7 @@ import { GmFixProposal, GmPlay, gmChapter, gmFix, gmSkip, gmTurn } from '../ai/g
 import { CHILDHOOD, TIME_JUMP, beginLife } from '../engine/prologue';
 import { BattleState, MAX_PHASES, Order, battleView, ordersFor } from '../engine/battle';
 import { battlePhase, battleToEnd } from '../engine/gm-battle';
+import { domainLines } from '../engine/gm-domain';
 import { changesLine, duelPanel, growthSnapshot, noticeable, progressChips } from '../engine/render';
 import { GameEvent } from '../engine/types';
 import { lastPeakDay, phase as directorPhase } from '../engine/director';
@@ -198,6 +199,8 @@ function refresh() {
   document.querySelector('.scene')!.classList.toggle('day', sc.day);
   $('side-li').innerHTML = liCard(state);
   $('side-grow').innerHTML = growthHtml(state);
+  $('side-land').hidden = !state.domain;
+  $('side-land-list').innerHTML = domainLines(state).map((l) => `<li>${esc(l)}</li>`).join('');
   $('side-map').innerHTML = mapSvg(state);
   $('chronicle').innerHTML = chronicle(state);
   $('goals').innerHTML = goalsHtml(state);
