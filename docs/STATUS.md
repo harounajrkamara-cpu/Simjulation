@@ -64,7 +64,10 @@ Big worldbuilding round:
 - Decided: **no firearms** in this world.
 Then: numbers sheet → build stage 1.
 
+- **Narrator (Oct 10):** the story can be read aloud (header button "Narrator"). Default voice is **George**: the Kokoro-82M AI voice (`bm_george`) running on the graphics card (WebGPU) in a worker (`web/voice-ai.ts`). The first use downloads ~330 MB once. Without WebGPU, or if the page blocks it, the browser voice reads and the panel says why. Films use pre-rendered George lines (`web/films/voice-lines.ts`). Works in the local dev page; **still to check on the claude.ai page** (the owner presses Test there).
+
 ## Open issues
+- Security tradeoff (accepted for now): George's code is loaded at runtime from jsdelivr (`kokoro-js@1.2.1`, pinned) and the model from Hugging Face. Safer later: bundle kokoro-js into the build and pin the model revision.
 - Old Google key: blanked in `legacy/server.ts` and **revoked by the owner (Oct 5)**; it remains in `main`'s first commit (harmless now).
 - Old app code (`src/`, `server.ts`) predates the World Bible and will be rebuilt.
 
