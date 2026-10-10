@@ -82,8 +82,8 @@ export function opening(): FilmSpec {
       { dur: 5000, caption: 'Seven Wardens crowned themselves. Seven kingdoms.' },
       { dur: 5000, caption: 'A hundred years of war.', cues: [{ at: 300, fn: () => drumsFar(4.5) }] },
       { dur: 7000, caption: 'In Suiren a peasant\'s son rose with two swords. They called him the Twin Demon.' },
-      { dur: 4500, caption: 'In Year 95 he fell on a night road. "Kurogane raiders," the songs say.' },
-      { dur: 6000 },
+      { dur: 7000, caption: 'In Year 95 he fell on a night road. "Kurogane raiders," the songs say.' },
+      { dur: 5000 },
       { dur: 6000, speak: "One boy. Seven kingdoms at war. A father's name he must not say.", cues: [{ at: 400, fn: () => shakuhachi(4.5) }] },
     ],
   };

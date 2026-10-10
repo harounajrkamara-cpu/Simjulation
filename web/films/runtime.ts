@@ -1,5 +1,6 @@
 import { esc } from './fx';
-import { Playing, isMuted, setMuted, unlockSound } from './sound';
+import { Playing, isMuted, playClip, setMuted, unlockSound } from './sound';
+import { VOICE_LINES } from './voice-lines';
 import { narrate } from '../narrator';
 
 // The film runtime (docs/FILMS.md, Build system). One overlay; a film is a list of shots with durations. The runtime
@@ -71,12 +72,14 @@ export function play(spec: FilmSpec): Promise<void> {
   let k = -1;
   let timer: number | undefined;
   const cueTimers: number[] = [];
+  let voice: Playing | undefined;
   return new Promise((done) => {
     const clearCues = () => { while (cueTimers.length) clearTimeout(cueTimers.pop()); };
     const end = () => {
       clearTimeout(timer);
       clearCues();
       ambient?.stop();
+      voice?.stop();
       document.removeEventListener('keydown', onKey);
       el.classList.add('is-ending');
       setTimeout(() => { el.hidden = true; el.className = 'film'; el.innerHTML = ''; done(); }, 350);
@@ -89,7 +92,11 @@ export function play(spec: FilmSpec): Promise<void> {
       el.dataset.shot = String(n + 1);
       caption.textContent = s.caption ?? '';
       caption.classList.toggle('is-on', !!s.caption);
-      if (s.speak ?? s.caption) narrate((s.speak ?? s.caption)!);
+      // George's recorded line when there is one (films), otherwise the narrator reads it (when it is on).
+      voice?.stop();
+      const line = s.speak ?? s.caption;
+      if (line && VOICE_LINES[line]) voice = playClip(VOICE_LINES[line]);
+      else if (line) narrate(line);
       for (const c of s.cues ?? []) cueTimers.push(window.setTimeout(c.fn, c.at));
       const last = n === spec.shots.length - 1;
       if (!(last && spec.waitAtEnd)) timer = window.setTimeout(() => (last ? end() : show(n + 1)), s.dur);

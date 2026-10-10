@@ -236,3 +236,23 @@ export function warCry(seconds = 2) {
   n.start(t);
   n.stop(t + seconds + 0.05);
 }
+
+/** A recorded voice line (base64 WAV), played over the film. Returns a handle so a skip can cut it off. */
+export function playClip(b64: string): Playing {
+  if (!ctx || !master) return none;
+  const c = ctx;
+  const out = master;
+  let src: AudioBufferSourceNode | null = null;
+  let stopped = false;
+  const bytes = Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0));
+  c.decodeAudioData(bytes.buffer).then((buf) => {
+    if (stopped) return;
+    src = c.createBufferSource();
+    src.buffer = buf;
+    const g = c.createGain();
+    g.gain.value = 1.25; // the voice sits above the wind and drums
+    src.connect(g).connect(out);
+    src.start();
+  }).catch(() => undefined);
+  return { stop() { stopped = true; try { src?.stop(); } catch { /* ended */ } } };
+}
