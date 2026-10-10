@@ -18,6 +18,8 @@ import { WOUND_LABEL } from '../engine/rules';
 import { PROLOGUE, Slide } from '../engine/content';
 import { GameState } from '../engine/types';
 import { pageAdapter, pageDownload } from './ai-page';
+import * as Film from './films/runtime';
+import * as Scenes from './films/scenes';
 import { loadFromCloud, saveToCloud } from './cloud-save';
 import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
 import {
@@ -266,7 +268,7 @@ async function gmStep(text?: string, said = text) {
     turn.querySelector('.wet')?.remove();
     await paintPlay(turn, r, said, before, metBefore, true, fine);
     refresh();
-    await afterPlays(r.events, r.turn.scene, seasonBefore, statusBefore, !!r.duelId);
+    await afterPlays(r.events, r.turn.scene, seasonBefore, statusBefore, !!r.duelId, said);
   } catch (e) {
     turn.querySelector('.wet')?.remove();
     if (errorCode(e) === 'bad_answer') turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc((e as Error).message)} Try again.</p>`);
@@ -293,8 +295,43 @@ async function paintPlay(turn: HTMLElement, r: GmPlay, said: string | undefined,
   if (why.length) turn.insertAdjacentHTML('beforeend', `<details class="why"><summary>Why?</summary><p>${esc(why.join(' '))}</p></details>`);
 }
 
+/**
+ * The short films (docs/FILMS.md) for the big moments in these events, in story order: the Zone, the name, a death,
+ * a promotion, the first battle. Each plays once, when it happens.
+ */
+async function filmsFor(events: GameEvent[], said?: string) {
+  const knows = (key: string) => events.some((e) => e.type === 'knowledge' && (e.data as { key?: string }).key === key);
+  if (knows('shinken_no_ryu')) await Film.play(Scenes.zone());
+  if (knows('said_hattori')) {
+    const words = (said ?? '').replace(/\([^)]*\)/g, '').trim();
+    const shout = words.match(/[^.!?]*hattori[^.!?]*[.!?]?/i)?.[0].trim() || 'I am Li Hattori';
+    await Film.play(Scenes.nameReveal({ words: shout.replace(/^["']|["']$/g, '').slice(0, 60) }));
+  }
+  for (const e of events.filter((x) => x.type === 'status')) {
+    const d = e.data as { char: string; alive?: boolean; role?: string };
+    if (d.alive === false && d.char !== state.liId && met(state, d.char)) {
+      await Film.play(Scenes.death({ name: state.characters[d.char]?.name ?? d.char, line: e.fact }));
+    }
+  }
+  const promo = events.find((e) => e.type === 'status' && /promoted to/.test(e.fact));
+  if (promo) {
+    const label = promo.fact.replace(/^Li is promoted to /, '');
+    const m = label.match(/^(.*?) \((.*)\)$/);
+    await Film.play(Scenes.promotion({ rank: m?.[1] ?? label, men: m ? `${m[2]} men` : '', line: promo.journal ?? '' }));
+  }
+  const start = events.find((e) => e.type === 'battle' && (e.data as { battle?: { phase?: number } }).battle?.phase === 0);
+  if (start) {
+    const b = (start.data as { battle: { name: string; units: { side: string; start: number }[] } }).battle;
+    const sum = (side: string) => b.units.filter((u) => u.side === side).reduce((s, u) => s + u.start, 0);
+    const first = state.events.filter((e) => e.type === 'battle' && (e.data as { battle?: { phase?: number } }).battle?.phase === 0).length === 1;
+    if (first) await Film.play(Scenes.firstBattle({ name: b.name, numbers: `About ${sum('ally').toLocaleString('en-US')} against about ${sum('enemy').toLocaleString('en-US')}` }));
+    else await titleCard('Battle', b.name);
+  }
+}
+
 /** After Game Master scenes: title cards, a freedom legend, the start of a fight. */
-async function afterPlays(events: GameEvent[], scene: string, seasonBefore: string, statusBefore: string, fight: boolean) {
+async function afterPlays(events: GameEvent[], scene: string, seasonBefore: string, statusBefore: string, fight: boolean, said?: string) {
+  await filmsFor(events, said);
   await bigMoments(events, seasonBefore);
   if (li(state).status !== statusBefore) {
     const how = state.knowledge.includes('hunted') ? 'by his own feet, and hunted' : 'his paper burned';
@@ -311,7 +348,8 @@ async function maybeChapter() {
     if (!ev.length) return;
     persist();
     refresh();
-    await titleCard(`Chapter ${state.gm?.chapters?.length ?? 1} closes`, (ev[0].data as { title: string }).title);
+    const ch = ev[0].data as { title: string; text: string };
+    await Film.play(Scenes.chapterEnd({ n: state.gm?.chapters?.length ?? 1, title: ch.title, text: ch.text }));
   } catch { /* the chapter closes next time */ }
 }
 
@@ -816,10 +854,11 @@ $('begin').onclick = () => {
  * and Li's first journal lines, never the outcome), "Five years later", then the new life begins with those memories:
  * Game Master mode when Claude is here, the classic chronicle otherwise. Skip keeps the choices made so far, canon for the rest.
  */
-function playPrologue() {
+async function playPrologue() {
+  await Film.play(Scenes.opening()); // the opening film (docs/FILMS.md), then the playable night
   const box = $('prologue');
   type Step = { slide: Slide } | { scene: number };
-  const steps: Step[] = [...PROLOGUE.map((slide) => ({ slide })), ...CHILDHOOD.map((_, scene) => ({ scene })), ...TIME_JUMP.map((slide) => ({ slide }))];
+  const steps: Step[] = [...CHILDHOOD.map((_, scene) => ({ scene })), ...TIME_JUMP.map((slide) => ({ slide }))];
   const picks: (number | undefined)[] = [];
   let i = 0;
   let after: string | undefined; // what happened after a pick, shown before moving on
@@ -1006,3 +1045,5 @@ $('loadsave').onclick = () => {
 start();
 setStoryteller();
 pageAdapter().then((a) => { ai = a; setStoryteller(); }).catch(() => setStoryteller()).finally(() => checkCloud());
+// For checking the films by hand (browser console): __films.Film.play(__films.Scenes.zone())
+(window as unknown as { __films: unknown }).__films = { Film, Scenes };

@@ -1,0 +1,229 @@
+/* Films (docs/FILMS.md): one anime style — Kingdom framing, sumi-e ink silhouettes, dark palette with seal red and gold.
+   Motion: transform, opacity, stroke-dashoffset, filter and clip-path only. A layer belongs to a shot by its class
+   .sh1 … .sh8 and starts its animation when the overlay's data-shot reaches it. */
+
+.film { position: fixed; inset: 0; z-index: 30; overflow: hidden; background: #08090B; color: var(--paper); cursor: pointer; }
+.film[hidden] { display: none; }
+.film.is-ending { animation: fl-out .35s ease-in forwards; }
+@keyframes fl-out { to { opacity: 0; } }
+.fl-stage { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Shot membership: hidden until its shot, a soft dissolve between shots. */
+.film .sh1, .film .sh2, .film .sh3, .film .sh4, .film .sh5, .film .sh6, .film .sh7, .film .sh8 { opacity: 0; transition: opacity .6s ease; }
+.film[data-shot="1"] .sh1, .film[data-shot="2"] .sh2, .film[data-shot="3"] .sh3, .film[data-shot="4"] .sh4,
+.film[data-shot="5"] .sh5, .film[data-shot="6"] .sh6, .film[data-shot="7"] .sh7, .film[data-shot="8"] .sh8 { opacity: 1; }
+
+/* Ink */
+.fl-ink { fill: #08090B; }
+.fl-ridge--far { fill: #1E2229; }
+.fl-ridge--mid { fill: #12151A; }
+.fl-parallax .fl-ridge--far { animation: fl-drift-far 12s linear infinite alternate; }
+.fl-parallax .fl-ridge--mid { animation: fl-drift-mid 12s linear infinite alternate; }
+@keyframes fl-drift-far { to { transform: translateX(-40px); } }
+@keyframes fl-drift-mid { to { transform: translateX(-90px); } }
+
+/* Shared effects */
+.fl-flash { position: absolute; inset: 0; background: #F3EBD8; opacity: 0; pointer-events: none; }
+.film.is-impact .fl-flash { animation: fl-flash .14s steps(2) forwards; }
+@keyframes fl-flash { 0% { opacity: .9; } 100% { opacity: 0; } }
+.film.is-impact .fl-stage, .film.is-impact .fl-titlecard { animation: fl-shake .24s steps(4); }
+@keyframes fl-shake { 0% { transform: translate(0, 0); } 25% { transform: translate(-8px, 4px); } 50% { transform: translate(6px, -6px); } 75% { transform: translate(-4px, 2px); } 100% { transform: translate(0, 0); } }
+.film.is-impact .fl-stage * { animation-play-state: paused !important; } /* the impact freeze */
+.fl-letterbox { position: absolute; left: 0; right: 0; height: 9vh; background: #000; pointer-events: none; }
+.fl-letterbox--top { top: 0; } .fl-letterbox--bottom { bottom: 0; }
+.film--name[data-shot="1"] .fl-letterbox, .film--name[data-shot="2"] .fl-letterbox, .film--name[data-shot="3"] .fl-letterbox { animation: fl-letterbox .6s cubic-bezier(.4, 0, .2, 1) forwards; }
+@keyframes fl-letterbox { to { height: 14vh; } }
+.fl-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, .75) 100%); }
+.fl-speed line { stroke: #E9E0CA; stroke-width: 2; stroke-dasharray: 60 900; opacity: .55; animation: fl-rush .35s linear infinite; }
+@keyframes fl-rush { from { stroke-dashoffset: 960; } to { stroke-dashoffset: 0; } }
+.fl-speed--in line { animation-direction: reverse; opacity: .3; }
+
+/* Particles */
+.fl-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.fl-p { position: absolute; top: 0; border-radius: 50%; animation-timing-function: linear; animation-iteration-count: infinite; }
+.fl-p--ember { top: auto; bottom: -10px; background: #E0876F; box-shadow: 0 0 6px #C8452F; animation-name: fl-rise; }
+@keyframes fl-rise { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(var(--dx), -100vh); opacity: 0; } }
+.fl-p--snow { top: -10px; background: #E9E0CA; opacity: .75; animation-name: fl-fall; }
+.fl-p--snow.near { filter: blur(1.5px); opacity: .9; transform: scale(1.8); }
+@keyframes fl-fall { to { transform: translate(var(--dx), 105vh); } }
+.fl-p--dust { top: 30%; background: #C7BFAB; opacity: .5; animation-name: fl-fall; animation-play-state: paused; } /* time stands still */
+
+/* Brush text and seal */
+.fl-titlecard { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 0 6vw; text-align: center; pointer-events: none; }
+.fl-brush { position: relative; font: 800 clamp(30px, 4.6vw, 64px)/1.15 var(--display); letter-spacing: .03em; color: var(--paper); }
+.fl-brush span { display: inline-block; clip-path: inset(0 100% 0 0); }
+.film[data-shot] .fl-brush span { animation: fl-paint .55s cubic-bezier(.6, 0, .2, 1) forwards; }
+@keyframes fl-paint { to { clip-path: inset(0 0 0 0); } }
+.fl-brush-stroke { display: block; width: 100%; height: 18px; margin-top: 4px; }
+.fl-brush-stroke path { fill: none; stroke: var(--seal); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 620; stroke-dashoffset: 620; }
+.film[data-shot] .fl-brush-stroke path { animation: fl-draw .6s ease-out forwards; }
+@keyframes fl-draw { to { stroke-dashoffset: 0; } }
+.fl-brush--sub { font-size: clamp(22px, 3vw, 40px); font-weight: 600; color: var(--paper-2); }
+.fl-brush--shout { font-size: clamp(44px, 8vw, 120px); text-transform: uppercase; letter-spacing: .05em; }
+.fl-brush--rank { font-size: clamp(34px, 5vw, 64px); }
+.fl-seal { display: inline-grid; place-items: center; width: 64px; height: 64px; background: var(--seal); color: var(--seal-ink); font: 800 32px var(--display); border-radius: 4px; opacity: 0; transform: scale(1.5) rotate(-6deg); }
+.film[data-shot] .fl-seal { animation: fl-stamp .18s cubic-bezier(.2, 1.6, .4, 1) forwards; }
+@keyframes fl-stamp { to { opacity: 1; transform: scale(1) rotate(-4deg); } }
+
+/* Caption and controls */
+.fl-caption { position: absolute; left: 50%; bottom: 12vh; width: min(900px, 86vw); margin: 0; transform: translateX(-50%); text-align: center; font: italic 400 clamp(18px, 1.9vw, 26px)/1.5 var(--body); color: var(--paper); text-shadow: 0 2px 12px #000; opacity: 0; }
+.fl-caption.is-on { animation: fl-in .8s ease-out .3s forwards; }
+@keyframes fl-in { to { opacity: 1; } }
+.fl-controls { position: absolute; top: 18px; right: 18px; display: flex; gap: 8px; z-index: 2; }
+.fl-controls button { min-height: 44px; padding: 0 16px; background: rgba(8, 9, 11, .6); border: 1px solid var(--line-2); border-radius: 4px; color: var(--paper-2); font-size: 15px; cursor: pointer; }
+.fl-controls button:hover, .fl-controls button:focus-visible { border-color: var(--gold); color: var(--paper); }
+.fl-hint { position: absolute; left: 18px; bottom: 14px; margin: 0; font-size: 13px; color: var(--faded); }
+
+/* 1. Opening */
+.film--opening[data-shot="1"] .fl-stage { animation: fl-push 5s cubic-bezier(.2, 0, .2, 1) forwards; }
+@keyframes fl-push { from { transform: scale(1); } to { transform: scale(1.08); } }
+.fl-sky--fire, .fl-sky--night { opacity: 0; }
+.fl-flag { fill: var(--seal); }
+.fl-flame { transform-box: fill-box; transform-origin: bottom; }
+.fl-flame-out { fill: #C8452F; opacity: .9; }
+.fl-flame-in { fill: #C9A55E; opacity: .8; }
+.fl-glow { fill: #C8452F; opacity: 0; filter: blur(40px); }
+.film--opening[data-shot="2"] .fl-glow { opacity: .45; }
+.film--opening[data-shot="2"] .fl-flame { animation: fl-flicker .8s ease-in-out infinite alternate; }
+@keyframes fl-flicker { 0% { transform: scaleY(.85); } 100% { transform: scaleY(1.2); } }
+.film--opening[data-shot="2"] .fl-city .fl-ink { fill: #050506; }
+.fl-land { fill: #2A2D33; stroke: #8E8776; stroke-width: 2; }
+.fl-region { fill: var(--gold); fill-opacity: 0; stroke: #E9E0CA; stroke-opacity: .25; }
+.film--opening[data-shot="3"] .fl-region { animation: fl-bleed .9s ease-out forwards; }
+.fl-region:nth-child(odd) { fill: var(--seal); }
+@keyframes fl-bleed { to { fill-opacity: .45; } }
+.fl-banner { fill: var(--paper); transform-box: fill-box; }
+.film--opening[data-shot="3"] .fl-banner { animation: fl-fly 1.6s cubic-bezier(.5, 0, .2, 1) forwards; }
+@keyframes fl-fly { to { transform: translate(var(--tx), var(--ty)) rotate(var(--r)); } }
+.fl-river { fill: none; stroke: #4E6A86; stroke-width: 22; opacity: .8; }
+.fl-army { color: #08090B; fill: #08090B; }
+.fl-army--b { fill: #2A1210; color: #2A1210; }
+.fl-rider { fill: #08090B; }
+.film--opening[data-shot="4"] .fl-rider { animation: fl-ride 4.8s linear forwards; }
+@keyframes fl-ride { from { transform: translateX(0); } to { transform: translateX(1900px); } }
+.film--opening[data-shot="4"] .gallop { animation: fl-gallop .32s steps(2) infinite; }
+@keyframes fl-gallop { 50% { transform: translateY(-4px); } }
+.fl-demon { transform-origin: 50% 60%; }
+.film--opening[data-shot="5"] .fl-demon { animation: fl-kenburns 7s ease-out forwards; }
+@keyframes fl-kenburns { from { transform: scale(1.02); } to { transform: scale(1.14) translate(-1%, -1%); } }
+.fl-river-far { fill: #4E6A86; opacity: .55; }
+.fl-tiny-banner { fill: var(--seal); opacity: .7; }
+.fl-hill { fill: #050506; }
+.fl-coat { fill: #08090B; }
+.fl-sword { fill: none; stroke: #C7BFAB; stroke-width: 5; stroke-linecap: round; }
+.fl-sash { fill: var(--seal); }
+.fl-hair { fill: none; stroke: #08090B; stroke-width: 6; stroke-linecap: round; }
+.fl-cloth { fill: #08090B; transform-box: fill-box; transform-origin: right center; }
+.film--opening[data-shot="5"] .fl-cloth { animation: fl-flutter 1.1s ease-in-out infinite alternate; }
+.film--opening[data-shot="5"] .fl-cloth--2 { animation-duration: .8s; }
+@keyframes fl-flutter { to { transform: skewY(6deg) scaleX(1.08); } }
+@keyframes fl-sway { to { transform: skewX(-8deg); } }
+.fl-blade { fill: none; stroke: #C7BFAB; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 800; stroke-dashoffset: 800; }
+.film--opening[data-shot="6"] .fl-blade { animation: fl-draw 1.3s ease-out forwards; }
+.film--opening[data-shot="6"] .fl-blade + .fl-blade { animation-delay: .4s; }
+.fl-guard { fill: none; stroke: var(--gold); stroke-width: 8; opacity: 0; }
+.film--opening[data-shot="6"] .fl-guard { animation: fl-in .5s ease-out 1.6s forwards; }
+.fl-slope { fill: #E9E0CA; opacity: .16; }
+.fl-cliff { fill: #050506; }
+.fl-lantern-glow { fill: #C8452F; opacity: .25; filter: blur(30px); }
+.fl-gusts path { fill: none; stroke: #E9E0CA; stroke-width: 2; stroke-linecap: round; opacity: .35; stroke-dasharray: 80 400; }
+.film--opening[data-shot="7"] .fl-gusts path { animation: fl-gust 1.6s linear infinite; }
+@keyframes fl-gust { from { stroke-dashoffset: 480; } to { stroke-dashoffset: 0; } }
+.fl-slope-line { fill: none; stroke: #A79F8C; stroke-width: 3; opacity: .4; }
+.fl-pass .fl-ink { fill: #050506; }
+.fl-lantern { fill: #C8452F; filter: drop-shadow(0 0 14px #E0876F); }
+.film--opening[data-shot="7"] .fl-pass { animation: fl-kenburns 6s ease-out forwards; transform-origin: 55% 45%; }
+.film--opening .fl-titlecard .fl-brush--sub span { animation-delay: 1.4s; }
+
+/* 2. First battle */
+.fl-mist { opacity: .7; animation: fl-drift-mid 12s linear infinite alternate; }
+.fl-foe { fill: #2A1210; color: #2A1210; }
+.fl-ally { fill: #08090B; color: #08090B; }
+.fl-li { fill: #050506; color: #050506; }
+.film--battle[data-shot="2"] .fl-enemy { animation: fl-advance 2.5s ease-in forwards; transform-origin: 50% 70%; }
+@keyframes fl-advance { to { transform: translateY(30px) scale(1.06); } }
+/* the clash: both lines meet, then the impact freezes it */
+.film--battle[data-shot="5"] .fl-enemy { transform: translateY(70px) scale(1.12); transform-origin: 50% 70%; }
+.film--battle[data-shot="5"] .fl-allies { transform: translateY(-60px); }
+.film--battle[data-shot="2"] .fl-foe .spear { animation: fl-lower .8s ease-in forwards; }
+@keyframes fl-lower { to { transform: rotate(-35deg); } }
+.fl-shaft { fill: none; stroke: #5A4A2A; stroke-width: 26; stroke-linecap: round; }
+.fl-fist { fill: #08090B; stroke: #2C3038; stroke-width: 3; }
+.film--battle[data-shot="4"] .fl-fist { animation: fl-grip .6s ease-in 0.4s forwards; transform-box: fill-box; transform-origin: center; }
+@keyframes fl-grip { to { transform: scale(.94); } }
+.fl-sweat { fill: #A79F8C; opacity: 0; }
+.film--battle[data-shot="4"] .fl-sweat { animation: fl-drop 1.4s ease-in .5s forwards; }
+@keyframes fl-drop { 0% { opacity: .9; transform: translateY(0); } 100% { opacity: 0; transform: translateY(80px); } }
+.fl-numbers { margin: 0; font: italic 400 clamp(18px, 2vw, 26px) var(--body); color: var(--paper-2); }
+.film--battle .fl-titlecard { background: rgba(8, 9, 11, .55); }
+
+/* 3. The Zone */
+.film--zone[data-shot="1"] .fl-gray { animation: fl-drain 1.4s ease-in forwards; }
+.film--zone[data-shot="2"] .fl-gray, .film--zone[data-shot="4"] .fl-gray, .film--zone[data-shot="3"] .fl-stage { filter: grayscale(1) contrast(1.3); }
+@keyframes fl-drain { to { filter: grayscale(1) contrast(1.3); } }
+.film--zone[data-shot="2"] .fl-eye { animation: fl-beat .9s ease-out; }
+@keyframes fl-beat { 0%, 100% { transform: translate(800px, 450px) scale(1); } 15% { transform: translate(800px, 450px) scale(1.04); } }
+.fl-eye-shape { fill: #C7BFAB; }
+.fl-streaks line { stroke: #0E1014; stroke-width: 3; opacity: .55; }
+.fl-lash { fill: none; stroke: #050506; stroke-width: 26; stroke-linecap: round; }
+.fl-iris { fill: #2A2D33; }
+.fl-pupil { fill: #050506; }
+.fl-glint { fill: #F3EBD8; }
+.fl-iris { fill: #3A3F49; }
+.fl-lid { fill: #08090B; }
+.film--zone[data-shot="1"] .fl-lid, .film--zone[data-shot="2"] .fl-lid { transform: translateY(70px); }
+.film--zone[data-shot="4"] .fl-lid { animation: fl-open .35s cubic-bezier(.2, 1.2, .4, 1) forwards; transform: translateY(70px); }
+@keyframes fl-open { to { transform: translateY(-30px); } }
+.fl-eye .fl-hair { stroke: #050506; stroke-width: 22; }
+.fl-ring { fill: none; stroke: var(--seal); stroke-width: 10; stroke-dasharray: 943; stroke-dashoffset: 943; }
+.film--zone[data-shot="4"] .fl-ring { animation: fl-draw .5s ease-out .15s forwards, fl-glow .6s ease-out .6s forwards; }
+@keyframes fl-glow { to { filter: drop-shadow(0 0 18px #C8452F); } }
+.fl-blade-frozen { stroke: #2C3038; stroke-width: 34; stroke-linecap: round; }
+.fl-blade-edge { stroke: #E9E0CA; stroke-width: 4; stroke-linecap: round; }
+.fl-kanji { font: 800 300px var(--display); fill: var(--seal); opacity: .28; }
+.film--zone[data-shot="5"] .fl-kanji { animation: fl-slam .4s cubic-bezier(.2, 1.4, .4, 1) both; transform-box: fill-box; transform-origin: center; }
+@keyframes fl-slam { from { transform: scale(1.3); opacity: 0; } to { transform: scale(1); opacity: .28; } }
+.film--zone .fl-brush--title { color: var(--paper); text-shadow: 0 0 24px #A8361F; }
+
+/* 4. The name */
+.fl-turner { fill: #08090B; transform-box: fill-box; transform-origin: center; }
+.film--name[data-shot="1"] .fl-turner { animation: fl-turn .3s ease-in-out forwards; animation-delay: inherit; }
+@keyframes fl-turn { to { transform: scaleX(-1); } }
+.fl-li-close .fl-ink { fill: #050506; }
+.fl-strands path { fill: none; stroke: #050506; stroke-width: 12; stroke-linecap: round; transform-box: fill-box; }
+.film--name[data-shot="2"] .fl-strands path { animation: fl-sway 1.2s ease-in-out infinite alternate; }
+.fl-witness { fill: #12151A; transform-box: fill-box; transform-origin: bottom; }
+.film--name[data-shot="4"] .fl-witness--back { animation: fl-back .8s ease-out forwards; }
+@keyframes fl-back { to { transform: translateY(-10px) scale(.92); } }
+.film--name .fl-titlecard--shout { background: radial-gradient(ellipse at center, rgba(168, 54, 31, .25), transparent 70%); }
+
+/* 5–7. Panels */
+.fl-paper { position: absolute; left: 50%; top: 50%; width: min(620px, 86vw); padding: 36px 40px; transform: translate(-50%, -45%); background: #E9E0CA; color: #171A20; border-radius: 4px; box-shadow: 0 30px 80px rgba(0, 0, 0, .6); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.film[data-shot] .fl-paper { animation: fl-card .45s ease-out forwards; }
+@keyframes fl-card { to { transform: translate(-50%, -50%); } }
+.fl-paper .fl-brush { color: #171A20; }
+.fl-kicker { margin: 0; font: 500 12px var(--body); letter-spacing: .3em; text-transform: uppercase; color: #6F5A34; }
+.fl-men { margin: 0; font: 600 20px var(--display); color: #3A3F49; }
+.fl-line { margin: 0; font: italic 400 17px/1.5 var(--body); color: #3A3F49; }
+.fl-death { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 24px; padding: 0 14vw; }
+.fl-vname { margin: 0; writing-mode: vertical-rl; font: 800 clamp(40px, 6vw, 84px)/1 var(--display); color: var(--paper); letter-spacing: .2em; clip-path: inset(0 0 100% 0); }
+.film--death[data-shot] .fl-vname { animation: fl-down 1.8s ease-in-out .4s forwards; }
+@keyframes fl-down { to { clip-path: inset(0 0 0 0); } }
+.fl-death .fl-line { color: var(--faded); align-self: center; opacity: 0; }
+.film--death[data-shot] .fl-death .fl-line { animation: fl-in 1s ease-out 2s forwards; }
+.film--death .fl-vignette { background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, .9) 100%); }
+.fl-petal { fill: #8E8776; offset-path: path('M1500 -40 C1200 200 900 260 700 460 S300 780 120 960'); offset-distance: 0%; }
+.film--death[data-shot] .fl-petal { animation: fl-petal 4.5s ease-in-out forwards; }
+@keyframes fl-petal { to { offset-distance: 100%; transform: rotate(540deg); } }
+.fl-wipe { fill: none; stroke: #08090B; stroke-width: 1100; stroke-linecap: round; stroke-dasharray: 2000; stroke-dashoffset: 2000; }
+.film--chapter[data-shot] .fl-wipe { animation: fl-draw .9s cubic-bezier(.7, 0, .3, 1) forwards; }
+.film--chapter { background: transparent; }
+.film--chapter .fl-paper { opacity: 0; }
+.film--chapter[data-shot] .fl-paper { animation: fl-card .45s ease-out .8s forwards, fl-in .45s ease-out .8s forwards; }
+.film--card .fl-titlecard, .film--death .fl-caption { display: none; }
+
+/* Calm motion when the reader asks for it: the last frame of each shot, no movement. */
+@media (prefers-reduced-motion: reduce) {
+  .film *, .film { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition: none !important; }
+  .fl-p { display: none; }
+}

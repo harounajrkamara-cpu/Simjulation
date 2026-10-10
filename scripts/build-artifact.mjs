@@ -3,7 +3,7 @@ import { build } from 'esbuild';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 const js = await build({ entryPoints: ['web/main.ts'], bundle: true, format: 'iife', minify: true, write: false, target: 'es2020' });
-const css = readFileSync('web/style.css', 'utf8');
+const css = [readFileSync('web/style.css', 'utf8'), readFileSync('web/films.css', 'utf8')].join('\n');
 const body = readFileSync('web/body.html', 'utf8');
 const page = `<title>Sengoku Soldier</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
