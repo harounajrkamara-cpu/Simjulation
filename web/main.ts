@@ -18,6 +18,7 @@ import { WOUND_LABEL } from '../engine/rules';
 import { PROLOGUE, Slide } from '../engine/content';
 import { GameState } from '../engine/types';
 import { pageAdapter, pageDownload } from './ai-page';
+import { loadFromCloud, saveToCloud } from './cloud-save';
 import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
 import {
   armyPage, chronicle, encyclopediaPage, goalsHtml, growthHtml, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
@@ -544,6 +545,34 @@ const COMMAND = /^(HELP|STATUS|INFOCHAR|RELATIONS|RECAP|LOG|SAVE|LOAD|NEW|WAIT|S
 
 function persist() {
   try { localStorage.setItem(slotKey(slot), JSON.stringify(toSave(state))); localStorage.setItem(SLOT_KEY, String(slot)); } catch { /* storage blocked: the game still runs */ }
+  scheduleCloud();
+}
+
+// ---------- the save in the player's account (web/cloud-save.ts) ----------
+let cloudTimer: number | undefined;
+let cloudNote = 'Saved in this browser only (your account save works on the claude.ai page).';
+/** The account copy follows the browser copy a moment later (many quick turns make one write). */
+function scheduleCloud() {
+  clearTimeout(cloudTimer);
+  const s = state;
+  const n = slot;
+  cloudTimer = window.setTimeout(async () => {
+    const ok = await saveToCloud(n, toSave(s), describe(s));
+    if (ok) cloudNote = `Saved in your claude.ai account too (life ${n}, ${describe(s)}). It continues on any device.`;
+    $('cloudnote').textContent = cloudNote;
+  }, 2000);
+}
+/** At start: when the account holds a longer version of this life (played on another device), continue from it. */
+async function checkCloud() {
+  const c = await loadFromCloud(slot);
+  if (!c || busy || c.save.events.length <= state.events.length) return;
+  try {
+    state = fromSave(c.save);
+    seen = look(state);
+    log.innerHTML = '';
+    show(`Continued from your claude.ai account: ${c.describe}.`);
+    refresh();
+  } catch { /* an older version: the browser save stays */ }
 }
 
 /** Game Master mode outside a fight: Claude runs the turn. */
@@ -922,7 +951,7 @@ newBtn.onclick = () => {
 // Save file: copy or paste the event log as text.
 const box = $('savebox');
 const saveText = $<HTMLTextAreaElement>('savetext');
-$('savebtn').onclick = () => { saveText.value = JSON.stringify(toSave(state)); renderSlots(); box.hidden = false; saveText.focus(); };
+$('savebtn').onclick = () => { saveText.value = JSON.stringify(toSave(state)); renderSlots(); $('cloudnote').textContent = cloudNote; box.hidden = false; saveText.focus(); };
 
 /** One line about the life in a slot (replayed from its save; an old save says so). */
 function slotLine(n: number): string {
@@ -976,4 +1005,4 @@ $('loadsave').onclick = () => {
 
 start();
 setStoryteller();
-pageAdapter().then((a) => { ai = a; setStoryteller(); }).catch(() => setStoryteller());
+pageAdapter().then((a) => { ai = a; setStoryteller(); }).catch(() => setStoryteller()).finally(() => checkCloud());
