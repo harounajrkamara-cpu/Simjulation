@@ -1,6 +1,6 @@
 import { inService } from './campaign';
 import {
-  Bond, CombatDeed, CommandDeed, Deed, KingdomId, MeritLedger, PoliticalDeed, RANK_IDS, RankId, checkPromotion, meritOf, nextRank,
+  Bond, CombatDeed, CommandDeed, Deed, KingdomId, MeritLedger, PoliticalDeed, RANK_IDS, RankId, ceremonyRewardMon, checkPromotion, meritOf, nextRank,
   rankInfo, rankLabel, rankLevel, sizeClassOfRank,
 } from './career';
 import { has, li, today } from './engine';
@@ -106,6 +106,47 @@ export function careerText(s: GameState): string {
     const chk = checkPromotion({ rank: car.rank, merit: car.merit, birth: 'commoner', bond: car.bond, kingdom: car.kingdom, armyMen: ARMY[car.kingdom], vacancy: true });
     lines.push(`Next: ${rankLabel(next)}: score ${chk.score} of ${chk.needed}${chk.blocks.length ? ` (blocked now: ${chk.blocks.map((b) => b.reason).join('; ')})` : ' (ready when a post opens)'}.`);
   }
-  lines.push('Propose deeds Li truly did with witnesses ("deed"), and a promotion only when a post opens or at a reward ceremony ("promotion", naming why the post is free and, from Sanbyakunin-shō up, the sponsor).');
+  const titles = titlesOf(s);
+  if (titles.length) lines.push(`Titles the world gives him: ${titles.map((t) => `"${t}"`).join(', ')}.`);
+  lines.push('Propose deeds Li truly did with witnesses ("deed"), and a promotion only when a post opens or at a reward ceremony ("promotion", naming why the post is free and, from Sanbyakunin-shō up, the sponsor). After a campaign, hold a reward ceremony ("ceremony"); the code pays merit and fills posts. Titles come from deeds ("title").');
   return lines.join('\n');
+}
+
+// ---------- reward ceremonies, titles and fame (World Bible ch. 4, 8; Numbers §7) ----------
+
+const meritTotal = (m: MeritLedger) => m.combat + m.command + m.political;
+
+/**
+ * A reward ceremony after a campaign: 0.1 ryō per merit point earned since the last ceremony (slaves get none, Numbers
+ * §7), and the ceremony fills free posts, so a promotion is tried (Numbers §6: vacancies are filled at ceremonies).
+ */
+export function ceremonyDrafts(s: GameState, x: Record<string, unknown>, notes: string[]): Draft[] {
+  const car = careerOf(s);
+  const total = meritTotal(car.merit);
+  const earned = total - has(s, 'merit_ceremony');
+  if (earned <= 0) { notes.push('no new merit since the last ceremony: Li stands in the crowd'); return []; }
+  const reward = ceremonyRewardMon(earned, car.bond);
+  const out: Draft[] = [{ type: 'flag', fact: 'ceremony held', visible: false, data: { key: 'merit_ceremony', value: total } }];
+  out.push({
+    type: 'story', fact: `Reward ceremony: Li's merit in this campaign is ${earned}.${reward ? '' : ' A slave receives no reward.'}`, visible: true,
+    journal: `At the reward ceremony my merit was counted: ${earned}.${reward ? ` I was given ${reward} mon.` : ''}`, data: { ceremony: true, earned },
+  });
+  if (reward) out.push({ type: 'money', fact: `Li gets ${reward} mon (ceremony reward, 0.1 ryō per merit)`, visible: true, data: { amount: reward } });
+  out.push(...promotionDrafts(s, { reason: 'the reward ceremony fills the posts left open by the campaign', sponsor: x.sponsor }, notes));
+  return out;
+}
+
+/** A title or nickname the world gives Li for a deed (it spreads as rumour; never self-given). */
+export function titleDrafts(s: GameState, x: Record<string, unknown>, notes: string[]): Draft[] {
+  const title = typeof x.title === 'string' ? x.title.trim().slice(0, 50) : '';
+  const reason = typeof x.reason === 'string' ? x.reason.trim().slice(0, 160) : '';
+  if (!title || !reason) { notes.push('a title needs a name and the deed behind it'); return []; }
+  const key = `title_${title.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')}`;
+  if (s.knowledge.includes(key)) return [];
+  return [{ type: 'knowledge', fact: `People call Li "${title}" (${reason})`, visible: true, journal: `They have started to call me "${title}".`, data: { key, title, reason } }];
+}
+
+/** Titles the world gives Li, oldest first. */
+export function titlesOf(s: GameState): string[] {
+  return s.events.flatMap((e) => (e.type === 'knowledge' && typeof (e.data as { title?: unknown }).title === 'string' ? [(e.data as { title: string }).title] : []));
 }

@@ -5,7 +5,7 @@ import { PLACES } from './data';
 import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { storyWindow } from './recaps';
-import { careerText, deedDrafts, promotionDrafts, serveDrafts } from './gm-career';
+import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
 import { battleClearDrafts, battleStartDrafts, battleText } from './gm-battle';
 import { domainMonthDrafts, domainOrderDrafts, domainText, landDrafts, projectDrafts } from './gm-domain';
@@ -81,6 +81,8 @@ export type GmChange =
   /** Career (engine/gm-career.ts): a deed with witnesses, a promotion when a post opens, serving another kingdom. */
   | { kind: 'deed'; deed: string; amount?: number; reason: string }
   | { kind: 'promotion'; reason: string; sponsor?: string }
+  | { kind: 'ceremony'; sponsor?: string }
+  | { kind: 'title'; title: string; reason: string }
   | { kind: 'serve'; kingdom: string }
   /** Armies meet (engine/gm-battle.ts): Claude sets the field, the code runs the phases with the player's orders. */
   | { kind: 'battle'; name: string; place?: string; sector?: string; ally: unknown[]; enemy: unknown[] }
@@ -556,6 +558,12 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         break;
       case 'promotion':
         drafts.push(...promotionDrafts(s, x, notes));
+        break;
+      case 'ceremony':
+        drafts.push(...ceremonyDrafts(s, x, notes));
+        break;
+      case 'title':
+        drafts.push(...titleDrafts(s, x, notes));
         break;
       case 'serve':
         drafts.push(...serveDrafts(s, String(x.kingdom ?? ''), notes));

@@ -73,6 +73,8 @@ ANSWER WITH JSON ONLY:
     {"kind":"freedom","route":"merit|head|bought|raizen|escape"},
     {"kind":"deed","deed":"standard|first_over_wall|saved_officer|scouting|objective|won|low_losses|withdrawal|steady_morale|supply_kept|disobeyed_paid_off|disobeyed_failed|negotiation|intelligence|governance|civilians","amount":<only for negotiation/intelligence/civilians>,"reason":"what Li did and who saw it"},
     {"kind":"promotion","reason":"why a post is free now (an officer fell, a new unit, a reward ceremony)","sponsor":"<id of a superior, needed from Sanbyakunin-shō up>"},
+    {"kind":"ceremony","sponsor":"<optional id of a superior who speaks for Li>"},
+    {"kind":"title","title":"what people start to call Li","reason":"the deed behind it"},
     {"kind":"serve","kingdom":"kurogane|suiren|hayate|ushio|takane|tatara|kitakaze"},
     {"kind":"land","koku":<size>,"name":"the land's name","reason":"who grants it and why (land only from Sanbyakunin-shō up)"},
     {"kind":"project","project":"watchtower|barracks|farmland|market|roads|smithy|walls|school|shrine"},
