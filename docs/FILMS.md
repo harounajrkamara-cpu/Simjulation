@@ -1,4 +1,6 @@
-# FILMS — short anime films in Sengoku Soldier (📝 proposal, Oct 10)
+# FILMS — short anime films in Sengoku Soldier (✅ built Oct 10, page version 16)
+
+**Built:** all seven films in `web/films/` + `web/films.css`, sound synthesized with Web Audio (`web/films/sound.ts`, no files). **Owner decisions (Oct 10):** images yes, sound yes, **mystery**: the opening has no wooden dragon and nothing ties the boy to the Twin Demon. **Deviation:** the three AI stills were generated in Canva (Twin Demon, snow pass, eye; same style) but Canva only returned 200-px thumbnails here, so every shot is drawn in SVG ink silhouettes instead; the stills can replace shots 5 and 7 of the opening and the eye of the Zone later (Canva media MAHXmFrEGyg, MAHXmF-KDVw, MAHXmCDjLMY).
 
 Built from the owner's film brief. Filled in from the canon: **Premise** — Li Hattori, twelve, a slave of a mercenary band in the seven kingdoms, is the lost son of the murdered general called the Twin Demon; he must rise from nothing without ever saying his father's name. **Style direction** — Kingdom anime framing plus sumi-e ink painting, dark palette (chosen; see Style).
 
