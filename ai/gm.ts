@@ -75,6 +75,8 @@ ANSWER WITH JSON ONLY:
     {"kind":"promotion","reason":"why a post is free now (an officer fell, a new unit, a reward ceremony)","sponsor":"<id of a superior, needed from Sanbyakunin-shō up>"},
     {"kind":"ceremony","sponsor":"<optional id of a superior who speaks for Li>"},
     {"kind":"title","title":"what people start to call Li","reason":"the deed behind it"},
+    {"kind":"grow","npc":"<id>","stat":"VAL|LEA|INT|POL","reason":"what they truly did","big":true|false (true only for a won duel or battle)},
+    {"kind":"role","npc":"<id>","role":"their new role or rank, e.g. Kogashira (10) of the Hagiwara levy"},
     {"kind":"serve","kingdom":"kurogane|suiren|hayate|ushio|takane|tatara|kitakaze"},
     {"kind":"land","koku":<size>,"name":"the land's name","reason":"who grants it and why (land only from Sanbyakunin-shō up)"},
     {"kind":"project","project":"watchtower|barracks|farmland|market|roads|smithy|walls|school|shrine"},

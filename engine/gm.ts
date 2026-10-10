@@ -9,6 +9,7 @@ import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, t
 import { stageDayCap, stageText } from './stages';
 import { battleClearDrafts, battleStartDrafts, battleText } from './gm-battle';
 import { domainMonthDrafts, domainOrderDrafts, domainText, landDrafts, projectDrafts } from './gm-domain';
+import { growDrafts, roleDrafts, seasonGrowthDrafts } from './growth';
 import { opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
 import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
@@ -83,6 +84,9 @@ export type GmChange =
   | { kind: 'promotion'; reason: string; sponsor?: string }
   | { kind: 'ceremony'; sponsor?: string }
   | { kind: 'title'; title: string; reason: string }
+  /** Other people grow and change (engine/growth.ts). */
+  | { kind: 'grow'; npc: string; stat: string; reason: string; big?: boolean }
+  | { kind: 'role'; npc: string; role: string }
   | { kind: 'serve'; kingdom: string }
   /** Armies meet (engine/gm-battle.ts): Claude sets the field, the code runs the phases with the player's orders. */
   | { kind: 'battle'; name: string; place?: string; sector?: string; ally: unknown[]; enemy: unknown[] }
@@ -281,7 +285,7 @@ export function gmMemoryText(s: GameState): string {
     const v = relSnapshot(s.relations[id], today(s));
     const a = g.agendas[id] ?? START_AGENDAS[id];
     return [
-      `- ${p.name} [id: ${id}] — ${p.role}${p.alive ? '' : ' (DEAD)'}. ${p.desc} Traits: ${p.traits.join(', ') || '—'}. Where: ${PLACES[p.location] ?? p.location}.`,
+      `- ${p.name} [id: ${id}] — ${p.role}${p.alive ? '' : ' (DEAD)'}, age ${ageOn(p.born, s.date)}, true strength ${rankLetter(rankScores(p).overall)} (SECRET: Li only guesses). ${p.desc} Traits: ${p.traits.join(', ') || '—'}. Where: ${PLACES[p.location] ?? p.location}.`,
       `  Toward Li: ${opinionLabel(opinion(s.relations[id], today(s)))} (trust ${i(v.trust)}, respect ${i(v.respect)}, affection ${i(v.affection)}, fear ${i(v.fear)}, rivalry ${i(v.rivalry)}). Recent reasons: ${reasonsOf(s, id).join('; ') || 'none'}.`,
       a ? `  Own plan: ${a.goal}${a.secret ? ` SECRET: ${a.secret}` : ''}` : '',
       ...s.memories.filter((m) => m.npc === id).slice(-3).map((m) => `  Remembers: ${m.what}`),
@@ -444,6 +448,7 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
   const newPeople = new Set<string>();
   let deeds = 0;
   const pendingMerit: Record<string, number> = {};
+  const grown = new Set<string>();
   // Land changes in one scene build on each other.
   let land = s.domain;
   const trackLand = (ds: Draft[]) => { for (const d of ds) if (d.type === 'domain') land = (d.data as { domain: GameState['domain'] }).domain; return ds; };
@@ -565,6 +570,12 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       case 'title':
         drafts.push(...titleDrafts(s, x, notes));
         break;
+      case 'grow':
+        drafts.push(...growDrafts(s, x, grown, notes));
+        break;
+      case 'role':
+        drafts.push(...roleDrafts(s, x, notes));
+        break;
       case 'serve':
         drafts.push(...serveDrafts(s, String(x.kingdom ?? ''), notes));
         break;
@@ -684,6 +695,8 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   }
   // Li's land runs on by itself through every month that ends in these days.
   out.push(...domainMonthDrafts(s, today(s), today(s) + n));
+  // Everyone Li knows grows with the seasons too.
+  out.push(...seasonGrowthDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.
   const later = part && PARTS.indexOf(part) > PARTS.indexOf(s.date.part);
   const to = dateFromIndex(today(s) + n, n > 0 ? part ?? 'morning' : later ? part! : s.date.part);
