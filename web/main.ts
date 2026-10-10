@@ -21,7 +21,8 @@ import { pageAdapter, pageDownload } from './ai-page';
 import * as Film from './films/runtime';
 import * as Scenes from './films/scenes';
 import { loadFromCloud, saveToCloud } from './cloud-save';
-import { narrate as speak, narratorAvailable, narratorOn, narratorRate, narratorVoice, setNarrator, stopNarrator, voices } from './narrator';
+import { aiVoicePossible, onAiStatus, warmAiVoice } from './voice-ai';
+import { GEORGE, narrate as speak, narratorAvailable, narratorOn, narratorRate, narratorVoice, setNarrator, stopNarrator, voices } from './narrator';
 import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
 import {
   armyPage, chronicle, encyclopediaPage, goalsHtml, growthHtml, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
@@ -975,10 +976,17 @@ const setNarratorBtn = () => { narratorBtn.textContent = narratorOn() ? 'Narrato
 function fillVoices() {
   const sel = $<HTMLSelectElement>('nr-voice');
   const vs = voices();
-  sel.innerHTML = vs.length ? vs.map((v) => `<option value="${esc(v.voiceURI)}">${esc(v.name)} (${esc(v.lang)})</option>`).join('') : '<option value="">No English voice found on this device</option>';
+  const george = aiVoicePossible() ? `<option value="${GEORGE}">George (AI voice, best)</option>` : '';
+  sel.innerHTML = george + vs.map((v) => `<option value="${esc(v.voiceURI)}">${esc(v.name)} (${esc(v.lang)})</option>`).join('') || '<option value="">No voice found on this device</option>';
   sel.value = narratorVoice();
 }
-narratorBtn.hidden = !narratorAvailable();
+narratorBtn.hidden = !narratorAvailable() && !aiVoicePossible();
+onAiStatus((st) => {
+  $('nr-status').textContent = st.state === 'loading' ? `George is getting ready: downloading his voice, ${st.pct}% (only the first time, about 330 MB).`
+    : st.state === 'ready' ? 'George is ready.'
+    : st.state === 'failed' ? `George cannot speak on this page (${st.why}). The browser voice reads instead.`
+    : aiVoicePossible() ? 'George is the AI voice: the first time, his voice downloads once (about 330 MB).' : 'This browser cannot run George (no WebGPU); the browser voices are used.';
+});
 setNarratorBtn();
 if (narratorAvailable()) window.speechSynthesis.onvoiceschanged = fillVoices;
 narratorBtn.onclick = () => {
@@ -988,7 +996,7 @@ narratorBtn.onclick = () => {
   $('narratorbox').hidden = false;
 };
 $('nr-on').onchange = () => { setNarrator({ on: $<HTMLInputElement>('nr-on').checked }); setNarratorBtn(); };
-$('nr-voice').onchange = () => setNarrator({ voice: $<HTMLSelectElement>('nr-voice').value });
+$('nr-voice').onchange = () => { setNarrator({ voice: $<HTMLSelectElement>('nr-voice').value }); if ($<HTMLSelectElement>('nr-voice').value === GEORGE) warmAiVoice(); };
 $('nr-rate').onchange = () => setNarrator({ rate: Number($<HTMLSelectElement>('nr-rate').value) || 1 });
 $('nr-test').onclick = () => { if (!narratorOn()) { setNarrator({ on: true }); $<HTMLInputElement>('nr-on').checked = true; setNarratorBtn(); } speak('Li carries the water past the horse lines. Somewhere in the dark, a guard coughs.'); };
 $('nr-close').onclick = () => { $('narratorbox').hidden = true; };

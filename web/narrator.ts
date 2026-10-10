@@ -1,16 +1,23 @@
-// The narrator (owner request, Oct 10): the story read aloud with the browser's own voice (Web Speech API). Free, no
-// files, no keys; the voices are the ones on the player's device (on Windows: the Microsoft voices, best the "Natural"
-// or "Online" ones). Off until the player turns it on; voice and speed are remembered. A new turn stops the old reading.
+// The narrator (owner request, Oct 10): the story read aloud. First choice: George, the AI voice on the graphics card
+// (web/voice-ai.ts). Fallback: the browser's own voices (Web Speech API). Off until the player turns it on; voice and
+// speed are remembered. A new turn stops the old reading.
+
+import { aiStatus, aiVoicePossible, speakAi, stopAi, warmAiVoice } from './voice-ai';
 
 const KEY = 'sengoku-soldier-narrator';
+/** The AI narrator George (web/voice-ai.ts); the default wherever the graphics card can run him. */
+export const GEORGE = '__george';
 interface Prefs { on: boolean; voice: string; rate: number }
-let prefs: Prefs = { on: false, voice: '', rate: 1 };
+let prefs: Prefs = { on: false, voice: GEORGE, rate: 1 };
 try { prefs = { ...prefs, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }; } catch { /* storage blocked */ }
+// Once (Oct 10): everyone who had picked a browser voice gets George, the owner found those voices bad.
+try { if (!localStorage.getItem(KEY + '-george')) { prefs.voice = GEORGE; localStorage.setItem(KEY + '-george', '1'); } } catch { /* fine */ }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch { /* fine */ } };
 
 const synth = (): SpeechSynthesis | null => (typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null);
 export const narratorAvailable = () => !!synth();
-export const narratorOn = () => prefs.on && narratorAvailable();
+export const narratorOn = () => prefs.on && (narratorAvailable() || aiVoicePossible());
+export const usingGeorge = () => prefs.voice === GEORGE && aiVoicePossible() && aiStatus().state !== 'failed';
 export const narratorRate = () => prefs.rate;
 
 /** English voices on this device, the most natural first. */
@@ -28,8 +35,9 @@ export function setNarrator(p: Partial<Prefs>) {
   prefs = { ...prefs, ...p };
   save();
   if (!prefs.on) stopNarrator();
+  else if (usingGeorge()) warmAiVoice();
 }
-export const narratorVoice = () => voice()?.voiceURI ?? '';
+export const narratorVoice = () => (prefs.voice === GEORGE ? GEORGE : voice()?.voiceURI ?? '');
 
 /** Long texts are read sentence by sentence (some browsers cut one long utterance off after ~15 seconds). */
 function chunks(text: string): string[] {
@@ -47,8 +55,19 @@ function chunks(text: string): string[] {
 
 /** Read a text aloud. `interrupt` (default) stops what is being read first; otherwise it is queued after it. */
 export function narrate(text: string, interrupt = true) {
+  if (!narratorOn() || !text.trim()) return;
+  if (usingGeorge()) {
+    synth()?.cancel();
+    // George reads it; if he cannot speak here after all, the browser voice takes over.
+    speakAi(chunks(text), prefs.rate, !interrupt).then((ok) => { if (!ok) browserSay(text, interrupt); });
+    return;
+  }
+  browserSay(text, interrupt);
+}
+
+function browserSay(text: string, interrupt: boolean) {
   const s = synth();
-  if (!s || !narratorOn() || !text.trim()) return;
+  if (!s) return;
   if (interrupt) s.cancel();
   const v = voice();
   for (const c of chunks(text)) {
@@ -60,4 +79,4 @@ export function narrate(text: string, interrupt = true) {
   }
 }
 
-export function stopNarrator() { synth()?.cancel(); }
+export function stopNarrator() { synth()?.cancel(); stopAi(); }
