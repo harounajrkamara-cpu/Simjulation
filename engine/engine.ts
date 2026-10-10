@@ -67,6 +67,9 @@ export function apply(state: GameState, ev: GameEvent): void {
     case 'money':
       state.money += d.amount;
       break;
+    case 'battle':
+      state.battle = d.battle ? structuredClone(d.battle) : null;
+      break;
     case 'duel':
       state.duel = d.state ? structuredClone(d.state) : null;
       if (d.template) gmMemOf(state).duels[d.template.id] = structuredClone(d.template);

@@ -8,6 +8,8 @@ import { SkipSummary, summaryText } from '../engine/summary';
 import { GmChange, gmApplyFix, gmOn, gmRewind, lastFightResult } from '../engine/gm';
 import { GmFixProposal, GmPlay, gmChapter, gmFix, gmSkip, gmTurn } from '../ai/gm';
 import { CHILDHOOD, TIME_JUMP, beginLife } from '../engine/prologue';
+import { BattleState, MAX_PHASES, Order, battleView, ordersFor } from '../engine/battle';
+import { battlePhase, battleToEnd } from '../engine/gm-battle';
 import { changesLine, duelPanel, growthSnapshot, noticeable, progressChips } from '../engine/render';
 import { GameEvent } from '../engine/types';
 import { lastPeakDay, phase as directorPhase } from '../engine/director';
@@ -146,9 +148,27 @@ function inkReveal(el: HTMLElement, text: string): Promise<void> {
   });
 }
 
+const battleOn = () => !!state.battle && !state.battle.over;
+
+/** The battle panel (WB 6b): every sector, Li's exact, the rest as reports with source, age and confidence. */
+function battleHtml(b: BattleState): string {
+  const v = battleView(b);
+  const rows = v.sectors.map((x) => `<tr><th>${esc(x.sector)}</th><td>${esc(x.ours)}</td><td>${esc(x.theirs)}</td><td class="src">${esc(x.source)}</td></tr>`).join('');
+  return `<strong>${esc(v.title)} · phase ${v.phase + 1} of at most ${MAX_PHASES}</strong>
+    <p class="duel-meta">Li's unit: ${v.li.men} of ${v.li.start} men · ${esc(v.li.morale)}</p>
+    <table class="table battle"><tr><th></th><td>Ours</td><td>Theirs</td><td class="src">Known from</td></tr>${rows}</table>`;
+}
+
 function renderOptions() {
   const panel = duelPanel(state);
   const duel = $('duel');
+  if (battleOn()) {
+    duel.hidden = false;
+    duel.innerHTML = battleHtml(state.battle!);
+    const orders = [...ordersFor(state.battle!), { order: 'auto', label: 'Fight on to the end (simulate)', risk: undefined as string | undefined }];
+    $('opts').innerHTML = orders.map((o, k) => `<button type="button" class="opt" data-battle="${o.order}"${busy ? ' disabled' : ''}><span class="k">${k + 1}</span><span class="l">${esc(o.label)}</span>${o.risk ? `<span class="t"><span class="risk">${esc(o.risk)}</span></span>` : ''}</button>`).join('');
+    return;
+  }
   duel.hidden = !panel;
   if (panel && state.duel) {
     const d = state.duel;
@@ -184,7 +204,7 @@ function refresh() {
   renderOptions();
   renderGuide();
   $('tools').hidden = !(ai && gmOn(state));
-  $<HTMLButtonElement>('skipbtn').disabled = busy || !gmMode();
+  $<HTMLButtonElement>('skipbtn').disabled = busy || !gmMode() || battleOn();
   $<HTMLButtonElement>('wrongbtn').disabled = busy;
   if (tab !== 'story' && PAGES[tab]) { $(`tab-${tab}`).innerHTML = PAGES[tab]!(state); markSeen(tab); }
   dots();
@@ -218,7 +238,7 @@ function setBusy(on: boolean) {
   busy = on;
   document.querySelector('.choose')!.classList.toggle('busy', on);
   $('opts').querySelectorAll('button').forEach((b) => ((b as HTMLButtonElement).disabled = on));
-  $<HTMLButtonElement>('skipbtn').disabled = on || !gmMode();
+  $<HTMLButtonElement>('skipbtn').disabled = on || !gmMode() || battleOn();
   $<HTMLButtonElement>('wrongbtn').disabled = on;
 }
 
@@ -297,7 +317,7 @@ const toolbox = $('toolbox');
 const closeTools = () => { toolbox.hidden = true; toolbox.innerHTML = ''; };
 
 function openSkip() {
-  if (busy || !ai || !gmMode()) return;
+  if (busy || !ai || !gmMode() || battleOn()) return;
   const next = Math.floor(liAge(state)) + 1;
   toolbox.innerHTML = `<p class="text info">Skip ahead: the story runs on, scene by scene, with Li's plan, and stops at anything important.</p>
     <label>Until when?<input id="sk-until" list="sk-until-list" autocomplete="off" placeholder="until something important happens"></label>
@@ -844,8 +864,28 @@ function playPrologue() {
 
 $('opts').addEventListener('click', (e) => {
   const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.opt');
+  if (b?.dataset.battle) { runBattle(b.dataset.battle as Order | 'auto', b.querySelector('.l')!.textContent ?? ''); return; }
   if (b) send(b.dataset.key!, b.querySelector('.l')!.textContent ?? b.dataset.key!);
 });
+
+/** One battle phase (or the rest of the battle) with Li's order; the code decides it. At the end Claude tells the aftermath. */
+async function runBattle(order: Order | 'auto', label: string) {
+  if (busy || !battleOn()) return;
+  setBusy(true);
+  const before = noticeable(state);
+  const fine = growthSnapshot(state);
+  const events = order === 'auto' ? battleToEnd(state) : battlePhase(state, order);
+  const turn = newTurn(label);
+  const lines = events.filter((e) => e.visible && e.type === 'battle').map((e) => `Phase ${(e.data as { battle?: { phase?: number } }).battle?.phase ?? ''} · ${e.fact}`);
+  const end = events.find((e) => e.type === 'story' && (e.data as { battleEnd?: string }).battleEnd);
+  turn.insertAdjacentHTML('beforeend', lines.slice(-4).map((l) => `<p class="text">${esc(l)}</p>`).join('') + (end ? `<p class="text info">${esc(end.fact)}</p>` : ''));
+  turn.insertAdjacentHTML('beforeend', chipsHtml([...replyParts(changesLine(before, noticeable(state)), []).chips, ...growChips(fine)]));
+  turn.scrollIntoView({ block: 'start' });
+  refresh();
+  persist();
+  setBusy(false);
+  if (end) { await titleCard('The battle is over', (end.data as { winner: string }).winner === 'ally' ? 'Victory' : (end.data as { winner: string }).winner === 'enemy' ? 'Defeat' : 'Night falls'); if (ai && gmOn(state)) await gmStep(); }
+}
 $('f').addEventListener('submit', (e) => {
   e.preventDefault();
   if (input.value.trim() && !busy) { const v = input.value; input.value = ''; send(v); }
@@ -859,6 +899,7 @@ document.addEventListener('keydown', (e) => {
   if (tab !== 'story' || busy || e.ctrlKey || e.metaKey || e.altKey || !/^[1-9]$/.test(e.key)) return;
   if (document.activeElement === input && input.value) return;
   if (document.activeElement instanceof HTMLTextAreaElement) return;
+  if (battleOn()) { const b = $('opts').querySelectorAll<HTMLButtonElement>('[data-battle]')[Number(e.key) - 1]; if (b) { e.preventDefault(); b.click(); } return; }
   if (gmMode()) { const t = gmChoices()[Number(e.key) - 1]; if (t) { e.preventDefault(); send(t); } return; }
   const o = options(state).find((x) => x.key === e.key);
   if (o) { e.preventDefault(); send(o.key, o.label); }

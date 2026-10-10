@@ -339,3 +339,8 @@ button { cursor: pointer; }
 .growth .bar { width: auto; margin: 0; }
 .growth .g-note { grid-column: 1 / -1; font-size: 13px; color: var(--gold); margin-top: -4px; }
 .chip.grow { color: var(--gold); border-style: dashed; }
+
+/* Battle panel (WB 6b): sectors, Li's own exact, the rest as reports. */
+.table.battle { font-size: 14px; margin-top: 6px; }
+.table.battle th, .table.battle td { padding: 4px 8px 4px 0; width: auto; }
+.table.battle .src { color: var(--faded); font-style: italic; }

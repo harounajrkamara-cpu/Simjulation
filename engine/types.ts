@@ -116,7 +116,9 @@ export type EventType =
   // A fix after the player's "Something's wrong" report, or a rewind of broken scenes (text only; read back by engine/gm.ts):
   | 'correction'
   // A chapter recap, written once by the Game Master (engine/recaps.ts):
-  | 'chapter';
+  | 'chapter'
+  // A battle's state after its start or a phase (engine/gm-battle.ts); null data clears it:
+  | 'battle';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {
@@ -155,6 +157,8 @@ export interface GameState {
   nextSeq: number;
   /** Active duel, if any (ch. 6a). */
   duel?: import('./duel').DuelState | null;
+  /** A battle in progress or just ended (engine/battle.ts), kept by 'battle' events. */
+  battle?: import('./battle').BattleState | null;
   /** Game Master mode memory (kept by events, so saves replay it). */
   gm?: GmMemory;
 }

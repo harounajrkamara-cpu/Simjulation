@@ -7,6 +7,7 @@ import { createWorld } from './data';
 import { storyWindow } from './recaps';
 import { careerText, deedDrafts, promotionDrafts, serveDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
+import { battleClearDrafts, battleStartDrafts, battleText } from './gm-battle';
 import { opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
 import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
@@ -79,7 +80,9 @@ export type GmChange =
   /** Career (engine/gm-career.ts): a deed with witnesses, a promotion when a post opens, serving another kingdom. */
   | { kind: 'deed'; deed: string; amount?: number; reason: string }
   | { kind: 'promotion'; reason: string; sponsor?: string }
-  | { kind: 'serve'; kingdom: string };
+  | { kind: 'serve'; kingdom: string }
+  /** Armies meet (engine/gm-battle.ts): Claude sets the field, the code runs the phases with the player's orders. */
+  | { kind: 'battle'; name: string; place?: string; sector?: string; ally: unknown[]; enemy: unknown[] };
 
 /** Claude's answer to the player's "Something's wrong" report. */
 export interface GmFixProposal {
@@ -296,6 +299,7 @@ export function gmMemoryText(s: GameState): string {
     `Merit: combat ${has(s, 'merit_combat')}, in Kurogane service ${has(s, 'merit_service')} of ${MERIT_FOR_FREEDOM}. In the Hagiwara levy: ${inService(s) ? 'yes' : 'no'}.`,
     careerText(s),
     stageText(s),
+    battleText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
     `FREEDOM ROUTES:\n${freedomRoutes.map((x) => `- ${x}`).join('\n')}`,
     longGoalsText(s),
@@ -387,6 +391,7 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   const notes: string[] = [];
   const secretNotes: string[] = [];
   const drafts: Draft[] = [];
+  drafts.push(...battleClearDrafts(s)); // the aftermath has been told: clear the field
   drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null } });
   if (t.place) drafts.push({ type: 'place', fact: `Li is at ${t.place}`, visible: false, data: { char: c.id, place: t.place } });
   drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false));
@@ -546,6 +551,9 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       case 'serve':
         drafts.push(...serveDrafts(s, String(x.kingdom ?? ''), notes));
         break;
+      case 'battle':
+        drafts.push(...battleStartDrafts(s, x, notes));
+        break;
       default:
         notes.push(`unknown change "${String(x.kind)}" ignored`);
     }
@@ -680,7 +688,8 @@ export function skipDaysLeft(s: GameState, until: string, startDay: number): num
 export function gmApply(s: GameState, t: GmTurn, said?: string): GmResult & { events: import('./types').GameEvent[] } {
   const r = checkGmTurn(s, t, said);
   const events = commitDrafts(s, r.drafts);
-  if (!r.duelId) events.push(...commitDrafts(s, gmTimeDrafts(s, t.days ?? 0, t.part)));
+  // No time passes while a battle is being fought: its phases are the clock.
+  if (!r.duelId && !(s.battle && !s.battle.over)) events.push(...commitDrafts(s, gmTimeDrafts(s, t.days ?? 0, t.part)));
   events.push(...commitDrafts(s, refereeDrafts(r.notes, r.secretNotes ?? [])));
   return { ...r, events };
 }
