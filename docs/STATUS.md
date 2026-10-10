@@ -73,3 +73,11 @@ Then: numbers sheet → build stage 1.
 
 ## Source material (owner's uploads, not in repo)
 Old chats and docs: ARC 1/2 (old slave "Ali" story), ARC 1 manhwa + Li Hattori summary (1540 Twin Demon story), complete 1540 simulation doc, tracking systems, master tracking PDF v3, Simulatie systeem/ChatGPT docs, Black Clover / Bleach / Solo Leveling / Naruto chats.
+
+## Plan for the next session (Oct 11, to discuss with the owner first)
+1. Owner's phone playtest feedback → fix what he found.
+2. Phone layout: the page was made for PC (one breakpoint at 1180px); make it work at phone width (header, tabs, story padding, side panel under the story).
+3. Four small fixes from the Hermes bot test: "Talk to whom?" lists known people as numbers; "Skip 7 days" as a numbered option; a clear "FREE" line when Li is free; a freedom-progress line once Li knows his price. No numbers change.
+4. George on the claude.ai page: read the status line; if blocked, bundle kokoro-js into the page.
+5. AI players: `npm run ai-players` (scripts/ai-players.ts) lets 2 free models play via OmniRoute and write a review to saves/ai-players/. Needs OMNIROUTE_URL / OMNIROUTE_KEY / AI_MODELS in .env (owner sets the key; never in chat).
+Note: someone ran npm install for Linux in this folder (esbuild broke); fixed with `npm install` on Windows. Hermes left loose simulate*.js/.cjs/.ts files in the root (uncommitted).

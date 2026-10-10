@@ -2,3 +2,4 @@ node_modules/
 dist-web/
 saves/*.json
 .env*
+saves/ai-players/
