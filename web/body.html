@@ -41,6 +41,8 @@
   <div class="overlay-inner">
     <h1 id="ht-title">How to play</h1>
     <ol id="ht-list" class="howto"></ol>
+    <h2 class="label">Every command</h2>
+    <dl id="ht-cmds" class="cmds"></dl>
     <button id="ht-close" type="button" class="primary">Back to the chronicle</button>
   </div>
 </div>
@@ -143,6 +145,8 @@
           <label for="in">Or write it</label>
           <input id="in" autocomplete="off" placeholder="I ask Sukezō where we are">
           <button type="submit">Send</button>
+          <button id="askbtn" type="button" class="quiet-btn" title="Ask the guide a question (time does not move)">Ask</button>
+          <button id="helpbtn" type="button" class="quiet-btn" title="Every command">Help</button>
         </form>
         <div id="examples" class="examples" aria-label="Example lines"></div>
         <div id="tools" class="tools" hidden>

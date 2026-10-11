@@ -57,7 +57,7 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
   for (const c of Object.values(s.characters)) for (const w of c.name.split(/\s+/)) known.add(w);
   const parts = [...known].filter((w) => w.length >= 5);
   const flagged = new Set<string>();
-  for (const w of new Set(story.match(/\b[A-ZŌŪ][\p{L}ōū-]{3,}\b/gu) ?? [])) {
+  for (const w of new Set(story.match(/(?<![\p{L}-])[A-ZŌŪ][\p{L}-]{3,}(?![\p{L}-])/gu) ?? [])) {
     if (known.has(w) || flagged.has(w)) continue;
     const near = parts.find((k) => Math.abs(k.length - w.length) <= 2 && distance(k.toLowerCase(), w.toLowerCase()) <= (k.length >= 7 ? 2 : 1));
     if (near) { flagged.add(w); problems.push({ kind: 'name', text: `"${w}" looks like a misspelling of ${near}.` }); }

@@ -23,7 +23,8 @@ import * as Scenes from './films/scenes';
 import { loadFromCloud, saveToCloud } from './cloud-save';
 import { aiVoicePossible, onAiStatus, warmAiVoice } from './voice-ai';
 import { GEORGE, narrate as speak, narratorAvailable, narratorOn, narratorRate, narratorVoice, setNarrator, stopNarrator, voices } from './narrator';
-import { Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
+import { COMMANDS, Guidance, HOW_TO_PLAY, exampleLines, nextHint, termify } from './guide';
+import { ask as askGuide, isQuestion, questionOf } from './ask';
 import {
   armyPage, chronicle, encyclopediaPage, goalsHtml, growthHtml, esc, journalPage, knownEntries, liCard, liPage, mapPage, mapSvg, peoplePage, plain, scene, strip,
 } from './panels';
@@ -628,6 +629,8 @@ async function send(raw: string, said = raw) {
   fineMark = growthSnapshot(state);
   if (shownHint) markHint(shownHint); // a hint closes itself once the player acts (ch. 8 §4)
   const text = raw.trim();
+  if (isQuestion(text)) return askQuestion(text, said);
+  if (/^help$/i.test(text)) return openHowTo();
   if (gmMode() && !/^(HELP|STATUS|INFOCHAR|RELATIONS|RECAP|LOG|SAVE|LOAD|NEW)\b/i.test(text)) return gmStep(text, said);
   if (!options(state).some((o) => o.key === text) && !COMMAND.test(text)) bumpFree();
   const before = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
@@ -742,12 +745,38 @@ $('examples').addEventListener('click', (e) => {
 
 function openHowTo() {
   $('ht-list').innerHTML = HOW_TO_PLAY.map(([t, d]) => `<li><b>${esc(t)}.</b> ${esc(d)}</li>`).join('');
+  $('ht-cmds').innerHTML = COMMANDS.map(([c, d]) => `<dt>${esc(c)}</dt><dd>${esc(d)}</dd>`).join('');
   $('howto-box').hidden = false;
   $('ht-close').focus();
 }
 $('howto').onclick = openHowTo;
 $('nl-howto').onclick = openHowTo;
 $('ht-close').onclick = () => { $('howto-box').hidden = true; };
+$('helpbtn').onclick = openHowTo;
+$('askbtn').onclick = () => {
+  if (input.value.trim() && !isQuestion(input.value)) input.value = `? ${input.value.trim()}`;
+  if (isQuestion(input.value) && questionOf(input.value)) { const v = input.value; input.value = ''; send(v); return; }
+  input.value = '? ';
+  input.placeholder = 'what should I do now?';
+  input.focus();
+};
+
+/** A question to the guide (web/ask.ts): out of the story, time does not move, nothing is saved. */
+async function askQuestion(text: string, said: string) {
+  const q = questionOf(text);
+  setBusy(true);
+  const turn = newTurn(said);
+  turn.insertAdjacentHTML('beforeend', '<p class="text info wet reading">The guide thinks…</p>');
+  turn.scrollIntoView({ block: 'start' });
+  const recentStory = Array.from(log.querySelectorAll(".turn")).slice(-3, -1).map((t) => (t as HTMLElement).innerText).join('\n');
+  let a: { text: string; from: 'claude' | 'game' };
+  try { a = await askGuide(ai && aiOn ? ai : null, state, q, recentStory); }
+  catch { a = await askGuide(null, state, q); }
+  turn.querySelector('.reading')?.remove();
+  turn.insertAdjacentHTML('beforeend', `<div class="ask-box"><span class="label">Guide${a.from === 'game' ? ' (from the game)' : ''} · time did not move</span><p>${esc(a.text)}</p></div>`);
+  input.placeholder = 'I ask Sukezō where we are';
+  setBusy(false);
+}
 
 /** Timeskip summary (World Bible ch. 9): what happened to Li, his people and the world while the days passed. */
 function skipScreen(x: SkipSummary): Promise<void> {

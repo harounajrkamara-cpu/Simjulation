@@ -49,6 +49,25 @@ export function termify(html: string, s: GameState): string {
   return out;
 }
 
+/** Every command the player can type (owner request Oct 11: the Help button). [what to type, what it does] */
+export const COMMANDS: [string, string][] = [
+  ['1, 2, 3…', 'Pick a numbered choice.'],
+  ['I …', 'Write anything Li does in your own words: "I ask Sukezō about the fort", "I train until dark".'],
+  ['? your question', 'Ask the guide, outside the story: "? what should I do now", "? who is Gonza". Time does not move. The guide only knows what Li knows, so it never spoils. The Ask button does the same.'],
+  ['( your wish )', 'Game Master mode: words in round brackets are wishes to the storyteller about the STORY, not things Li does: "I spar with Hachi (make it a close fight)". Wishes never change numbers or rules.'],
+  ['wait 7 / skip 7', 'Let quiet days pass (a slave plans at most 30). Stops when something happens. "wait 7 train" trains at night.'],
+  ['Skip ahead', 'Game Master mode button: jump ahead to a moment you name.'],
+  ["Something's wrong", 'Button: the story forgot or broke something. Fix it, or go back up to 3 scenes.'],
+  ['Why?', 'Under a scene: shows the causes the code used.'],
+  ['STATUS', 'Li now: health, fatigue, skills, money.'],
+  ['INFOCHAR name', 'What Li knows about one person: "INFOCHAR hisame".'],
+  ['RELATIONS', 'How everyone Li knows feels about him.'],
+  ['RECAP', "The story so far, from Li's journal."],
+  ['LOG', 'The last things that happened, plainly.'],
+  ['SAVE / LOAD', 'Save or load in this browser. The Save file button can copy or download it.'],
+  ['HELP', 'Opens this list.'],
+];
+
 export const HOW_TO_PLAY = [
   ['Choose or write', 'Pick a numbered choice, or write what Li does in your own words, as "I…". The story is told about Li.'],
   ['No dice', 'The world is fair: the same choice in the same moment gives the same result. Every result has a cause; "Why?" shows it.'],

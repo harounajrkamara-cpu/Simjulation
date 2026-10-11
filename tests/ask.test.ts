@@ -1,0 +1,48 @@
+import { describe, expect, it } from 'vitest';
+import { newGame } from '../engine/game';
+import { ask, askSheet, checkAnswer, isQuestion, localAnswer, questionOf } from '../web/ask';
+import type { AiAdapter } from '../ai/adapter';
+
+const fake = (answers: string[]): AiAdapter => ({ name: 'fake', ask: async () => answers.shift() ?? '' });
+
+describe('Ask the guide', () => {
+  it('knows a question by its "?"', () => {
+    expect(isQuestion('? what now')).toBe(true);
+    expect(isQuestion('I ask Sukezō')).toBe(false);
+    expect(questionOf('??  who is Gonza')).toBe('who is Gonza');
+  });
+
+  it('the sheet holds only people Li has met', () => {
+    const s = newGame().state;
+    const sheet = askSheet(s);
+    expect(sheet).toContain('Hisame');
+    expect(sheet).not.toContain('Kaname');
+    expect(sheet).not.toContain('Daisuke');
+  });
+
+  it('rejects answers about people Li has not met, or wrong money', () => {
+    const s = newGame().state;
+    expect(checkAnswer(s, 'Talk to Hisame at the fire tonight.')).toEqual([]);
+    expect(checkAnswer(s, 'Kaname will help you escape.').length).toBeGreaterThan(0);
+    expect(checkAnswer(s, 'You have 500 mon saved.').length).toBeGreaterThan(0);
+    expect(checkAnswer(s, `You have ${s.money} mon.`)).toEqual([]);
+  });
+
+  it('a bad answer twice falls back to the game\'s own answer; time never moves', async () => {
+    const s = newGame().state;
+    const before = JSON.stringify(s);
+    const a = await ask(fake(['Kaname knows the way.', 'Ask Ōno Daisuke.']), s, 'who can help me?');
+    expect(a.from).toBe('game');
+    expect(a.text).toBe(localAnswer(s));
+    const b = await ask(fake(['Ask Old Sukezō at the cook fire.']), s, 'who can help me?');
+    expect(b).toEqual({ text: 'Ask Old Sukezō at the cook fire.', from: 'claude' });
+    expect(JSON.stringify(s)).toBe(before);
+  });
+
+  it('without Claude the game answers with goals and choices', async () => {
+    const s = newGame().state;
+    const a = await ask(null, s, 'what should I do?');
+    expect(a.from).toBe('game');
+    expect(a.text).toMatch(/Your goals:.*\nWhat Li can do now:/);
+  });
+});
