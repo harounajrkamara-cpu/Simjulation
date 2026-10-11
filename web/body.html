@@ -41,8 +41,7 @@
   <div class="overlay-inner">
     <h1 id="ht-title">How to play</h1>
     <ol id="ht-list" class="howto"></ol>
-    <h2 class="label">Every command</h2>
-    <dl id="ht-cmds" class="cmds"></dl>
+    <div id="ht-cmds"></div>
     <button id="ht-close" type="button" class="primary">Back to the chronicle</button>
   </div>
 </div>
@@ -145,13 +144,15 @@
           <label for="in">Or write it</label>
           <input id="in" autocomplete="off" placeholder="I ask Sukezō where we are">
           <button type="submit">Send</button>
-          <button id="askbtn" type="button" class="quiet-btn" title="Ask the guide a question (time does not move)">Ask</button>
-          <button id="helpbtn" type="button" class="quiet-btn" title="Every command">Help</button>
         </form>
         <div id="examples" class="examples" aria-label="Example lines"></div>
-        <div id="tools" class="tools" hidden>
+        <div id="tools" class="tools">
+          <button id="askbtn" type="button" title="Ask the guide a question. Time does not move.">? Ask</button>
+          <button id="wishbtn" type="button" title="A wish to the storyteller about the story, in brackets">( ) Wish</button>
+          <button id="waitbtn" type="button" title="Let a quiet week pass. Stops when something happens.">Wait a week</button>
           <button id="skipbtn" type="button">Skip ahead</button>
           <button id="wrongbtn" type="button" class="quiet-tool">Something's wrong</button>
+          <button id="helpbtn" type="button" class="quiet-tool">Help</button>
         </div>
         <div id="toolbox" class="confirm toolbox" hidden></div>
       </div>

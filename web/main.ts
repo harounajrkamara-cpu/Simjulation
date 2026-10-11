@@ -212,7 +212,11 @@ function refresh() {
   $('goals').innerHTML = goalsHtml(state);
   renderOptions();
   renderGuide();
-  $('tools').hidden = !(ai && gmOn(state));
+  const gmTools = !!ai && gmOn(state);
+  $('wishbtn').hidden = !gmTools;
+  $('skipbtn').hidden = !gmTools;
+  $('wrongbtn').hidden = !gmTools;
+  $('waitbtn').hidden = gmTools;
   $<HTMLButtonElement>('skipbtn').disabled = busy || !gmMode() || battleOn();
   $<HTMLButtonElement>('wrongbtn').disabled = busy;
   if (tab !== 'story' && PAGES[tab]) { $(`tab-${tab}`).innerHTML = PAGES[tab]!(state); markSeen(tab); }
@@ -745,7 +749,7 @@ $('examples').addEventListener('click', (e) => {
 
 function openHowTo() {
   $('ht-list').innerHTML = HOW_TO_PLAY.map(([t, d]) => `<li><b>${esc(t)}.</b> ${esc(d)}</li>`).join('');
-  $('ht-cmds').innerHTML = COMMANDS.map(([c, d]) => `<dt>${esc(c)}</dt><dd>${esc(d)}</dd>`).join('');
+  $('ht-cmds').innerHTML = COMMANDS.map(([cat, items]) => `<h2 class="label">${esc(cat)}</h2><dl class="cmds">${items.map(([c, d]) => `<dt>${esc(c)}</dt><dd>${esc(d)}</dd>`).join('')}</dl>`).join('');
   $('howto-box').hidden = false;
   $('ht-close').focus();
 }
@@ -753,6 +757,13 @@ $('howto').onclick = openHowTo;
 $('nl-howto').onclick = openHowTo;
 $('ht-close').onclick = () => { $('howto-box').hidden = true; };
 $('helpbtn').onclick = openHowTo;
+$('waitbtn').onclick = () => { if (!busy) send('wait 7', 'Wait a week'); };
+$('wishbtn').onclick = () => {
+  const v = input.value.replace(/\s+$/, '');
+  input.value = `${v}${v ? ' ' : ''}()`;
+  input.focus();
+  input.setSelectionRange(input.value.length - 1, input.value.length - 1);
+};
 $('askbtn').onclick = () => {
   if (input.value.trim() && !isQuestion(input.value)) input.value = `? ${input.value.trim()}`;
   if (isQuestion(input.value) && questionOf(input.value)) { const v = input.value; input.value = ''; send(v); return; }
