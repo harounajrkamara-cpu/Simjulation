@@ -80,6 +80,8 @@ Old chats and docs: ARC 1/2 (old slave "Ali" story), ARC 1 manhwa + Li Hattori s
 - **"Something's wrong" did not fix it** (the owner then skipped). What he reported: "the day didn't go to day 2 and I went to sleep" - the scene had Li sleep, but the date stayed on day 1. Likely the same bug as the board: the Game Master's scene did not move time (sleep should advance to the next morning), and the fix tool cannot move time. Fix both: when a scene ends with Li sleeping, the code advances to the next morning; the fix tool may correct "time did not pass".
 - **Wish for later (not this phase, needs a plan):** a close-up map of where Li is, e.g. the camp with its places ("here is the drill field, the cook fire, the tents, you are here"), later Li's own home/land with real upgrades. Fits Stage 3 (land & economy); plan it with the owner first.
 
+- **Owner wish for Thursday:** test the whole game with many AI testers (he said 13–14 agents) so all bugs get found and fixed. Proposal: (1) a Game Master test harness so testers can play GM mode in the terminal (today only the classic mode runs there); (2) a broad sweep with free models via `npm run ai-players` (costs no Claude tokens); (3) a few Claude testers (about 4–5, each its own area: duels, sleep/time, fix tool, freedom routes, GM scenes) for depth; (4) deduplicate findings, then fix. Mind the owner's weekly token budget.
+
 ## Plan for the next session (Oct 11, to discuss with the owner first)
 1. Owner's phone playtest feedback → fix what he found.
 2. Phone layout: the page was made for PC (one breakpoint at 1180px); make it work at phone width (header, tabs, story padding, side panel under the story).
