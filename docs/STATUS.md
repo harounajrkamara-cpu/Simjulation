@@ -74,6 +74,12 @@ Then: numbers sheet → build stage 1.
 ## Source material (owner's uploads, not in repo)
 Old chats and docs: ARC 1/2 (old slave "Ali" story), ARC 1 manhwa + Li Hattori summary (1540 Twin Demon story), complete 1540 simulation doc, tracking systems, master tracking PDF v3, Simulatie systeem/ChatGPT docs, Black Clover / Bleach / Solo Leveling / Naruto chats.
 
+## Owner playtest findings (Oct 11; owner plays until Thursday Oct 15, then sends the rest)
+- **Duel did not start (Game Master mode):** a slow sword drill against Gonza (Raizen: "Strike him. Slowly.") stayed story text; the choices were blows ("I use the opening in Gonza's front foot and strike"), so Claude would decide the outcome. Fix (approved idea, not built): (1) GM rule: every exchange of blows whose outcome matters (spar, drill against a person, challenge) is a fight, non-deadly for practice; (2) code check: if the suggestions are strikes/blocks against a person and no fight was set, send the scene back; (3) solo training stays story.
+- **Board does not update:** while playing, the dashboard (date/place/state) sometimes does not change until the owner skips a day. Investigate (refresh after GM scenes?).
+- **"Something's wrong" did not fix it** (the owner then skipped). Investigate what he reported and why the fix did nothing.
+- **Wish for later (not this phase, needs a plan):** a close-up map of where Li is, e.g. the camp with its places ("here is the drill field, the cook fire, the tents, you are here"), later Li's own home/land with real upgrades. Fits Stage 3 (land & economy); plan it with the owner first.
+
 ## Plan for the next session (Oct 11, to discuss with the owner first)
 1. Owner's phone playtest feedback → fix what he found.
 2. Phone layout: the page was made for PC (one breakpoint at 1180px); make it work at phone width (header, tabs, story padding, side panel under the story).
