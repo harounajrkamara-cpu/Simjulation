@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sengoku Soldier - Li Hattori Simulation</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Sengoku Soldier is an interactive Sengoku Jidai RPG roleplay simulation. Track stats, skills, relationships, and guide Li Hattori from peasant to legendary general.">
+  <meta name="keywords" content="Sengoku Jidai, RPG, Simulation, Li Hattori, Takeda Shingen, text-based RPG, visual novel, strategy">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    /* DESIGN SYSTEM */
+    :root {
+      --bg-color: #0b0b0c;
+      --panel-bg: rgba(20, 20, 25, 0.7);
+      --panel-border: rgba(255, 255, 255, 0.05);
+      --panel-border-hover: rgba(199, 44, 44, 0.4);
+      --text-color: #e3e3e6;
+      --text-muted: #8b8b94;
+      --accent-crimson: #c92a2a;
+      --accent-crimson-glow: rgba(199, 44, 44, 0.6);
+      --accent-gold: #ffd43b;
+      --accent-gold-glow: rgba(255, 212, 59, 0.4);
+      --accent-green: #37b24d;
+      --accent-blue: #1c7ed6;
+      --accent-purple: #9c36b5;
+      --font-sans: 'Outfit', sans-serif;
+      --font-serif: 'Playfair Display', serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: var(--font-sans);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Ambient Background Graphic effects */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      right: -10%;
+      width: 40%;
+      height: 50%;
+      background: radial-gradient(circle, rgba(199, 44, 44, 0.08) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: -10%;
+      left: -10%;
+      width: 40%;
+      height: 50%;
+      background: radial-gradient(circle, rgba(255, 212, 59, 0.04) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* HEADER */
+    header {
+      background: rgba(10, 10, 12, 0.9);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand h1 {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent-gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent-crimson);
+      border-radius: 4px;
+      transform: rotate(45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px var(--accent-crimson-glow);
+    }
+
+    .brand .logo-icon::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--bg-color);
+      transform: rotate(-45deg);
+    }
+
+    .date-badge {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: inset 0 0 10px rgba(255, 212, 59, 0.05);
+    }
+
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .api-status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
+    }
+
+    .api-status-indicator.offline {
+      background: var(--accent-blue);
+      box-shadow: 0 0 6px var(--accent-blue);
+    }
+
+    .api-status-indicator.ai {
+      background: var(--accent-gold);
+      box-shadow: 0 0 6px var(--accent-gold);
+    }
+
+    /* MAIN CONTAINER */
+    .app-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      height: calc(100vh - 53px);
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* SIDEBARS & PANELS */
+    .panel {
+      background: var(--panel-bg);
+      border-right: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(15px);
+    }
+
+    .panel-right {
+      border-right: none;
+      border-left: 1px solid var(--panel-border);
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-header h2 {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-color);
+      font-weight: 700;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-crimson);
+    }
+
+    /* LEFT PANEL: RELATIONS & FACTIONS */
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      color: var(--text-color);
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 2px solid var(--accent-crimson);
+    }
+
+    .relation-card {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .relation-card:hover {
+      border-color: var(--panel-border-hover);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .relation-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .relation-name {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .relation-type {
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1px 6px;
+      border-radius: 10px;
+      color: var(--text-muted);
+    }
+
+    .relation-meter {
+      height: 4px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .relation-progress {
+      height: 100%;
+      background: var(--accent-green);
+      transition: width 0.5s ease;
+    }
+
+    .relation-progress.negative {
+      background: var(--accent-crimson);
+    }
+
+    .relation-progress.neutral {
+      background: var(--accent-blue);
+    }
+
+    /* MAP PANEL */
+    .map-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+    }
+
+    .map-svg {
+      width: 100%;
+      height: auto;
+      max-height: 240px;
+    }
+
+    .map-province {
+      fill: #1a1a24;
+      stroke: var(--panel-border);
+      stroke-width: 1.5px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .map-province:hover {
+      fill: #2c2c3d;
+    }
+
+    .map-province.anegakoji { fill: rgba(255, 212, 59, 0.2); stroke: var(--accent-gold); }
+    .map-province.takeda { fill: rgba(199, 44, 44, 0.2); stroke: var(--accent-crimson); }
+    .map-province.uesugi { fill: rgba(55, 178, 77, 0.2); stroke: var(--accent-green); }
+    .map-province.oda { fill: rgba(28, 126, 214, 0.2); stroke: var(--accent-blue); }
+    .map-province.imagawa { fill: rgba(156, 54, 181, 0.2); stroke: var(--accent-purple); }
+
+    /* OBJECTIVES & THREATS */
+    .objectives-list, .threats-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .objective-item, .threat-item {
+      background: rgba(255, 255, 255, 0.01);
+      border-left: 3px solid var(--accent-gold);
+      padding: 10px 12px;
+      border-radius: 0 4px 4px 0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .threat-item {
+      border-left-color: var(--accent-crimson);
+    }
+
+    .objective-title, .threat-title {
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 2px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .objective-status {
+      font-size: 9px;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+    }
+
+    /* RIGHT PANEL: PLAYER SHEET */
+    .player-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255,255,255,0.01);
+      border: 1px solid var(--panel-border);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .player-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-crimson) 0%, #300 100%);
+      border: 2px solid var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(199, 44, 44, 0.3);
+      color: var(--text-color);
+    }
+
+    .player-info-meta h3 {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .player-info-meta p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .player-conditions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .condition-card {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .condition-label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .condition-value {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--text-color);
+    }
+
+    .condition-value.warning { color: var(--accent-gold); }
+    .condition-value.danger { color: var(--accent-crimson); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.01);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--panel-border-hover);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .stat-val {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--accent-gold);
+    }
+
+    .section-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      margin-top: 14px;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 4px;
+    }
+
+    .skills-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .skill-item {
+      display: flex;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.01);
+      padding: 6px 10px;
+      border-radius: 4px;
+      border-left: 2px solid var(--panel-border);
+    }
+
+    .skill-item.advanced {
+      border-left-color: var(--accent-gold);
+    }
+
+    .skill-name {
+      color: var(--text-color);
+    }
+
+    .skill-val {
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .inventory-slot {
+      aspect-ratio: 1;
+      background: rgba(0,0,0,0.3);
+      border: 1px dashed var(--panel-border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .inventory-slot:hover {
+      border-color: var(--accent-gold);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .inventory-slot.occupied {
+      border-style: solid;
+      border-color: var(--panel-border);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .item-count {
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-size: 9px;
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
+    /* CENTER PANEL: STORY NARRATIVE & INPUT */
+    .center-column {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .story-log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+
+    .story-paragraph {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-color);
+      opacity: 0.95;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .dialog-bubble {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 8px 0;
+      position: relative;
+      animation: slideIn 0.3s ease-out forwards;
+    }
+
+    .dialog-speaker {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--accent-gold);
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .dialog-text {
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .system-notification {
+      background: rgba(199, 44, 44, 0.03);
+      border: 1px solid rgba(199, 44, 44, 0.15);
+      border-radius: 4px;
+      padding: 8px 14px;
+      font-size: 12px;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .system-notification.win {
+      background: rgba(55, 178, 77, 0.03);
+      border-color: rgba(55, 178, 77, 0.15);
+      color: var(--accent-green);
+    }
+
+    .input-panel {
+      background: rgba(12, 12, 14, 0.95);
+      border-top: 1px solid var(--panel-border);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 5;
+    }
+
+    .choices-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .choice-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      color: var(--text-color);
+      padding: 12px 18px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .choice-btn:hover {
+      background: rgba(199, 44, 44, 0.05);
+      border-color: var(--accent-crimson);
+      color: #fff;
+      transform: translateX(4px);
+    }
+
+    .choice-number {
+      font-weight: 700;
+      color: var(--accent-gold);
+      min-width: 20px;
+    }
+
+    .free-input-container {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .free-textbox {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: var(--text-color);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .free-textbox:focus {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 10px rgba(255, 212, 59, 0.1);
+    }
+
+    .submit-btn {
+      background: var(--accent-crimson);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      padding: 12px 20px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(199, 44, 44, 0.3);
+    }
+
+    .submit-btn:hover {
+      background: #e03131;
+      box-shadow: 0 0 20px rgba(199, 44, 44, 0.5);
+    }
+
+    /* FOOTER/TABS PANEL */
+    footer {
+      background: rgba(10, 10, 12, 0.95);
+      border-top: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .footer-nav {
+      display: flex;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .footer-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px 24px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.2s ease;
+    }
+
+    .footer-btn.active {
+      color: var(--text-color);
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 2px solid var(--accent-gold);
+    }
+
+    .footer-panel-content {
+      height: 120px;
+      overflow-y: auto;
+      padding: 12px 24px;
+      font-size: 12px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .footer-panel-content.active {
+      display: block;
+    }
+
+    /* SETTINGS PANEL FORM styling */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .settings-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .settings-col label {
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    .settings-input, .settings-select {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      color: var(--text-color);
+      font-family: var(--font-sans);
+      outline: none;
+      width: 100%;
+    }
+
+    .settings-input:focus, .settings-select:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .action-btn-danger {
+      background: var(--accent-crimson);
+      border: none;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+
+    .action-btn-danger:hover {
+      background: #e03131;
+    }
+
+    /* KEYFRAMES & ANIMATIONS */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 0.95; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Loading screen */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.5s ease;
+      font-family: var(--font-serif);
+    }
+
+    .loading-title {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      color: #fff;
+      text-shadow: 0 0 20px var(--accent-crimson-glow);
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.05);
+      border-top-color: var(--accent-crimson);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      box-shadow: 0 0 15px var(--accent-crimson-glow);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Utilities */
+    .flex-row-justify {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .alert {
+      color: var(--accent-gold);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-overlay">
+    <div class="loading-title">SENGOKU SOLDIER</div>
+    <div class="loading-spinner"></div>
+    <div style="margin-top: 20px; color: var(--text-muted); font-size: 14px; font-family: var(--font-sans)">Loading Simulation State...</div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="logo-icon"></div>
+      <h1>Sengoku Soldier</h1>
+    </div>
+    
+    <div class="date-badge">
+      <span style="font-size: 14px;">📅</span>
+      <span id="headerDate">Jaar 1540, Winter - 10e Maand, 15e Dag</span>
+    </div>
+    
+    <div class="api-status">
+      <div id="statusIndicator" class="api-status-indicator offline"></div>
+      <span id="statusText">Local Simulation Mode (Free)</span>
+    </div>
+  </header>
+
+  <!-- Main Grid Area -->
+  <div class="app-container">
+    
+    <!-- LEFT PANEL: Factions, Map, Relations, Objectives -->
+    <div class="panel">
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchLeftTab('mapTab', this)">Map</button>
+        <button class="tab-btn" onclick="switchLeftTab('relationsTab', this)">Relations</button>
+        <button class="tab-btn" onclick="switchLeftTab('goalsTab', this)">Objectives</button>
+      </div>
+      
+      <div class="panel-content" style="padding: 0; background: rgba(0,0,0,0.15)">
+        <!-- Tab: Map -->
+        <div id="mapTab" class="tab-content-left" style="height: 100%; display: block;">
+          <div class="map-container">
+            <svg class="map-svg" viewBox="0 0 400 300">
+              <!-- Hida (Anegakoji) -->
+              <path class="map-province anegakoji" d="M180,120 L210,120 L220,140 L190,150 Z" />
+              <text x="188" y="137" fill="#fff" font-size="9" font-weight="bold">Hida</text>
+              
+              <!-- Kai (Takeda) -->
+              <path class="map-province takeda" d="M220,140 L260,130 L270,160 L230,170 Z" />
+              <text x="240" y="155" fill="#fff" font-size="9" font-weight="bold">Kai</text>
+              
+              <!-- Echigo (Uesugi) -->
+              <path class="map-province uesugi" d="M210,120 L270,80 L290,110 L260,130 Z" />
+              <text x="245" y="105" fill="#fff" font-size="9" font-weight="bold">Echigo</text>
+              
+              <!-- Owari (Oda) -->
+              <path class="map-province oda" d="M150,150 L180,140 L190,160 L160,170 Z" />
+              <text x="162" y="158" fill="#fff" font-size="9" font-weight="bold">Owari</text>
+              
+              <!-- Suruga (Imagawa) -->
+              <path class="map-province imagawa" d="M210,170 L250,165 L260,195 L220,200 Z" />
+              <text x="225" y="187" fill="#fff" font-size="9" font-weight="bold">Suruga</text>
+            </svg>
+          </div>
+          <div style="padding: 16px;">
+            <div class="section-title" style="margin-top: 0">Faction Power Balance</div>
+            <div id="factionBalances" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab: Relations -->
+        <div id="relationsTab" class="tab-content-left" style="padding: 16px; display: none;">
+          <div id="relationsList" style="display: flex; flex-direction: column; gap: 2px;">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+        
+        <!-- Tab: Goals -->
+        <div id="goalsTab" class="tab-content-left" style="padding: 16px; display: none;">
+          <div class="section-title" style="margin-top: 0">Current Objective</div>
+          <div id="activeObjectives" class="objectives-list">
+            <!-- Dynamic content -->
+          </div>
+          
+          <div class="section-title">Active Threats</div>
+          <div id="activeThreats" class="threats-list">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CENTER PANEL: NARRATIVE LOG & ACTION SELECTION -->
+    <div class="center-column">
+      <div id="storyLog" class="story-log">
+        <!-- Dynamic content -->
+      </div>
+      
+      <div class="input-panel">
+        <div id="choicesContainer" class="choices-container">
+          <!-- Dynamic content -->
+        </div>
+        
+        <div class="free-input-container">
+          <input type="text" id="freeTextbox" class="free-textbox" placeholder="Type a custom narrative action (e.g., 'Practice swinging with my left arm at the stream')...">
+          <button id="submitActionBtn" class="submit-btn" onclick="submitFreeAction()">Submit Action</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RIGHT PANEL: CHARACTER SHEET & DETAILS -->
+    <div class="panel panel-right">
+      <div class="panel-header">
+        <h2>Character Sheet</h2>
+        <div style="font-size: 11px; font-weight: bold; color: var(--accent-gold)" id="playerRank">Gokenin</div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Player Profile Card -->
+        <div class="player-profile">
+          <div class="player-avatar" id="avatarLetter">L</div>
+          <div class="player-info-meta">
+            <h3 id="playerName">Li Hattori</h3>
+            <p id="playerDetails">Age 16 | Peasant Commoner</p>
+          </div>
+        </div>
+        
+        <!-- Conditions row -->
+        <div class="player-conditions">
+          <div class="condition-card">
+            <div class="condition-label">Health</div>
+            <div id="condHealth" class="condition-value">100/100</div>
+          </div>
+          <div class="condition-card">
+            <div class="condition-label">Morale</div>
+            <div id="condMorale" class="condition-value">75/100</div>
+          </div>
+          <div class="condition-card">
+            <div class="condition-label">Fatigue</div>
+            <div id="condFatigue" class="condition-value">0/100</div>
+          </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">VAL (Valor)</div>
+            <div id="statVAL" class="stat-val">18</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">LEA (Leadership)</div>
+            <div id="statLEA" class="stat-val">10</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">INT (Intel)</div>
+            <div id="statINT" class="stat-val">12</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">POL (Politics)</div>
+            <div id="statPOL" class="stat-val">8</div>
+          </div>
+        </div>
+        
+        <!-- Skills list -->
+        <div class="section-title" style="margin-top: 0">Combat Skills</div>
+        <div id="skillsList" class="skills-list">
+          <!-- Dynamic content -->
+        </div>
+        
+        <!-- Special Abilities -->
+        <div class="section-title">Special Abilities</div>
+        <div id="abilitiesList" class="skills-list">
+          <!-- Dynamic content -->
+        </div>
+        
+        <!-- Inventory Grid -->
+        <div class="section-title">Equipment & Inventory</div>
+        <div id="inventoryGrid" class="inventory-grid">
+          <div class="inventory-slot occupied" title="Weapon Slot" id="slotW1">⚔️</div>
+          <div class="inventory-slot" title="Sub-weapon Slot" id="slotW2"></div>
+          <div class="inventory-slot occupied" title="Armor Slot" id="slotArmor">🛡️</div>
+          <div class="inventory-slot occupied" title="Rations" id="slotRations">🍙<span class="item-count">x2</span></div>
+          <div class="inventory-slot occupied" title="Medkit" id="slotMed">💊<span class="item-count">x1</span></div>
+          <div class="inventory-slot occupied" title="Coins" id="slotCoins">🪙<span class="item-count" id="coinsCount">x0</span></div>
+          <div class="inventory-slot" id="slot6"></div>
+          <div class="inventory-slot" id="slot7"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Tabs Panel -->
+  <footer>
+    <div class="footer-nav">
+      <button class="footer-btn active" onclick="switchFooterTab('eventLogTab', this)">Event Log</button>
+      <button class="footer-btn" onclick="switchFooterTab('recapTab', this)">Session Recap</button>
+      <button class="footer-btn" onclick="switchFooterTab('settingsTab', this)">Settings</button>
+    </div>
+    
+    <!-- Tab: Event Log -->
+    <div id="eventLogTab" class="footer-panel-content active">
+      <div id="eventLogContainer" style="display: flex; flex-direction: column; gap: 6px;">
+        <!-- Log lines dynamically populated -->
+      </div>
+    </div>
+    
+    <!-- Tab: Session Recap -->
+    <div id="recapTab" class="footer-panel-content">
+      <div id="recapLogContainer" style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- Recaps populated -->
+      </div>
+    </div>
+    
+    <!-- Tab: Settings -->
+    <div id="settingsTab" class="footer-panel-content">
+      <div class="settings-grid">
+        <div class="settings-col">
+          <label for="simulationModeSelect">Simulation Engine Mode</label>
+          <select id="simulationModeSelect" class="settings-select" onchange="toggleEngineMode()">
+            <option value="local">Local Mode (Deterministic Rules Engine)</option>
+            <option value="gemini">Google Gemini AI Mode (Requires Free API Key)</option>
+            <option value="ollama">Local AI Mode (Ollama Server connection)</option>
+          </select>
+        </div>
+        
+        <div id="geminiConfigGroup" class="settings-col" style="display: none;">
+          <label for="geminiApiKeyInput">Gemini API Key (Google AI Studio - Free)</label>
+          <input type="password" id="geminiApiKeyInput" class="settings-input" placeholder="AIzaSy..." onchange="saveApiKey()">
+        </div>
+        
+        <div id="ollamaConfigGroup" class="settings-col" style="display: none;">
+          <label for="ollamaModelInput">Ollama Model Name</label>
+          <select id="ollamaModelInput" class="settings-select">
+            <option value="llama3">Llama 3 (8B) - Creative Roleplay</option>
+            <option value="gemma2:2b">Gemma 2 (2B) - Lightweight / Fast</option>
+            <option value="gemma2">Gemma 2 (9B)</option>
+          </select>
+        </div>
+        
+        <div class="settings-col" style="justify-content: flex-end;">
+          <button class="action-btn-danger" onclick="triggerHardReset()">Reset Simulation Database</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // CORE SIMULATION STATE SCHEMAS & DEFAULT DATA
+    const INITIAL_STATE = {
+      time: { year: 1540, season: "Winter", month: 10, day: 15 },
+      player: {
+        name: "Li Hattori",
+        age: 16,
+        rank: "Ashigaru Gashira",
+        stats: { LEA: 10, VAL: 18, INT: 12, POL: 8, WIS: 10 },
+        conditions: { health: 100, fatigue: 0, morale: 75 },
+        skills: {
+          "Two-Sword Mastery": 8,
+          "Left Hand Proficiency": 8,
+          "Right Hand Proficiency": 50,
+          "Single Sword": 10,
+          "Spear": 10,
+          "Mountain Movement": 15,
+          "Tactics": 10,
+          "Leadership": 10
+        },
+        abilities: [],
+        inventory: {
+          weapons: ["standard_sword"],
+          armor: "light_armor",
+          items: { medkit: 1, rations: 2, koku: 0 }
+        }
+      },
+      relations: {
+        yasutane: { name: "Lord Yasutane", type: "Mentor", strength: 54 },
+        yuki: { name: "Yuki", type: "Friend", strength: 30 },
+        takeshi: { name: "Takeshi", type: "Rival", strength: 20 },
+        tora: { name: "Tora", type: "Friend", strength: 10 },
+        hiro: { name: "Hiro", type: "Friend", strength: 10 },
+        gonji: { name: "Gonji", type: "Friend", strength: 10 },
+        yori: { name: "Yori", type: "Friend", strength: 10 },
+        goro: { name: "Sergeant Goro", type: "Instructor", strength: 10 },
+        watanabe: { name: "Lord Watanabe", type: "Enemy", strength: -20 },
+        shingen: { name: "Takeda Shingen", type: "Rival", strength: 0 }
+      },
+      factions: {
+        anegakoji: { name: "Anegakoji", troops: 380, status: "Survival Mode" },
+        takeda: { name: "Takeda", troops: 15000, status: "Expanding Rapidly" },
+        uesugi: { name: "Uesugi", troops: 12000, status: "Internal Struggles" },
+        shimazu: { name: "Shimazu", troops: 9000, status: "Naval Power" },
+        oda: { name: "Oda", troops: 8000, status: "Under Pressure" },
+        imagawa: { name: "Imagawa", troops: 18000, status: "Strongest" }
+      },
+      currentChapter: 1,
+      currentStep: "intro",
+      history: [],
+      recaps: []
+    };
+
+    let gameState = {};
+    let config = {
+      engineMode: "local",
+      geminiKey: "",
+      ollamaModel: "llama3"
+    };
+
+    // LOCAL NARRATIVE STEP DATABASE
+    const STORY_STEPS = {
+      "intro": {
+        title: "Chapter 1: The Recruitment",
+        location: "Village Square, Shiina Territory",
+        narrative: "The cold winter wind blows down Hida province. You stand in the center of the mountain village. A crowd has gathered in the square around a newly erected wooden notice board. It is a recruitment call for the Shiina clan under the command of Lord Yasutane, summoning able men to form lines against Takeda border pressure. Standing here holding the small hand of your 5-year-old sister Kenjiko, your heart pounds. A memory of a dual-blade warrior cutting through shadow assassins flashes inside your head. You don't know why, but you feel called to this.",
+        choices: [
+          { text: "Step forward and shout loudly: 'I'M JOINING THE ARMY!'", nextStep: "meet_yasutane", modifiers: { "player.stats.LEA": 2, "player.conditions.morale": 5 } },
+          { text: "Observe the notice silently, memorizing the requirements and pay details.", nextStep: "meet_yasutane", modifiers: { "player.stats.INT": 2 } }
+        ]
+      },
+      "meet_yasutane": {
+        title: "Meeting Lord Yasutane",
+        location: "Village Square, Shiina Territory",
+        narrative: "As you step forward, the crowd parts. A middle-aged samurai in green and silver armor approaches. It is Lord Shiina Yasutane himself, governor of this district. He stops, looking down at you. His eyes carry a flicker of guilt, sorrow, and surprise. 'You wish to join my forces, boy?' he asks. The crowd goes silent, wondering why the Lord is speaking to a peasant youth.",
+        choices: [
+          { text: "Bow respectfully and say yes formally. 'I wish to protect my family, my lord.'", nextStep: "home_leave", modifiers: { "player.stats.POL": 2, "relations.yasutane.strength": 5 } },
+          { text: "Straighten your back and look him in the eyes: 'Hell yes! I'm ready to fight!'", nextStep: "home_leave", modifiers: { "player.stats.VAL": 2, "relations.yasutane.strength": -2 } },
+          { text: "Ask him directly: 'My lord, do we know each other?'", nextStep: "home_leave", modifiers: { "player.stats.INT": 2, "relations.yasutane.strength": 2 } }
+        ]
+      },
+      "home_leave": {
+        title: "Facing the Family",
+        location: "Your Mountain Home",
+        narrative: "You walk back home, the recruitment token in your pouch. Entering the small thatched house, your mother Yuki is sitting at the loom. Your sister Mei (15) is hanging laundry. Seeing your expression, your mother's face goes pale. 'No, Li. Don't say it...' she whispers, knowing exactly what joining the army means.",
+        choices: [
+          { text: "Tell her directly and honestly: 'Mother, I am joining the army. I need to protect us.'", nextStep: "three_days_prep", modifiers: { "player.stats.LEA": 2, "player.conditions.morale": -5 } },
+          { text: "Sit down at the table and explain gently that they need the pay (10 koku/year).", nextStep: "three_days_prep", modifiers: { "player.stats.POL": 2, "player.inventory.items.koku": 10 } },
+          { text: "Ask her about your father: 'Who was he? Did he die like this?'", nextStep: "three_days_prep", modifiers: { "player.stats.INT": 2 } }
+        ]
+      },
+      "three_days_prep": {
+        title: "The Three Days of Preparation",
+        location: "Shibata Forest",
+        narrative: "Your mother reluctantly yields, and hands you a small wrapped short sword. 'Your father's blade,' she whispers, crying. You have three days to prepare before you report to the Shiina training camp. How do you spend the time?",
+        choices: [
+          { text: "Train in secret with two wooden swords in the deep forest.", nextStep: "departure", modifiers: { "player.skills.Two-Sword Mastery": 4, "player.stats.VAL": 2 } },
+          { text: "Go maps-searching and study the mountain pathways surrounding the village.", nextStep: "departure", modifiers: { "player.skills.Mountain Movement": 5, "player.stats.INT": 2 } },
+          { text: "Spend every moment with your mother and sisters, repairing the roof.", nextStep: "departure", modifiers: { "relations.yuki.strength": 10, "player.conditions.morale": 10 } }
+        ]
+      },
+      "departure": {
+        title: "Chapter 2: Basic Training",
+        location: "Shiina Training Camp",
+        narrative: "The next morning you depart. At the camp, thirty young recruits are gathered in a messy line. Commander Kaito, a grizzled captain with a deep scar on his neck, paces in front of you. 'From this day, your lives belong to the Shiina stam!' he roars. He tosses a wooden training sword to you. 'You, boy! Step out. Let's see if you can hold a blade.'",
+        choices: [
+          { text: "Engage Genji (the opponent Kaito calls out) with aggressive speed.", nextStep: "sparring_genji", modifiers: { "player.stats.VAL": 2, "player.skills.Single Sword": 5 } },
+          { text: "Adopt a defensive stance, waiting to counter Genji.", nextStep: "sparring_genji", modifiers: { "player.stats.INT": 2, "player.skills.Tactics": 4 } }
+        ]
+      },
+      "sparring_genji": {
+        title: "The First Sparring Victory",
+        location: "Shiina Sparring Ring",
+        narrative: "You step into the ring. Genji, a stocky farm boy, charges you with pure strength. You sidestep smoothly and strike his wrist with a sharp *clack*. He drops the sword with a yelp. The yard goes quiet. Kaito raises an eyebrow. 'Quick hands, peasant. Do you think speed beats armor?'",
+        choices: [
+          { text: "Answer with humility: 'Only if I train harder, sir.'", nextStep: "training_start", modifiers: { "relations.goro.strength": 5, "player.stats.POL": 2 } },
+          { text: "Answer confidently: 'Speed kills, Commander.'", nextStep: "training_start", modifiers: { "relations.goro.strength": -2, "player.stats.VAL": 2 } }
+        ]
+      },
+      "training_start": {
+        title: "Three Months of Grinding",
+        location: "Shiina Training Grounds",
+        narrative: "Three months of training pass. You build a strong bond with Hiro, coaching him in secret, and keep your dual-blade style hidden. However, during a night walk in the forest, you notice a shadow meeting. You peer through the branches: Lord Mitsui Sadamune (Anegakoji's western pass lord) is meeting with Takeda officers in red lacquer armor! They are planning to open the Southern Pass in one month. You have discovered treason.",
+        choices: [
+          { text: "Write an anonymous letter detailing the plot and slip it under Lord Yasutane's door.", nextStep: "mitsui_conspiracy", modifiers: { "player.stats.INT": 3, "player.stats.POL": 2 } },
+          { text: "Confront Mitsui's men directly to get more proof (Highly Dangerous).", nextStep: "mitsui_conspiracy", modifiers: { "player.stats.VAL": 4, "player.conditions.health": -20 } }
+        ]
+      },
+      "mitsui_conspiracy": {
+        title: "Promotion to Gokenin",
+        location: "Yasutane's Command Office",
+        narrative: "The final test arrives. Your Blue Team wins the capture-the-flag exercise. The next day, you are summoned directly to Lord Yasutane's chambers. He slides your anonymous letter across the table. 'You wrote this. I know your handwriting, Li. Your father was Takeshi Hattori, the legendary Twin Demon. He was my closest friend, assassinated by Imagawa in 1538. I took your family in to protect them. Now you have exposed Mitsui's betrayal. I am promoting you to Gokenin (Samurai Officer) to lead your own company.'",
+        choices: [
+          { text: "Accept the rank and propose building a squad of outcasts ('Team Shock').", nextStep: "forming_team", modifiers: { "player.stats.LEA": 3, "relations.yasutane.strength": 8 } },
+          { text: "Ask for your father's legendary twin swords, Kage & Hikari.", nextStep: "forming_team", modifiers: { "player.stats.VAL": 2, "player.stats.POL": -2 } }
+        ]
+      },
+      "forming_team": {
+        title: "Chapter 3: Team Shock",
+        location: "Garrison Courtyard",
+        narrative: "You recruit ten outcasts - the 'rejects' who have something to prove, including Yuki (the female naginata warrior), Takeshi, Hiro, and Gonji. You gather them in the courtyard. They look at you, a 16-year-old commander, with skepticism and doubt.",
+        choices: [
+          { text: "Give an inspiring speech about proving the traditionalist nobles wrong.", nextStep: "border_patrol", modifiers: { "player.stats.LEA": 4, "player.conditions.morale": 15 } },
+          { text: "Draw your sword and challenge anyone who doubts you to a duel. Yuki steps forward.", nextStep: "yuki_duel", modifiers: { "player.stats.VAL": 3 } }
+        ]
+      },
+      "yuki_duel": {
+        title: "Duel with Yuki",
+        location: "Garrison Courtyard",
+        narrative: "Yuki attacks with her naginata, using its superior range. You deflect her sweeps, draw your second wooden sword mid-flow, and place the blade at her neck in ten seconds. Murmurs of awe ripple through the yard. She bows respectfully: 'I accept you as my commander.'",
+        choices: [
+          { text: "Shake her hand: 'We fight together now.'", nextStep: "border_patrol", modifiers: { "relations.yuki.strength": 15, "player.stats.LEA": 2 } }
+        ]
+      },
+      "border_patrol": {
+        title: "First Mission & Ambush",
+        location: "Southern Mountains Border",
+        narrative: "Your team is sent to patrol the southern pass. Jin and Kaze (your scouts) sprint back - a squad of Takeda scouts has crossed the border. If they escape, the garrison will be compromised.",
+        choices: [
+          { text: "Set up a quick mountain ambush using your scouts as bait.", nextStep: "ambush_victory", modifiers: { "player.stats.INT": 3, "player.skills.Tactics": 5 } },
+          { text: "Charge them head-on with Tora leading the vanguard.", nextStep: "ambush_victory", modifiers: { "player.stats.VAL": 3, "player.conditions.health": -10 } }
+        ]
+      },
+      "ambush_victory": {
+        title: "Chapter 4: Battle of Kawanakajima",
+        location: "Kawanakajima Plains",
+        narrative: "Your patrol is a success. You return with critical intel: Takeda is launching a full invasion. Spring arrives, and the two armies clash at the Kawanakajima Plains. 55,000 Allies vs 40,000 Takeda elites. Your 5th Regiment holds the crucial western flank. Suddenly, Takeda heavy cavalry charges directly at your line. The soldiers around you start to panic.",
+        choices: [
+          { text: "Leap onto a supply cart, draw your swords and roar: 'I AM LI HATTORI, SON OF TAKESHI!'", nextStep: "kawanakajima_rally", modifiers: { "player.stats.LEA": 5, "player.conditions.morale": 20 } },
+          { text: "Keep your head down and fight defensively beside Yuki to maintain the line.", nextStep: "kawanakajima_rally", modifiers: { "player.stats.VAL": 3, "player.skills.Single Sword": 5 } }
+        ]
+      },
+      "kawanakajima_rally": {
+        title: "Rallying the Center",
+        location: "Kawanakajima Center Line",
+        narrative: "Hearing your father's legendary name, the soldiers roar. The line holds! In the distance, you see a figure on a massive black horse: Takeda Shingen himself. He rides down the line, charging straight at your position. You stand alone against a legendary giant.",
+        choices: [
+          { text: "Evade his horse and strike at its legs, risking getting trampled.", nextStep: "shingen_clash", modifiers: { "player.stats.INT": 3, "player.conditions.health": -15 } },
+          { text: "Commit everything to a double-strike, awakening your bloodline 'Kishin no Shūchū'!", nextStep: "shingen_clash", modifiers: { "player.stats.VAL": 5, "player.skills.Two-Sword Mastery": 8 } }
+        ]
+      },
+      "shingen_clash": {
+        title: "Clash with the Legend",
+        location: "Kawanakajima Battle Ground",
+        narrative: "Your eyes turn crimson red as the 'Kishin no Shūchū' activates. You deflect his cavalry sword and drive your blade into his ribs, drawing blood. Shocked, Shingen punches you in the chest, sending you flying. As your allies form a shield wall to protect you, Shingen laughs: 'Magnificent. Grow stronger, boy. We will finish this.' Takeda retreats. You survived.",
+        choices: [
+          { text: "Wakes up in the medical tent, receiving recommendations for Captain.", nextStep: "mizuno_prep", modifiers: { "player.stats.POL": 3, "player.stats.LEA": 2 } }
+        ]
+      },
+      "mizuno_prep": {
+        title: "Chapter 5: Fort Mizuno",
+        location: "Takayama Command Hall",
+        narrative: "Three months pass. You are promoted to Captain of the 3rd Company (100 men). Lord Yasutane calls you in and hands you KAGE and HIKARI - your father's legendary twin blades. Suddenly, scouts bring grave news: Takeda Shingen is marching with 10,000 troops. Your company is deployed to hold the strategic Fort Mizuno. 2,000 defenders against 10,000. How do you prepare?",
+        choices: [
+          { text: "Run intensive wall-defense and choke-point training drills.", nextStep: "mizuno_day1", modifiers: { "player.skills.Tactics": 6, "player.stats.INT": 2 } },
+          { text: "Gather the men around the fire, telling stories of Team Shock to raise morale.", nextStep: "mizuno_day1", modifiers: { "player.stats.LEA": 4, "player.conditions.morale": 20 } }
+        ]
+      },
+      "mizuno_day1": {
+        title: "Siege of Fort Mizuno - Day 1",
+        location: "Fort Mizuno Eastern Wall",
+        narrative: "Takeda forces arrive, surrounding the fort like a red tide. Siege ladders slam against your wall. A massive breach opens to your left. Takeshi's squad is outnumbered and about to be cut down.",
+        choices: [
+          { text: "Sprint to the breach, drawing Kage and Hikari to hold the line personally.", nextStep: "mizuno_day2", modifiers: { "player.stats.VAL": 4, "player.conditions.health": -10 } },
+          { text: "Coordinate overlapping archer volleys to cover Takeshi's retreat.", nextStep: "mizuno_day2", modifiers: { "player.stats.INT": 4, "player.skills.Tactics": 4 } }
+        ]
+      },
+      "mizuno_day2": {
+        title: "Day 2: The Sabotage Run",
+        location: "Outside Fort Mizuno Walls",
+        narrative: "Takeda rolls forward a massive 40-foot siege tower, threatening to drop its drawbridge onto your ramparts. If it reaches the wall, the fort will fall.",
+        choices: [
+          { text: "Lead a suicide sabotage run outside the walls to blow up the wheels.", nextStep: "mizuno_day4", modifiers: { "player.stats.INT": 4, "player.conditions.health": -30, "player.stats.VAL": 3 } },
+          { text: "Instruct archers to target the tower with flaming arrows from safety.", nextStep: "mizuno_day4", modifiers: { "player.skills.Tactics": 4 } }
+        ]
+      },
+      "mizuno_day4": {
+        title: "Day 4: The Breaking Point",
+        location: "Fort Mizuno Command Post",
+        narrative: "The siege is grinding your company down. You are down to 50 active soldiers, and you are heavily bandaged. Facing a massive Crimson Legion flank assault, the situation is desperate.",
+        choices: [
+          { text: "Send Hana to request reinforcements from Commander Takano (Smart Call).", nextStep: "mizuno_reinforcements", modifiers: { "player.stats.INT": 3, "player.stats.POL": 3 } },
+          { text: "Go full defensive focus with what you have, bracing for the impact.", nextStep: "mizuno_reinforcements", modifiers: { "player.stats.VAL": 4, "player.conditions.health": -40 } }
+        ]
+      },
+      "mizuno_reinforcements": {
+        title: "Day 5: The Desperate Charge",
+        location: "Eastern Wall Ramparts",
+        narrative: "Takano sends 70 reinforcements, giving you 120 soldiers. The Takeda assault is relentless. Suddenly, 20 Crimson Legion elites scale the walls. Your lines are buckling. Your left arm is severely damaged, but you see the commander of the Crimson Legion approaching.",
+        choices: [
+          { text: "Charge the elites, utilizing 'Unyielding Will' to fight past your limits!", nextStep: "mizuno_victory", modifiers: { "player.stats.VAL": 5, "player.conditions.health": -20 } },
+          { text: "Order Masaru's reserves to block them while you organize a fallback.", nextStep: "mizuno_victory", modifiers: { "player.stats.INT": 4, "player.skills.Tactics": 5 } }
+        ]
+      },
+      "mizuno_victory": {
+        title: "Chapter 6: Aftermath & Home Leave",
+        location: "Takayama Infirmary",
+        narrative: "You collapse from blood loss, but the wall held! Two days later, Anegakoji reinforcements arrive, forcing Takeda to retreat. You are awarded the Medal of Valor. However, the noble council blocks your promotion to Officer. You are allowed 1 week home leave to recover.",
+        choices: [
+          { text: "Travel back to Shibata village to visit your mother, Mei, and Kenjiro.", nextStep: "home_leave_reunion", modifiers: { "player.conditions.health": 30, "player.conditions.morale": 30 } },
+          { text: "Stay at Takayama to train your left hand and study politics with Yasutane.", nextStep: "training_recovery", modifiers: { "player.skills.Left Hand Proficiency": 10, "player.stats.POL": 5 } }
+        ]
+      },
+      "home_leave_reunion": {
+        title: "Family Reunion",
+        location: "Your Mountain Home",
+        narrative: "You arrive home. Your mother screams and throws her arms around you. They have rebuilt the house and hired a teacher for Kenjiro with the money you sent. Seeing your scars and your father's swords, they look at you with awe and fear. You spend your days resting and showing basic sword forms to your brother.",
+        choices: [
+          { text: "Return to Takayama Fortress, feeling a new resolve to protect them.", nextStep: "next_campaign_summons", modifiers: { "player.conditions.morale": 20 } }
+        ]
+      },
+      "training_recovery": {
+        title: "Politics & Recovery",
+        location: "Takayama Training Grounds",
+        narrative: "You spend weeks in isolation, training your left hand to match your right and studying historical battles. Your sword movements are becoming coordinated and precise. You are no longer just relying on speed; you have control.",
+        choices: [
+          { text: "Wait for the next summons from Lord Yasutane.", nextStep: "next_campaign_summons", modifiers: { "player.stats.INT": 2 } }
+        ]
+      },
+      "next_campaign_summons": {
+        title: "The Next War Approaches",
+        location: "Lord Yasutane's Office",
+        narrative: "You are summoned to the command hall. Lord Yasutane stands over a map. 'Takeda is moving again, 30,000 troops. The ceasefire is over. Your 3rd Company is assigned to garrison duty. But remember, the Imagawa and the conspirators are watching you now. You are a target. Are you ready, Captain?'",
+        choices: [
+          { text: "Raise Kage and Hikari: 'I am ready, my lord. Let them come.'", nextStep: "victory_end", modifiers: { "player.conditions.morale": 10, "player.stats.VAL": 2 } },
+          { text: "Confirm you will focus on building your team and finding a strategist.", nextStep: "victory_end", modifiers: { "player.stats.INT": 3 } }
+        ]
+      },
+      "victory_end": {
+        title: "Sengoku Soldier - Victory!",
+        location: "Fortress Wall, Takayama",
+        narrative: "You stand on the fortress walls under the stars. You are 17 years old. A Captain of 100 soldiers, wielding your father's legendary blades. The nobles plot against you, the Imagawa watch from the shadows, and Takeda Shingen waits for a rematch. But you are ready. Your legend is just beginning.",
+        choices: [
+          { text: "Restart the Simulation", nextStep: "intro", modifiers: { "reset": true } }
+        ]
+      }
+    };
+
+    // INIT APP
+    window.onload = function() {
+      // Load configuration
+      loadConfig();
+      // Load game state
+      loadGame();
+      
+      // Remove loading overlay
+      setTimeout(() => {
+        document.getElementById('loadingScreen').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loadingScreen').style.display = 'none';
+        }, 500);
+      }, 800);
+    };
+
+    function loadConfig() {
+      const savedConfig = localStorage.getItem('sengoku_config');
+      if (savedConfig) {
+        config = JSON.parse(savedConfig);
+        document.getElementById('simulationModeSelect').value = config.engineMode;
+        document.getElementById('geminiApiKeyInput').value = config.geminiKey || '';
+        document.getElementById('ollamaModelInput').value = config.ollamaModel || 'llama3';
+        toggleEngineMode(false);
+      }
+    }
+
+    function saveConfig() {
+      config.engineMode = document.getElementById('simulationModeSelect').value;
+      config.geminiKey = document.getElementById('geminiApiKeyInput').value;
+      config.ollamaModel = document.getElementById('ollamaModelInput').value;
+      localStorage.setItem('sengoku_config', JSON.stringify(config));
+      updateStatusIndicator();
+    }
+
+    function toggleEngineMode(shouldSave = true) {
+      const mode = document.getElementById('simulationModeSelect').value;
+      const geminiGroup = document.getElementById('geminiConfigGroup');
+      const ollamaGroup = document.getElementById('ollamaConfigGroup');
+      
+      if (mode === 'gemini') {
+        geminiGroup.style.display = 'flex';
+        ollamaGroup.style.display = 'none';
+      } else if (mode === 'ollama') {
+        geminiGroup.style.display = 'none';
+        ollamaGroup.style.display = 'flex';
+      } else {
+        geminiGroup.style.display = 'none';
+        ollamaGroup.style.display = 'none';
+      }
+
+      if (shouldSave) saveConfig();
+    }
+
+    function updateStatusIndicator() {
+      const indicator = document.getElementById('statusIndicator');
+      const text = document.getElementById('statusText');
+      
+      if (config.engineMode === 'local') {
+        indicator.className = 'api-status-indicator offline';
+        text.innerText = 'Local Simulation Mode (Free)';
+      } else if (config.engineMode === 'gemini') {
+        indicator.className = 'api-status-indicator ai';
+        text.innerText = 'Gemini AI Mode';
+      } else if (config.engineMode === 'ollama') {
+        indicator.className = 'api-status-indicator ai';
+        text.innerText = 'Ollama Local AI Mode';
+      }
+    }
+
+    // GAME STATE ACTIONS
+    function loadGame() {
+      const savedState = localStorage.getItem('sengoku_state');
+      if (savedState) {
+        try {
+          gameState = JSON.parse(savedState);
+          // Sync dates/times or details if missing
+          validateState(gameState);
+        } catch (e) {
+          console.error("Error loading state, resetting", e);
+          resetState();
+        }
+      } else {
+        resetState();
+      }
+      renderUI();
+    }
+
+    function validateState(state) {
+      // Fallbacks for potential schema discrepancies
+      if (!state.player.stats.WIS) state.player.stats.WIS = 10;
+      if (!state.player.skills["Tactics"]) state.player.skills["Tactics"] = 10;
+      if (!state.player.skills["Leadership"]) state.player.skills["Leadership"] = 10;
+    }
+
+    function resetState() {
+      gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
+      gameState.history.push({
+        type: 'system',
+        text: 'Simulation Database Initialized. Starting story path.',
+        timestamp: getTimestampString()
+      });
+      saveGame();
+    }
+
+    function saveGame() {
+      localStorage.setItem('sengoku_state', JSON.stringify(gameState));
+    }
+
+    function triggerHardReset() {
+      if (confirm("Are you sure you want to delete your current game state and restart the simulation?")) {
+        resetState();
+        loadGame();
+        // Clear narrative area
+        document.getElementById('storyLog').innerHTML = '';
+        renderUI();
+      }
+    }
+
+    // TIME & DATA STRING HELPERS
+    function getTimestampString() {
+      const time = gameState.time;
+      return `Jaar ${time.year}, ${time.season} - M${time.month} D${time.day}`;
+    }
+
+    // TAB CONTROLLER
+    function switchLeftTab(tabId, btn) {
+      document.querySelectorAll('.tab-content-left').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).style.display = 'block';
+      btn.classList.add('active');
+    }
+
+    function switchFooterTab(tabId, btn) {
+      document.querySelectorAll('.footer-panel-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.footer-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // UI RENDERERS
+    function renderUI() {
+      // Sync date meta
+      const time = gameState.time;
+      const dateText = `Jaar ${time.year}, ${time.season} - ${time.month}e Maand, ${time.day}e Dag`;
+      document.getElementById('headerDate').innerText = dateText;
+
+      // Sync character meta
+      const player = gameState.player;
+      document.getElementById('playerName').innerText = player.name;
+      document.getElementById('playerDetails').innerText = `Age ${player.age} | ${player.rank}`;
+      document.getElementById('playerRank').innerText = player.rank;
+      
+      // Set Avatar initials
+      document.getElementById('avatarLetter').innerText = player.name.charAt(0);
+
+      // Sync conditions
+      const conds = player.conditions;
+      document.getElementById('condHealth').innerText = `${conds.health}/100`;
+      document.getElementById('condMorale').innerText = `${conds.morale}/100`;
+      document.getElementById('condFatigue').innerText = `${conds.fatigue}/100`;
+
+      // Set warnings for conditions
+      setConditionClass('condHealth', conds.health, false);
+      setConditionClass('condMorale', conds.morale, false);
+      setConditionClass('condFatigue', conds.fatigue, true);
+
+      // Sync stats
+      document.getElementById('statVAL').innerText = player.stats.VAL;
+      document.getElementById('statLEA').innerText = player.stats.LEA;
+      document.getElementById('statINT').innerText = player.stats.INT;
+      document.getElementById('statPOL').innerText = player.stats.POL;
+
+      // Sync skills
+      const skillsContainer = document.getElementById('skillsList');
+      skillsContainer.innerHTML = '';
+      for (const [skill, val] of Object.entries(player.skills)) {
+        const item = document.createElement('div');
+        item.className = `skill-item ${val >= 60 ? 'advanced' : ''}`;
+        
+        let desc = 'Beginner';
+        if (val >= 80) desc = 'Legend';
+        else if (val >= 60) desc = 'Master';
+        else if (val >= 40) desc = 'Expert';
+        else if (val >= 20) desc = 'Advanced';
+
+        item.innerHTML = `<span class="skill-name">${skill}</span><span class="skill-val">${val}/100 (${desc})</span>`;
+        skillsContainer.appendChild(item);
+      }
+
+      // Sync abilities
+      const abilitiesContainer = document.getElementById('abilitiesList');
+      abilitiesContainer.innerHTML = '';
+      if (player.abilities.length === 0) {
+        abilitiesContainer.innerHTML = '<div style="font-size: 11px; color: var(--text-muted); font-style: italic;">No special abilities unlocked yet.</div>';
+      } else {
+        player.abilities.forEach(ab => {
+          const item = document.createElement('div');
+          item.className = 'skill-item advanced';
+          item.innerHTML = `<span class="skill-name">🌟 ${ab.name}</span><span class="skill-val">${ab.val}/100</span>`;
+          abilitiesContainer.appendChild(item);
+        });
+      }
+
+      // Sync Faction Balances
+      const factionContainer = document.getElementById('factionBalances');
+      factionContainer.innerHTML = '';
+      for (const [id, faction] of Object.entries(gameState.factions)) {
+        const row = document.createElement('div');
+        row.className = 'flex-row-justify';
+        let clanColor = 'var(--text-muted)';
+        if (id === 'anegakoji') clanColor = 'var(--accent-gold)';
+        else if (id === 'takeda') clanColor = 'var(--accent-crimson)';
+        else if (id === 'uesugi') clanColor = 'var(--accent-green)';
+        else if (id === 'oda') clanColor = 'var(--accent-blue)';
+        else if (id === 'imagawa') clanColor = 'var(--accent-purple)';
+
+        row.innerHTML = `<span style="font-weight: bold; color: ${clanColor}">${faction.name}</span><span>${faction.troops.toLocaleString()} troops (${faction.status})</span>`;
+        factionContainer.appendChild(row);
+      }
+
+      // Sync Relations
+      const relationsContainer = document.getElementById('relationsList');
+      relationsContainer.innerHTML = '';
+      for (const [id, rel] of Object.entries(gameState.relations)) {
+        const card = document.createElement('div');
+        card.className = 'relation-card';
+        
+        let typeClass = 'neutral';
+        if (rel.strength > 40) typeClass = ''; // uses default green
+        else if (rel.strength < 0) typeClass = 'negative';
+
+        card.innerHTML = `
+          <div class="relation-info">
+            <span class="relation-name">${rel.name}</span>
+            <span class="relation-type">${rel.type} (${rel.strength > 0 ? '+' : ''}${rel.strength})</span>
+          </div>
+          <div class="relation-meter">
+            <div class="relation-progress ${typeClass}" style="width: ${Math.max(0, Math.min(100, (rel.strength + 100) / 2))}%"></div>
+          </div>
+        `;
+        relationsContainer.appendChild(card);
+      }
+
+      // Sync Inventory Grid
+      const inventory = player.inventory;
+      document.getElementById('slotW1').innerHTML = inventory.weapons[0] ? '⚔️' : '';
+      document.getElementById('slotW1').title = inventory.weapons[0] ? `Primary Weapon: ${inventory.weapons[0].toUpperCase()}` : 'Empty Weapon Slot';
+      
+      document.getElementById('slotW2').innerHTML = inventory.weapons[1] ? '⚔️' : '';
+      document.getElementById('slotW2').title = inventory.weapons[1] ? `Secondary Weapon: ${inventory.weapons[1].toUpperCase()}` : 'Empty Weapon Slot';
+      
+      document.getElementById('slotArmor').innerHTML = inventory.armor ? '🛡️' : '';
+      document.getElementById('slotArmor').title = inventory.armor ? `Armor: ${inventory.armor.replace('_', ' ').toUpperCase()}` : 'No Armor';
+
+      document.getElementById('slotRations').innerHTML = inventory.items.rations > 0 ? `🍙<span class="item-count">x${inventory.items.rations}</span>` : '';
+      document.getElementById('slotRations').className = `inventory-slot ${inventory.items.rations > 0 ? 'occupied' : ''}`;
+      
+      document.getElementById('slotMed').innerHTML = inventory.items.medkit > 0 ? `💊<span class="item-count">x${inventory.items.medkit}</span>` : '';
+      document.getElementById('slotMed').className = `inventory-slot ${inventory.items.medkit > 0 ? 'occupied' : ''}`;
+
+      document.getElementById('coinsCount').innerText = `x${inventory.items.koku}`;
+
+      // Sync Objectives & Threats
+      const objectivesContainer = document.getElementById('activeObjectives');
+      objectivesContainer.innerHTML = '';
+      const threatsContainer = document.getElementById('activeThreats');
+      threatsContainer.innerHTML = '';
+
+      if (gameState.currentChapter === 1) {
+        objectivesContainer.innerHTML = `
+          <div class="objective-item">
+            <div class="objective-title">Join The Army <span class="objective-status">In Progress</span></div>
+            Report to the local recruiters in Shibata village square.
+          </div>
+        `;
+        threatsContainer.innerHTML = `
+          <div class="threat-item">
+            <div class="threat-title">Poverty</div>
+            Your family lacks food and basic resources. You must support them.
+          </div>
+        `;
+      } else if (gameState.currentChapter === 2) {
+        objectivesContainer.innerHTML = `
+          <div class="objective-item">
+            <div class="objective-title">Survive Basic Training <span class="objective-status">In Progress</span></div>
+            Complete the 3-month physical and weapon training, and pass Kaito's combat test.
+          </div>
+        `;
+        threatsContainer.innerHTML = `
+          <div class="threat-item">
+            <div class="threat-title">Lord Mitsui</div>
+            The pass lord is behaving suspiciously. Watch your surroundings.
+          </div>
+        `;
+      } else if (gameState.currentChapter === 3) {
+        objectivesContainer.innerHTML = `
+          <div class="objective-item">
+            <div class="objective-title">Command Team Shock <span class="objective-status">In Progress</span></div>
+            Unify your outcast unit and complete border patrol missions successfully.
+          </div>
+        `;
+        threatsContainer.innerHTML = `
+          <div class="threat-item">
+            <div class="threat-title">Takeda border raids</div>
+            Takeda scouts are infiltrating Hida province borders.
+          </div>
+        `;
+      } else if (gameState.currentChapter >= 4) {
+        objectivesContainer.innerHTML = `
+          <div class="objective-item">
+            <div class="objective-title">Protect Hida Borders <span class="objective-status">Critical</span></div>
+            Defend Fort Mizuno and secure Anegakoji territory against Takeda Shingen's invasion forces.
+          </div>
+        `;
+        threatsContainer.innerHTML = `
+          <div class="threat-item">
+            <div class="threat-title">Takeda Shingen</div>
+            The Legendary Warlord is leading the campaigns personally.
+          </div>
+          <div class="threat-item">
+            <div class="threat-title">Noble Conspiracy</div>
+            Lords Kuroda, Fujimoto, and Saito want Takeshi's bloodline dead.
+          </div>
+        `;
+      }
+
+      // Sync Event Log Tab
+      const logContainer = document.getElementById('eventLogContainer');
+      logContainer.innerHTML = '';
+      // Limit to last 20 history entries
+      const startHistIndex = Math.max(0, gameState.history.length - 20);
+      for (let i = gameState.history.length - 1; i >= startHistIndex; i--) {
+        const item = gameState.history[i];
+        const logLine = document.createElement('div');
+        logLine.style.borderBottom = '1px solid rgba(255, 255, 255, 0.02)';
+        logLine.style.paddingBottom = '4px';
+        logLine.innerHTML = `<span style="color: var(--accent-gold); font-weight: bold; margin-right: 10px;">[${item.timestamp}]</span> <span style="color: var(--text-muted)">${item.text}</span>`;
+        logContainer.appendChild(logLine);
+      }
+
+      // Sync Session Recap Tab
+      const recapContainer = document.getElementById('recapLogContainer');
+      recapContainer.innerHTML = '';
+      if (gameState.recaps.length === 0) {
+        recapContainer.innerHTML = '<div style="font-style: italic; color: var(--text-muted)">No major story recaps logged yet. Advance through the story chapters.</div>';
+      } else {
+        for (let i = gameState.recaps.length - 1; i >= 0; i--) {
+          const recap = gameState.recaps[i];
+          const card = document.createElement('div');
+          card.style.background = 'rgba(255, 255, 255, 0.01)';
+          card.style.border = '1px solid var(--panel-border)';
+          card.style.padding = '8px 12px';
+          card.style.borderRadius = '4px';
+          card.innerHTML = `<div style="font-weight: bold; color: var(--accent-gold); margin-bottom: 2px;">Chapter ${recap.chapter} Summary</div><div style="color: var(--text-muted); line-height: 1.4">${recap.text}</div>`;
+          recapContainer.appendChild(card);
+        }
+      }
+
+      // Render Current Narrative & choices
+      renderNarrativeSection();
+      updateStatusIndicator();
+    }
+
+    function setConditionClass(elId, val, invert) {
+      const el = document.getElementById(elId);
+      el.className = 'condition-value';
+      if (!invert) {
+        if (val < 30) el.classList.add('danger');
+        else if (val < 60) el.classList.add('warning');
+      } else {
+        if (val > 70) el.classList.add('danger');
+        else if (val > 45) el.classList.add('warning');
+      }
+    }
+
+    // NARRATIVE DISPATCHER
+    function renderNarrativeSection() {
+      const step = STORY_STEPS[gameState.currentStep];
+      if (!step) {
+        console.error("Step not found: " + gameState.currentStep);
+        return;
+      }
+
+      // Sync story text
+      const log = document.getElementById('storyLog');
+      log.innerHTML = '';
+
+      // Append Location Header
+      const header = document.createElement('div');
+      header.style.color = 'var(--accent-gold)';
+      header.style.fontFamily = 'var(--font-serif)';
+      header.style.fontSize = '18px';
+      header.style.fontWeight = 'bold';
+      header.style.borderBottom = '1px solid rgba(255, 212, 59, 0.15)';
+      header.style.paddingBottom = '8px';
+      header.style.marginBottom = '12px';
+      header.innerText = `${step.title} — ${step.location}`;
+      log.appendChild(header);
+
+      // Append Main Narrative paragraphs
+      const p = document.createElement('p');
+      p.className = 'story-paragraph';
+      p.innerText = step.narrative;
+      log.appendChild(p);
+
+      // Render Choices buttons
+      const choicesContainer = document.getElementById('choicesContainer');
+      choicesContainer.innerHTML = '';
+      
+      step.choices.forEach((choice, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.onclick = () => selectChoice(choice);
+        btn.innerHTML = `<span class="choice-number">${index + 1}.</span> <span>${choice.text}</span>`;
+        choicesContainer.appendChild(btn);
+      });
+    }
+
+    // CHOICE SELECTION HANDLER
+    function selectChoice(choice) {
+      // 1. Apply local modifiers
+      if (choice.modifiers) {
+        applyModifiers(choice.modifiers);
+      }
+
+      // 2. Advance time based on step
+      advanceTimeByStep(gameState.currentStep);
+
+      // 3. Log history
+      gameState.history.push({
+        type: 'action',
+        text: `Li chose: "${choice.text}"`,
+        timestamp: getTimestampString()
+      });
+
+      // 4. Handle resets or promotions
+      if (choice.modifiers && choice.modifiers.reset) {
+        resetState();
+        loadGame();
+        return;
+      }
+
+      // 5. Special story checks (e.g. unlocking abilities or recap summaries)
+      checkStoryMilestones(choice);
+
+      // 6. Transition state
+      gameState.currentStep = choice.nextStep;
+      saveGame();
+      
+      // 7. Render UI
+      renderUI();
+      
+      // Scroll narrative area to top
+      document.getElementById('storyLog').scrollTop = 0;
+    }
+
+    // MODIFIERS PARSER
+    function applyModifiers(mods) {
+      for (const [key, delta] of Object.entries(mods)) {
+        const path = key.split('.');
+        let obj = gameState;
+        for (let i = 0; i < path.length - 1; i++) {
+          obj = obj[path[i]];
+        }
+        
+        const lastKey = path[path.length - 1];
+        if (typeof obj[lastKey] === 'number') {
+          // stats clamping
+          if (path[0] === 'player' && path[1] === 'stats') {
+            obj[lastKey] = Math.max(0, Math.min(100, obj[lastKey] + delta));
+          } else if (path[0] === 'player' && path[1] === 'conditions') {
+            obj[lastKey] = Math.max(0, Math.min(100, obj[lastKey] + delta));
+          } else {
+            obj[lastKey] += delta;
+          }
+        } else if (typeof obj[lastKey] === 'string') {
+          obj[lastKey] = delta;
+        } else {
+          obj[lastKey] = delta; // Drop replacement
+        }
+      }
+    }
+
+    // STATE TRANSITION TIME ADVANCIER
+    function advanceTimeByStep(step) {
+      const time = gameState.time;
+      let dayDelta = 1;
+
+      if (step === 'three_days_prep') {
+        dayDelta = 3;
+      } else if (step === 'sparring_genji') {
+        // advance 3 months
+        time.month += 3;
+        dayDelta = 0;
+      } else if (step === 'mitsui_conspiracy') {
+        time.month += 1;
+        dayDelta = 0;
+      } else if (step === 'ambush_victory') {
+        // Kawanakajima plains: advance spring
+        time.season = "Spring";
+        time.month = 4;
+        time.day = 1;
+        dayDelta = 0;
+      } else if (step === 'shingen_clash') {
+        time.month += 3;
+        dayDelta = 0;
+      } else if (step === 'mizuno_reinforcements') {
+        dayDelta = 5;
+      } else if (step === 'mizuno_victory') {
+        dayDelta = 14;
+      }
+      
+      time.day += dayDelta;
+
+      // Handle rollover
+      if (time.day > 30) {
+        time.day -= 30;
+        time.month += 1;
+      }
+      if (time.month > 12) {
+        time.month = 1;
+        time.year += 1;
+      }
+
+      // Update Season automatically based on Month
+      if (time.month >= 3 && time.month <= 5) time.season = "Spring";
+      else if (time.month >= 6 && time.month <= 8) time.season = "Summer";
+      else if (time.month >= 9 && time.month <= 11) time.season = "Autumn";
+      else time.season = "Winter";
+    }
+
+    // CONJECTURES & MILESTONES
+    function checkStoryMilestones(choice) {
+      // Unlocks, promotions, gear modifications
+      if (choice.nextStep === 'gokenin_promotion') {
+        gameState.player.rank = "Gokenin";
+        gameState.player.inventory.weapons.push("father_short_sword");
+        gameState.player.inventory.armor = "captain_medium_armor";
+        gameState.recaps.push({
+          chapter: 1,
+          text: "Joined the Shiina army in Shibata. Discovered Lord Mitsui meeting with Takeda officers to betray the Anegakoji. Warned Lord Yasutane anonymously. Promoted to Gokenin."
+        });
+      }
+
+      if (choice.nextStep === 'border_patrol') {
+        gameState.recaps.push({
+          chapter: 2,
+          text: "Created Team Shock out of outcasts. Dueled Yuki to establish authority. Completed basic training."
+        });
+      }
+
+      if (choice.nextStep === 'ambush_victory') {
+        // Increment career kills
+        gameState.player.inventory.items.rations -= 1;
+        gameState.player.inventory.items.medkit -= 1;
+      }
+
+      if (choice.nextStep === 'shingen_clash') {
+        // Unlock Kishin no Shūchū
+        gameState.player.abilities.push({ name: "Kishin no Shūchū (Demon God's Concentration)", val: 20 });
+        gameState.recaps.push({
+          chapter: 3,
+          text: "Participated in the Battle of Kawanakajima. Rallied the 5th regiment under your father's name. Clashed with Takeda Shingen, unlocking your bloodline ability."
+        });
+      }
+
+      if (choice.nextStep === 'mizuno_victory') {
+        gameState.player.rank = "Captain";
+        // Award weapons KAGE & HIKARI
+        gameState.player.inventory.weapons = ["Kage (Shadow)", "Hikari (Light)"];
+        gameState.player.skills["Two-Sword Mastery"] += 15;
+        // Award Medal of Valor
+        gameState.player.abilities.push({ name: "Unyielding Will", val: 50 });
+        gameState.recaps.push({
+          chapter: 4,
+          text: "Appointed Captain of the 3rd Company. Received father's twin swords Kage & Hikari. Successfully defended Fort Mizuno, sabotaging Takeda's siege tower. Wounded Crimson Legion elements."
+        });
+      }
+
+      if (choice.nextStep === 'victory_end') {
+        gameState.recaps.push({
+          chapter: 5,
+          text: "Completed home leave. Reunited with mother and sisters, trained your brother. Returned to Takayama. Ready for Takeda's return campaign."
+        });
+      }
+    }
+
+    // AI API CONNECTIONS
+    async function submitFreeAction() {
+      const textbox = document.getElementById('freeTextbox');
+      const actionText = textbox.value.trim();
+      if (!actionText) return;
+
+      // Disable inputs during network request
+      textbox.disabled = true;
+      document.getElementById('submitActionBtn').disabled = true;
+      
+      // Log custom action
+      gameState.history.push({
+        type: 'action',
+        text: `Custom Action: "${actionText}"`,
+        timestamp: getTimestampString()
+      });
+
+      // Append temporary loading dialogue
+      const log = document.getElementById('storyLog');
+      const loading = document.createElement('div');
+      loading.id = 'aiLoadingIndicator';
+      loading.className = 'system-notification';
+      loading.innerHTML = '<div class="loading-spinner" style="width:16px; height:16px; border-width:2px;"></div> Generating AI Narration...';
+      log.appendChild(loading);
+      log.scrollTop = log.scrollHeight;
+
+      if (config.engineMode === 'gemini') {
+        await queryGeminiAPI(actionText);
+      } else if (config.engineMode === 'ollama') {
+        await queryOllamaAPI(actionText);
+      } else {
+        // Local mode fallback simulation of custom actions
+        simulateLocalAction(actionText);
+      }
+
+      // Cleanup & Enable inputs
+      const indicator = document.getElementById('aiLoadingIndicator');
+      if (indicator) indicator.remove();
+      
+      textbox.value = '';
+      textbox.disabled = false;
+      document.getElementById('submitActionBtn').disabled = false;
+      
+      saveGame();
+      renderUI();
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // LOCAL NARRATIVE REASONER FOR FREE ACTION
+    function simulateLocalAction(action) {
+      const actionLower = action.toLowerCase();
+      let outcomeText = "";
+      let statChanges = {};
+
+      if (actionLower.includes('train') || actionLower.includes('practice') || actionLower.includes('swing')) {
+        if (actionLower.includes('left')) {
+          statChanges["player.skills.Left Hand Proficiency"] = 3;
+          statChanges["player.conditions.fatigue"] = 8;
+          outcomeText = "You isolate your left arm, tying your right behind your back. Repeating basic strikes at the trees, your muscles burn in protest. Your Left Hand Proficiency increases.";
+        } else if (actionLower.includes('two') || actionLower.includes('kage')) {
+          statChanges["player.skills.Two-Sword Mastery"] = 3;
+          statChanges["player.conditions.fatigue"] = 10;
+          outcomeText = "You draw Kage and Hikari. Feeling their perfect balance, you coordinate left-hand deflections and right-hand counters. Your Two-Sword Mastery increases.";
+        } else {
+          statChanges["player.skills.Single Sword"] = 3;
+          statChanges["player.conditions.fatigue"] = 6;
+          outcomeText = "You repeat your stances and strikes until your arms are heavy. Your Single Sword skill improves.";
+        }
+      } else if (actionLower.includes('talk') || actionLower.includes('speak') || actionLower.includes('ask')) {
+        if (actionLower.includes('yuki')) {
+          statChanges["relations.yuki.strength"] = 5;
+          outcomeText = "You seek out Yuki. She is sitting on a crate cleaning her naginata. You speak about your father and Hida province borders. She smiles slightly, appreciating your dedication.";
+        } else if (actionLower.includes('yasutane')) {
+          statChanges["relations.yasutane.strength"] = 3;
+          statChanges["player.stats.INT"] = 1;
+          outcomeText = "You speak with Lord Yasutane. He points out troop rotations and the importance of supply logistics on the map, giving you a strategy lesson.";
+        } else if (actionLower.includes('goro') || actionLower.includes('sergeant')) {
+          statChanges["relations.goro.strength"] = 4;
+          statChanges["player.skills.Tactics"] = 2;
+          outcomeText = "Sergeant Goro looks you over. 'Guts isn't enough, Captain. You need discipline.' He details standard training routines.";
+        } else {
+          outcomeText = "You speak with the surrounding soldiers. They share rumors about Takeda movements and express high confidence in your command.";
+        }
+      } else if (actionLower.includes('rest') || actionLower.includes('sleep') || actionLower.includes('heal')) {
+        statChanges["player.conditions.fatigue"] = -30;
+        statChanges["player.conditions.health"] = 20;
+        outcomeText = "You sit back against the wooden support logs, closing your eyes. Rest allows your body to recover from your cuts and minor bruises.";
+      } else if (actionLower.includes('family') || actionLower.includes('money') || actionLower.includes('home')) {
+        if (gameState.player.inventory.items.koku >= 10) {
+          statChanges["player.inventory.items.koku"] = -10;
+          statChanges["relations.yuki.strength"] = 10;
+          outcomeText = "You send a courier home to Shibata village containing 10 koku. Your family receives the funds, ensuring food security.";
+        } else {
+          outcomeText = "You wish to send support home, but you lack sufficient coins. You must earn more koku first.";
+        }
+      } else {
+        // Generic fallback action
+        statChanges["player.stats.WIS"] = 1;
+        outcomeText = `You execute: "${action}". Your tactical wisdom guides your actions, preparing you for the coming campaign.`;
+      }
+
+      applyModifiers(statChanges);
+      advanceTimeByStep('generic');
+
+      // Append scene to log
+      appendStoryScene(`Custom Action: ${action}`, outcomeText, statChanges);
+    }
+
+    function appendStoryScene(headerText, description, changes) {
+      const log = document.getElementById('storyLog');
+      
+      const divider = document.createElement('hr');
+      divider.style.borderColor = 'rgba(255,255,255,0.05)';
+      divider.style.margin = '20px 0';
+      log.appendChild(divider);
+
+      const h = document.createElement('div');
+      h.style.color = 'var(--accent-gold)';
+      h.style.fontSize = '14px';
+      h.style.fontWeight = 'bold';
+      h.style.marginBottom = '6px';
+      h.innerText = headerText;
+      log.appendChild(h);
+
+      const p = document.createElement('p');
+      p.className = 'story-paragraph';
+      p.innerText = description;
+      log.appendChild(p);
+
+      if (Object.keys(changes).length > 0) {
+        const notif = document.createElement('div');
+        notif.className = 'system-notification win';
+        let updates = [];
+        for (const [key, val] of Object.entries(changes)) {
+          const name = key.split('.').pop();
+          updates.push(`${name} ${val > 0 ? '+' : ''}${val}`);
+        }
+        notif.innerHTML = `⚔️ Mechanical updates: ${updates.join(', ')}`;
+        log.appendChild(notif);
+      }
+    }
+
+    // GOOGLE GEMINI API CALLS
+    async function queryGeminiAPI(action) {
+      const apiKey = config.geminiKey;
+      if (!apiKey) {
+        alert("Please enter a valid Gemini API Key in the Settings tab first!");
+        return;
+      }
+
+      const prompt = buildGeminiPrompt(action);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: "application/json"
+            }
+          })
+        });
+
+        const data = await response.json();
+        const jsonText = data.candidates[0].content.parts[0].text;
+        const result = JSON.parse(jsonText);
+        
+        applyAIRulesResult(result);
+      } catch (e) {
+        console.error("Gemini API Error", e);
+        appendStoryScene("Gemini AI API Error", "The AI was unable to respond. Falling back to offline simulation rules.", {});
+        simulateLocalAction(action);
+      }
+    }
+
+    // OLLAMA API CALLS
+    async function queryOllamaAPI(action) {
+      const model = config.ollamaModel;
+      const prompt = buildGeminiPrompt(action);
+      const url = `http://localhost:11434/api/generate`;
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: model,
+            prompt: prompt,
+            format: "json",
+            stream: false
+          })
+        });
+
+        const data = await response.json();
+        const result = JSON.parse(data.response);
+        applyAIRulesResult(result);
+      } catch (e) {
+        console.error("Ollama connection failed", e);
+        appendStoryScene("Local Ollama Server Offline", "Could not connect to Ollama at http://localhost:11434. Please verify Ollama is running.", {});
+        simulateLocalAction(action);
+      }
+    }
+
+    function buildGeminiPrompt(action) {
+      return `You are the narrater and simulation logic processor for 'Sengoku Soldier', a strategy-RPG simulation in Sengoku Jidai Japan.
+You must process the player's custom action within the current game state and output the results strictly as a JSON object matching this schema:
+{
+  "header": "Format: Action Type - Location Description",
+  "narrative": "Paragraph detailing what happens. Make it grounded, gritty, historical and epic. Respect historical details.",
+  "dialogue": {
+    "speaker": "Name of NPC responding, or null if none",
+    "text": "Dialogue text, or null if none"
+  },
+  "state_updates": {
+    "player.stats.VAL": 1,
+    "player.conditions.fatigue": 10
+  }
+}
+
+Rules:
+1. Respect current game state and narrative continuity.
+2. Clamp stats updates realistically (usually +1 to +3 max. Do not make player overpowered).
+3. Do not invent unsupplied state fields.
+4. Output must be raw JSON matching the schema, with no Markdown or text wrap formatting.
+
+CURRENT STATE:
+${JSON.stringify(gameState)}
+
+PLAYER ACTION:
+"${action}"`;
+    }
+
+    function applyAIRulesResult(result) {
+      if (result.state_updates) {
+        applyModifiers(result.state_updates);
+      }
+      advanceTimeByStep('generic');
+      
+      const log = document.getElementById('storyLog');
+      
+      const divider = document.createElement('hr');
+      divider.style.borderColor = 'rgba(255,255,255,0.05)';
+      divider.style.margin = '20px 0';
+      log.appendChild(divider);
+
+      const h = document.createElement('div');
+      h.style.color = 'var(--accent-gold)';
+      h.style.fontSize = '14px';
+      h.style.fontWeight = 'bold';
+      h.style.marginBottom = '6px';
+      h.innerText = result.header || "Action Executed";
+      log.appendChild(h);
+
+      const p = document.createElement('p');
+      p.className = 'story-paragraph';
+      p.innerText = result.narrative;
+      log.appendChild(p);
+
+      if (result.dialogue && result.dialogue.speaker) {
+        const d = document.createElement('div');
+        d.className = 'dialog-bubble';
+        d.innerHTML = `<div class="dialog-speaker">${result.dialogue.speaker}</div><div class="dialog-text">"${result.dialogue.text}"</div>`;
+        log.appendChild(d);
+      }
+
+      if (result.state_updates && Object.keys(result.state_updates).length > 0) {
+        const notif = document.createElement('div');
+        notif.className = 'system-notification win';
+        let updates = [];
+        for (const [key, val] of Object.entries(result.state_updates)) {
+          const name = key.split('.').pop();
+          updates.push(`${name} ${val > 0 ? '+' : ''}${val}`);
+        }
+        notif.innerHTML = `🌟 AI State Updates: ${updates.join(', ')}`;
+        log.appendChild(notif);
+      }
+    }
+
+    function saveApiKey() {
+      saveConfig();
+    }
+  </script>
+</body>
+</html>

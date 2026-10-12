@@ -1,0 +1,188 @@
+<div id="newlife" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="nl-title">
+  <div class="overlay-inner">
+    <span class="seal big" aria-hidden="true">兵</span>
+    <h1 id="nl-title">How will Li's story be told?</h1>
+    <p class="lead">Everything is already chosen. Change what you like, or just begin.</p>
+    <div class="settings">
+      <fieldset><legend>Story</legend>
+        <label><input type="radio" name="mode" value="gm" checked> <span><b>Game Master</b><br><small>Claude runs the world. Write anything; people follow their own plans; the story moves scene by scene. Needs Claude.</small></span></label>
+        <label><input type="radio" name="mode" value="classic"> <span><b>Classic chronicle</b><br><small>The hand-written first chapter with numbered choices. Works offline.</small></span></label>
+      </fieldset>
+      <fieldset><legend>Storyteller</legend>
+        <label><input type="radio" name="ai" value="claude" checked> <span><b>Claude</b><br><small>Write anything. Uses your own Claude account; asks permission once.</small></span></label>
+        <label><input type="radio" name="ai" value="plain"> <span><b>Plain chronicle</b><br><small>Template text and numbered choices. Works offline.</small></span></label>
+      </fieldset>
+      <fieldset><legend>Guidance</legend>
+        <label><input type="radio" name="guide" value="full" checked> <span><b>Full hints</b></span></label>
+        <label><input type="radio" name="guide" value="light"> <span><b>Light</b></span></label>
+        <label><input type="radio" name="guide" value="off"> <span><b>Off</b></span></label>
+      </fieldset>
+      <fieldset><legend>Ink speed</legend>
+        <label><input type="radio" name="ink" value="slow"> <span><b>Slow ink</b></span></label>
+        <label><input type="radio" name="ink" value="fast" checked> <span><b>Fast</b></span></label>
+        <label><input type="radio" name="ink" value="instant"> <span><b>Instant</b></span></label>
+      </fieldset>
+    </div>
+    <div class="row"><button id="begin" type="button" class="primary">Begin</button><button id="nl-howto" type="button" class="quiet">How to play</button></div>
+  </div>
+</div>
+<div id="prologue" class="overlay prologue" hidden role="dialog" aria-modal="true" aria-label="Prologue">
+  <div class="overlay-inner">
+    <span id="pr-label" class="label"></span>
+    <p id="pr-text" class="pr-text"></p>
+    <p id="pr-quote" class="pr-quote"></p>
+    <p id="pr-ask" class="pr-ask" hidden></p>
+    <div id="pr-opts" class="pr-opts" hidden></div>
+    <div class="pr-bar"><span id="pr-dots" class="pr-dots" aria-hidden="true"></span>
+      <button id="pr-skip" type="button">Skip</button><button id="pr-next" type="button" class="primary">Continue</button></div>
+  </div>
+</div>
+<div id="howto-box" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="ht-title">
+  <div class="overlay-inner">
+    <h1 id="ht-title">How to play</h1>
+    <ol id="ht-list" class="howto"></ol>
+    <div id="ht-cmds"></div>
+    <button id="ht-close" type="button" class="primary">Back to the chronicle</button>
+  </div>
+</div>
+<div id="skipbox" class="overlay skipbox" hidden role="dialog" aria-modal="true" aria-labelledby="sk-title">
+  <div class="overlay-inner">
+    <span class="label">Timeskip</span>
+    <h1 id="sk-title"></h1>
+    <p id="sk-when" class="lead"></p>
+    <div id="sk-body" class="sk-body"></div>
+    <button id="sk-close" type="button" class="primary">Continue</button>
+  </div>
+</div>
+<div id="legend" class="overlay legend" hidden role="dialog" aria-modal="true" aria-labelledby="lg-title">
+  <div class="lg-inner">
+    <span id="lg-native" class="lg-native" aria-hidden="true"></span>
+    <span class="label lg-label">Legend moment</span>
+    <p id="lg-text" class="lg-text"></p>
+    <h1 id="lg-title" class="lg-title"></h1>
+    <span id="lg-meaning" class="lg-meaning"></span>
+    <span class="seal lg-seal" aria-hidden="true">龍</span>
+    <p id="lg-meta" class="lg-meta"></p>
+    <button id="lg-close" type="button" class="quiet">Continue</button>
+  </div>
+</div>
+<div id="titlecard" class="overlay titlecard" hidden aria-live="polite">
+  <div class="tc-inner"><span id="tc-label" class="label"></span><span id="tc-title" class="tc-title"></span></div>
+</div>
+<div class="app">
+  <header class="strip">
+    <span class="seal" aria-hidden="true">兵</span>
+    <div class="chapter">
+      <span class="label">Chapter 1</span>
+      <span class="chapter-title">The Red Crane</span>
+    </div>
+    <dl class="facts">
+      <div><dt class="sr">Date</dt><dd id="s-date"></dd></div>
+      <div class="wide"><dt class="sr">Place</dt><dd id="s-place"></dd></div>
+      <div><dt class="sr">Condition</dt><dd id="s-cond"></dd></div>
+      <div><dt class="sr">Money</dt><dd id="s-money" class="gold"></dd></div>
+    </dl>
+    <div class="file">
+      <button id="howto" type="button">How to play</button>
+      <button id="storyteller" type="button" aria-pressed="false">Storyteller: plain</button>
+      <button id="narratorbtn" type="button" aria-pressed="false">Narrator: off</button>
+      <button id="savebtn" type="button">Save file</button>
+      <button id="new" type="button">New life</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Chronicle">
+    <button role="tab" type="button" data-tab="story" aria-selected="true">Story</button>
+    <button role="tab" type="button" data-tab="map" aria-selected="false">Map</button>
+    <button role="tab" type="button" data-tab="li" aria-selected="false">Li</button>
+    <button role="tab" type="button" data-tab="army" aria-selected="false">Army</button>
+    <button role="tab" type="button" data-tab="people" aria-selected="false">People</button>
+    <button role="tab" type="button" data-tab="journal" aria-selected="false">Journal</button>
+    <button role="tab" type="button" data-tab="encyclopedia" aria-selected="false">Encyclopedia</button>
+  </nav>
+
+  <div id="narratorbox" class="savebox narratorbox" hidden>
+    <p class="note">The narrator reads the story aloud. George is the AI voice (best); the other voices come from this computer.</p>
+    <p id="nr-status" class="note"></p>
+    <div class="row">
+      <label><input id="nr-on" type="checkbox"> Read the story aloud</label>
+      <label>Voice <select id="nr-voice"></select></label>
+      <label>Speed <select id="nr-rate"><option value="0.85">Slow</option><option value="1">Normal</option><option value="1.15">Quick</option><option value="1.3">Fast</option></select></label>
+      <button id="nr-test" type="button">Test</button>
+      <button id="nr-close" type="button">Close</button>
+    </div>
+  </div>
+  <div id="savebox" class="savebox" hidden>
+    <p class="note">Three lives can be kept in this browser. Each is its own story: switching never undoes anything.</p>
+    <div id="slots" class="slots" aria-label="Lives"></div>
+    <p class="note">Copy this text to keep the game, or paste a save here and load it. A save works in the browser, the terminal and the chat version.</p>
+    <p id="cloudnote" class="note"></p>
+    <textarea id="savetext" spellcheck="false" aria-label="Save file text"></textarea>
+    <div class="row"><button id="copysave" type="button">Copy</button><button id="downloadsave" type="button">Download save</button><button id="loadsave" type="button">Load pasted save</button><button id="closesave" type="button">Close</button></div>
+  </div>
+
+  <div class="body">
+    <main id="tab-story" class="panel story-panel" role="tabpanel">
+      <div class="scene" aria-hidden="true">
+        <svg class="ridge" viewBox="0 0 960 140" preserveAspectRatio="xMidYMax slice">
+          <circle id="sky" cx="790" cy="40" r="20"></circle>
+          <path d="M0 104 L90 70 L170 92 L260 52 L360 88 L450 60 L560 98 L660 56 L760 88 L860 64 L960 84 L960 140 L0 140 Z" class="far"></path>
+          <path d="M0 124 L140 102 L300 118 L470 96 L640 120 L800 104 L960 116 L960 140 L0 140 Z" class="near"></path>
+          <g id="fire"><path d="M470 128 Q480 100 490 128 Q500 110 506 128 Z" class="flame"></path><path d="M478 128 Q486 113 494 128 Z" class="core"></path></g>
+        </svg>
+        <div class="scene-text">
+          <span id="scene-label" class="label"></span>
+          <span id="scene-title" class="scene-title"></span>
+        </div>
+      </div>
+      <div id="log" class="log" aria-live="polite"></div>
+      <div class="choose">
+        <div id="duel" class="duel" hidden></div>
+        <div id="guide" class="guide" hidden><span class="label">Guide</span><span id="guide-text"></span><button id="guide-close" type="button" aria-label="Close this hint">×</button></div>
+        <div id="opts" class="opts"></div>
+        <form id="f" class="write">
+          <label for="in">Or write it</label>
+          <input id="in" autocomplete="off" placeholder="I ask Sukezō where we are">
+          <button type="submit">Send</button>
+        </form>
+        <div id="examples" class="examples" aria-label="Example lines"></div>
+        <div id="tools" class="tools">
+          <button id="askbtn" type="button" title="Ask the guide a question. Time does not move.">? Ask</button>
+          <button id="wishbtn" type="button" title="A wish to the storyteller about the story, in brackets">( ) Wish</button>
+          <button id="waitbtn" type="button" title="Let a quiet week pass. Stops when something happens.">Wait a week</button>
+          <button id="skipbtn" type="button">Skip ahead</button>
+          <button id="wrongbtn" type="button" class="quiet-tool">Something's wrong</button>
+          <button id="helpbtn" type="button" class="quiet-tool">Help</button>
+        </div>
+        <div id="toolbox" class="confirm toolbox" hidden></div>
+      </div>
+    </main>
+    <section id="tab-map" class="panel page" role="tabpanel" hidden></section>
+    <section id="tab-li" class="panel page" role="tabpanel" hidden></section>
+    <section id="tab-army" class="panel page" role="tabpanel" hidden></section>
+    <section id="tab-people" class="panel page" role="tabpanel" hidden></section>
+    <section id="tab-journal" class="panel page" role="tabpanel" hidden></section>
+    <section id="tab-encyclopedia" class="panel page" role="tabpanel" hidden></section>
+
+    <aside class="side" aria-label="Li at a glance">
+      <section id="side-li" class="card li-card"></section>
+      <section class="side-block">
+        <h2 class="label">Growing</h2>
+        <div id="side-grow"></div>
+      </section>
+      <section id="side-land" class="side-block" hidden>
+        <h2 class="label">Li's land</h2>
+        <ul id="side-land-list" class="chronicle"></ul>
+      </section>
+      <section class="side-block">
+        <h2 class="label">The land, as Li knows it</h2>
+        <div id="side-map"></div>
+      </section>
+      <section class="side-block">
+        <h2 class="label">Chronicle</h2>
+        <ol id="chronicle" class="chronicle"></ol>
+      </section>
+      <section id="goals" class="goals"></section>
+    </aside>
+  </div>
+</div>
