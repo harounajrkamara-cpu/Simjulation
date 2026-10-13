@@ -1,0 +1,48 @@
+name: AI Testing Lab
+
+on:
+  push:
+    branches:
+      - ai-lab/testing-council
+  pull_request:
+    branches:
+      - ai-lab/testing-council
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-lab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deterministic-checks:
+    name: Engine tests, types, web build, balance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out testing branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Check TypeScript
+        run: npm run typecheck
+
+      - name: Build browser version
+        run: npm run build:web
+
+      - name: Run deterministic balance simulation
+        run: npm run balance
+
