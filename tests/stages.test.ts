@@ -43,3 +43,41 @@ describe('life stages', () => {
     expect(mem).toMatch(/about 300 koku/);
   });
 });
+
+describe('Tatara runaway start (world 2)', () => {
+  it('starts in Tatara as a free hunted smith', () => {
+    // We need a way to start world 2. Since createWorld is not exported,
+    // we test via the GM layer: start a GM game with worldNumber=2.
+    const s = startGmGame(2); // startGmGame accepts an optional worldNumber
+    // Life stage is determined by status and rank_level:
+    // - status is 'free' (not slave)
+    // - rank_level defaults to 0 (Ashigaru) -> soldier stage
+    expect(lifeStage(s)).toBe('soldier');
+    expect(s.liId).toBe('li');
+    const li = s.characters['li'];
+    expect(li.role).toContain('Tatara');
+    expect(li.status).toBe('free');
+    expect(li.location).toBe('tatara');
+    expect(s.money).toBe(0);
+    expect(s.date).toEqual({ year: 101, month: 1, day: 1, part: 'morning' });
+    expect(s.seasonKey).toBe('101-Spring');
+    // Knowledge includes both base and Tatara-specific
+    expect(s.knowledge).toContain('tatara_refuge');
+    expect(s.knowledge).toContain('hunted_by_band');
+    // Flags
+    expect(s.flags.hunted).toBe(1);
+    expect(s.flags.runaway).toBe(1);
+    // Tatara characters are present
+    expect(s.characters['kane']).toBeDefined();
+    expect(s.characters['masaru']).toBeDefined();
+    expect(s.characters['shinobu']).toBeDefined();
+    // Relations: old band degraded, Tatara hosts present
+    expect(s.relations['raizen'].base.trust).toBeLessThan(30); // trust degraded
+    expect(s.relations['gonza'].base.fear).toBeGreaterThan(20); // fear increased
+    expect(s.relations['kane'].base.trust).toBeGreaterThan(70); // trust with smith
+    // Known list includes Tatara contacts
+    expect(s.flags.met_kane).toBe(1);
+    expect(s.flags.met_masaru).toBe(1);
+    expect(s.flags.met_hachi).toBe(1); // from slave start
+  });
+});
