@@ -134,13 +134,47 @@ async function play(ai: AiAdapter, s: GameState, said: string | undefined, signa
     } catch (e) {
       if (!first) throw e;
     }
-    // The rewrite failed or was unusable: the first scene stands (the problems were already logged to Claude).
-    if (!turn && first) turn = first;
+    // If the rewrite call failed or returned unusable JSON, try the next iteration.
+    // The first scene had fact-check problems, so it must NOT be used as a fallback (Issue #2 fix).
     if (!turn) continue;
-    if (!first) {
-      const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
-      const found = checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames);
-      if (found.length) { first = turn; facts = factFixPrompt(found); continue; }
+    // ALWAYS fact-check — both the initial scene and the one-time rewrite (Issue #2 fix).
+    const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
+    const found = checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames);
+    if (found.length) {
+      if (!first) {
+        // First scene has problems: store it and request a one-time rewrite.
+        first = turn;
+        facts = factFixPrompt(found);
+        continue;
+      }
+      // The rewrite still has fact-check problems: reject visibly.
+      // Never accept an unchecked scene; never retry indefinitely.
+      throw Object.assign(new Error(`The Game Master's answer could not be used (the rewrite still broke facts: ${found.map((p) => p.text).join('; ')}).`), { code: 'bad_answer' });
+    }
+    // Facts check passed. Clear the retry prompt so it does not shadow later checks.
+    facts = undefined;
+    // ── Playtest fix (Oct 11): combat suggestions without a fight ─────────
+    // Every exchange of blows that matters is a fight. If the suggestions
+    // describe combat moves (strikes, blocks, etc.) but no "fight" field was
+    // set, the code must reject the scene so a real duel starts — not leave it
+    // as story text that Claude would resolve by narration.
+    const COMBAT_WORDS = /\b(strike|slash|thrust|slice|stab|cut|block|parry|attack|feint|dodge)\b/i;
+    const hasCombatSuggestion = (turn.suggestions ?? []).some((s) => COMBAT_WORDS.test(s));
+    if (!turn.fight && hasCombatSuggestion) {
+      if (!first) {
+        first = turn;
+        problem = 'the suggestions describe combat moves (strikes, blocks, parries) but no "fight" field was set. Every exchange of blows that matters is a fight: revise the scene to set "fight" describing the foe and the deadly stakes, or change the suggestions to non-combat actions (social moves, exploration, training description).';
+        continue;
+      }
+      throw Object.assign(new Error(`The Game Master's answer could not be used (${problem}).`), { code: 'bad_answer' });
+    }
+    // ── Playtest fix (Oct 11): sleeping must advance the date ──────────────
+    // If Li sleeps (night rest), the date must not stay on the same day.
+    // Force at least one day forward and set the next part to morning.
+    const sceneText = `${turn.title ?? ''} ${turn.scene}`.toLowerCase();
+    if ((turn.days ?? 0) === 0 && /night|bed|tuck|drift|fall.*asleep|rest.*night|night.*rest|sleep/i.test(sceneText)) {
+      turn.days = 1;
+      turn.part = 'morning';
     }
     if (maxDays !== undefined && (turn.days ?? 0) > maxDays) turn.days = maxDays;
     const r = gmApply(s, turn, record);

@@ -19,6 +19,12 @@ export const SHARE_MIN_RESPECT = 50;
 /** Coins tossed by soldiers with fresh pay (paydays 1 and 16) and by levy men Li stitches up on raid days. */
 export const PAYDAY_TIP = 10;
 export const STITCH_TIP = 20;
+/** Dice games on paydays (1, 16): deterministic winnings by observation skill (VISIE Phase 2 #2). */
+export const DICE_WIN_BASE = 5;
+export const DICE_WIN_PER_OBS = 2;
+/** Carrying for the Hagiwara villages: pay by endurance (VISIE Phase 2 #2). */
+export const CARRY_PAY_BASE = 15;
+export const CARRY_PAY_PER_END = 3;
 /** Escape (WB 10.4 route 4): fixed requirements, checked in this order (no dice). */
 export const ESCAPE_NEEDS = { stealth: 25, endurance: 40, maxFatigue: 1, maxWound: 1 } as const;
 /** Years with a contract beat and a levy call (stage 1 ends long before Year 105 in every simulated career). */

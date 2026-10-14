@@ -70,17 +70,62 @@ describe('the Game Master turn uses it', () => {
     expect(r.turn.scene).toBe('Li bows to Raizen.');
   });
 
-  it('keeps the first scene when the rewrite still breaks the facts (never loops)', async () => {
+  it('rejects the rewrite when it still breaks the facts (never loops)', async () => {
     const { ai, prompts } = fakeAi([bad, { ...bad, scene: 'Li bows to Raizan again.' }]);
-    const r = await gmTurn(ai, startGmGame());
-    expect(prompts).toHaveLength(2);
-    expect(r.turn.scene).toBe('Li bows to Raizan again.');
+    await expect(gmTurn(ai, startGmGame())).rejects.toMatchObject({ code: 'bad_answer' });
+    expect(prompts).toHaveLength(2); // 1 initial + 1 rewrite that still had problems
   });
 
-  it('keeps the first scene when the rewrite fails', async () => {
+  it('rejects when the rewrite call fails (no unsafe fallback to the broken first scene)', async () => {
     let k = 0;
     const ai = { name: 'fake', ask: async () => { if (k++ === 0) return JSON.stringify(bad); throw Object.assign(new Error('down'), { code: 'upstream_error' }); } };
+    await expect(gmTurn(ai, startGmGame())).rejects.toMatchObject({ code: 'bad_answer' });
+    expect(k).toBe(3); // 1 initial + 2 retry attempts that errored
+  });
+
+  // ── Regression test for AI Lab Issue #2 ──────────────────────────────────
+  // The rewrite still contains "Raizan" (misspelling of Raizen).
+  // Current code: accepts the rewrite WITHOUT re-running checkGmScene → BUG.
+  // Expected: the rewrite must also pass the fact-check; if it still fails,
+  // throw a controlled 'bad_answer' error — never accept a fact-broken scene,
+  // never enter an infinite retry loop.
+  it('regression #2: rewrite is re-checked — a still-broken rewrite is NOT accepted', async () => {
+    const { ai, prompts } = fakeAi([bad, { ...bad, scene: 'Li bows to Raizan again.' }]);
+    await expect(gmTurn(ai, startGmGame())).rejects.toMatchObject({ code: 'bad_answer' });
+    expect(prompts).toHaveLength(2); // 1 initial + 1 rewrite; no infinite retry
+  });
+
+  // ── Playtest fix (Oct 11): combat suggestions without a fight ─────────────
+  // The GM wrote a sword drill against Gonza with suggestion "I strike",
+  // but did not set the "fight" field. The code must reject it so a real
+  // duel starts instead of Claude narrating the outcome.
+  it('rejects combat suggestions without a fight field (duel must start)', async () => {
+    const { ai, prompts } = fakeAi([{
+      scene: 'Gonza offers Li a slow sword drill with sticks. Li accepts.',
+      summary: 'Li drills with Gonza.',
+      suggestions: [
+        "I use the opening in Gonza's front foot and strike",
+        'I keep my blade ready',
+        'I ask Gonza about the levy',
+      ],
+    }]);
+    await expect(gmTurn(ai, startGmGame())).rejects.toMatchObject({ code: 'bad_answer' });
+    expect(prompts).toHaveLength(2); // 1 initial + 1 rewrite (both lack fight)
+  });
+
+  // ── Playtest fix (Oct 11): sleeping must advance the date ──────────────────
+  // The GM wrote a scene where Li sleeps through the night, but set days: 0.
+  // The fix forces days=1 and part=morning, so a time event is created
+  // and the date advances (no more "date stayed on day 1").
+  it('advances to next morning when Li sleeps (days=0 → 1, part=morning)', async () => {
+    const { ai } = fakeAi([{
+      scene: 'Li falls asleep under the plum tree. He rests through the night, safe and still.',
+      summary: 'Li sleeps through the night.',
+      days: 0,
+      part: 'night',
+    }]);
     const r = await gmTurn(ai, startGmGame());
-    expect(r.turn.scene).toBe('Li bows to Raizan.');
+    // A time event should have been created by gmTimeDrafts(days=1, "morning").
+    expect(r.events.some((e) => e.type === 'time')).toBe(true);
   });
 });
