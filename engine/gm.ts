@@ -6,7 +6,7 @@ import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
-import { stageDayCap, stageText } from './stages';
+import { stageDayCap, stageText, STAGE_FACTS, lifeStage } from './stages';
 import { battleClearDrafts, battleStartDrafts, battleText } from './gm-battle';
 import { domainMonthDrafts, domainOrderDrafts, domainText, landDrafts, projectDrafts } from './gm-domain';
 import { growDrafts, roleDrafts, seasonGrowthDrafts } from './growth';
@@ -314,6 +314,7 @@ export function gmMemoryText(s: GameState): string {
     `Merit: combat ${has(s, 'merit_combat')}, in Kurogane service ${has(s, 'merit_service')} of ${MERIT_FOR_FREEDOM}. In the Hagiwara levy: ${inService(s) ? 'yes' : 'no'}.`,
     careerText(s),
     stageText(s),
+    `WORLD FACTS FOR THIS STAGE:\\n${STAGE_FACTS[lifeStage(s)].map((x) => `- ${x}`).join('\\n')}`,
     domainText(s),
     battleText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
