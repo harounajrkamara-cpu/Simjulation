@@ -157,3 +157,14 @@ describe('interesting scenes (owner, Oct 16: I + F + E + H, then J + G)', () => 
     expect(quietPush(s)).toBeUndefined(); // not while Li is wounded (RimWorld weighs recent wounds)
   });
 });
+
+describe('already said: places are not tics (night Oct 16)', () => {
+  it('"the horse lines" is never listed, "stiff left knee" still is', async () => {
+    const { alreadySaid } = await import('../engine/pacing');
+    const s = startGmGame();
+    gmApply(s, scene({ scene: 'Li works behind the horse lines. Raizen shifts his stiff left knee.', days: 1 }));
+    gmApply(s, scene({ scene: 'Hachi waits behind the horse lines. Raizen shifts his stiff left knee.', days: 1 }));
+    expect(alreadySaid(s).join(' ')).not.toMatch(/horse lines/);
+    expect(alreadySaid(s).join(' ')).toMatch(/stiff left knee/);
+  });
+});

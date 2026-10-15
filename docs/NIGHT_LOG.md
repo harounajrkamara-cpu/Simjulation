@@ -9,3 +9,8 @@ Owner's permission (Oct 16, /loop): build on `build/stage-1`; new features allow
 - **The fix:** the title is checked like a quoted line (names and the dead still count, "you" does not). Also: dialogue in single curly quotes ‘…’ and thoughts in *italics* count as quoted, so "you" there no longer refuses a scene.
 - **Tests:** `tests/opening-live.test.ts` (3 openings written the way Claude writes them + quote rules). 350 tests.
 - **Lesson kept in memory:** before shipping a refusal rule, check the GM prompt for what it asks Claude to write, and run Claude-style openings.
+
+## 2. The first stretch, played offline (live play was not possible: no claude.ai sign-in)
+- Played the opening and five turns through the real Game Master flow with scenes written the way Claude writes them (a lie to Raizen, quiet work, the soldiers' fire with Gonza's coins, waiting twice). **No false refusals.** The waiting rule fired on the second "I wait", as designed; the Gonza threat showed up under "stories in motion".
+- **Bug found and fixed:** the "already said" list told Claude to avoid "the horse lines" (a place, not a tic), and phrases ran across sentences. Places are now cut out before counting, and phrases stay within one sentence. Test added (351 tests).
+- **Not measurable offline:** the Game Experience Bible targets (first real choice within 2 minutes; a spark about every 10 minutes). Offline, the opening ends on Raizen's question with 2–4 choices, so the first choice comes in the first scene. The spark rhythm needs the owner's real play.

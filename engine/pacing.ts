@@ -45,13 +45,18 @@ const STOP = new Set('a an the and or but of to in on at by for with from into o
 
 /** Three-word phrases (two or more real words) used in two of the last three scenes: the tics to avoid. */
 export function alreadySaid(s: GameState, max = 8): string[] {
+  // Places are names, not tics (night Oct 16: "the horse lines" was listed): they are cut out before counting, and a
+  // phrase never runs across a sentence or a cut.
+  const PLACE = /\b(?:horse lines?|cook ?fire|soldiers' fire|fodder store|drill field|kōri|kurose|red crane|ford|camp|fort|tent|river|stables?|palisade)\b/gu;
   const seen = new Map<string, number>();
   for (const e of scenes(s).slice(-3)) {
-    const words = e.fact.toLowerCase().replace(/[^\p{L}\s'-]/gu, ' ').split(/\s+/).filter(Boolean);
     const here = new Set<string>();
-    for (let k = 0; k + 2 < words.length; k++) {
-      const tri = words.slice(k, k + 3);
-      if (tri.filter((w) => !STOP.has(w)).length >= 2) here.add(tri.join(' '));
+    for (const part of e.fact.toLowerCase().replace(PLACE, '|').split(/[.!?;:,|"“”]/)) {
+      const words = part.replace(/[^\p{L}\s'-]/gu, ' ').split(/\s+/).filter(Boolean);
+      for (let k = 0; k + 2 < words.length; k++) {
+        const tri = words.slice(k, k + 3);
+        if (tri.filter((w) => !STOP.has(w)).length >= 2) here.add(tri.join(' '));
+      }
     }
     here.forEach((p) => seen.set(p, (seen.get(p) ?? 0) + 1));
   }
