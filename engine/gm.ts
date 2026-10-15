@@ -12,6 +12,7 @@ import { seedDrafts, seedsText } from './seeds';
 import { clockDrafts, clocksText, clockTimeDrafts } from './clocks';
 import { nemesisDrafts } from './drama';
 import { planText } from './plan';
+import { childDrafts, familyText, marryDrafts } from './family';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -87,6 +88,8 @@ export type GmChange =
   | { kind: 'lever'; fuse: string; toward: string; reason: string }
   | { kind: 'seed'; id: string; state: 'planted' | 'grown' | 'dead'; note?: string }
   | { kind: 'clock'; id: string; name?: string; doom?: string; size?: number; tick?: number; back?: number; close?: boolean; reason?: string }
+  | { kind: 'marry'; npc: string; alliance?: boolean; reason?: string }
+  | { kind: 'child'; name: string; son?: boolean }
   | { kind: 'skill'; skill: string; delta: number }
   | { kind: 'memory'; npc: string; what: string; weight?: number }
   | { kind: 'person'; id: string; name: string; role: string; desc: string; goal: string; secret?: string; trust?: number; respect?: number; affection?: number; rivalry?: number }
@@ -333,6 +336,7 @@ export function gmMemoryText(s: GameState): string {
     publicWorldText(s),
     liLifeText(s),
     planText(s),
+    familyText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -586,6 +590,12 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       }
       case 'lever':
         drafts.push(...leverDrafts(s, x, notes));
+        break;
+      case 'marry':
+        drafts.push(...marryDrafts(s, x, notes));
+        break;
+      case 'child':
+        drafts.push(...childDrafts(s, x, notes));
         break;
       case 'clock':
         drafts.push(...clockDrafts(s, x, notes));

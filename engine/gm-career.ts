@@ -16,7 +16,7 @@ const KINGDOM_NAME: Record<KingdomId, string> = {
   kurogane: 'Kurogane', suiren: 'Suiren', hayate: 'Hayate', ushio: 'Ushio', takane: 'Takane', tatara: 'Tatara', kitakaze: 'Kitakaze',
 };
 /** Standing armies (World Bible ch. 13, about): Rule 1 reads the army Li serves. */
-const ARMY: Record<KingdomId, number> = { kurogane: 150_000, suiren: 220_000, hayate: 90_000, ushio: 100_000, takane: 55_000, tatara: 25_000, kitakaze: 45_000 };
+export const ARMY: Record<KingdomId, number> = { kurogane: 150_000, suiren: 220_000, hayate: 90_000, ushio: 100_000, takane: 55_000, tatara: 25_000, kitakaze: 45_000 };
 
 const COMBAT: CombatDeed[] = ['standard', 'first_over_wall', 'saved_officer', 'scouting'];
 const COMMAND: CommandDeed[] = ['objective', 'won', 'low_losses', 'withdrawal', 'steady_morale', 'supply_kept', 'disobeyed_paid_off', 'disobeyed_failed'];

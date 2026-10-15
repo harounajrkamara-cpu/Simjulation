@@ -8,7 +8,7 @@ describe("Li's plan", () => {
   it('choosing a plan is an event; the memory shows its steps and the next one', () => {
     const s = startGmGame();
     expect(currentPlan(s)).toBeUndefined();
-    expect(planText(s)).toMatch(/none chosen yet/);
+    expect(planText(s)).toMatch(/none chosen/);
     commitDrafts(s, planDrafts(s, 'escape'));
     expect(currentPlan(s)).toBe('escape');
     expect(s.journal.at(-1)!.text).toMatch(/escape to tatara/i);

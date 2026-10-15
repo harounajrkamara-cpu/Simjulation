@@ -400,6 +400,7 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 
 ### Romance & marriage
 - Marriage for love, alliance, or both (links ch. 2 extra 3). Status matters: low-born + noble is very hard. Jealousy and rivals in love possible.
+- ✅ **How the code checks it** (goal Oct 17, owner kan terugdraaien; numbers PROVISIONAL, `engine/family.ts`): Li must be free and 16+, the other 15+, alive and known. **Love** = affection 70+ and trust 50+; **alliance** = Li is Sanbyakunin-shō or higher. A **noble house** gives its child to a low-born man only from **Sennin-shō** up. One spouse at a time (a widower may marry again). **Children**: only to a married Li with a living wife, the first after about 9 months, then about one a year at most, six at most; each child is a real person in the world who grows up (an heir comes of age at 15).
 
 ## Chapter 9 – Time ✅
 
@@ -539,7 +540,7 @@ Possible outcomes: an ally reaches out · a Kurogane veteran turns hostile · wo
 - **Detail by importance:** an ordinary scene 120–200 words, a big moment 200–300, routine 60–150. Enter late, leave early; end on the decision.
 - **Stories in motion** (story sifting): the code lists open threats, grudges, strong bonds, seeds in play and world events near Li.
 - **The drama layer** (owner's OK, Oct 16; `docs/PROPOSAL_DRAMA.md`): people remember their fights with Li (score kept by the code); a known person Li beat and left alive opens a revenge threat by itself (Nemesis); people react to what Li did; old setups get their payoff; there is always an open question; a chapter ends on a hook.
-- **Li's plan** (nacht Oct 16, owner kan terugdraaien): in the Li tab the player chooses what Li works toward (earn freedom in service · take an enemy officer's head · win Raizen over · buy his freedom · escape to Tatara). The code shows the real steps from the rules that decide it (merit 0 of 30, Raizen's trust and respect to 85, 15 ryō, stealth 25, endurance 40, winter quarters) and Claude builds chances toward the next step. A plan grants nothing by itself; the plan can be changed at any time.
+- **Li's plan** (nacht Oct 16; every stage: goal Oct 17, owner kan terugdraaien): in the Li tab the player chooses what Li works toward. As a slave: earn freedom in service · take an enemy officer's head · win Raizen over · buy his freedom · escape to Tatara. Once free: the next rank · land of his own · find his mother and sisters · the truth about his father · a seat among the Six Pillars · a wife and a house. The code shows the real steps from the rules that decide it (merit 0 of 30, Raizen's trust and respect to 85, 15 ryō, stealth 25, endurance 40, winter quarters) and Claude builds chances toward the next step. A plan grants nothing by itself; the plan can be changed at any time.
 - **Sparks in Game Master mode** (nacht Oct 16, owner kan terugdraaien): after each scene, up to 3 short gold lines say what turned, read from the state: a person's view of Li changes, a skill reaches a new level, a fighting style grows, a step of Li's plan is done, a threat starts to brew. Never numbers, never invented.
 - **A push after a calm:** after **5** quiet game days the code picks one thing for the next scene (a fitting seed, a threat showing itself, a person acting on their own plan); not while Li is wounded or right after a big moment.
 
