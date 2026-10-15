@@ -81,7 +81,9 @@ jobs:
 
       - name: Inject isolated adversarial tests (never committed to game source)
         if: always() && steps.install.outcome == 'success'
-        run: cp reports/reviews/poisoning-scenarios-2026-10-15.test.ts target/tests/round2-poisoning.test.ts
+        run: |
+          echo 'Using 11 adversarial NPC-death scenarios from the test-lab branch'
+          cp reports/reviews/poisoning-scenarios-2026-10-15.test.ts target/tests/round2-poisoning.test.ts
 
       - name: Probe poisoning / NPC death scenarios against the exact target source
         id: poisoning
