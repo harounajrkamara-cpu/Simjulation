@@ -309,7 +309,9 @@ async function gmStep(text?: string, said = text) {
     if (errorCode(e) === 'bad_answer') {
       // Say why, and keep the refused scenes in the console, so every refusal can be diagnosed (owner playtest v30).
       console.warn('[Game Master] scene refused:', (e as Error).message, (e as { scenes?: string[] }).scenes ?? []);
-      turn.insertAdjacentHTML('beforeend', `<p class="text info">Claude's scene did not hold up to the facts, so it was not used. Nothing happened in the story; press Send to try again.</p><details class="why"><summary>Why?</summary><p>${esc((e as Error).message)}</p></details>`);
+      // The reason is shown at once (owner, Oct 16: the closed "Why?" hid it twice); the refused scene stays one click away.
+      const refused = ((e as { scenes?: string[] }).scenes ?? []).filter(Boolean).at(-1);
+      turn.insertAdjacentHTML('beforeend', `<p class="text info">Claude's scene was not used. Nothing happened in the story; press Send to try again.<br>Reason: ${esc((e as Error).message)}</p>${refused ? `<details class="why"><summary>The refused scene</summary><p>${esc(refused)}</p></details>` : ''}`);
     }
     else aiFailed(e, turn, true);
     if (text) input.value = text;
