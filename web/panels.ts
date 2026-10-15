@@ -9,11 +9,13 @@ import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '.
 import { GameState, STAT_KEYS } from '../engine/types';
 import { STANCE_LABEL, Stance, publicWorld } from '../engine/world-public';
 import { domainLines } from '../engine/gm-domain';
-import { titlesOf } from '../engine/gm-career';
+import { careerOf, titlesOf } from '../engine/gm-career';
+import { rankInfo, rankLabel, rankLevel } from '../engine/career';
 import { WORLD_CSS, liPoint, worldSvg } from './world-map';
 import { liLife } from '../engine/life';
 import { clockFeelings } from '../engine/clocks';
 import { courtFeelings } from '../engine/court';
+import { reputationLines } from '../engine/reputation';
 import { currentPlan, plansFor, planSteps } from '../engine/plan';
 
 // The war chronicle's tabs and side panel (Game Experience ch. 3, 6). Only what Li can know is shown.
@@ -130,7 +132,7 @@ export function liPage(s: GameState): string {
   const planHtml = `<h2 class="label">Li's plan</h2>
     <div class="slots">${plansFor(s).map((p) => `<button type="button" class="slot${p.id === chosen ? ' on' : ''}" data-plan="${p.id}" title="${esc(p.why)}"><b>${esc(p.label)}</b>${esc(p.why)}</button>`).join('')}</div>
     ${chosen ? `<ul class="chronicle">${planSteps(s, chosen).map((x) => `<li>${x.done ? '✓' : '○'} ${esc(x.text)}</li>`).join('')}</ul>` : '<p class="empty">Choose what Li is working toward. The story will bring chances toward the next step; the rules still decide.</p>'}`;
-  const threats = [...clockFeelings(s), ...courtFeelings(s).map((x) => `At court: ${x}`)];
+  const threats = [...clockFeelings(s), ...courtFeelings(s).map((x) => `At court: ${x}`), ...reputationLines(s)];
   const threatHtml = threats.length ? `<h2 class="label">What Li feels coming</h2><ul class="chronicle">${threats.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
   return `<div class="card">${liCard(s)}</div>${planHtml}${lifeHtml}${threatHtml}
     <h2 class="label">Condition</h2>
@@ -164,6 +166,24 @@ export function peoplePage(s: GameState): string {
 
 export function armyPage(s: GameState): string {
   const ids = BAND.filter((id) => met(s, id) && s.characters[id]);
+  const car = careerOf(s);
+  // The roster opens when Li leads men of his own (goal Oct 17): his unit by rank, his land's troops, the people he leads.
+  if (rankLevel(car.rank) >= rankLevel('gocho')) {
+    const info = rankInfo(car.rank);
+    const d = s.domain;
+    const under = Object.keys(s.characters).filter((id) => id !== s.liId && s.characters[id].alive && met(s, id) && /\b(?:under Li|Li's (?:men|unit|army|officer|lieutenant|retainer|vassal))\b/i.test(s.characters[id].role));
+    const rows = [
+      `<tr><th>Rank</th><td>${esc(rankLabel(car.rank))}</td></tr>`,
+      `<tr><th>Men by rank</th><td>${esc(info.men)}</td></tr>`,
+      `<tr><th>Serves</th><td>${esc(car.kingdom[0].toUpperCase() + car.kingdom.slice(1))}</td></tr>`,
+      d ? `<tr><th>His land</th><td>${esc(d.name)} · ${d.koku.toLocaleString('en-US')} koku · ${d.standing} standing troops${d.levies ? ` · ${d.levies} levies under arms` : ''}</td></tr>` : '',
+      s.battle && !s.battle.over ? `<tr><th>In the field</th><td>${esc(s.battle.name ?? 'a battle')}</td></tr>` : '',
+    ].join('');
+    return `<h1>Li's command</h1><p class="lead">The men Li leads now, and the people who serve under him.</p>
+      <table class="table">${rows}</table>
+      ${under.length ? `<h2 class="label">Under his command</h2><div class="grid">${under.map((id) => personCard(s, id)).join('')}</div>` : '<p class="empty">No officer of his own yet. When someone comes to serve under Li, the story names them.</p>'}
+      ${ids.length ? `<h2 class="label">The Red Crane band</h2><div class="grid">${ids.map((id) => personCard(s, id)).join('')}</div>` : ''}`;
+  }
   return `<h1>The Red Crane band</h1><p class="lead">Seen from the baggage line. About 120 hired swords; Li carries their gear but is not one of them. The full roster opens when Li leads men of his own.</p>
     <div class="grid">${ids.map((id) => personCard(s, id)).join('')}</div>`;
 }

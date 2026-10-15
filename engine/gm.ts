@@ -14,6 +14,7 @@ import { nemesisDrafts } from './drama';
 import { planText } from './plan';
 import { childDrafts, familyText, marryDrafts } from './family';
 import { courtText, factionDrafts } from './court';
+import { reputationDrafts, reputationText } from './reputation';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -92,6 +93,7 @@ export type GmChange =
   | { kind: 'marry'; npc: string; alliance?: boolean; reason?: string }
   | { kind: 'child'; name: string; son?: boolean }
   | { kind: 'faction'; faction: string; delta?: number; join?: boolean; leave?: boolean; reason?: string }
+  | { kind: 'reputation'; group: string; delta: number; reason?: string }
   | { kind: 'skill'; skill: string; delta: number }
   | { kind: 'memory'; npc: string; what: string; weight?: number }
   | { kind: 'person'; id: string; name: string; role: string; desc: string; goal: string; secret?: string; trust?: number; respect?: number; affection?: number; rivalry?: number }
@@ -340,6 +342,7 @@ export function gmMemoryText(s: GameState): string {
     planText(s),
     familyText(s),
     courtText(s),
+    reputationText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -593,6 +596,9 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       }
       case 'lever':
         drafts.push(...leverDrafts(s, x, notes));
+        break;
+      case 'reputation':
+        drafts.push(...reputationDrafts(s, x, notes));
         break;
       case 'faction':
         drafts.push(...factionDrafts(s, x, notes));

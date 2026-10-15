@@ -106,6 +106,8 @@ export function careerText(s: GameState): string {
     const chk = checkPromotion({ rank: car.rank, merit: car.merit, birth: 'commoner', bond: car.bond, kingdom: car.kingdom, armyMen: ARMY[car.kingdom], vacancy: true });
     lines.push(`Next: ${rankLabel(next)}: score ${chk.score} of ${chk.needed}${chk.blocks.length ? ` (blocked now: ${chk.blocks.map((b) => b.reason).join('; ')})` : ' (ready when a post opens)'}.`);
   }
+  // The Army tab lists the people who serve under Li by their role (goal Oct 17).
+  if (rankLevel(car.rank) >= rankLevel('gocho')) lines.push('When someone comes to serve under Li, give them a role that says so ("role": "Gochō under Li", "Li\'s lieutenant"): the Army tab lists them.');
   const titles = titlesOf(s);
   if (titles.length) lines.push(`Titles the world gives him: ${titles.map((t) => `"${t}"`).join(', ')}.`);
   lines.push('Propose deeds Li truly did with witnesses ("deed"), and a promotion only when a post opens or at a reward ceremony ("promotion", naming why the post is free and, from Sanbyakunin-shō up, the sponsor). After a campaign, hold a reward ceremony ("ceremony"); the code pays merit and fills posts. Titles come from deeds ("title").');

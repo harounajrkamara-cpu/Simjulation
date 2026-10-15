@@ -394,6 +394,7 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 
 ### Reputation
 - Separate per group: soldiers · nobles · peasants · enemies. Titles/nicknames come from deeds and spread as rumours.
+- ✅ **In the code** (goal Oct 17, owner kan terugdraaien; `engine/reputation.ts`): each group 0–100, moved by what Li does (at most ±10 a scene, with a reason); Claude sees it, the Li tab shows it in words ("soldiers speak well of him", "enemies fear his name"). It does not feed the promotion score yet (the scale of that term is an owner question, Numbers §6).
 
 ### What the player sees
 - Close friends: fairly accurate. Others: estimates ("seems to respect you, trust unclear"). Spies, conversations, POL/INT make it sharper.

@@ -92,6 +92,7 @@ ANSWER WITH JSON ONLY:
     {"kind":"lever","fuse":"<fuse id from WORLD EVENTS COMING>","toward":"<one of its outcomes>","reason":"what Li did"} (only where the fuse plays out; either side),
     {"kind":"seed","id":"<id from STORY SEEDS>","state":"planted|grown|dead","note":"short"},
     {"kind":"clock","id":"<id>","name":"<who wants what>","doom":"<what happens when full>","size":4} (open a threat; or "tick":1 / "back":1 with "reason" / "close":true for an open one),
+    {"kind":"reputation","group":"soldiers|nobles|peasants|enemies","delta":<-10..10>,"reason":"what they heard"}, {"kind":"faction","faction":"<id from THE COURT>","delta":<-10..10>,"reason":"..."},
     {"kind":"marry","npc":"<id>","alliance":false,"reason":"..."} (the code checks love, status and age), {"kind":"child","name":"...","son":true} (only a married Li; about one a year),
     {"kind":"freedom","route":"merit|head|bought|raizen|escape"},
     {"kind":"deed","deed":"standard|first_over_wall|saved_officer|scouting|objective|won|low_losses|withdrawal|steady_morale|supply_kept|disobeyed_paid_off|disobeyed_failed|negotiation|intelligence|governance|civilians","amount":<only for negotiation/intelligence/civilians>,"reason":"what Li did and who saw it"},
