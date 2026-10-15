@@ -30,3 +30,8 @@ Owner's permission (Oct 16, /loop): build on `build/stage-1`; new features allow
   3. A due threat that Claude never closed doubled every Claude call (one rewrite per scene). Now it asks once; the memory keeps saying DUE NOW.
   4. Seeds that had already grown stayed listed as "waiting for a payoff"; long-goal storylines were pushed to close. Both fixed.
   5. Smaller: "push after 5 quiet days" could fire every scene if Claude never fills "turns"; a second win reopened revenge later without a new fight; **bold** text hid a win from the checks; the "big moment" weight lingered for several scenes after a fight; the plan's ford step never showed progress.
+
+## 5. What matters most for the first hours: progress you can feel (page v40)
+- **Why this one:** the Game Experience Bible promises a "spark" about every 10 minutes (a bond that turns, a skill, a rumour), and ChatGPT's review and the owner both said progress must be felt. The classic chronicle had sparks (◆ lines); **Game Master mode showed none**, so even real progress was invisible.
+- **Built:** after each Game Master scene (also inside a montage) up to 3 gold ◆ lines: a person's view of Li changes ("Hisame now likes Li"), a skill reaches a new level, a fighting style grows, a step of Li's plan is done, a threat starts to brew. Read from the state before and after; nothing invented. `engine/sparks.ts`, `tests/sparks.test.ts`. Canon WB ch. 11 "(nacht Oct 16, owner kan terugdraaien)".
+- **Not built on purpose:** rumours about Li as sparks (needs a rumour system in GM mode first), and more new systems. As agreed in the evening: the first 30 minutes must be played for real before more is added.

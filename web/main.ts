@@ -4,6 +4,9 @@ import { Narration, narrate, shouldNarrate, templateText } from '../ai/narrate';
 import { FactPacket, buildPacket } from '../ai/packet';
 import { commitDrafts, fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
 import { planDrafts, PlanId } from '../engine/plan';
+import { SparkSnapshot, sparkSnapshot, sparksSince } from '../engine/sparks';
+/** The state after the last painted scene, for sparks; unset until the first scene of this page visit. */
+let sparkMark: SparkSnapshot | undefined;
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
 import { SkipSummary, summaryText } from '../engine/summary';
 import { GmChange, gmApplyFix, gmOn, gmRewind, lastFightResult } from '../engine/gm';
@@ -383,6 +386,9 @@ async function paintPlay(turn: HTMLElement, r: GmPlay, said: string | undefined,
   else p.innerHTML = termify(esc(r.turn.scene), state);
   const newPeople = Object.keys(state.relations).filter((id) => met(state, id) && !metBefore.has(id)).map((id) => state.characters[id].name);
   turn.insertAdjacentHTML('beforeend', chipsHtml([...replyParts(changesLine(before, noticeable(state)), newPeople).chips, ...growChips(fine)]));
+  // Sparks (night Oct 16): what turned since the last scene, as short gold lines (Game Experience Bible: ~every 10 minutes).
+  if (sparkMark) for (const line of sparksSince(state, sparkMark)) turn.insertAdjacentHTML('beforeend', `<p class="text spark">◆ ${esc(line)}</p>`);
+  sparkMark = sparkSnapshot(state);
   if (r.turn.gmNote) turn.insertAdjacentHTML('beforeend', `<p class="text gmnote">Game Master: ${esc(r.turn.gmNote)}</p>`);
   const why = [said ? `Because Li chose: ${said}.` : '', r.turn.journal ? `Li's journal: ${r.turn.journal}` : '', r.notes.length ? `The rules held: ${r.notes.join('; ')}.` : ''].filter(Boolean);
   if (why.length) turn.insertAdjacentHTML('beforeend', `<details class="why"><summary>Why?</summary><p>${esc(why.join(' '))}</p></details>`);
