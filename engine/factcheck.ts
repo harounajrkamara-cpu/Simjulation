@@ -5,7 +5,7 @@ import { GameState } from './types';
 // the code compares it with the memory: the dead stay silent, known names are spelled right, Li's age and rank are right,
 // and the story has no game words or "you". A scene with problems gets one rewrite (ai/gm.ts). Pure and deterministic.
 
-export interface FactProblem { kind: 'dead' | 'name' | 'age' | 'rank' | 'mechanics' | 'person'; text: string }
+export interface FactProblem { kind: 'dead' | 'name' | 'age' | 'rank' | 'mechanics' | 'person' | 'fight'; text: string }
 
 /** Command ranks (World Bible ch. 4), so a wrong rank for Li can be caught. */
 export const RANK_TITLES = ['Ashigaru', 'Gochō', 'Kogashira', 'Gojū-gashira', 'Hyakunin-gashira', 'Sanbyakunin-shō', 'Sennin-shō', 'Gosennin-shō', 'Taishō', 'Dai-Shōgun'];
@@ -85,11 +85,38 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
     problems.push({ kind: 'rank', text: 'Li is still a slave: freedom comes only through a real route the code records.' });
   }
 
-  // 5. The story stays a story: no game words, no "you" outside dialogue.
+  // 5. No win the code did not decide (owner, Oct 11: a rank-F slave "won" a spar against Gonza in story text). Li may
+  // beat or kill a known person only right after a fight the duel engine ran (a duelEnd since the last scene).
+  const lastScene = [...s.events].reverse().find((e) => e.type === 'scene')?.seq ?? -1;
+  const justFought = s.events.some((e) => e.seq > lastScene && e.type === 'story' && (e.data as { duelEnd?: string }).duelEnd);
+  if (!justFought) {
+    const WIN = /\bLi\b[^.!?]{0,80}?\b(?:kills|slays|beheads|cuts down|strikes down|knocks down|beats|defeats|disarms|bests|overpowers|takes the head of)\b/;
+    for (const sen of sentences(prose).filter((x) => WIN.test(x))) {
+      const foe = people.find((c) => c.alive && c.name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'u').test(sen.slice(sen.search(WIN)))));
+      if (foe) { problems.push({ kind: 'fight', text: `The scene has Li beat ${foe.name}, but no fight decided that. An exchange of blows that matters is a fight the code runs: end the scene where the fight starts and set "fight".` }); break; }
+    }
+  }
+
+  // 6. The story stays a story: no game words, no "you" outside dialogue.
   if (MECHANICS.test(prose)) problems.push({ kind: 'mechanics', text: 'Game words (stats, dice, levels, percent) appear in the story text.' });
   if (/\b(you|your|yours|yourself)\b/i.test(prose)) problems.push({ kind: 'person', text: 'The story speaks to "you" outside dialogue; tell it in the third person.' });
 
   return problems;
+}
+
+/**
+ * A scene that offers blows against a known person must start the fight (owner, Oct 11: the Gonza spar stayed story
+ * text, so Claude decided it). Training alone, or blows against nobody the code knows, stays story.
+ */
+export function checkGmSuggestions(s: GameState, t: { suggestions?: string[]; fight?: unknown }): FactProblem[] {
+  if (t.fight || (s.duel && !s.duel.over)) return [];
+  const BLOW = /\b(strike|strikes|hit|slash|thrust|stab|cut at|attack|lunge|feint|parry|block|spar with|fight)\b/i;
+  const people = Object.values(s.characters).filter((c) => c.id !== s.liId && c.alive);
+  for (const line of (t.suggestions ?? []).filter((x) => BLOW.test(x))) {
+    const foe = people.find((c) => c.name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'iu').test(line)));
+    if (foe) return [{ kind: 'fight', text: `The choices offer blows against ${foe.name} ("${line}"), but no fight was started. An exchange of blows that matters is a fight the code runs: set "fight" (deadly false for practice) and end the scene where it starts.` }];
+  }
+  return [];
 }
 
 /** One instruction for a single rewrite: the same events, these facts fixed. */

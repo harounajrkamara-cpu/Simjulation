@@ -96,15 +96,31 @@ describe('Game Master mode: the code referees', () => {
     expect(lastFightResult(s)).toBeUndefined();
   });
 
-  it('an officer head in Kurogane service can free Li, but only through a won fight', () => {
+  it('an invented officer earns nothing: a farmhand called "Kogashira" cannot free Li (AI Lab issue #3)', () => {
     const s = startGmGame();
     gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
-    gmApply(s, scene({ fight: { foe: 'A Suiren Kogashira', rank: 'F', look: 'an old officer, half dead', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
-    for (let g = 0; s.duel && g < 12; g++) handleInput(s, 'feint'); // this foe falls to feints (fixed, no dice)
-    expect(s.flags[`duel_${Object.keys(s.gm!.duels)[0]}_won`]).toBe(1);
-    expect(s.flags.kogashira_head).toBe(1);
+    const r = gmApply(s, scene({ fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant with a staff', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/not a Kogashira on the code's record/);
+    for (let g = 0; s.duel && g < 12; g++) handleInput(s, 'feint');
+    expect(s.flags.kogashira_head ?? 0).toBe(0);
+    expect(s.flags.merit_service ?? 0).toBe(0);
     gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'head' }] }));
-    expect(li(s).status).toBe('free');
+    expect(li(s).status).toBe('slave');
+  });
+
+  it('the real officer at the ford on his raid day does count, and fights at his real strength', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
+    while (today(s) < 261) gmApply(s, scene({ days: Math.min(30, 261 - today(s)) })); // Year 100, Month 9, Day 22: the Kogashira's raid
+    const r = gmApply(s, scene({ fight: { foe: 'A Suiren Kogashira', rank: 'F', look: 'an officer under a blue banner', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect(r.secretNotes ?? []).toEqual([]);
+    expect(s.duel!.foe.val).toBe(38); // the record's Kogashira, not Claude's "F"
+  });
+
+  it('a known person fights with his own numbers, whatever rank Claude guesses', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ fight: { foe: 'Gonza', rank: 'F', look: 'one-eared and angry', deadly: false } }));
+    expect(s.duel!.foe.val).toBe(s.characters.gonza.stats.VAL);
   });
 
   it('time never runs backwards and a slave scene skips at most a month', () => {

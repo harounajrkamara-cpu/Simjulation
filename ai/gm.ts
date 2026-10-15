@@ -2,7 +2,7 @@ import { AiAdapter, ModelTier } from './adapter';
 import { GmFixProposal, GmResult, GmTurn, gmApply, gmDayCap, gmMemoryText, gmRecentScenes, lastFightResult, parseGmFix, parseGmTurn, skipDaysLeft, splitWishes } from '../engine/gm';
 import { commitDrafts, today } from '../engine/engine';
 import { chapterDraft, chapterDue, chapterPrompt } from '../engine/recaps';
-import { checkGmScene, factFixPrompt } from '../engine/factcheck';
+import { checkGmScene, checkGmSuggestions, factFixPrompt } from '../engine/factcheck';
 import { GameEvent, GameState } from '../engine/types';
 
 export type { GmFixProposal } from '../engine/gm';
@@ -30,8 +30,13 @@ HOW TO RUN THE WORLD
 5. Keep faith with the memory: use the people, their feelings and reasons, the open storylines and the story so far. Never contradict them.
    Open new storylines and close old ones. Introduce new people with the "person" change before they matter. CORRECTIONS override the rest.
 6. Secrets: the HIDDEN TRUTHS and every SECRET stay hidden until Li truly discovers them through play. Hint, foreshadow, never reveal early.
-7. Fights are decided by the code, never by you. When a real fight starts, describe the moment it begins and set "fight"; stop there.
-   After the fight you will be told the result: tell what happens next, true to it. Do not start a fight for every scene.
+7. Fights are decided by the code, never by you. Every exchange of blows whose outcome matters is a fight: a spar or drill against
+   a person, a challenge, boys fighting ("deadly": false for practice; training alone is story). Describe the moment it begins, set
+   "fight" and stop there. After the fight you will be told the result: tell what happens next, true to it. Never write that Li beats,
+   kills or takes the head of anyone the code did not decide. Officer rank, an enemy and witnesses count only where the memory shows
+   a raid or a battle; the code checks them against its own record.
+7b. When the player tries something impossible or unearned, refuse INSIDE the story: the world answers (someone stops him, the plan
+   meets reality, the fight starts for real and the code decides). No out-of-character refusal for this.
 8. Numbers belong to the code: propose changes, never write numbers, stats or game words in the scene text.
 9. Freedom only comes through a real route (see FREEDOM ROUTES); if the condition is not met, the code will refuse it.
 10. LONG GOALS (in the memory): steer the world so that a CHANCE toward the next open goal keeps coming — a person, a rumour, a door, a fight.
@@ -134,13 +139,15 @@ async function play(ai: AiAdapter, s: GameState, said: string | undefined, signa
     } catch (e) {
       if (!first) throw e;
     }
-    // The rewrite failed or was unusable: the first scene stands (the problems were already logged to Claude).
-    if (!turn && first) turn = first;
     if (!turn) continue;
-    if (!first) {
-      const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
-      const found = checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames);
-      if (found.length) { first = turn; facts = factFixPrompt(found); continue; }
+    // Every scene is checked, the rewrite too: a scene the code knows breaks the facts is never shown (AI Lab issue #2).
+    const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
+    const found = [...checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn)];
+    if (found.length) {
+      if (first) throw Object.assign(new Error(`The Game Master's rewrite still broke the facts (${found.map((p) => p.text).join(' ')}).`), { code: 'bad_answer' });
+      first = turn;
+      facts = factFixPrompt(found);
+      continue;
     }
     if (maxDays !== undefined && (turn.days ?? 0) > maxDays) turn.days = maxDays;
     const r = gmApply(s, turn, record);

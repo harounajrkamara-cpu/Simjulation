@@ -1,5 +1,5 @@
 import { ageOn, dateFromIndex, dayIndex, formatDate, seasonKey } from './calendar';
-import { ESCAPE_NEEDS, inService, MERIT_FOR_FREEDOM, PRICE_MON } from './campaign';
+import { ESCAPE_NEEDS, inService, MERIT_FOR_FREEDOM, PRICE_MON, raidIndexOn, raidOfficerOn } from './campaign';
 import { DuelOutcome, DuelTemplate } from './content';
 import { PLACES } from './data';
 import { commitDrafts, has, li, met, replay, today } from './engine';
@@ -411,7 +411,7 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   let duelId: string | undefined;
   if (t.fight) {
     duelId = `gm_${s.nextSeq}`;
-    drafts.push(...gmDuelStart(s, duelId, t.fight));
+    drafts.push(...gmDuelStart(s, duelId, t.fight, secretNotes));
   }
   return { drafts, notes, secretNotes, duelId };
 }
@@ -552,6 +552,11 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         const npc = str(x.npc, 40);
         if (npc === s.liId) { notes.push('Li does not die'); break; }
         if (!known(npc) || !s.characters[npc].alive) break;
+        // A death Li causes is a fight the code runs (it can end in a kill), never a story claim.
+        if (/\bLi\b/.test(str(x.reason, 100)) && /\b(kill|slay|slew|strike|struck|stab|cut|beat|behead|head|fight|duel)/i.test(str(x.reason, 100))) {
+          secretNotes.push(`${s.characters[npc].name} does not die by Li's hand in story text: a fight between them must be started with "fight" and decided by the code`);
+          break;
+        }
         drafts.push({ type: 'status', fact: `${s.characters[npc].name} dies (${str(x.reason, 100)})`, visible: true, data: { char: npc, status: s.characters[npc].status, role: s.characters[npc].role, alive: false } });
         break;
       }
@@ -644,26 +649,54 @@ function freedomCheck(s: GameState, route: string, notes: string[]): Draft[] {
   }
 }
 
+const OFFICER_MEN: Record<NonNullable<GmFight['officer']>, number> = { 'Gochō': 5, 'Kogashira': 10, 'Gojū-gashira': 50, 'Hyakunin-gashira': 100 };
+
+/**
+ * What the code itself knows about a fight Claude starts (owner, Oct 12: "impossible things really cannot happen").
+ * Claude's labels are only Li's guess: the foe's strength comes from the person's real numbers when he is someone the
+ * code knows; officer rank, an enemy and witnesses count only where the code records a war (a raid on the ford today,
+ * or a battle in progress) and the officer is on that record. Anything else is fought, but earns no merit or head.
+ */
+export function fightFacts(s: GameState, f: GmFight) {
+  const name = f.foe.toLowerCase();
+  const person = Object.values(s.characters).find((p) => p.id !== s.liId && p.alive && (name.includes(p.name.toLowerCase()) || name.includes(p.id)));
+  const raidOfficer = raidOfficerOn(today(s));
+  const battle = s.battle && !s.battle.over ? s.battle : undefined;
+  const atWar = raidIndexOn(today(s)) !== undefined || !!battle;
+  let officer: GmFight['officer'];
+  if (f.officer && raidOfficer?.rank === f.officer) officer = f.officer;
+  else if (f.officer && battle?.units.some((u) => u.side === 'enemy' && !!u.commander && name.includes(u.commander.toLowerCase()) && u.men >= OFFICER_MEN[f.officer!])) officer = f.officer;
+  const strength = person ? { val: person.stats.VAL, mastery: Math.max(0, ...Object.values(person.styles)) }
+    : officer && raidOfficer?.rank === officer ? { val: raidOfficer.val, mastery: raidOfficer.mastery }
+    : { val: RANK_SCORE[f.rank] + 1, mastery: RANK_SCORE[f.rank] - 1 };
+  const enemy = !!f.witnessedEnemy && atWar && !person;
+  const notes: string[] = [];
+  if (f.officer && !officer) notes.push(`"${f.foe}" fights, but is not a ${f.officer} on the code's record (no raid or battle names him): no officer merit or head`);
+  if (f.witnessedEnemy && !enemy) notes.push(`"${f.foe}" is not an enemy in a war the code records today: no merit for this fight`);
+  return { person, officer, strength, enemy, notes };
+}
+
 /** A fight the Game Master starts: the duel engine decides it, never Claude. */
-function gmDuelStart(s: GameState, id: string, f: GmFight): Draft[] {
+function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = []): Draft[] {
   const c = li(s);
-  const score = RANK_SCORE[f.rank];
-  const foeId = `gmfoe_${slug(f.foe)}`;
-  const officerMerit = f.officer && f.witnessedEnemy && inService(s) ? OFFICER_MERIT[f.officer] : 0;
-  const plainMerit = f.witnessedEnemy && f.deadly ? 1 : 0;
-  const head = f.officer && f.officer !== 'Gochō' && f.witnessedEnemy && inService(s);
+  const facts = fightFacts(s, f);
+  notes.push(...facts.notes);
+  const foeId = facts.person?.id ?? `gmfoe_${slug(f.foe)}`;
+  const officerMerit = facts.officer && facts.enemy && inService(s) ? OFFICER_MERIT[facts.officer] : 0;
+  const plainMerit = facts.enemy && f.deadly ? 1 : 0;
+  const head = facts.officer && facts.officer !== 'Gochō' && facts.enemy && inService(s);
   const won: DuelOutcome = {
     fact: `${f.foe} goes down.`,
     journal: `I beat ${f.foe}.`,
     grow: 1.0,
-    merit: officerMerit || plainMerit ? { amount: officerMerit || plainMerit, why: f.officer ? `enemy ${f.officer} head` : 'witnessed kill of an enemy' } : undefined,
+    merit: officerMerit || plainMerit ? { amount: officerMerit || plainMerit, why: officerMerit ? `enemy ${facts.officer} head` : 'witnessed kill of an enemy' } : undefined,
     flag: head ? ['kogashira_head', 1] : undefined,
   };
   const t: DuelTemplate = {
     id,
     place: f.place ?? PLACES[c.location] ?? c.location,
     intro: `${f.foe} — ${f.look}.`,
-    foe: { id: foeId, name: f.foe.replace(/^A /, 'the ').replace(/^An /, 'the '), val: score + 1, mastery: score - 1, wound: 0, fatigue: 0, estimate: `${f.look} · Warrior ${f.rank}?` },
+    foe: { id: foeId, name: facts.person?.name ?? f.foe.replace(/^A /, 'the ').replace(/^An /, 'the '), val: facts.strength.val, mastery: facts.strength.mastery, wound: 0, fatigue: 0, estimate: `${f.look} · Warrior ${f.rank}?` },
     prefs: [{ attack: 3, counter: 1, feint: 1, observe: 0 }, { attack: 1, counter: 3, feint: 0, observe: 1 }, { attack: 1, counter: 1, feint: 3, observe: 0 }][s.nextSeq % 3],
     surprise: false,
     maxWound: f.deadly ? 3 : 1,
