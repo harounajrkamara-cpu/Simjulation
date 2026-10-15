@@ -72,12 +72,11 @@ Answer:`;
 /** Problems with an answer: wrong names, people Li has not met, money that is not Li's. Empty = fine. */
 export function checkAnswer(s: GameState, answer: string): string[] {
   const out = checkGmScene(s, answer).filter((p) => p.kind === 'name' || p.kind === 'dead').map((p) => p.text);
-  const knownNames = new Set(knownPeople(s).flatMap((p) => p.name.toLowerCase().split(/\s+/)));
   for (const c of Object.values(s.characters)) {
     if (c.id === s.liId || met(s, c.id)) continue;
-    for (const part of c.name.split(/\s+/).filter((w) => w.length >= 4 && !knownNames.has(w.toLowerCase()))) {
-      if (new RegExp(`\\b${part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'u').test(answer)) out.push(`${c.name} is someone Li has not met.`);
-    }
+    // Only the given name (last word): family names like "Hagiwara" are houses Li may well know about.
+    const given = c.name.split(/\s+/).pop()!;
+    if (given.length >= 4 && new RegExp(`(?<!\\p{L})${given.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?!\\p{L})`, 'u').test(answer)) out.push(`${c.name} is someone Li has not met.`);
   }
   const sheetMoney = new Set([s.money, PRICE_MON]);
   for (const m of answer.matchAll(/([\d][\d,.]*)\s*mon\b/g)) {
@@ -87,8 +86,16 @@ export function checkAnswer(s: GameState, answer: string): string[] {
   return out;
 }
 
-/** The code's own answer: goals and what Li can do now. Always right, never a spoiler. */
-export function localAnswer(s: GameState): string {
+/** The code's own answer: what Li knows about the words in the question, else goals and choices. Never a spoiler. */
+export function localAnswer(s: GameState, question = ''): string {
+  const words = question.toLowerCase().match(/\p{L}{4,}/gu) ?? [];
+  const hit = (t: string) => words.some((w) => t.toLowerCase().includes(w));
+  const facts = [
+    ...knownEntries(s).filter((e) => hit(e.title)).map((e) => `${e.title}: ${e.text}`),
+    ...knownPeople(s).filter((p) => hit(p.name)).map((p) => p.line),
+  ];
+  if (facts.length) return `What Li knows:\n${facts.slice(0, 4).join('\n')}`;
+  if (words.length && !/\b(what|should|do|now|next|lost|help)\b/i.test(question)) return `Li does not know anything about that yet. Ask someone in the camp, or look in the Encyclopedia and People tabs.`;
   const goals = plainHtml(goalsHtml(s)).replace(/^Goals\n?/, '').split('\n').filter(Boolean).slice(0, 4).join(' · ');
   const now = nowChoices(s).slice(0, 4).join(' · ');
   return `Your goals: ${goals}.\nWhat Li can do now: ${now}.\nYou can also write anything Li does in your own words, "skip" quiet days, or open the People and Journal tabs to remember who is who.`;
@@ -96,11 +103,11 @@ export function localAnswer(s: GameState): string {
 
 /** Ask the guide. Returns the answer and whether it came from Claude (checked) or from the code. */
 export async function ask(ai: AiAdapter | null, s: GameState, question: string, recentStory = ''): Promise<{ text: string; from: 'claude' | 'game' }> {
-  if (!ai || !question) return { text: localAnswer(s), from: 'game' };
+  if (!ai || !question) return { text: localAnswer(s, question), from: 'game' };
   const sheet = askSheet(s, recentStory);
   for (let attempt = 0; attempt < 2; attempt++) {
     const raw = (await ai.ask(askPrompt(sheet, question) + (attempt ? '\n(Your last answer named things that are not on the sheet. Use only the sheet.)' : ''), { tier: 'quick' })).trim();
     if (raw && checkAnswer(s, raw).length === 0) return { text: raw, from: 'claude' };
   }
-  return { text: localAnswer(s), from: 'game' };
+  return { text: localAnswer(s, question), from: 'game' };
 }

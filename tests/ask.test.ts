@@ -33,7 +33,7 @@ describe('Ask the guide', () => {
     const before = JSON.stringify(s);
     const a = await ask(fake(['Kaname knows the way.', 'Ask Ōno Daisuke.']), s, 'who can help me?');
     expect(a.from).toBe('game');
-    expect(a.text).toBe(localAnswer(s));
+    expect(a.text).toBe(localAnswer(s, 'who can help me?'));
     const b = await ask(fake(['Ask Old Sukezō at the cook fire.']), s, 'who can help me?');
     expect(b).toEqual({ text: 'Ask Old Sukezō at the cook fire.', from: 'claude' });
     expect(JSON.stringify(s)).toBe(before);
@@ -44,5 +44,19 @@ describe('Ask the guide', () => {
     const a = await ask(null, s, 'what should I do?');
     expect(a.from).toBe('game');
     expect(a.text).toMatch(/Your goals:.*\nWhat Li can do now:/);
+  });
+});
+
+describe('Ask the guide: houses and facts', () => {
+  it('an answer may name a house that shares a name with someone Li has not met', () => {
+    const s = newGame().state;
+    expect(checkAnswer(s, 'The Hagiwara are the border lords of Akaishi.')).toEqual([]);
+    expect(checkAnswer(s, 'Sayo will help you.').length).toBeGreaterThan(0);
+  });
+  it('without Claude, a question about a known thing gets what Li knows about it', async () => {
+    const s = newGame().state;
+    const a = await ask(null, s, 'hagiwara who are they');
+    expect(a.text).toMatch(/Hagiwara/);
+    expect(a.text).not.toMatch(/Your goals/);
   });
 });
