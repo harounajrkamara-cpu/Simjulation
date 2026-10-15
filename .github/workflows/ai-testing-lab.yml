@@ -91,7 +91,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          npm exec vitest run tests/round2-poisoning.test.ts -- --reporter=verbose 2>&1 | tee "$RUNNER_TEMP/poisoning-test.log"
+          npx vitest run tests/round2-poisoning.test.ts --reporter=verbose 2>&1 | tee "$RUNNER_TEMP/poisoning-test.log"
           rc=${PIPESTATUS[0]}
           echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
           exit "$rc"
@@ -109,10 +109,11 @@ jobs:
           BALANCE_OUTCOME: ${{ steps.balance.outcome }}
           POISONING_OUTCOME: ${{ steps.poisoning.outcome }}
           POISONING_EXIT: ${{ steps.poisoning.outputs.exit_code }}
+          LOG_PATH: ${{ runner.temp }}/poisoning-test.log
         with:
           script: |
             const fs = require('fs');
-            const logPath = process.env.RUNNER_TEMP + '/poisoning-test.log';
+            const logPath = process.env.LOG_PATH;
             let log = '';
             try { log = fs.readFileSync(logPath, 'utf8'); } catch { log = '(No adversarial test log was produced; dependency installation or an earlier step may have failed.)'; }
             const checks = [
