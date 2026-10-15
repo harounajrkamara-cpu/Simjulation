@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { gmTurn } from '../ai/gm';
 import { fromSave, li, stateHash, toSave, today } from '../engine/engine';
 import { handleInput } from '../engine/game';
-import { GM_LIMITS, gmApply, gmMemoryText, lastFightResult, parseGmTurn, startGmGame } from '../engine/gm';
+import { GM_LIMITS, gmApply, gmApplyFix, gmMemoryText, lastFightResult, parseGmTurn, startGmGame } from '../engine/gm';
 
 // Game Master mode (owner decision Oct 7): Claude runs the world; the code remembers and referees.
 
@@ -123,13 +123,36 @@ describe('Game Master mode: the code referees', () => {
     expect(s.duel!.foe.val).toBe(s.characters.gonza.stats.VAL);
   });
 
-  it('time never runs backwards and a slave scene skips at most a month', () => {
+  it('time never runs backwards: "morning" after an evening is the next morning; a slave scene skips at most a month', () => {
     const s = startGmGame();
+    const d0 = today(s);
     gmApply(s, scene({ days: 0, part: 'evening' }));
     gmApply(s, scene({ days: 0, part: 'morning' }));
-    expect(s.date.part).toBe('evening');
+    expect(today(s)).toBe(d0 + 1);
+    expect(s.date.part).toBe('morning');
     gmApply(s, scene({ days: 400 }));
-    expect(today(s)).toBe(30);
+    expect(today(s)).toBe(d0 + 31);
+  });
+
+  it('when Li sleeps the next scene is the next morning, even if Claude wrote days 0 (owner, Oct 11)', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ days: 0, part: 'night' }));
+    const d = today(s);
+    gmApply(s, scene({ days: 0, sleeps: true }));
+    expect(today(s)).toBe(d + 1);
+    expect(s.date.part).toBe('morning');
+  });
+
+  it('"Something\'s wrong" can move time forward (never in a scene, never back)', () => {
+    const s = startGmGame();
+    const d = today(s);
+    const r = gmApply(s, scene({ changes: [{ kind: 'time', days: 1, part: 'morning', reason: 'sneaky' }] }));
+    expect(today(s)).toBe(d);
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/time moves with/);
+    gmApplyFix(s, { explanation: 'Li slept; the day should have changed.', changes: [{ kind: 'time', days: 1, part: 'morning', reason: 'Li slept' }], rewindScenes: 0 }, 'the day did not change after I slept');
+    expect(today(s)).toBe(d + 1);
+    gmApplyFix(s, { explanation: 'x', changes: [{ kind: 'time', days: -5, reason: 'back' }], rewindScenes: 0 }, 'go back');
+    expect(today(s)).toBe(d + 1);
   });
 });
 

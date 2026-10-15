@@ -59,6 +59,7 @@ ANSWER WITH JSON ONLY:
   "journal": "one line in Li's own voice, 'I ...', only what Li knows",
   "days": <whole days until the next scene starts: 0 for the same day, up to the longest skip of his LIFE STAGE>,
   "part": "morning|afternoon|evening|night (when the next scene starts)",
+  "sleeps": true only when Li goes to sleep at the end of the scene (the next scene is the next morning),
   "place": "where Li is, short (optional)",
   "changes": [
     {"kind":"relation","npc":"<id>","field":"trust|respect|affection|fear|rivalry","delta":<-15..15>,"reason":"short reason"},
@@ -218,6 +219,7 @@ Compare the report with the memory and the last scenes below, out of character.
 - If the story broke a fact (a dead man speaks, a wound or a coin forgotten, a name changed, a promise the memory holds but the story dropped,
   a change that should have been recorded and was not), propose the smallest correction: changes of the same kinds as a scene, and
   {"kind":"fact","what":"short subject","text":"the true fact, one line"} so the memory keeps it from now on.
+  If time did not pass that should have (Li slept but the day did not change): {"kind":"time","days":1,"part":"morning","reason":"..."}.
 - Only when the last scene(s) broke the facts so badly they cannot stand, set "rewindScenes" (1–3) to take them back. Otherwise 0.
 - Ironman: never undo a fair loss, a fight the code decided, a bad choice or its fair consequences, and never hand out gains the story did
   not earn. If the report is a complaint about a fair outcome, change nothing and explain politely, in a sentence or two, why it stands.

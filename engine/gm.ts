@@ -33,6 +33,8 @@ export interface GmTurn {
   days?: number;
   /** Part of the day the scene ends in. */
   part?: Part;
+  /** Li goes to sleep at the end of the scene: the next scene is the next morning (the code sets it, not the prose). */
+  sleeps?: boolean;
   /** Where Li is now (short place name). */
   place?: string;
   changes?: GmChange[];
@@ -67,6 +69,7 @@ export type GmChange =
   | { kind: 'wound'; level: number; reason: string }
   | { kind: 'fatigue'; level: number }
   | { kind: 'train'; focus: string; days: number }
+  | { kind: 'time'; days: number; part?: Part; reason: string }
   | { kind: 'skill'; skill: string; delta: number }
   | { kind: 'memory'; npc: string; what: string; weight?: number }
   | { kind: 'person'; id: string; name: string; role: string; desc: string; goal: string; secret?: string; trust?: number; respect?: number; affection?: number; rivalry?: number }
@@ -362,6 +365,7 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
     journal: str(o.journal, 300) || undefined,
     days: num(o.days, 0),
     part,
+    sleeps: o.sleeps === true || undefined,
     place: str(o.place, 80) || undefined,
     changes: Array.isArray(o.changes) ? (o.changes.filter((x) => x && typeof x === 'object') as GmChange[]).slice(0, 20) : [],
     fight: f && str(f.foe) ? {
@@ -542,6 +546,14 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         const text = str(x.text, 300);
         if (!facts) secretNotes.push('fact corrections come only from the player\'s report');
         else if (what && text) drafts.push({ type: 'correction', fact: `Correction: ${what}: ${text}`, visible: false, data: { what, text } });
+        break;
+      }
+      case 'time': {
+        // Only "Something's wrong" moves the clock this way ("Li slept but the day did not change"): forward only, never in a fight.
+        if (!facts) { secretNotes.push('time moves with "days", "part" and "sleeps", not with a change'); break; }
+        if ((s.duel && !s.duel.over) || (s.battle && !s.battle.over)) { notes.push('time cannot move during a fight'); break; }
+        const part = PARTS.includes(x.part as Part) ? (x.part as Part) : undefined;
+        drafts.push(...gmTimeDrafts(s, ...sceneTime(s, { days: clamp(Math.round(num(x.days)), 0, stageDayCap(s)), part })));
         break;
       }
       case 'service': {
@@ -773,9 +785,22 @@ export function gmApply(s: GameState, t: GmTurn, said?: string): GmResult & { ev
   const r = checkGmTurn(s, t, said);
   const events = commitDrafts(s, r.drafts);
   // No time passes while a battle is being fought: its phases are the clock.
-  if (!r.duelId && !(s.battle && !s.battle.over)) events.push(...commitDrafts(s, gmTimeDrafts(s, t.days ?? 0, t.part)));
+  if (!r.duelId && !(s.battle && !s.battle.over)) events.push(...commitDrafts(s, gmTimeDrafts(s, ...sceneTime(s, t))));
   events.push(...commitDrafts(s, refereeDrafts(r.notes, r.secretNotes ?? [])));
   return { ...r, events };
+}
+
+/**
+ * When the next scene starts, from what Claude says explicitly (owner, Oct 11: "I went to sleep and it stayed day 1"): Li
+ * sleeps, or the scene ends in a part of the day that is already past ("morning" after an evening): the next day. Never
+ * guessed from the prose.
+ */
+export function sceneTime(s: GameState, t: Pick<GmTurn, 'days' | 'part' | 'sleeps'>): [number, Part | undefined] {
+  const days = Math.max(0, Math.round(t.days ?? 0));
+  if (days > 0) return [days, t.part];
+  if (t.sleeps) return [1, 'morning'];
+  if (t.part && PARTS.indexOf(t.part) < PARTS.indexOf(s.date.part)) return [1, t.part];
+  return [0, t.part];
 }
 
 /** The referee's notes as one hidden alert (the secret ones only in data, for Claude). */
