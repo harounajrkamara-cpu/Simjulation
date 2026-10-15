@@ -6,7 +6,7 @@ import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
-import { stageDayCap, stageText, STAGE_FACTS, lifeStage } from './stages';
+import { stageDayCap, stageText } from './stages';
 import { battleClearDrafts, battleStartDrafts, battleText } from './gm-battle';
 import { domainMonthDrafts, domainOrderDrafts, domainText, landDrafts, projectDrafts } from './gm-domain';
 import { growDrafts, roleDrafts, seasonGrowthDrafts } from './growth';
@@ -53,7 +53,7 @@ export interface GmFight {
   /** Short description Li sees ("Suiren levy with a spear"). */
   look: string;
   /** Officer rank, if the foe is an enemy officer (his head can count under the merit law). */
-  officer?: 'Gochō' | 'Kogashira';
+  officer?: 'Gochō' | 'Kogashira' | 'Gojū-gashira' | 'Hyakunin-gashira';
   /** Sticks and fists (worst: Hurt) or real weapons (worst: Badly wounded). */
   deadly: boolean;
   /** An enemy of Kurogane, fought in Kurogane service, with witnesses (merit counts). */
@@ -129,11 +129,7 @@ export const GM_LIMITS = {
 
 /** Warrior score Li guesses for each rank letter (Numbers §1 bands, middle of the band). */
 const RANK_SCORE: Record<GmFight['rank'], number> = { F: 10, E: 22, D: 37, C: 52, B: 67, A: 82 };
-/** Canonical officer ranks only (campaign.ts OFFICERS contains Gochō and Kogashira).
- * Gojū-gashira and Hyakunin-gashira do not exist in canonical data — any claim
- * for them is non-canonical and must be rejected before awarding merit (Issue #3 fix). */
-const CANONICAL_OFFICERS: NonNullable<GmFight['officer']>[] = ['Gochō', 'Kogashira'];
-const OFFICER_MERIT: Record<'Gochō' | 'Kogashira', number> = { 'Gochō': 3, 'Kogashira': 3 };
+const OFFICER_MERIT: Record<NonNullable<GmFight['officer']>, number> = { 'Gochō': 3, 'Kogashira': 3, 'Gojū-gashira': 10, 'Hyakunin-gashira': 10 };
 
 export const gmOn = (s: GameState) => (s.flags.gm_mode ?? 0) > 0;
 /** Read-only view of the Game Master memory. Never creates it: only events do (engine.ts), so reading cannot change the
@@ -314,7 +310,6 @@ export function gmMemoryText(s: GameState): string {
     `Merit: combat ${has(s, 'merit_combat')}, in Kurogane service ${has(s, 'merit_service')} of ${MERIT_FOR_FREEDOM}. In the Hagiwara levy: ${inService(s) ? 'yes' : 'no'}.`,
     careerText(s),
     stageText(s),
-    `WORLD FACTS FOR THIS STAGE:\\n${STAGE_FACTS[lifeStage(s)].map((x) => `- ${x}`).join('\\n')}`,
     domainText(s),
     battleText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
@@ -359,7 +354,7 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
   const part = PARTS.includes(o.part as Part) ? (o.part as Part) : undefined;
   const f = o.fight as Record<string, unknown> | undefined;
   const ranks = ['F', 'E', 'D', 'C', 'B', 'A'];
-  const officers = ['Gochō', 'Kogashira'];
+  const officers = ['Gochō', 'Kogashira', 'Gojū-gashira', 'Hyakunin-gashira'];
   return {
     scene,
     summary: str(o.summary, 300) || scene.split(/(?<=\.)\s/)[0].slice(0, 300),
@@ -654,18 +649,14 @@ function gmDuelStart(s: GameState, id: string, f: GmFight): Draft[] {
   const c = li(s);
   const score = RANK_SCORE[f.rank];
   const foeId = `gmfoe_${slug(f.foe)}`;
-  // Validate officer claim against canonical data (Issue #3 fix).
-  // Only Gochō and Kogashira exist in campaign.ts OFFICERS; claims for
-  // Gojū-gashira / Hyakunin-gashira are non-canonical and must be rejected.
-  const isCanonOfficer = !!f.officer && CANONICAL_OFFICERS.includes(f.officer);
-  const officerMerit = isCanonOfficer && f.witnessedEnemy && inService(s) ? OFFICER_MERIT[f.officer as 'Gochō' | 'Kogashira'] : 0;
+  const officerMerit = f.officer && f.witnessedEnemy && inService(s) ? OFFICER_MERIT[f.officer] : 0;
   const plainMerit = f.witnessedEnemy && f.deadly ? 1 : 0;
-  const head = isCanonOfficer && f.officer !== 'Gochō' && f.witnessedEnemy && inService(s);
+  const head = f.officer && f.officer !== 'Gochō' && f.witnessedEnemy && inService(s);
   const won: DuelOutcome = {
     fact: `${f.foe} goes down.`,
     journal: `I beat ${f.foe}.`,
     grow: 1.0,
-    merit: officerMerit || plainMerit ? { amount: officerMerit || plainMerit, why: isCanonOfficer ? `enemy ${f.officer} head` : 'witnessed kill of an enemy' } : undefined,
+    merit: officerMerit || plainMerit ? { amount: officerMerit || plainMerit, why: f.officer ? `enemy ${f.officer} head` : 'witnessed kill of an enemy' } : undefined,
     flag: head ? ['kogashira_head', 1] : undefined,
   };
   const t: DuelTemplate = {

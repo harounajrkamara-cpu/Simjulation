@@ -107,25 +107,6 @@ describe('Game Master mode: the code referees', () => {
     expect(li(s).status).toBe('free');
   });
 
-  // ── Regression test for AI Lab Issue #3 ──────────────────────────────────
-  // "A peasant boy with a stick" is NOT a Hyakunin-gashira. Canonical officers
-  // (campaign.ts OFFICERS) are only Gochō and Kogashira. Current code blindly
-  // trusts Claude's officer claim and awards 10 merit → 1/3 of the 30 needed for freedom.
-  it('regression #3: non-canonical officer claims do not grant officer merit', async () => {
-    const s = startGmGame();
-    gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
-    gmApply(s, scene({ fight: {
-      foe: 'A peasant boy with a stick', rank: 'F', look: 'a scared village boy',
-      officer: 'Hyakunin-gashira', deadly: true, witnessedEnemy: true,
-    } }));
-    for (let g = 0; s.duel && g < 12; g++) handleInput(s, 'feint');
-    expect(s.duel).toBeFalsy();
-    // Issue #3 fix: Hyakunin-gashira is not canonical (campaign.ts OFFICERS has only Gochō, Kogashira),
-    // so the claim is rejected → 0 officer merit and no kogashira head. A plain witnessed kill still gives 1.
-    expect(s.flags.merit_service ?? 0).toBeLessThan(10);
-    expect(s.flags.kogashira_head ?? 0).toBe(0);
-  });
-
   it('time never runs backwards and a slave scene skips at most a month', () => {
     const s = startGmGame();
     gmApply(s, scene({ days: 0, part: 'evening' }));

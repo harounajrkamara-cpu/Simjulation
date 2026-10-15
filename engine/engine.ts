@@ -1,6 +1,6 @@
 import { dateFromIndex, dayIndex, nextPart, seasonKey } from './calendar';
 import { BEATS, DUELS, DuelTemplate, Effect, RUMOURS, STORY as BASE_STORY, StoryEvent, setRestCheck } from './content';
-import { ARC, ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PAYDAY_TIP, PRICE_MON, SHARE_MIN_RESPECT, SHARE_PER_MERIT, STITCH_TIP, DICE_WIN_BASE, DICE_WIN_PER_OBS, CARRY_PAY_BASE, CARRY_PAY_PER_END, fordStory, inService, officerOf, officerTemplate, raidIndexOn, setRelField, skirmishTemplate } from './campaign';
+import { ARC, ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PAYDAY_TIP, PRICE_MON, SHARE_MIN_RESPECT, SHARE_PER_MERIT, STITCH_TIP, fordStory, inService, officerOf, officerTemplate, raidIndexOn, setRelField, skirmishTemplate } from './campaign';
 import { relValue } from './relations';
 import { restDone } from './director';
 import { DuelMove, DuelState, MOVE_LABEL, autoMove, duelRound } from './duel';
@@ -225,7 +225,6 @@ export function options(s: GameState): Option[] {
   if (part === 'morning' || part === 'afternoon') {
     opts.push({ label: 'Do the chores in the camp', action: { kind: 'chores' }, test: 'camp work' });
     opts.push({ label: 'Help Old Sukezō with cooking and the wounded', action: { kind: 'help_sukezo' }, test: 'medicine' });
-    if (!s.battle) opts.push({ label: 'Carry goods for the Hagiwara villages along the road', action: { kind: 'carry_villages' }, test: 'endurance' });
     opts.push({ label: 'Work near the drill ground and watch Raizen train the men', action: { kind: 'watch_drill' }, test: '👁 observation', risk: 'Gonza may catch Li idling' });
   } else if (part === 'evening') {
     if (has(s, 'lessons_open')) opts.push({ label: 'Letters with Old Sukezō', action: { kind: 'lesson' }, test: '📖 INT' });
@@ -382,15 +381,6 @@ export function resolve(s: GameState, a: Action): Draft[] {
       out.push({ type: 'flag', fact: 'chores done', visible: false, data: { key: 'chores_total', value: has(s, 'chores_total') + 1 } });
       break;
     }
-    case 'carry_villages': {
-      out.push({ type: 'work', fact: 'Li carries salt and rice for the Hagiwara villages along the Kurose road, steady and quiet under the sun.', visible: true, data: {} });
-      out.push(...skill(s, 'endurance', 0.1), ...skill(s, 'observation', 0.05));
-      const end = c.skills.endurance ?? 0;
-      const pay = CARRY_PAY_BASE + Math.floor(end / 3) * CARRY_PAY_PER_END;
-      out.push({ type: 'money', fact: `The village woman pays Li ${pay} mon for the day's carrying.`, visible: true, data: { amount: pay } });
-      out.push({ type: 'flag', fact: 'carrying done', visible: false, data: { key: 'carry_villages_total', value: has(s, 'carry_villages_total') + 1 } });
-      break;
-    }
     case 'watch_drill': {
       out.push({ type: 'work', fact: 'Li carries arrows near the drill ground and watches Raizen correct the spearmen, every step, every turn of the hips.', visible: true, data: {} });
       out.push(...growth(s, 'style', 'two_swords', 0.02, true, 'watching Raizen'));
@@ -429,11 +419,6 @@ export function resolve(s: GameState, a: Action): Draft[] {
       if (n < RUMOURS.length) {
         out.push({ type: 'work', fact: `Li sits in the shadows near the soldiers' fire. Someone says: ${RUMOURS[n]}`, visible: true, journal: `Rumour at the fire: ${RUMOURS[n]}`, data: {} });
         out.push({ type: 'flag', fact: 'rumour heard', visible: false, data: { key: 'rumours_heard', value: n + 1 } });
-      } else if (part === 'evening' && (s.date.day === 1 || s.date.day === 16) && c.status === 'slave') {
-        const obs = c.skills.observation ?? 0;
-        const win = DICE_WIN_BASE + Math.floor(obs / 5) * DICE_WIN_PER_OBS;
-        out.push({ type: 'work', fact: `After the rumours are spent, Li plays dice at the fire with off-duty soldiers. By watching their tells he wins ${win} mon.`, visible: true, journal: `I won ${win} mon at dice by reading tells.`, data: {} });
-        out.push({ type: 'money', fact: `${win} mon`, visible: false, data: { amount: win } });
       } else {
         out.push({ type: 'work', fact: 'The soldiers talk about dice, women and pay. Nothing new tonight.', visible: true, data: {} });
       }

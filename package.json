@@ -13,8 +13,7 @@
     "typecheck": "tsc --noEmit",
     "ui:check": "node scripts/ui-check.mjs",
     "balance": "tsx scripts/balance.ts",
-    "ai-players": "tsx scripts/ai-players.ts",
-    "gm-proxy": "tsx scripts/gm-proxy.ts"
+    "ai-players": "tsx scripts/ai-players.ts"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

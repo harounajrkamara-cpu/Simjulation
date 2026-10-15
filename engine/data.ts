@@ -11,7 +11,6 @@ export const PLACES: Record<string, string> = {
   kori_camp: 'Red Crane camp, below Kōri fort (Akaishi province, Kurogane)',
   sasabe: 'Sasabe village',
   akaishi: 'Akaishi castle town',
-  tatara: 'Tatara — the Smiths\' kingdom, iron-rich mountains east of the Shōu',
 };
 
 const SEEDS: CharSeed[] = [
@@ -76,28 +75,6 @@ const SEEDS: CharSeed[] = [
   },
 ];
 
-/** Characters specific to the Tatara runaway start (world 2). */
-export const TATARA_SEEDS: CharSeed[] = [
-  {
-    id: 'kane', name: 'Kane the Smith', born: { year: 48, month: 6, day: 14 }, role: 'master smith of Tatara', status: 'free',
-    stats: st(55, 75, 50, 35), potential: st(60, 80, 55, 40), styles: { hammer: 85, sword: 40 }, skills: { smithing: 80, endurance: 55 },
-    traits: ['gruff', 'honourable', 'protective of runaways', 'distrusts soldiers'], location: 'tatara',
-    desc: 'A weathered man whose arms are thick as rope from the forge. He took Li in without asking questions.', publicRank: '?',
-  },
-  {
-    id: 'masaru', name: 'Masaru the Headman', born: { year: 50, month: 3, day: 22 }, role: 'headman of Tatara village', status: 'noble',
-    stats: st(38, 40, 55, 30), potential: st(45, 48, 70, 40), styles: {}, skills: { administration: 60, persuasion: 40 },
-    traits: ['calculating', 'wary of outsiders', 'pragmatic'], location: 'tatara',
-    desc: 'A thin man with ink-stained fingers. He keeps careful records and watches the border.', publicRank: '?',
-  },
-  {
-    id: 'shinobu', name: 'Shinobu the Hunter', born: { year: 67, month: 11, day: 7 }, role: 'hunter-trackr of Tatara', status: 'free',
-    stats: st(30, 55, 40, 25), potential: st(35, 70, 50, 35), styles: { bow: 72, unarmed: 30 }, skills: { tracking: 75, stealth: 60, survival: 50 },
-    traits: ['solitary', 'observant', 'has his own agenda'], location: 'tatara',
-    desc: 'Tracks more than game — Li has seen him reading the trail signs near the village.', publicRank: 'Warrior D?',
-  },
-];
-
 /** How each NPC sees Li at the start (trust, respect, affection, fear, rivalry). */
 const REL_START: Record<string, [number, number, number, number, number]> = {
   raizen: [50, 40, 40, 0, 0], // owner: cool, not hostile
@@ -112,35 +89,10 @@ const REL_START: Record<string, [number, number, number, number, number]> = {
   ishizue: [25, 20, 20, 0, 0],
 };
 
-/** Relations override for the Tatara runaway start (world 2): old band sees Li as a runaway, Tatara hosts are wary/protective. */
-const TATARA_REL_START: Record<string, [number, number, number, number, number]> = {
-  // Old band — relations degraded by the escape
-  raizen: [20, 10, 0, 40, 10],   // cool former owner, now hunted
-  gonza: [-20, 0, -30, 30, 40],  // cruel enforcer becomes an active threat
-  rokubei: [15, 10, 0, 20, 0],   // quartermaster holds the papers
-  hisame: [30, 20, 10, 15, 0],   // silent archer, ambiguous
-  sukezo: [70, 60, 80, 0, 0],    // the cook who helped him flee — still trusted
-  hachi: [30, 20, 25, 10, 0],    // slave-boy friend, left behind
-  // Tatara hosts
-  kane: [80, 75, 85, 0, 0],      // master smith, protecting Li
-  masaru: [50, 40, 30, 20, 0],   // headman, wary but curious
-  shinobu: [35, 45, 25, 30, 0],  // tracker, has his own agenda
-};
-
-/** People Li already knows at the Tatara start. */
-export const KNOWN_AT_START_TATARA = ['sukezo', 'hachi', 'kane', 'masaru'];
-
-/** People Li already knows in the slave start (others are met through story events). */
+/** People Li already knows at the start (others are met through story events). */
 export const KNOWN_AT_START = ['raizen', 'gonza', 'rokubei', 'hisame', 'sukezo', 'hachi'];
 
 export function createWorld(worldNumber = 1): GameState {
-  if (worldNumber === 2) {
-    return createWorldTataraStart();
-  }
-  // Default to world 1 (slave start)
-  return createWorldSlaveStart();
-}
-export function createWorldSlaveStart(): GameState {
   const characters: Record<string, Character> = {};
   for (const s of SEEDS) {
     characters[s.id] = { ...structuredClone(s), wound: 0, healDays: 0, fatigue: 0, alive: true };
@@ -156,7 +108,7 @@ export function createWorldSlaveStart(): GameState {
   for (const id of KNOWN_AT_START) flags[`met_${id}`] = 1;
   return {
     version: 1,
-    worldNumber: 1,
+    worldNumber,
     date: { year: 100, month: 1, day: 1, part: 'morning' },
     liId: 'li',
     characters,
@@ -171,43 +123,4 @@ export function createWorldSlaveStart(): GameState {
     events: [],
     nextSeq: 1,
   };
-}
-export function createWorldTataraStart(): GameState {
-  // Start from slave base, then morph into the Tatara runaway start.
-  const s = createWorldSlaveStart();
-
-  // Add Tatara characters.
-  for (const seed of TATARA_SEEDS) {
-    s.characters[seed.id] = { ...structuredClone(seed), wound: 0, healDays: 0, fatigue: 0, alive: true };
-  }
-
-  // Override relations with Tatara-specific values (old band degraded, Tatara hosts added).
-  for (const [id, v] of Object.entries(TATARA_REL_START)) {
-    const fields: RelField[] = ['trust', 'respect', 'affection', 'fear', 'rivalry'];
-    const base = {} as Record<RelField, number>;
-    fields.forEach((f, i) => (base[f] = v[i]));
-    s.relations[id] = { base, mods: [], heard: [], lastTalkDay: -1 };
-  }
-
-  // Mark Tatara characters as already met.
-  for (const id of KNOWN_AT_START_TATARA) {
-    s.flags[`met_${id}`] = 1;
-  }
-
-  // Li is now free, in Tatara, working as a smith's apprentice.
-  const li = s.characters['li'];
-  li.role = 'smith\'s apprentice in Tatara';
-  li.status = 'free';
-  li.location = 'tatara';
-  li.desc = 'Free but hunted. A former slave who escaped to Tatara and now works in the forge.';
-
-  // Mutate the starting state for the runaway life.
-  s.worldNumber = 2;
-  s.money = 0;
-  s.date = { year: 101, month: 1, day: 1, part: 'morning' };
-  s.seasonKey = '101-Spring';
-  s.knowledge = ['own_name', 'father_soldier_killed', 'family_names', 'came_from_suiren', 'white_rock_crest', 'wooden_dragon', 'tatara_refuge', 'hunted_by_band'];
-  s.flags = { ...s.flags, hunted: 1, runaway: 1 };
-
-  return s;
 }

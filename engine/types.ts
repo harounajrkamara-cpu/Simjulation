@@ -190,7 +190,6 @@ export interface Action {
   kind:
     | 'chores'
     | 'help_sukezo'
-    | 'carry_villages'
     | 'watch_drill'
     | 'eat_with'
     | 'lesson'
