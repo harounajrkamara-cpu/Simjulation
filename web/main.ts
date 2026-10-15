@@ -369,13 +369,27 @@ async function filmsFor(events: GameEvent[], said?: string) {
   }
 }
 
+/** The first duel Li wins (decided by the duel engine) gets its own film; a deadly one is "first blood". */
+async function victoryFilm(events: GameEvent[]) {
+  const end = events.find((e) => e.type === 'story' && (e.data as { result?: string }).result === 'won' && (e.data as { duelEnd?: string }).duelEnd);
+  if (!end) return;
+  const wins = state.events.filter((e) => e.type === 'story' && (e.data as { result?: string }).result === 'won' && (e.data as { duelEnd?: string }).duelEnd).length;
+  if (wins !== 1) return;
+  const id = (end.data as { duelEnd: string }).duelEnd;
+  // Both modes record the duel's start with its state (and, for Game Master fights, the template).
+  const start = [...state.events].reverse().find((e) => e.type === 'duel' && (e.data as { state?: { id?: string } }).state?.id === id)?.data as { state: { foe: { name: string } }; template?: { maxWound: number } } | undefined;
+  const foe = (start?.state.foe.name ?? 'the foe').replace(/^the /, 'The ');
+  const maxWound = start?.template?.maxWound ?? state.gm?.duels[id]?.maxWound ?? (id === 'spar' ? 1 : 3);
+  await Film.play(Scenes.victory({ foe, deadly: maxWound >= 3 }));
+}
+
 /** After Game Master scenes: title cards, a freedom legend, the start of a fight. */
 async function afterPlays(events: GameEvent[], scene: string, seasonBefore: string, statusBefore: string, fight: boolean, said?: string) {
   await filmsFor(events, said);
   await bigMoments(events, seasonBefore);
   if (li(state).status !== statusBefore) {
-    const how = state.knowledge.includes('hunted') ? 'by his own feet, and hunted' : 'his paper burned';
-    await legendScreen({ label: 'Legend moment', title: 'Free', native: '自由', meaning: how }, scene, state.events.at(-1)!.day);
+    const how = state.knowledge.includes('hunted') ? 'By his own feet, and hunted' : 'His paper burned';
+    await Film.play(Scenes.freedom({ how }));
   }
   if (fight) await titleCard('A fight', state.duel?.foe.name.replace(/^the /, 'The ') ?? 'A fight');
 }
@@ -680,6 +694,7 @@ async function send(raw: string, said = raw) {
     if (r.command === 'load') { if (!resume()) show('No saved game in this browser.', said); return; }
     setBusy(true);
     await finish(r, newTurn(said), said, !isKey && !COMMAND.test(text), before, seasonBefore);
+    await victoryFilm(r.events ?? []);
     setBusy(false);
     // A fight the Game Master started is over: Claude tells what happens next, true to the result.
     if (gmOn(state) && !state.duel && lastFightResult(state)) await gmStep();

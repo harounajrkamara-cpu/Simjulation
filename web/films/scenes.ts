@@ -209,3 +209,56 @@ export function chapterEnd(d: { n: number; title: string; text: string }): FilmS
     shots: [{ dur: 3000, speak: `Chapter ${d.n}. ${d.title}. ${first}`, cues: [{ at: 0, fn: swish }] }],
   };
 }
+
+// ---------- 8. First victory (owner, Oct 12: "more and cooler films") ----------
+// Li's first duel the code decided in his favour: two figures, the rush, a frozen impact, a gold cut, the foe falls.
+
+export function victory(d: { foe: string; deadly: boolean }): FilmSpec {
+  const svg = `${defs}<rect width="1600" height="900" fill="url(#fl-sky-night)"/>
+  <g class="fl-parallax">${ridges(80)}</g>
+  <g class="sh1 sh2 fv-duelists">
+    <use href="#fl-figure" class="fv-li" x="300" y="430" width="120" height="360"/>
+    <use href="#fl-figure" class="fv-foe" x="1180" y="410" width="135" height="390"/>
+  </g>
+  ${speedLines(56, 'fl-speed--in sh2')}
+  <g class="sh3"><path class="fv-cut" d="M260 180 L1340 700"/><path class="fv-cut fv-cut--thin" d="M300 230 L1300 650"/></g>
+  <g class="sh4"><use href="#fl-figure" class="fv-stand" x="640" y="520" width="100" height="300"/><use href="#fl-figure" class="fv-fall" x="860" y="520" width="110" height="300"/></g>`;
+  const title = d.deadly ? 'FIRST BLOOD' : 'FIRST VICTORY';
+  const html = `<div class="fl-titlecard fv-title sh4">${brushTitle(title, 'fl-brush--shout', 0.1)}<p class="fl-men">${esc(d.foe)}</p>${seal('勝', 1.2)}</div>`;
+  return {
+    id: 'victory', svg, html, waitAtEnd: true,
+    shots: [
+      { dur: 1600, cues: [{ at: 0, fn: heartbeat }, { at: 800, fn: heartbeat }] },
+      { dur: 700, cues: [{ at: 0, fn: swish }] },
+      { dur: 1300, cues: [{ at: 0, fn: bladeRing }, flashAt(0), clearImpact(500)] },
+      { dur: 3200, speak: `${title.charAt(0)}${title.slice(1).toLowerCase()}. ${d.foe}.`, cues: [{ at: 300, fn: () => taiko(true) }] },
+    ],
+  };
+}
+
+// ---------- 9. Freedom ----------
+// The chain breaks; dawn over the ridge; one figure; "FREE".
+
+export function freedom(d: { how: string }): FilmSpec {
+  const links = Array.from({ length: 9 }, (_, k) => {
+    const x = 455 + k * 70;
+    const fly = [[-260, -220, -60], [-200, 180, 40], [-140, -260, 80], [-60, 240, -30], [0, -300, 120], [70, 260, -90], [150, -240, 50], [210, 200, -120], [280, -180, 70]][k];
+    const side = k % 2 === 1; // links alternate: one seen flat, the next edge-on, so they interlock
+    return `<rect class="fv-link${side ? ' fv-link--side' : ''}" x="${x}" y="${side ? 443 : 428}" width="95" height="${side ? 14 : 44}" rx="${side ? 7 : 22}" style="--tx:${fly[0]}px;--ty:${fly[1]}px;--r:${fly[2]}deg"/>`;
+  }).join('');
+  const svg = `${defs}<rect width="1600" height="900" fill="#0B0C0F"/>
+  <rect class="fv-dawn sh3 sh4" width="1600" height="900" fill="url(#fl-sky-dawn)"/>
+  <g class="sh1 sh2">${links}</g>
+  <g class="sh3 sh4 fl-parallax">${ridges(140)}<use href="#fl-figure" class="fv-alone" x="770" y="520" width="60" height="180"/></g>`;
+  const html = `${particles('dust', 40).replace('fl-particles--dust', 'fl-particles--dust sh3')}
+    <div class="fl-titlecard fv-title sh4">${brushTitle('FREE', 'fl-brush--shout', 0.2)}<p class="fl-men">${esc(d.how)}</p>${seal('自', 1)}</div>`;
+  return {
+    id: 'freedom', svg, html, waitAtEnd: true, ambient: wind,
+    shots: [
+      { dur: 1800, cues: [{ at: 0, fn: heartbeat }, { at: 900, fn: heartbeat }] },
+      { dur: 1200, cues: [{ at: 0, fn: bladeRing }, flashAt(0), clearImpact(400)] },
+      { dur: 2600, cues: [{ at: 200, fn: shakuhachi }] },
+      { dur: 3200, speak: `Free. ${d.how}.`, cues: [{ at: 0, fn: () => taiko(false) }] },
+    ],
+  };
+}
