@@ -13,6 +13,7 @@ import { titlesOf } from '../engine/gm-career';
 import { WORLD_CSS, liPoint, worldSvg } from './world-map';
 import { liLife } from '../engine/life';
 import { clockFeelings } from '../engine/clocks';
+import { courtFeelings } from '../engine/court';
 import { currentPlan, plansFor, planSteps } from '../engine/plan';
 
 // The war chronicle's tabs and side panel (Game Experience ch. 3, 6). Only what Li can know is shown.
@@ -129,7 +130,7 @@ export function liPage(s: GameState): string {
   const planHtml = `<h2 class="label">Li's plan</h2>
     <div class="slots">${plansFor(s).map((p) => `<button type="button" class="slot${p.id === chosen ? ' on' : ''}" data-plan="${p.id}" title="${esc(p.why)}"><b>${esc(p.label)}</b>${esc(p.why)}</button>`).join('')}</div>
     ${chosen ? `<ul class="chronicle">${planSteps(s, chosen).map((x) => `<li>${x.done ? '✓' : '○'} ${esc(x.text)}</li>`).join('')}</ul>` : '<p class="empty">Choose what Li is working toward. The story will bring chances toward the next step; the rules still decide.</p>'}`;
-  const threats = clockFeelings(s);
+  const threats = [...clockFeelings(s), ...courtFeelings(s).map((x) => `At court: ${x}`)];
   const threatHtml = threats.length ? `<h2 class="label">What Li feels coming</h2><ul class="chronicle">${threats.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
   return `<div class="card">${liCard(s)}</div>${planHtml}${lifeHtml}${threatHtml}
     <h2 class="label">Condition</h2>

@@ -9,12 +9,12 @@ import type { GameState } from '../engine/types';
 // Stage 3: Li's house (goal Oct 17, owner kan terugdraaien). Claude proposes, the code checks.
 const scene = (t: Partial<GmTurn> = {}): GmTurn => ({ scene: 'Time passes.', summary: 'x', ...t });
 /** Li free, older, a rank; a person he knows who loves him. */
-function grownLi(rank = 'gocho', noble = false): GameState {
+function grownLi(rankLevel = 1, noble = false): GameState {
   const s = startGmGame();
   const c = s.characters[s.liId];
   c.status = 'free';
   c.born = { year: 82, month: 1, day: 1 };
-  s.flags[`rank_${rank}`] = 1;
+  s.flags.rank_level = rankLevel;
   gmApply(s, scene({ changes: [{ kind: 'person', id: 'aiko', name: noble ? 'Hagiwara Aiko' : 'Aiko', role: noble ? 'daughter of Lord Hagiwara' : 'a weaver of Akaishi', desc: 'x', goal: 'x', affection: 80, trust: 80 }] }));
   return s;
 }
@@ -32,7 +32,7 @@ describe('marriage and children', () => {
   it('a slave, a boy, a stranger or a noble house above his station are refused', () => {
     const slave = startGmGame();
     expect(gmApply(slave, scene({ changes: [{ kind: 'marry', npc: 'hachi' }] })).notes.join(' ')).toMatch(/slave cannot marry/);
-    const noble = grownLi('gocho', true);
+    const noble = grownLi(1, true);
     expect(gmApply(noble, scene({ changes: [{ kind: 'marry', npc: 'aiko' }] })).notes.join(' ')).toMatch(/below Sennin-shō/);
     expect(spouseOf(noble)).toBeUndefined();
   });
@@ -64,5 +64,17 @@ describe("Li's plan in every stage", () => {
     free.knowledge.push('family_lead');
     expect(planSteps(free, 'family')[0]).toMatchObject({ done: true });
     expect(planSteps(free, 'marry').map((x) => x.done)).toEqual([true, true, false]);
+  });
+});
+
+describe('marriage by alliance and the noble bar (rank from the code)', () => {
+  it('a Sennin-shō may marry into a noble house; a Sanbyakunin-shō may make an alliance without love', () => {
+    const noble = grownLi(6, true);
+    noble.relations.aiko.base.affection = 20;
+    expect(gmApply(noble, scene({ changes: [{ kind: 'marry', npc: 'aiko', alliance: true }] })).notes).toEqual([]);
+    expect(spouseOf(noble)).toBe('aiko');
+    const low = grownLi(5);
+    low.relations.aiko.base.affection = 20;
+    expect(gmApply(low, scene({ changes: [{ kind: 'marry', npc: 'aiko', alliance: true }] })).notes).toEqual([]);
   });
 });
