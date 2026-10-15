@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { gmTurn } from '../target/ai/gm';
-import { startGmGame } from '../target/engine/gm';
+import { gmTurn } from '../ai/gm';
+import { startGmGame } from '../engine/gm';
 
 type Answer = {
   scene: string;
