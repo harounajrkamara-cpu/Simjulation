@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bad, good, upsetRate } from '../scripts/balance';
+import { bad, good, skilled, upsetRate } from '../scripts/balance';
 import { fromSave, stateHash, toSave } from '../engine/engine';
 import { handleInput, newGame } from '../engine/game';
 
@@ -17,11 +17,15 @@ describe('duel balance across a grid of opponents (Numbers §12)', () => {
   it('two ranks up cannot be won with ordinary play (D vs B)', () => {
     expect(upsetRate([30, 44], [60, 74], good)).toBe(0);
   });
-  // Open balance question for the owner (see BUILD_PLAN V6 report): C vs B with "good" choices measures ~3%, target 10–20%.
-  it('C vs B with good choices: recorded, not yet at target', () => {
-    const r = upsetRate([45, 59], [60, 74], good);
-    expect(r).toBeGreaterThan(0);
-    expect(r).toBeLessThan(0.2);
+  // Owner decision (Oct 15): C beats B 10–20% with good choices. Good = reading the foe's habits from the hint and
+  // predicting his next move (`skilled`); answering only his last move (`good`) stays low, and that is fair.
+  it('C vs B with skilled choices is on target (10–20%)', () => {
+    const r = upsetRate([45, 59], [60, 74], skilled);
+    expect(r).toBeGreaterThanOrEqual(0.1);
+    expect(r).toBeLessThanOrEqual(0.2);
+  });
+  it('two ranks up stays practically impossible even when skilled (< 2%)', () => {
+    expect(upsetRate([30, 44], [60, 74], skilled)).toBeLessThan(0.02);
   });
 });
 
