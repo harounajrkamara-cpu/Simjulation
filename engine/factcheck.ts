@@ -18,7 +18,8 @@ const NUMBER_WORDS: Record<string, number> = {
 /** Verbs that mean a person is present and acting right now (a dead one cannot). */
 const ACTS = 'says|said|asks|asked|answers|replies|whispers|shouts|laughs|smiles|grins|nods|walks|runs|turns|looks|stands|sits|grabs|hands|draws|spits|waves|calls|mutters|watches';
 
-const outsideQuotes = (t: string) => t.replace(/"[^"]*"|“[^”]*”/g, '""');
+// Dialogue and thoughts: "…", “…”, ‘…’ (single curly quotes; an apostrophe is only ’) and *italic thoughts*.
+const outsideQuotes = (t: string) => t.replace(/"[^"]*"|“[^”]*”|‘[^’]*’|\*[^*\n]+\*/g, '""');
 const sentences = (t: string) => t.split(/(?<=[.!?])\s+/);
 const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /** Word edges that understand ō and ū (a plain \b does not). Use with the u flag. */

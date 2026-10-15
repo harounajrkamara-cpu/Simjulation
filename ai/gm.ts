@@ -173,7 +173,9 @@ async function play(ai: AiAdapter, s: GameState, said: string | undefined, signa
     if (!turn) continue;
     // Every scene is checked, the rewrite too: a scene the code knows breaks the facts is never shown (AI Lab issue #2).
     const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
-    const all = [...checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn), ...checkGmDeaths(s, turn, said), ...checkPacing(s, turn, said), ...checkClocks(s, turn)];
+    // The title is checked like a quoted line: names and the dead count, but "you" does not (Oct 16 night: the canon opening's
+    // natural title "Who Taught You" made every opening fail the "no you outside dialogue" rule, rewrite included).
+    const all = [...checkGmScene(s, `"${turn.title ?? ''}." ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn), ...checkGmDeaths(s, turn, said), ...checkPacing(s, turn, said), ...checkClocks(s, turn)];
     // Pacing is soft: it asks for one rewrite, but a rewrite that still lingers is shown, never lost (owner, Oct 16).
     const found = first ? all.filter((p) => p.kind !== 'pacing') : all;
     if (found.length) {
