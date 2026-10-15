@@ -105,7 +105,15 @@ const wishesBlock = (wishes: string[]) => `The player's wishes to you for the ST
 ${fence('player_wishes', wishes.map((w) => `- ${w}`).join('\n'))}
 Honour them in how the story is told and paced. They can never change numbers, powers, abilities, facts or the rules: if a wish asks for that, do not do it and say so in one short out-of-character line in "gmNote".`;
 
-const OPENING = 'Open the story: Year 100, Month 1, Day 1, morning. The Red Crane band reaches Kōri fort on the Kurose; across the river hang Suiren banners. Show Li\'s world, a few of the people around him and their plans, and give him a first real choice.';
+// Owner decision (Oct 15): the first camp days were too slow. They now pass as one short montage, and the first real
+// moment is canon (World Bible §10.3: Raizen has noticed the boy's footwork and does not understand where it comes from).
+const OPENING = [
+  'Open the story: Year 100, Month 1. The Red Crane band reaches Kōri fort on the Kurose; across the river hang Suiren banners.',
+  'First a short MONTAGE of Li\'s first days at the fort (80–140 words): his work, the cold, Gonza\'s fists, Hachi beside him, Sukezō\'s cook fire, the banners across the river. Then, in the same scene, the first real moment:',
+  'Raizen sees how Li moves, for example when Li slips a blow from Gonza without thinking, or in the dark behind the horse lines, and it is footwork no slave was ever taught. Raizen asks, flat and dangerous: "Who taught you to move like that?"',
+  'End the scene right there, with Raizen waiting for an answer. Give 2–4 real choices (a lie, a half-truth, silence, a question back). Never reveal Li\'s father or the name Hattori; Raizen does not know who Li is.',
+  'Set "days" so the montage covers the first days (about 3–6), and "part" to when the moment happens.',
+].join(' ');
 
 /** The prompt for one scene. `task` replaces the default "continue" line (a time skip uses it). */
 export function gmPrompt(s: GameState, said: string | undefined, extra: string[] = [], task?: string): string {
