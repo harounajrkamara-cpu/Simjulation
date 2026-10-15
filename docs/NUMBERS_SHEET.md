@@ -318,3 +318,16 @@ Expected pace for a **strong** player in Kurogane (owner's choice: fast progress
 - Head-hunting may not beat command merit after Hyakunin-gashira (checked with the §6 weights).
 - A normal battle (no rout) costs each side under ~10% of its men in total.
 - No career may get stuck for more than 3 years without any route forward.
+
+### 11b. Fuse dates and weights (Oct 15, ⚠ PROVISIONAL — owner may change)
+Until the decision trees of build stage 4, each fuse fires on a fixed day (after its "not before") and picks its outcome by **weights**: a base weight per outcome plus Li's levers (+2 per lever toward an outcome); highest wins, ties go to the first listed. Days count from Year 100, Month 1, Day 1 (360 per year).
+| Fuse | Fires (day) | Outcomes (base weight) |
+|---|---|---|
+| Gōda's coup | Y101 M2 D25 (414) | crushed (3) · purge of the Chancellor (2) · the king killed (1) |
+| Hostage prince's revenge | Y101 M6 D15 (524) | discovered early (2) · fails, war of revenge (3) · succeeds, Kurogane in chaos (1) |
+| Bribed slander (Hayate) | Y101 M9 D1 (600) | plot exposed (2) · Kagami rebels (1) · Kagami executed (3) |
+| Pass revolt (Takane) | Y101 M10 D1 (630) | no revolt (3) · revolt, the pass opens (2) · revolt crushed (1) |
+| Great canal | Y102 M6 D1 (870) | finished, the land grows green (2) · exposed (1) · bankrupts the treasury (3) |
+| Hostage heir (Suiren) | Y102 M8 D1 (930) | stays a hostage (3) · breaks away (2) · crushed (1) |
+| Slow usurpation (Ushio) | Y103 M6 D1 (1230) | smooth (3) · civil war (2) · the child king murdered (1) |
+| King's death (Tatara) | Y103 M10 D1 (1350) | heir crowned, the prince loyal (3) · the prince rules (2) |

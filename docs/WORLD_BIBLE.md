@@ -712,3 +712,18 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 - **Tier A:** 3–5 key great families per kingdom, fully designed (head, heir, general, branches, goals, secrets).
 - **Tier B:** the other great families: named, with head and values.
 - **Tier C:** lesser families and branches, generated only when Li gets close, then saved permanently in the name registry.
+
+## Chapter 13d – The free world ✅ (owner, Oct 15; from `docs/PROPOSAL_FREE_WORLD.md`)
+Three layers: the **fixed core** (ch. 13b fuses, Atlas, Numbers §11) · the **living layer** (news, Li's levers) · the **free space** (story seeds, people Claude invents and the code records).
+
+**News travels — fast, for drama** (owner choice). A fired fuse becomes public news that reaches Li by distance:
+| Where Li is | He learns it | How exact |
+|---|---|---|
+| where it happens | at once (he sees it) | true |
+| elsewhere in the same kingdom | after 3 days | the official version |
+| in another kingdom | after 10 days | the public version, partly changed |
+Claude only ever gets what has reached Li; the coming fuses near Li are given to Claude as hidden foreshadowing (rule 11: a visible sign before a big hidden change).
+
+**Li's levers.** Li can push any fuse **on either side** (owner: "he should be able to do anything he wants"): warn or betray, protect or kill, expose or carry the bribe. A lever counts only when Li is where the fuse plays out. The outcome stays one of the canon outcomes (ch. 13b) and is decided by the code; without Li the fuse runs on its own.
+
+**Story seeds** (the 15 of the proposal, owner: keep all): situations, never scripts. Claude plants one when Li's place and life stage fit; the code records planted / grown / dead, so nothing is repeated or forgotten. A missed seed may return in another form.
