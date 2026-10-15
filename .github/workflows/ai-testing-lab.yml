@@ -18,31 +18,46 @@ concurrency:
 
 jobs:
   deterministic-checks:
-    name: Engine tests, types, web build, balance
+    name: Target branch tests, types, web build, balance
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Check out testing branch
+      - name: Check out current game-development branch
         uses: actions/checkout@v4
+        with:
+          ref: build/stage-1
+          path: target
+
+      - name: Record exact game commit under test
+        working-directory: target
+        run: |
+          echo "Testing branch: build/stage-1"
+          git rev-parse HEAD
+          git log -1 --oneline
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: target/package-lock.json
 
       - name: Install locked dependencies
+        working-directory: target
         run: npm ci
 
       - name: Run test suite
+        working-directory: target
         run: npm test
 
       - name: Check TypeScript
+        working-directory: target
         run: npm run typecheck
 
       - name: Build browser version
+        working-directory: target
         run: npm run build:web
 
       - name: Run deterministic balance simulation
+        working-directory: target
         run: npm run balance
-
