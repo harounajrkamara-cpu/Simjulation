@@ -169,11 +169,36 @@ function inkReveal(el: HTMLElement, text: string): Promise<void> {
 const battleOn = () => !!state.battle && !state.battle.over;
 
 /** The battle panel (WB 6b): every sector, Li's exact, the rest as reports with source, age and confidence. */
+/** The battle map (GE Phase 3; goal Oct 17): sectors as Li knows them (the same view as the table, fog kept). */
+function battleMap(v: ReturnType<typeof battleView>): string {
+  const cols = ['left', 'center', 'right'] as const;
+  const mood = (t: string) => (/Shattered/.test(t) ? 'shattered' : /Routing/.test(t) ? 'routing' : /Wavering/.test(t) ? 'wavering' : 'steady');
+  const at = (sector: string) => v.sectors.find((x) => x.sector === sector);
+  const block = (sector: string, k: number, row: 'theirs' | 'ours') => {
+    const x = at(sector);
+    if (!x) return '';
+    const text = row === 'ours' ? x.ours : x.theirs;
+    const y = row === 'theirs' ? 18 : 108;
+    return `<g class="bm-unit ${row} ${mood(text)}"><rect x="${12 + k * 130}" y="${y}" width="118" height="62" rx="4"/><text x="${71 + k * 130}" y="${y + 26}" text-anchor="middle">${esc(sector)}</text><text x="${71 + k * 130}" y="${y + 46}" text-anchor="middle" class="bm-n">${esc(text.split(' · ')[0])}</text></g>`;
+  };
+  const li = v.sectors.find((x) => x.exact);
+  const k = li ? cols.indexOf(li.sector as (typeof cols)[number]) : -1;
+  const reserve = at('reserve');
+  return `<svg class="battlemap" viewBox="0 0 404 ${reserve ? 230 : 182}" role="img" aria-label="Battle map as Li knows it">
+    <text x="8" y="12" class="bm-side">Enemy</text><text x="8" y="104" class="bm-side">Ours</text>
+    <line x1="8" x2="396" y1="92" y2="92" class="bm-front"/>
+    ${cols.map((c, n) => block(c, n, 'theirs') + block(c, n, 'ours')).join('')}
+    ${reserve ? `<g class="bm-unit ours ${mood(reserve.ours)}"><rect x="142" y="184" width="118" height="40" rx="4"/><text x="201" y="208" text-anchor="middle">reserve · ${esc(reserve.ours.split(' · ')[0])}</text></g>` : ''}
+    ${k >= 0 ? `<g class="bm-li"><circle cx="${116 + k * 130}" cy="120" r="6"/><text x="${92 + k * 130}" y="124">Li</text></g>` : ''}
+  </svg>`;
+}
+
 function battleHtml(b: BattleState): string {
   const v = battleView(b);
   const rows = v.sectors.map((x) => `<tr><th>${esc(x.sector)}</th><td>${esc(x.ours)}</td><td>${esc(x.theirs)}</td><td class="src">${esc(x.source)}</td></tr>`).join('');
   return `<strong>${esc(v.title)} · phase ${v.phase + 1} of at most ${MAX_PHASES}</strong>
     <p class="duel-meta">Li's unit: ${v.li.men} of ${v.li.start} men · ${esc(v.li.morale)}</p>
+    ${battleMap(v)}
     <table class="table battle"><tr><th></th><td>Ours</td><td>Theirs</td><td class="src">Known from</td></tr>${rows}</table>`;
 }
 
