@@ -5,6 +5,7 @@ import { PLACES } from './data';
 import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { publicWorldText } from './atlas-public';
+import { liLifeText } from './life';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -317,6 +318,7 @@ export function gmMemoryText(s: GameState): string {
     careerText(s),
     stageText(s),
     publicWorldText(s),
+    liLifeText(s),
     domainText(s),
     battleText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,

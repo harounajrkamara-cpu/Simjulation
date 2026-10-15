@@ -72,3 +72,16 @@ describe('People tab (owner, Oct 12: it opened empty)', () => {
     expect(html).toContain('Mikumo Raizen');
   });
 });
+
+describe("Li's life (owner, Oct 12: the slave life was vague)", () => {
+  it('the Li tab and Claude both get it while Li is a slave, and only then', async () => {
+    const { liPage } = await import('../web/panels');
+    const { gmMemoryText, startGmGame } = await import('../engine/gm');
+    const s = startGmGame();
+    expect(liPage(s)).toContain("Li's life");
+    expect(liPage(s)).toContain('On the straw by the horse lines');
+    expect(gmMemoryText(s)).toContain("LI'S LIFE AS A SLAVE");
+    s.characters[s.liId].status = 'free';
+    expect(liPage(s)).not.toContain("Li's life");
+  });
+});
