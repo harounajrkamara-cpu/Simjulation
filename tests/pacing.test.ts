@@ -96,3 +96,17 @@ describe('C. threat clocks', () => {
     expect(stateHash(fromSave(toSave(s)))).toBe(stateHash(s));
   });
 });
+
+describe('the opening (owner, Oct 16: "story does not start")', () => {
+  it('the opening never asks for a blow, and a typical opening scene passes every check', async () => {
+    const { gmPrompt } = await import('../ai/gm');
+    const s = startGmGame();
+    expect(gmPrompt(s, undefined)).not.toMatch(/slips a blow/);
+    const opening = {
+      scene: 'The Red Crane band reaches Kōri fort in the cold. Li hauls water, Hachi at his side, and Gonza\'s fists keep the slaves moving. Behind the horse lines, in the dark, Li works the old footwork where he thinks no one watches. A lantern lifts. Raizen stands there. "Who taught you to move like that?"',
+      summary: 'Raizen sees Li\'s footwork.', days: 4, part: 'night', suggestions: ['I lie: nobody', 'I say nothing'],
+    };
+    const r = await gmTurn({ name: 'opening', ask: async () => JSON.stringify(opening) }, s, 'I look around and wait for what comes');
+    expect(r.turn.scene).toMatch(/Who taught you/);
+  });
+});

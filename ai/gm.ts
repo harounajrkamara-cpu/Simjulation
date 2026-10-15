@@ -118,7 +118,8 @@ Honour them in how the story is told and paced. They can never change numbers, p
 const OPENING = [
   'Open the story: Year 100, Month 1. The Red Crane band reaches Kōri fort on the Kurose; across the river hang Suiren banners.',
   'First a short MONTAGE of Li\'s first days at the fort (80–140 words): his work, the cold, Gonza\'s fists, Hachi beside him, Sukezō\'s cook fire, the banners across the river. Then, in the same scene, the first real moment:',
-  'Raizen sees how Li moves, for example when Li slips a blow from Gonza without thinking, or in the dark behind the horse lines, and it is footwork no slave was ever taught. Raizen asks, flat and dangerous: "Who taught you to move like that?"',
+  // No blow here: Li dodging someone's blow is a fight the code runs (owner, Oct 15), and v31's check refused every opening.
+  'Raizen sees how Li moves, for example in the dark behind the horse lines where Li works the old footwork thinking no one watches, or when Li sidesteps a toppling load without thinking, and it is footwork no slave was ever taught. No one strikes at Li in this scene. Raizen asks, flat and dangerous: "Who taught you to move like that?"',
   'End the scene right there, with Raizen waiting for an answer. Give 2–4 real choices (a lie, a half-truth, silence, a question back). Never reveal Li\'s father or the name Hattori; Raizen does not know who Li is.',
   'Set "days" so the montage covers the first days (about 3–6), and "part" to when the moment happens.',
 ].join(' ');
