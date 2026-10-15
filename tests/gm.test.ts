@@ -113,8 +113,21 @@ describe('Game Master mode: the code referees', () => {
     gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
     while (today(s) < 261) gmApply(s, scene({ days: Math.min(30, 261 - today(s)) })); // Year 100, Month 9, Day 22: the Kogashira's raid
     const r = gmApply(s, scene({ fight: { foe: 'A Suiren Kogashira', rank: 'F', look: 'an officer under a blue banner', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
-    expect(r.secretNotes ?? []).toEqual([]);
+    expect((r.secretNotes ?? []).join(' ')).not.toMatch(/not a Kogashira|no merit/);
     expect(s.duel!.foe.val).toBe(38); // the record's Kogashira, not Claude's "F"
+  });
+
+  it('on the raid day a "farmhand" called Kogashira is not the officer: the fight is against the recorded officer, once (Copilot review, PR #5)', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
+    while (today(s) < 261) gmApply(s, scene({ days: Math.min(30, 261 - today(s)) }));
+    gmApply(s, scene({ fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant with a staff', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect(s.duel!.foe.name).toMatch(/Suiren Kogashira/); // the record's officer, at his strength
+    expect(s.duel!.foe.val).toBe(38);
+    s.duel = undefined; // leave the first fight (its result does not matter here)
+    const r = gmApply(s, scene({ fight: { foe: 'Another Suiren Kogashira', rank: 'C', look: 'a second officer', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/not a Kogashira on the code's record/);
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/one fight that counts is over/);
   });
 
   it('a known person fights with his own numbers, whatever rank Claude guesses', () => {

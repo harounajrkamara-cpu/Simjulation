@@ -681,20 +681,30 @@ const OFFICER_MEN: Record<NonNullable<GmFight['officer']>, number> = { 'Gochō':
 export function fightFacts(s: GameState, f: GmFight) {
   const name = f.foe.toLowerCase();
   const person = Object.values(s.characters).find((p) => p.id !== s.liId && p.alive && (name.includes(p.name.toLowerCase()) || name.includes(p.id)));
+  const raid = raidIndexOn(today(s));
   const raidOfficer = raidOfficerOn(today(s));
   const battle = s.battle && !s.battle.over ? s.battle : undefined;
-  const atWar = raidIndexOn(today(s)) !== undefined || !!battle;
+  const flags: string[] = []; // what this fight uses up (a raid has one officer and one fight that counts)
   let officer: GmFight['officer'];
-  if (f.officer && raidOfficer?.rank === f.officer) officer = f.officer;
-  else if (f.officer && battle?.units.some((u) => u.side === 'enemy' && !!u.commander && name.includes(u.commander.toLowerCase()) && u.men >= OFFICER_MEN[f.officer!])) officer = f.officer;
+  let foeName = f.foe;
+  if (f.officer && !person && raid !== undefined && raidOfficer?.rank === f.officer && !has(s, `raid_officer_${raid}`)) {
+    // Copilot review of PR #5: a label alone made a "farmhand" the raid's Kogashira. Now the fight IS against the
+    // officer on the record (his name, his strength), and only once per raid.
+    officer = f.officer;
+    foeName = raidOfficer.name;
+    flags.push(`raid_officer_${raid}`);
+  } else if (f.officer && !person && battle?.units.some((u) => u.side === 'enemy' && !!u.commander && name.includes(u.commander.toLowerCase()) && u.men >= OFFICER_MEN[f.officer!])) officer = f.officer;
+  const raidFight = raid !== undefined && !battle && !has(s, `raid_fight_${raid}`);
+  const enemy = !!f.witnessedEnemy && !person && (!!battle || raidFight);
+  if (enemy && raidFight) flags.push(`raid_fight_${raid}`);
   const strength = person ? { val: person.stats.VAL, mastery: Math.max(0, ...Object.values(person.styles)) }
-    : officer && raidOfficer?.rank === officer ? { val: raidOfficer.val, mastery: raidOfficer.mastery }
+    : officer && raidOfficer && foeName === raidOfficer.name ? { val: raidOfficer.val, mastery: raidOfficer.mastery }
     : { val: RANK_SCORE[f.rank] + 1, mastery: RANK_SCORE[f.rank] - 1 };
-  const enemy = !!f.witnessedEnemy && atWar && !person;
   const notes: string[] = [];
-  if (f.officer && !officer) notes.push(`"${f.foe}" fights, but is not a ${f.officer} on the code's record (no raid or battle names him): no officer merit or head`);
-  if (f.witnessedEnemy && !enemy) notes.push(`"${f.foe}" is not an enemy in a war the code records today: no merit for this fight`);
-  return { person, officer, strength, enemy, notes };
+  if (f.officer && !officer) notes.push(`"${f.foe}" fights, but is not a ${f.officer} on the code's record (no raid or battle names him, or his fight is over): no officer merit or head`);
+  else if (officer && foeName !== f.foe) notes.push(`the officer at the ford today is ${foeName}: the fight is against him`);
+  if (f.witnessedEnemy && !enemy) notes.push(`"${f.foe}" is not an enemy in a war the code records now (or today's one fight that counts is over): no merit for this fight`);
+  return { person, officer, foeName, strength, enemy, flags, notes };
 }
 
 /** A fight the Game Master starts: the duel engine decides it, never Claude. */
@@ -702,13 +712,14 @@ function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = [])
   const c = li(s);
   const facts = fightFacts(s, f);
   notes.push(...facts.notes);
-  const foeId = facts.person?.id ?? `gmfoe_${slug(f.foe)}`;
+  const foe = facts.foeName;
+  const foeId = facts.person?.id ?? `gmfoe_${slug(foe)}`;
   const officerMerit = facts.officer && facts.enemy && inService(s) ? OFFICER_MERIT[facts.officer] : 0;
   const plainMerit = facts.enemy && f.deadly ? 1 : 0;
   const head = facts.officer && facts.officer !== 'Gochō' && facts.enemy && inService(s);
   const won: DuelOutcome = {
-    fact: `${f.foe} goes down.`,
-    journal: `I beat ${f.foe}.`,
+    fact: `${foe} goes down.`,
+    journal: `I beat ${foe}.`,
     grow: 1.0,
     merit: officerMerit || plainMerit ? { amount: officerMerit || plainMerit, why: officerMerit ? `enemy ${facts.officer} head` : 'witnessed kill of an enemy' } : undefined,
     flag: head ? ['kogashira_head', 1] : undefined,
@@ -716,8 +727,8 @@ function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = [])
   const t: DuelTemplate = {
     id,
     place: f.place ?? PLACES[c.location] ?? c.location,
-    intro: `${f.foe} — ${f.look}.`,
-    foe: { id: foeId, name: facts.person?.name ?? f.foe.replace(/^A /, 'the ').replace(/^An /, 'the '), val: facts.strength.val, mastery: facts.strength.mastery, wound: 0, fatigue: 0, estimate: `${f.look} · Warrior ${f.rank}?` },
+    intro: `${foe} — ${f.look}.`,
+    foe: { id: foeId, name: facts.person?.name ?? foe.replace(/^A /, 'the ').replace(/^An /, 'the '), val: facts.strength.val, mastery: facts.strength.mastery, wound: 0, fatigue: 0, estimate: `${f.look} · Warrior ${f.rank}?` },
     prefs: [{ attack: 3, counter: 1, feint: 1, observe: 0 }, { attack: 1, counter: 3, feint: 0, observe: 1 }, { attack: 1, counter: 1, feint: 3, observe: 0 }][s.nextSeq % 3],
     surprise: false,
     maxWound: f.deadly ? 3 : 1,
@@ -726,10 +737,10 @@ function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = [])
     yieldText: 'Li lowers his weapon.',
     outcomes: {
       won,
-      lost: { fact: `${f.foe} beats Li.`, journal: `${f.foe} beat me.`, grow: 0.5 },
-      draw: { fact: 'Neither of them can finish it.', journal: `My fight with ${f.foe} ended with no winner.`, grow: 0.5 },
-      fled: { fact: 'Li runs from the fight.', journal: `I ran from ${f.foe}.`, grow: 0 },
-      yielded: { fact: 'Li gives up the fight.', journal: `I gave up against ${f.foe}.`, grow: 0 },
+      lost: { fact: `${foe} beats Li.`, journal: `${foe} beat me.`, grow: 0.5 },
+      draw: { fact: 'Neither of them can finish it.', journal: `My fight with ${foe} ended with no winner.`, grow: 0.5 },
+      fled: { fact: 'Li runs from the fight.', journal: `I ran from ${foe}.`, grow: 0 },
+      yielded: { fact: 'Li gives up the fight.', journal: `I gave up against ${foe}.`, grow: 0 },
     },
   };
   const mastery = Math.max(0, ...Object.values(c.styles));
@@ -738,7 +749,7 @@ function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = [])
     li: { id: c.id, name: 'Li', val: c.stats.VAL, mastery, wound: c.wound, fatigue: c.fatigue, observed: 0, history: [] },
     foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: 0, fatigue: 0, observed: 0, history: [] },
   };
-  return [{ type: 'duel', fact: `fight begins: ${f.foe}`, visible: false, data: { state, template: t } }];
+  return [...facts.flags.map((k): Draft => ({ type: 'flag', fact: `${k} used`, visible: false, data: { key: k, value: 1 } })), { type: 'duel', fact: `fight begins: ${foe}`, visible: false, data: { state, template: t } }];
 }
 
 /** Time passes between scenes: healing, rest, the season (same healing as playing the days). */
