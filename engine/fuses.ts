@@ -130,11 +130,12 @@ export function leverDrafts(s: GameState, x: { fuse?: unknown; toward?: unknown;
   return [{ type: 'flag', fact: `Li pushes ${f.name} toward "${o.id}" (${String(x.reason ?? '').slice(0, 100)})`, visible: false, data: { key, value: has(s, key) + 1 } }];
 }
 
-/** Time passes from `from` to `to`: fuses whose day comes fire (outcome decided now); news that reaches Li arrives. */
-export function fuseDrafts(s: GameState, from: number, to: number): Draft[] {
+/** Time passes up to `to`: fuses whose day has come fire (outcome decided now); news that reaches Li arrives. */
+export function fuseDrafts(s: GameState, to: number): Draft[] {
   const out: Draft[] = [];
   for (const f of FUSES) {
-    if (!has(s, `fuse_${f.id}`) && f.day > from && f.day <= to) {
+    // Every unfired day up to now fires: a day passed by another clock (classic mode, a battle) still fires, late.
+    if (!has(s, `fuse_${f.id}`) && f.day <= to) {
       const o = fuseOutcome(s, f);
       out.push({ type: 'flag', fact: `${f.name}: ${o.id}`, visible: false, data: { key: `fuse_${f.id}`, value: f.outcomes.indexOf(o) + 1 } });
       out.push({ type: 'flag', fact: `${f.name} fired`, visible: false, data: { key: `fuse_${f.id}_day`, value: f.day } });

@@ -106,15 +106,16 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
   if (!justFought) {
     // Copilot QA (PR #5) found wordings that slipped through ("won the spar", "punches Gonza to the ground", "leaves
     // Gonza unable to rise"): the list now covers winning, felling and leaving someone beaten.
-    const WIN = /\bLi\b[^.!?]{0,80}?\b(?:kills|killed|slays|slew|beheads|cuts down|cut down|strikes down|struck down|knocks|knocked|punches|punched|throws|threw|floors|floored|pins|pinned|beats|beat|defeats|defeated|disarms|disarmed|bests|bested|overpowers|overpowered|wins|won|takes the head of|took the head of|leaves|left|drops|dropped|puts|put|sends|sent)\b/;
-    const BEATEN = /\b(?:down|to the ground|into the dirt|in the dirt|in the mud|unable to rise|senseless|unconscious|helpless|on his back|flat|sprawling|wins|won|beats|beat|defeats|defeated|bests|bested|kills|killed|slays|slew|beheads|disarms|overpowers|the head of|the spar|the fight|the duel|the bout)\b/i;
+    // Every verb in the sentence is checked, not only the first ("Li sends Hachi a look and defeats Gonza").
+    const WIN = /\b(kills|killed|slays|slew|beheads|cuts down|cut down|strikes down|struck down|knocks|knocked|punches|punched|throws|threw|floors|floored|pins|pinned|beats|beat|defeats|defeated|disarms|disarmed|bests|bested|overpowers|overpowered|wins|won|takes the head of|took the head of|poisons|poisoned|stabs|stabbed|strangles|strangled|drowns|drowned|leaves|left|drops|dropped|puts|put|sends|sent)\b/g;
+    const BEATEN = /\b(?:down|to the ground|into the dirt|in the dirt|in the mud|unable to rise|senseless|unconscious|helpless|on his back|flat|sprawling|wins|won|beats|beat|defeats|defeated|bests|bested|kills|killed|slays|slew|beheads|disarms|overpowers|the head of|poisons|poisoned|stabs|stabbed|strangles|strangled|drowns|drowned|the spar|the fight|the duel|the bout)\b/i;
     // Plain verbs ("puts", "leaves", "knocks") count only with the person and a beaten-word after them
     // ("leaves Gonza unable to rise", not "puts the bucket down near Gonza").
     const PLAIN = /^(?:knocks|knocked|punches|punched|throws|threw|pins|pinned|leaves|left|drops|dropped|puts|put|sends|sent)$/i;
-    for (const sen of sentences(prose).filter((x) => WIN.test(x))) {
-      const m = sen.match(WIN)!;
-      const verb = m[0].match(/\b(\w+)$/)?.[1] ?? '';
-      const rest = sen.slice(sen.search(WIN) + m[0].length - verb.length);
+    const hits = sentences(prose).flatMap((sen) => [...sen.matchAll(WIN)]
+      .filter((m) => /\bLi\b[^.!?]{0,80}$/.test(sen.slice(0, m.index)))
+      .map((m) => ({ verb: m[1], rest: sen.slice(m.index) })));
+    for (const { verb, rest } of hits) {
       const foe = people.find((c) => c.alive && c.name.split(/\s+/).some((w) => {
         if (w.length < 3) return false;
         const named = new RegExp(`${B}${esc(w)}${E}`, 'u');

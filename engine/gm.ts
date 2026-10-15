@@ -787,7 +787,7 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   // Li's land runs on by itself through every month that ends in these days.
   out.push(...domainMonthDrafts(s, today(s), today(s) + n));
   // The world moves on (World Bible 13d): fuses fire on their days, and their news reaches Li by distance.
-  out.push(...fuseDrafts(s, today(s), today(s) + n));
+  out.push(...fuseDrafts(s, today(s) + n));
   // Everyone Li knows grows with the seasons too.
   out.push(...seasonGrowthDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.

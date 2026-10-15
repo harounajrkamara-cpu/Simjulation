@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { fromSave, stateHash, toSave, today } from '../engine/engine';
 import { gmApply, gmMemoryText, startGmGame } from '../engine/gm';
 import type { GmTurn } from '../engine/gm';
+import { dateFromIndex } from '../engine/calendar';
 
 // The free world (World Bible ch. 13d, Numbers §11b; owner approved Oct 15).
 const scene = (t: Partial<GmTurn> = {}): GmTurn => ({ scene: 'Time passes.', summary: 'x', ...t });
@@ -39,6 +40,13 @@ describe('fuses: the world moves on by itself', () => {
     expect(s.journal.some((j) => /king Asagiri Tokinari is dead/.test(j.text))).toBe(true); // Li was there: at once
   });
 
+  it('a fuse day passed by another clock (classic mode, a battle) still fires at the next scene', () => {
+    const s = startGmGame();
+    s.date = dateFromIndex(420);
+    gmApply(s, scene({ days: 1 }));
+    expect(s.flags.fuse_coup).toBe(1);
+  });
+
   it('the history replays the same from the save', () => {
     const s = startGmGame();
     goTo(s, 420);
@@ -59,5 +67,7 @@ describe('story seeds', () => {
     expect(again.notes.join(' ')).toMatch(/cannot be planted now/);
     gmApply(s, scene({ changes: [{ kind: 'seed', id: 'bridge', state: 'grown' }] }));
     expect(s.flags.seed_bridge).toBe(2);
+    gmApply(s, scene({ changes: [{ kind: 'seed', id: 'bridge', state: 'dead' }] }));
+    expect(s.flags.seed_bridge).toBe(3); // a grown seed can still die
   });
 });

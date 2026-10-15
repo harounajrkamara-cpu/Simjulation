@@ -226,7 +226,8 @@ describe('Copilot QA of PR #5 (6dfcc42): the four reproduced exploits stay close
   it('4. other wordings of an unearned win are sent back', async () => {
     const { checkGmScene } = await import('../engine/factcheck');
     const s = startGmGame();
-    for (const t of ['Li won the spar against Gonza.', 'Li punches Gonza to the ground.', 'Li leaves Gonza unable to rise.'])
+    for (const t of ['Li won the spar against Gonza.', 'Li punches Gonza to the ground.', 'Li leaves Gonza unable to rise.',
+      'Li takes the head of Gonza.', 'Li sends Hachi a look and defeats Gonza.', 'Li poisons Gonza at dinner.'])
       expect(checkGmScene(s, t).map((p) => p.kind)).toContain('fight');
     for (const t of ['Li puts the bucket down near Gonza.', "Li leaves Gonza's tent.", 'Li sends Hachi to fetch water.'])
       expect(checkGmScene(s, t).map((p) => p.kind)).not.toContain('fight');

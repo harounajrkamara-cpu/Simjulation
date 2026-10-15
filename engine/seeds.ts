@@ -40,13 +40,14 @@ export function seedDrafts(s: GameState, x: { id?: unknown; state?: unknown; not
   if (!seed || !st) { notes.push(`no seed "${String(x.id)}" / state "${String(x.state)}"`); return []; }
   const now = has(s, key(seed.id));
   if (st === 1 && (now || !fits(s, seed))) { notes.push(`seed "${seed.name}" cannot be planted now`); return []; }
-  if (st > 1 && now !== 1) { notes.push(`seed "${seed.name}" was not planted`); return []; }
+  // planted → grown or dead; grown → dead.
+  if (st > 1 && (!now || now >= st)) { notes.push(`seed "${seed.name}" cannot become ${String(x.state)} now`); return []; }
   return [{ type: 'flag', fact: `seed ${seed.name}: ${String(x.state)}${x.note ? ` (${String(x.note).slice(0, 100)})` : ''}`, visible: false, data: { key: key(seed.id), value: st } }];
 }
 
 /** Open seeds and the ones that could be planted here and now, for Claude's memory. */
 export function seedsText(s: GameState): string {
-  const open = SEEDS.filter((x) => has(s, key(x.id)) === 1).map((x) => `- [${x.id}] ${x.name} (planted): can become ${x.becomes}.`);
+  const open = SEEDS.filter((x) => [1, 2].includes(has(s, key(x.id)))).map((x) => `- [${x.id}] ${x.name} (${has(s, key(x.id)) === 1 ? 'planted' : 'grown'}): can become ${x.becomes}.`);
   const ready = SEEDS.filter((x) => !has(s, key(x.id)) && fits(s, x)).slice(0, 4).map((x) => `- [${x.id}] ${x.name}: needs ${x.needs}; can become ${x.becomes}.`);
   if (!open.length && !ready.length) return '';
   return `STORY SEEDS (situations, never scripts; plant at most one when it fits, with {"kind":"seed","id":"<id>","state":"planted"}, later "grown" or "dead"):\n${[...open, ...ready].join('\n')}`;
