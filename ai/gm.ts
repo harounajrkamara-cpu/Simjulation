@@ -2,7 +2,7 @@ import { AiAdapter, ModelTier } from './adapter';
 import { GmFixProposal, GmResult, GmTurn, gmApply, gmDayCap, gmMemoryText, gmRecentScenes, lastFightResult, parseGmFix, parseGmTurn, skipDaysLeft, splitWishes } from '../engine/gm';
 import { commitDrafts, today } from '../engine/engine';
 import { chapterDraft, chapterDue, chapterPrompt } from '../engine/recaps';
-import { checkGmScene, checkGmSuggestions, factFixPrompt } from '../engine/factcheck';
+import { checkGmDeaths, checkGmScene, checkGmSuggestions, factFixPrompt } from '../engine/factcheck';
 import { GameEvent, GameState } from '../engine/types';
 
 export type { GmFixProposal } from '../engine/gm';
@@ -158,7 +158,7 @@ async function play(ai: AiAdapter, s: GameState, said: string | undefined, signa
     if (!turn) continue;
     // Every scene is checked, the rewrite too: a scene the code knows breaks the facts is never shown (AI Lab issue #2).
     const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
-    const found = [...checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn)];
+    const found = [...checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn), ...checkGmDeaths(s, turn, said)];
     if (found.length) {
       if (first) throw Object.assign(new Error(`The Game Master's rewrite still broke the facts (${found.map((p) => p.text).join(' ')}).`), { code: 'bad_answer' });
       first = turn;

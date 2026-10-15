@@ -149,6 +149,29 @@ export function checkGmSuggestions(s: GameState, t: { suggestions?: string[]; fi
   return [];
 }
 
+/**
+ * Who caused a story death is decided by the code, not by a word list (owner's runtime QA Oct 15: "the boy tips
+ * powder", "smothers", "arranges for a camp follower" all killed Raizen). Default deny: a "dies" change is cleared of
+ * Li's hand only when Li is nowhere in the scene or the reason, and the player's words this turn do not name the dead.
+ * A death Li causes is a fight the code runs. shortcut: a scene that calls Li only "he" is not caught; a "by" field
+ * with the killer recorded by the code would close it.
+ */
+export function liHandInDeath(s: GameState, npc: string, text: string, said = ''): boolean {
+  const named = s.characters[npc].name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'iu').test(said));
+  return /\b(?:Li|Li's|the boy|the slave)\b/i.test(text) || named;
+}
+
+/** Story deaths the code cannot clear of Li's hand go back for one rewrite; a rewrite that keeps one is never shown. */
+export function checkGmDeaths(s: GameState, t: { scene: string; title?: string; changes?: { kind: string; npc?: unknown; reason?: unknown }[] }, said?: string): FactProblem[] {
+  const text = `${t.title ?? ''}. ${t.scene}`;
+  return (t.changes ?? []).flatMap((c) => {
+    const npc = String(c.npc ?? '');
+    const p = c.kind === 'dies' && npc !== s.liId ? s.characters[npc] : undefined;
+    if (!p?.alive || !liHandInDeath(s, npc, `${text} ${String(c.reason ?? '')}`, said)) return [];
+    return [{ kind: 'fight' as const, text: `${p.name} dies in a scene where Li is present or the player named ${p.name}. The code cannot tell that Li had no hand in it. Either ${p.name} does not die now (drop the "dies" change and the death from the scene), or a fight between them starts with "fight" and the code decides it.` }];
+  });
+}
+
 /** One instruction for a single rewrite: the same events, these facts fixed. */
 export function factFixPrompt(problems: FactProblem[]): string {
   return `Your last scene broke facts the memory holds. Write the same scene again (same events, same changes), fixing exactly these:\n${problems.map((p) => `- ${p.text}`).join('\n')}`;

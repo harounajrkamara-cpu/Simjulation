@@ -4,6 +4,7 @@ import { DuelOutcome, DuelTemplate } from './content';
 import { PLACES } from './data';
 import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
+import { liHandInDeath } from './factcheck';
 import { publicWorldText } from './atlas-public';
 import { liLifeText } from './life';
 import { fuseDrafts, fusesText, leverDrafts } from './fuses';
@@ -423,7 +424,7 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   drafts.push(...battleClearDrafts(s)); // the aftermath has been told: clear the field
   drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null } });
   if (t.place) drafts.push({ type: 'place', fact: `Li is at ${t.place}`, visible: false, data: { char: c.id, place: t.place } });
-  drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false));
+  drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false, `${t.title ?? ''}. ${t.scene}`));
 
   let duelId: string | undefined;
   if (t.fight) {
@@ -457,7 +458,7 @@ export function splitWishes(said: string): { action: string; wishes: string[] } 
 }
 
 /** The referee for a list of changes (a scene's, or a fix's when `facts` is true). */
-function checkChanges(s: GameState, changes: GmChange[], notes: string[], secretNotes: string[], said: string | undefined, facts: boolean): Draft[] {
+function checkChanges(s: GameState, changes: GmChange[], notes: string[], secretNotes: string[], said: string | undefined, facts: boolean, scene = ''): Draft[] {
   const c = li(s);
   const g = gmMem(s);
   const drafts: Draft[] = [];
@@ -586,8 +587,8 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         if (npc === s.liId) { notes.push('Li does not die'); break; }
         if (!known(npc) || !s.characters[npc].alive) break;
         // A death Li causes is a fight the code runs (it can end in a kill), never a story claim. Default deny
-        // (Copilot QA, PR #5: "Li poisons Raizen at dinner" killed Raizen): any reason that names Li is refused.
-        if (/\b(Li|Li's|the boy|the slave)\b/i.test(str(x.reason, 100))) {
+        // (engine/factcheck.ts liHandInDeath): Li in the scene or the reason, or the dead named in the player's words.
+        if (liHandInDeath(s, npc, `${scene} ${str(x.reason, 100)}`, said ?? '')) {
           secretNotes.push(`${s.characters[npc].name} does not die by Li's hand in story text: a fight between them must be started with "fight" and decided by the code`);
           break;
         }
