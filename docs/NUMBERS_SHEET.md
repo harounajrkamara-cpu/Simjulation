@@ -320,7 +320,7 @@ Expected pace for a **strong** player in Kurogane (owner's choice: fast progress
 - No career may get stuck for more than 3 years without any route forward.
 
 ### 11b. Fuse dates and weights (Oct 15, ⚠ PROVISIONAL — owner may change)
-Until the decision trees of build stage 4, each fuse fires on a fixed day (after its "not before") and picks its outcome by **weights**: a base weight per outcome plus Li's levers (+2 per lever toward an outcome; each listed lever counts once per fuse, owner decision Oct 15); highest wins, ties go to the first listed. Days count from Year 100, Month 1, Day 1 (360 per year).
+Until the decision trees of build stage 4, each fuse fires on a fixed day (after its "not before") and picks its outcome by **weights**: a base weight per outcome plus Li's levers (+2 per lever toward an outcome; each listed lever counts once per fuse, owner decision Oct 15); highest wins, a tie goes to the side Li pushed (owner, Oct 15), otherwise to the first listed. Days count from Year 100, Month 1, Day 1 (360 per year).
 | Fuse | Fires (day) | Outcomes (base weight) |
 |---|---|---|
 | Gōda's coup | Y101 M2 D25 (414) | crushed (3) · purge of the Chancellor (2) · the king killed (1) |

@@ -107,12 +107,13 @@ export const newsDelay = (s: GameState, f: Fuse) => (liIsAt(s, f) ? 0 : liKingdo
 
 const leverKey = (fuse: string, outcome: string) => `lever_${fuse}_${outcome}`;
 
-/** The outcome a fuse takes: base weight + 2 per lever Li pulled toward it; ties go to the first listed. */
+/** The outcome a fuse takes: base weight + 2 per lever Li pulled toward it; ties go to Li's side, then the first listed. */
 export function fuseOutcome(s: GameState, f: Fuse) {
   let best = f.outcomes[0];
   let bestW = -1;
   for (const o of f.outcomes) {
-    const w = o.weight + 2 * has(s, leverKey(f.id, o.id));
+    const n = has(s, leverKey(f.id, o.id));
+    const w = o.weight + 2 * n + (n ? 0.5 : 0); // the half point: Li's push wins a tie (owner, Oct 15)
     if (w > bestW) { best = o; bestW = w; }
   }
   return best;

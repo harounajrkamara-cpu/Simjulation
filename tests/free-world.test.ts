@@ -50,6 +50,14 @@ describe('fuses: the world moves on by itself', () => {
     expect(s.flags.fuse_coup).toBe(1);
   });
 
+  it('Li\'s one push wins a tie: opening a door for the killers kills the king (1 + 2 ties 3)', () => {
+    const s = startGmGame();
+    goTo(s, 400, 'the palace in Seikyō');
+    gmApply(s, scene({ place: 'the palace in Seikyō', changes: [{ kind: 'lever', fuse: 'coup', toward: 'king_killed', reason: 'opens a door for the killers' }] }));
+    goTo(s, 414, 'the palace in Seikyō');
+    expect(s.flags.fuse_coup).toBe(3);
+  });
+
   it('the history replays the same from the save', () => {
     const s = startGmGame();
     goTo(s, 420);
