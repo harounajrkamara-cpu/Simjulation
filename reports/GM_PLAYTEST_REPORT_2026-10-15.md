@@ -135,3 +135,13 @@ All reviewers should receive the same base commit, setup and scenario list. Each
 9. **Exact-current-head verification:** run `npm test`, `npm run typecheck`, `npm run build:web`, `npm run balance` and `npm run ui:check` on commit `fb6aae37b2e5de8ea4f5b13af2c85dbf4e0a5792` after fixes; attach actual command output/CI. Distinguish fake-AI tests from a live playtest with the real Claude artifact.
 
 Do not merge, publish, deploy or change `main` as part of this review. Fixes belong on a dedicated review/fix branch or child branch until the owner approves them.
+
+
+## Shared handoff and peer-review location
+
+- Central tracker for Claude and every reviewer: [Issue #6](https://github.com/harounajrkamara-cpu/Simjulation/issues/6).
+- Copy/paste instructions for another AI: [reports/AI_REVIEW_PROMPT.md](https://github.com/harounajrkamara-cpu/Simjulation/blob/ai-lab/testing-council/reports/AI_REVIEW_PROMPT.md).
+- Direct, observed exploit output and explicit version limitation: [reports/GM_REPRODUCTION_EVIDENCE_2026-10-15.json](https://github.com/harounajrkamara-cpu/Simjulation/blob/ai-lab/testing-council/reports/GM_REPRODUCTION_EVIDENCE_2026-10-15.json).
+- Directly reproduced findings and the official-test limitation: [reports/reviews/chatgpt-gm-audit-2026-10-15.md](https://github.com/harounajrkamara-cpu/Simjulation/blob/ai-lab/testing-council/reports/reviews/chatgpt-gm-audit-2026-10-15.md).
+
+All reports must state the exact commit tested. The older main-snapshot reproductions are not runtime proof that the same scenarios were executed against PR #5. Current-head tests and live Claude artifact playtesting remain required.
