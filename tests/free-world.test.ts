@@ -33,11 +33,14 @@ describe('fuses: the world moves on by itself', () => {
     const far = gmApply(s, scene({ changes: [{ kind: 'lever', fuse: 'coup', toward: 'king_killed', reason: 'opens a door' }] }));
     expect(far.notes.join(' ')).toMatch(/not where Gōda's coup plays out/);
     goTo(s, 400, 'the palace in Seikyō');
-    gmApply(s, scene({ place: 'the palace in Seikyō', changes: [{ kind: 'lever', fuse: 'coup', toward: 'king_killed', reason: 'opens a door for the killers' }] }));
-    gmApply(s, scene({ place: 'the palace in Seikyō', changes: [{ kind: 'lever', fuse: 'coup', toward: 'king_killed', reason: 'tells them the guard rota' }] }));
+    gmApply(s, scene({ place: 'the palace in Seikyō', changes: [{ kind: 'lever', fuse: 'coup', toward: 'purge', reason: 'serves Gōda against the Chancellor' }] }));
+    // Each listed lever counts once per fuse (owner, Oct 15): purge has one, so a second push is refused.
+    const twice = gmApply(s, scene({ place: 'the palace in Seikyō', changes: [{ kind: 'lever', fuse: 'coup', toward: 'purge', reason: 'again' }] }));
+    expect(twice.notes.join(' ')).toMatch(/as far as it goes/);
+    expect(s.flags.lever_coup_purge).toBe(1);
     goTo(s, 414, 'the palace in Seikyō');
-    expect(s.flags.fuse_coup).toBe(3); // king killed: 1 + 2 + 2 beats 3
-    expect(s.journal.some((j) => /king Asagiri Tokinari is dead/.test(j.text))).toBe(true); // Li was there: at once
+    expect(s.flags.fuse_coup).toBe(2); // purge: 2 + 2 beats 3
+    expect(s.journal.some((j) => /Chancellor Ebisawa Rokusai has fallen/.test(j.text))).toBe(true); // Li was there: at once
   });
 
   it('a fuse day passed by another clock (classic mode, a battle) still fires at the next scene', () => {

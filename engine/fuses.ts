@@ -127,6 +127,8 @@ export function leverDrafts(s: GameState, x: { fuse?: unknown; toward?: unknown;
   if (has(s, `fuse_${f.id}`)) { notes.push(`${f.name} has already happened`); return []; }
   if (!liIsAt(s, f)) { notes.push(`Li is not where ${f.name} plays out (${f.where[0]})`); return []; }
   const key = leverKey(f.id, o.id);
+  // Owner decision Oct 15: each listed lever counts once per fuse (no pushing the same side every scene).
+  if (has(s, key) >= f.levers.filter((l) => l.toward === o.id).length) { notes.push(`Li has already pushed ${f.name} toward "${o.id}" as far as it goes`); return []; }
   return [{ type: 'flag', fact: `Li pushes ${f.name} toward "${o.id}" (${String(x.reason ?? '').slice(0, 100)})`, visible: false, data: { key, value: has(s, key) + 1 } }];
 }
 
