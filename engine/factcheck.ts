@@ -104,9 +104,24 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
   const lastScene = [...s.events].reverse().find((e) => e.type === 'scene')?.seq ?? -1;
   const justFought = s.events.some((e) => e.seq > lastScene && e.type === 'story' && (e.data as { duelEnd?: string }).duelEnd);
   if (!justFought) {
-    const WIN = /\bLi\b[^.!?]{0,80}?\b(?:kills|slays|beheads|cuts down|strikes down|knocks down|beats|defeats|disarms|bests|overpowers|takes the head of)\b/;
+    // Copilot QA (PR #5) found wordings that slipped through ("won the spar", "punches Gonza to the ground", "leaves
+    // Gonza unable to rise"): the list now covers winning, felling and leaving someone beaten.
+    const WIN = /\bLi\b[^.!?]{0,80}?\b(?:kills|killed|slays|slew|beheads|cuts down|cut down|strikes down|struck down|knocks|knocked|punches|punched|throws|threw|floors|floored|pins|pinned|beats|beat|defeats|defeated|disarms|disarmed|bests|bested|overpowers|overpowered|wins|won|takes the head of|took the head of|leaves|left|drops|dropped|puts|put|sends|sent)\b/;
+    const BEATEN = /\b(?:down|to the ground|into the dirt|in the dirt|in the mud|unable to rise|senseless|unconscious|helpless|on his back|flat|sprawling|wins|won|beats|beat|defeats|defeated|bests|bested|kills|killed|slays|slew|beheads|disarms|overpowers|the head of|the spar|the fight|the duel|the bout)\b/i;
+    // Plain verbs ("puts", "leaves", "knocks") count only with the person and a beaten-word after them
+    // ("leaves Gonza unable to rise", not "puts the bucket down near Gonza").
+    const PLAIN = /^(?:knocks|knocked|punches|punched|throws|threw|pins|pinned|leaves|left|drops|dropped|puts|put|sends|sent)$/i;
     for (const sen of sentences(prose).filter((x) => WIN.test(x))) {
-      const foe = people.find((c) => c.alive && c.name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'u').test(sen.slice(sen.search(WIN)))));
+      const m = sen.match(WIN)!;
+      const verb = m[0].match(/\b(\w+)$/)?.[1] ?? '';
+      const rest = sen.slice(sen.search(WIN) + m[0].length - verb.length);
+      const foe = people.find((c) => c.alive && c.name.split(/\s+/).some((w) => {
+        if (w.length < 3) return false;
+        const named = new RegExp(`${B}${esc(w)}${E}`, 'u');
+        if (!named.test(rest)) return false;
+        if (!PLAIN.test(verb)) return BEATEN.test(rest);
+        return new RegExp(`${B}${esc(w)}${E}[^.!?]{0,30}?\\b(?:down|to the ground|into the dirt|in the dirt|in the mud|unable to rise|senseless|unconscious|helpless|on his back|sprawling|flat)\\b`, 'iu').test(rest);
+      }));
       if (foe) { problems.push({ kind: 'fight', text: `The scene has Li beat ${foe.name}, but no fight decided that. An exchange of blows that matters is a fight the code runs: end the scene where the fight starts and set "fight".` }); break; }
     }
   }

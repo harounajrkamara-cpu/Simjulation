@@ -112,7 +112,7 @@ describe('Game Master mode: the code referees', () => {
     const s = startGmGame();
     gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
     while (today(s) < 261) gmApply(s, scene({ days: Math.min(30, 261 - today(s)) })); // Year 100, Month 9, Day 22: the Kogashira's raid
-    const r = gmApply(s, scene({ fight: { foe: 'A Suiren Kogashira', rank: 'F', look: 'an officer under a blue banner', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    const r = gmApply(s, scene({ place: 'the ford on the Kurose', fight: { foe: 'A Suiren Kogashira', rank: 'F', look: 'an officer under a blue banner', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
     expect((r.secretNotes ?? []).join(' ')).not.toMatch(/not a Kogashira|no merit/);
     expect(s.duel!.foe.val).toBe(38); // the record's Kogashira, not Claude's "F"
   });
@@ -121,11 +121,11 @@ describe('Game Master mode: the code referees', () => {
     const s = startGmGame();
     gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
     while (today(s) < 261) gmApply(s, scene({ days: Math.min(30, 261 - today(s)) }));
-    gmApply(s, scene({ fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant with a staff', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    gmApply(s, scene({ place: 'the ford on the Kurose', fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant with a staff', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
     expect(s.duel!.foe.name).toMatch(/Suiren Kogashira/); // the record's officer, at his strength
     expect(s.duel!.foe.val).toBe(38);
     s.duel = undefined; // leave the first fight (its result does not matter here)
-    const r = gmApply(s, scene({ fight: { foe: 'Another Suiren Kogashira', rank: 'C', look: 'a second officer', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    const r = gmApply(s, scene({ place: 'the ford on the Kurose', fight: { foe: 'Another Suiren Kogashira', rank: 'C', look: 'a second officer', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
     expect((r.secretNotes ?? []).join(' ')).toMatch(/not a Kogashira on the code's record/);
     expect((r.secretNotes ?? []).join(' ')).toMatch(/one fight that counts is over/);
   });
@@ -184,5 +184,51 @@ describe('pacing: routine plays itself (owner, Oct 12)', () => {
   it('Claude can mark a scene as routine; nothing is routine unless Claude says so', () => {
     expect(parseGmTurn({ scene: 'Li waters the mare.', routine: true })?.routine).toBe(true);
     expect(parseGmTurn({ scene: 'Bells at dawn: raiders at the ford.' })?.routine).toBeUndefined();
+  });
+});
+
+describe('Copilot QA of PR #5 (6dfcc42): the four reproduced exploits stay closed', () => {
+  const toRaidDay = (s: ReturnType<typeof startGmGame>, place: string) => {
+    gmApply(s, scene({ place, changes: [{ kind: 'service', reason: 'levy' }] }));
+    while (today(s) < 261) gmApply(s, scene({ place, days: Math.min(30, 261 - today(s)) }));
+  };
+  const winDuel = (s: ReturnType<typeof startGmGame>) => {
+    s.characters[s.liId].stats.VAL = 100; s.duel!.li.val = 100; s.duel!.li.mastery = 100;
+    for (let g = 0; s.duel && !s.duel.over && g < 12; g++) handleInput(s, 'feint');
+  };
+
+  it('1. a non-lethal (practice) win against the raid officer gives no head, no officer merit, no freedom', () => {
+    const s = startGmGame();
+    toRaidDay(s, 'the ford on the Kurose');
+    gmApply(s, scene({ place: 'the ford on the Kurose', fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant', officer: 'Kogashira', deadly: false, witnessedEnemy: true } }));
+    winDuel(s);
+    expect(s.flags.kogashira_head ?? 0).toBe(0);
+    expect(s.flags.merit_service ?? 0).toBe(0);
+    gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'head' }] }));
+    expect(li(s).status).toBe('slave');
+  });
+
+  it('2. "Li poisons Raizen at dinner" does not kill Raizen', () => {
+    const s = startGmGame();
+    const r = gmApply(s, scene({ changes: [{ kind: 'dies', npc: 'raizen', reason: 'Li poisons Raizen at dinner' }] }));
+    expect(s.characters.raizen.alive).toBe(true);
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/does not die by Li's hand/);
+  });
+
+  it('3. away from the ford (the rice fields), the raid officer and raid rewards do not count', () => {
+    const s = startGmGame();
+    toRaidDay(s, 'the rice fields');
+    const r = gmApply(s, scene({ place: 'the rice fields', fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect(s.duel!.foe.name).not.toMatch(/Kogashira/);
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/not a Kogashira on the code's record/);
+  });
+
+  it('4. other wordings of an unearned win are sent back', async () => {
+    const { checkGmScene } = await import('../engine/factcheck');
+    const s = startGmGame();
+    for (const t of ['Li won the spar against Gonza.', 'Li punches Gonza to the ground.', 'Li leaves Gonza unable to rise.'])
+      expect(checkGmScene(s, t).map((p) => p.kind)).toContain('fight');
+    for (const t of ['Li puts the bucket down near Gonza.', "Li leaves Gonza's tent.", 'Li sends Hachi to fetch water.'])
+      expect(checkGmScene(s, t).map((p) => p.kind)).not.toContain('fight');
   });
 });

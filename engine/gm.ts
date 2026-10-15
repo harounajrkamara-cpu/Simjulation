@@ -422,7 +422,7 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   let duelId: string | undefined;
   if (t.fight) {
     duelId = `gm_${s.nextSeq}`;
-    drafts.push(...gmDuelStart(s, duelId, t.fight, secretNotes));
+    drafts.push(...gmDuelStart(s, duelId, t.fight, secretNotes, t.place));
   }
   return { drafts, notes, secretNotes, duelId };
 }
@@ -573,8 +573,9 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         const npc = str(x.npc, 40);
         if (npc === s.liId) { notes.push('Li does not die'); break; }
         if (!known(npc) || !s.characters[npc].alive) break;
-        // A death Li causes is a fight the code runs (it can end in a kill), never a story claim.
-        if (/\bLi\b/.test(str(x.reason, 100)) && /\b(kill|slay|slew|strike|struck|stab|cut|beat|behead|head|fight|duel)/i.test(str(x.reason, 100))) {
+        // A death Li causes is a fight the code runs (it can end in a kill), never a story claim. Default deny
+        // (Copilot QA, PR #5: "Li poisons Raizen at dinner" killed Raizen): any reason that names Li is refused.
+        if (/\b(Li|Li's|the boy|the slave)\b/i.test(str(x.reason, 100))) {
           secretNotes.push(`${s.characters[npc].name} does not die by Li's hand in story text: a fight between them must be started with "fight" and decided by the code`);
           break;
         }
@@ -678,10 +679,12 @@ const OFFICER_MEN: Record<NonNullable<GmFight['officer']>, number> = { 'Gochō':
  * code knows; officer rank, an enemy and witnesses count only where the code records a war (a raid on the ford today,
  * or a battle in progress) and the officer is on that record. Anything else is fought, but earns no merit or head.
  */
-export function fightFacts(s: GameState, f: GmFight) {
+export function fightFacts(s: GameState, f: GmFight, scenePlace?: string) {
   const name = f.foe.toLowerCase();
   const person = Object.values(s.characters).find((p) => p.id !== s.liId && p.alive && (name.includes(p.name.toLowerCase()) || name.includes(p.id)));
-  const raid = raidIndexOn(today(s));
+  // A raid is at the ford: it counts only if Li is there (his recorded place, or this scene's place). Copilot QA, PR #5.
+  const atFord = [PLACES[li(s).location] ?? li(s).location, scenePlace ?? ''].some((p) => /\b(ford|Kurose)\b/i.test(p));
+  const raid = atFord ? raidIndexOn(today(s)) : undefined;
   const raidOfficer = raidOfficerOn(today(s));
   const battle = s.battle && !s.battle.over ? s.battle : undefined;
   const flags: string[] = []; // what this fight uses up (a raid has one officer and one fight that counts)
@@ -708,15 +711,16 @@ export function fightFacts(s: GameState, f: GmFight) {
 }
 
 /** A fight the Game Master starts: the duel engine decides it, never Claude. */
-function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = []): Draft[] {
+function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = [], scenePlace?: string): Draft[] {
   const c = li(s);
-  const facts = fightFacts(s, f);
+  const facts = fightFacts(s, f, scenePlace);
   notes.push(...facts.notes);
   const foe = facts.foeName;
   const foeId = facts.person?.id ?? `gmfoe_${slug(foe)}`;
-  const officerMerit = facts.officer && facts.enemy && inService(s) ? OFFICER_MERIT[facts.officer] : 0;
+  // An officer's merit and head come only from a fight to the death (Copilot QA, PR #5: a practice win freed Li).
+  const officerMerit = facts.officer && facts.enemy && f.deadly && inService(s) ? OFFICER_MERIT[facts.officer] : 0;
   const plainMerit = facts.enemy && f.deadly ? 1 : 0;
-  const head = facts.officer && facts.officer !== 'Gochō' && facts.enemy && inService(s);
+  const head = facts.officer && facts.officer !== 'Gochō' && facts.enemy && f.deadly && inService(s);
   const won: DuelOutcome = {
     fact: `${foe} goes down.`,
     journal: `I beat ${foe}.`,
