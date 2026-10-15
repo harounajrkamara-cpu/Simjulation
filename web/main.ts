@@ -284,12 +284,14 @@ async function gmStep(text?: string, said = text) {
   const metBefore = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
   const statusBefore = li(state).status;
   const seasonBefore = state.seasonKey;
+  let routine = false;
   try {
     const r = await gmTurn(ai, state, text);
     turn.querySelector('.wet')?.remove();
     await paintPlay(turn, r, said, before, metBefore, true, fine);
     refresh();
     await afterPlays(r.events, r.turn.scene, seasonBefore, statusBefore, !!r.duelId, said);
+    routine = !!r.turn.routine && !r.duelId && !battleOn() && li(state).status === statusBefore;
   } catch (e) {
     turn.querySelector('.wet')?.remove();
     if (errorCode(e) === 'bad_answer') turn.insertAdjacentHTML('beforeend', `<p class="text info">Claude's scene did not hold up to the facts, so it was not used. Nothing happened in the story; press Send to try again.</p>`);
@@ -300,7 +302,23 @@ async function gmStep(text?: string, said = text) {
   persist();
   await maybeChapter();
   setBusy(false);
+  if (routine) goOn(turn); else autoRun = 0;
 }
+
+// ---------- pacing: routine plays itself (owner, Oct 12; a test version to judge in play) ----------
+// After a scene Claude marks as routine, the story goes on by itself to the next moment that matters. At most
+// AUTO_MAX scenes in a row (each one is a Claude call on the player's account); typing, a choice or "Take over" stops it.
+const AUTO_MAX = 4;
+let autoRun = 0;
+let autoTimer: ReturnType<typeof setTimeout> | undefined;
+function stopAuto() { if (autoTimer) clearTimeout(autoTimer); autoTimer = undefined; document.querySelectorAll('.auto-on').forEach((x) => x.remove()); }
+function goOn(turn: HTMLElement) {
+  if (autoRun >= AUTO_MAX) { autoRun = 0; turn.insertAdjacentHTML('beforeend', '<p class="text info">The days go on quietly. Your move.</p>'); return; }
+  turn.insertAdjacentHTML('beforeend', '<p class="text info auto-on">The story goes on… <button type="button" class="quiet-tool takeover">Take over</button></p>');
+  turn.querySelector<HTMLButtonElement>('.takeover')!.onclick = () => { stopAuto(); autoRun = 0; input.focus(); };
+  autoTimer = setTimeout(() => { autoTimer = undefined; document.querySelectorAll('.auto-on').forEach((x) => x.remove()); if (busy || input.value.trim()) { autoRun = 0; return; } autoRun++; gmStep(); }, 2500);
+}
+input.addEventListener('input', () => { if (autoTimer) { stopAuto(); autoRun = 0; } });
 
 /** One Game Master scene in the log: the story (inked or at once), its chips, the GM's out-of-character note, "Why?". */
 async function paintPlay(turn: HTMLElement, r: GmPlay, said: string | undefined, before: ReturnType<typeof noticeable>, metBefore: Set<string>, ink: boolean, fine: Record<string, number>) {
@@ -644,6 +662,7 @@ const gmChoices = () => state.gm?.suggestions?.length ? state.gm.suggestions : [
 async function send(raw: string, said = raw) {
   stopNarrator();
   if (busy) return;
+  stopAuto(); autoRun = 0; // the player acts: the story stops going on by itself
   fineMark = growthSnapshot(state);
   if (shownHint) markHint(shownHint); // a hint closes itself once the player acts (ch. 8 §4)
   const text = raw.trim();

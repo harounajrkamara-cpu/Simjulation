@@ -166,3 +166,10 @@ describe('the Game Master loop with a fake Claude', () => {
     expect(s.gm!.suggestions).toEqual(['I wait', 'I hide']);
   });
 });
+
+describe('pacing: routine plays itself (owner, Oct 12)', () => {
+  it('Claude can mark a scene as routine; nothing is routine unless Claude says so', () => {
+    expect(parseGmTurn({ scene: 'Li waters the mare.', routine: true })?.routine).toBe(true);
+    expect(parseGmTurn({ scene: 'Bells at dawn: raiders at the ford.' })?.routine).toBeUndefined();
+  });
+});

@@ -45,6 +45,8 @@ export interface GmTurn {
   suggestions?: string[];
   /** Time skip: something important happened or the target is reached, so the skip stops here. */
   stop?: boolean;
+  /** Only routine happened: the story goes on by itself to the next moment that matters (pacing, owner Oct 12). */
+  routine?: boolean;
   /** One short out-of-character line to the player (e.g. why a wish could not be granted). Shown apart from the scene. */
   gmNote?: string;
 }
@@ -377,6 +379,7 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
     } : undefined,
     suggestions: Array.isArray(o.suggestions) ? o.suggestions.map((x) => str(x, 120)).filter(Boolean).slice(0, 4) : [],
     stop: o.stop === true,
+    routine: o.routine === true || undefined,
     gmNote: str(o.gmNote, 240) || undefined,
   };
 }
