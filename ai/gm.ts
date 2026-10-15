@@ -5,6 +5,7 @@ import { chapterDraft, chapterDue, chapterPrompt } from '../engine/recaps';
 import { checkGmDeaths, checkGmScene, checkGmSuggestions, factFixPrompt } from '../engine/factcheck';
 import { checkPacing, pacingText } from '../engine/pacing';
 import { checkClocks } from '../engine/clocks';
+import { dramaText } from '../engine/drama';
 import { GameEvent, GameState } from '../engine/types';
 
 export type { GmFixProposal } from '../engine/gm';
@@ -134,6 +135,8 @@ export function gmPrompt(s: GameState, said: string | undefined, extra: string[]
   if (fight) parts.push(fight);
   const pacing = pacingText(s, said);
   if (pacing) parts.push(pacing);
+  const drama = dramaText(s);
+  if (drama) parts.push(drama);
   parts.push(...extra);
   const { action, wishes } = splitWishes(said ?? '');
   if (task) parts.push(task);

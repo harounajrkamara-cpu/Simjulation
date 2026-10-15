@@ -538,6 +538,7 @@ Possible outcomes: an ally reaches out · a Kurogane veteran turns hostile · wo
 - **Every scene turns** (McKee): a scene that hands control back names what it changed; a scene that changes nothing plays as routine.
 - **Detail by importance:** an ordinary scene 120–200 words, a big moment 200–300, routine 60–150. Enter late, leave early; end on the decision.
 - **Stories in motion** (story sifting): the code lists open threats, grudges, strong bonds, seeds in play and world events near Li.
+- **The drama layer** (owner's OK, Oct 16; `docs/PROPOSAL_DRAMA.md`): people remember their fights with Li (score kept by the code); a known person Li beat and left alive opens a revenge threat by itself (Nemesis); people react to what Li did; old setups get their payoff; there is always an open question; a chapter ends on a hook.
 - **A push after a calm:** after **5** quiet game days the code picks one thing for the next scene (a fitting seed, a threat showing itself, a person acting on their own plan); not while Li is wounded or right after a big moment.
 
 ### Turn loop (code decides, AI narrates)
