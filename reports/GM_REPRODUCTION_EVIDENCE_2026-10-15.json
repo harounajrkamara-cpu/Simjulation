@@ -1,0 +1,93 @@
+{
+  "title": "Simjulation GM vulnerability reproductions",
+  "testedAt": "2026-10-15",
+  "method": "Actually executed with Node.js 22 and the globally installed TypeScript transpiler through an isolated CommonJS require hook; no npm packages were installed. These are custom direct-engine calls, not Vitest.",
+  "snapshot": {
+    "source": "uploaded Simjulation-main.zip",
+    "commit": "8a717861431155d0b2017d05bd09224de294ca30",
+    "branch": "main base snapshot",
+    "date": "2026-10-12",
+    "appliesToCurrentPR5Head": false,
+    "currentPR5HeadSourceInspectedSeparately": "fb6aae37b2e5de8ea4f5b13af2c85dbf4e0a5792"
+  },
+  "reproductions": [
+    {
+      "id": "REPRO-001",
+      "title": "NPC death by poisoning bypasses the dies guard",
+      "result": "REPRODUCED_ON_OLDER_SNAPSHOT",
+      "input": {
+        "changes": [
+          {
+            "kind": "dies",
+            "npc": "raizen",
+            "reason": "Li poisons Raizen at dinner"
+          }
+        ]
+      },
+      "expected": "The NPC remains alive unless an explicitly authorised engine mechanic resolves the death.",
+      "observed": {
+        "raizenAlive": false,
+        "raizenStatus": "ronin",
+        "notes": [],
+        "secretNotes": [],
+        "event": "Mikumo Raizen dies (Li poisons Raizen at dinner)"
+      },
+      "exactPR5HeadRuntimeTest": "NOT RUN",
+      "sourceInspectionOfPR5": "The limited verb guard in engine/gm.ts still does not include poison/poisons. Add a regression test on the current head."
+    },
+    {
+      "id": "REPRO-002",
+      "title": "A non-lethal fight with a made-up farmhand awarded Kogashira head and merit",
+      "result": "REPRODUCED_ON_OLDER_SNAPSHOT",
+      "setup": "Started GM game, put Li in service, advanced to day index 261 (scheduled raid day), then submitted an officer-tagged fight with a random farmhand.",
+      "input": {
+        "fight": {
+          "foe": "A random farmhand",
+          "rank": "F",
+          "look": "a peasant with a staff",
+          "officer": "Kogashira",
+          "deadly": false,
+          "witnessedEnemy": true,
+          "place": "at the ford"
+        }
+      },
+      "playerMoves": "Repeated the engine's 'feint' move until the duel ended.",
+      "observed": {
+        "dayIndex": 261,
+        "duelResult": "Li WON against the random farmhand",
+        "kogashira_head": 1,
+        "merit_service": 3,
+        "rewardEvent": "combat merit +3 (enemy Kogashira head)",
+        "headFlagEvent": "flag kogashira_head = 1"
+      },
+      "expected": "A practice/non-lethal win must never award an officer's head or officer-kill merit.",
+      "exactPR5HeadRuntimeTest": "NOT RUN",
+      "sourceInspectionOfPR5": "engine/gm.ts gmDuelStart still derives officer merit/head without checking f.deadly. Current head uses a new canonical raid-officer substitution, so the exact old reproduction must be adapted and run on PR #5."
+    },
+    {
+      "id": "SOURCE-001",
+      "title": "Raid officer selection may not require Li to be at the ford",
+      "result": "SOURCE_LEVEL_RISK",
+      "evidence": "Current build/stage-1 commit fb6aae37b2e5de8ea4f5b13af2c85dbf4e0a5792: fightFacts selects raidOfficerOn(today(s)) and uses the date/flags, without an obvious location eligibility condition.",
+      "exactPR5HeadRuntimeTest": "NOT RUN",
+      "nextTest": "On a scheduled raid day, place Li away from the ford and submit an officer fight. Assert no ford officer substitution/reward outside the authorised location."
+    },
+    {
+      "id": "SOURCE-002",
+      "title": "Narrative victory fact-checker uses a limited verb list",
+      "result": "SOURCE_LEVEL_RISK",
+      "evidence": "Current build/stage-1 commit fb6aae37b2e5de8ea4f5b13af2c85dbf4e0a5792: engine/factcheck.ts checkGmScene checks a finite list of victory verbs and may miss phrases such as 'Li won the spar'. Full pipeline bypass not yet executed.",
+      "exactPR5HeadRuntimeTest": "NOT RUN",
+      "nextTest": "Without a duel-end event, check 'Li won the spar against Gonza', 'Li punches Gonza to the ground', and other equivalent language."
+    }
+  ],
+  "officialCommands": {
+    "npmCi": "NOT RUN successfully; npm ci --offline failed with ENOTCACHED for why-is-node-running@2.3.0",
+    "npmTest": "NOT RUN",
+    "npmRunTypecheck": "NOT RUN",
+    "npmRunBuildWeb": "NOT RUN",
+    "npmRunBalance": "NOT RUN as a package command",
+    "npmRunUiCheck": "NOT RUN"
+  },
+  "note": "Do not treat these two old-snapshot reproductions as a runtime test of v25. Run targeted regressions and full CI on exact PR #5 head before merge."
+}
