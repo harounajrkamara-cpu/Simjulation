@@ -13,6 +13,7 @@ import { titlesOf } from '../engine/gm-career';
 import { WORLD_CSS, liPoint, worldSvg } from './world-map';
 import { liLife } from '../engine/life';
 import { clockFeelings } from '../engine/clocks';
+import { currentPlan, PLANS, planSteps } from '../engine/plan';
 
 // The war chronicle's tabs and side panel (Game Experience ch. 3, 6). Only what Li can know is shown.
 
@@ -123,9 +124,14 @@ export function liPage(s: GameState): string {
   const season = Object.entries(s.seasonGains).map(([k, v]) => `${k.split(':')[1].replace('_', ' ')} +${v.toFixed(2)} of 2`).join(' · ') || 'none yet';
   const life = liLife(s);
   const lifeHtml = life.length ? `<h2 class="label">Li's life</h2><table class="table life">${life.map((l) => `<tr><th>${esc(l.label)}</th><td>${esc(l.text)}</td></tr>`).join('')}</table>` : '';
+  // Li's plan (night Oct 16): the player chooses an ambition; the steps come from the rules that decide it.
+  const chosen = currentPlan(s);
+  const planHtml = c.status !== 'slave' ? '' : `<h2 class="label">Li's plan</h2>
+    <div class="slots">${PLANS.map((p) => `<button type="button" class="slot${p.id === chosen ? ' on' : ''}" data-plan="${p.id}" title="${esc(p.why)}"><b>${esc(p.label)}</b>${esc(p.why)}</button>`).join('')}</div>
+    ${chosen ? `<ul class="chronicle">${planSteps(s, chosen).map((x) => `<li>${x.done ? '✓' : '○'} ${esc(x.text)}</li>`).join('')}</ul>` : '<p class="empty">Choose what Li is working toward. The story will bring chances toward the next step; the rules still decide.</p>'}`;
   const threats = clockFeelings(s);
   const threatHtml = threats.length ? `<h2 class="label">What Li feels coming</h2><ul class="chronicle">${threats.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
-  return `<div class="card">${liCard(s)}</div>${lifeHtml}${threatHtml}
+  return `<div class="card">${liCard(s)}</div>${planHtml}${lifeHtml}${threatHtml}
     <h2 class="label">Condition</h2>
     <table class="table"><tr><th>Wounds</th><td>${WOUND_LABEL[c.wound]}${c.wound ? ` · ${c.healDays} days to heal a step` : ''}</td></tr>
       <tr><th>Fatigue</th><td>${c.fatigue} of 3</td></tr><tr><th>Money</th><td>${s.money} mon</td></tr>

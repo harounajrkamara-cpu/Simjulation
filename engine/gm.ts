@@ -11,6 +11,7 @@ import { fuseDrafts, fusesText, leverDrafts } from './fuses';
 import { seedDrafts, seedsText } from './seeds';
 import { clockDrafts, clocksText, clockTimeDrafts } from './clocks';
 import { nemesisDrafts } from './drama';
+import { planText } from './plan';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -331,6 +332,7 @@ export function gmMemoryText(s: GameState): string {
     stageText(s),
     publicWorldText(s),
     liLifeText(s),
+    planText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),

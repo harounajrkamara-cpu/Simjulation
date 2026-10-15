@@ -2,7 +2,8 @@ import { AiAdapter, PERMANENT, errorCode } from '../ai/adapter';
 import { Reading, interpret } from '../ai/interpret';
 import { Narration, narrate, shouldNarrate, templateText } from '../ai/narrate';
 import { FactPacket, buildPacket } from '../ai/packet';
-import { fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
+import { commitDrafts, fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
+import { planDrafts, PlanId } from '../engine/plan';
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
 import { SkipSummary, summaryText } from '../engine/summary';
 import { GmChange, gmApplyFix, gmOn, gmRewind, lastFightResult } from '../engine/gm';
@@ -357,6 +358,14 @@ function goOn(turn: HTMLElement) {
     if (detail === 'all') { autoRun++; gmStep(); } else runSkip('until something important happens', lastPlan(state), MONTAGE_SCENES, 'The days go on');
   }, detail === 'all' ? 2500 : detail === 'normal' ? 1500 : 300);
 }
+// Li's plan (night Oct 16): choosing one is an event, so the memory and Claude keep it.
+$('tab-li').addEventListener('click', (ev) => {
+  const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-plan]');
+  if (!b || busy) return;
+  commitDrafts(state, planDrafts(state, b.dataset.plan as PlanId));
+  persist();
+  refresh();
+});
 $('detailbtn').onclick = () => {
   detail = detail === 'normal' ? 'key' : detail === 'key' ? 'all' : 'normal';
   try { localStorage.setItem(DETAIL_KEY, detail); } catch { /* this session only */ }
