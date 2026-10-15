@@ -29,7 +29,7 @@ export function planSteps(s: GameState, id: PlanId): PlanStep[] {
     case 'merit':
       return [serving, { text: `Merit in service: ${pct(has(s, 'merit_service'), MERIT_FOR_FREEDOM)} (deeds with witnesses, battles, reward ceremonies)`, done: has(s, 'merit_service') >= MERIT_FOR_FREEDOM }];
     case 'head':
-      return [serving, { text: 'Stand in the levy line at the Kurose ford on a raid day', done: has(s, 'kogashira_head') > 0 },
+      return [serving, { text: 'Stand in the levy line at the Kurose ford on a raid day', done: has(s, 'kogashira_head') > 0 || Object.keys(s.flags).some((k) => k.startsWith('raid_fight_')) },
         { text: "Take an enemy Kogashira's head in a fight to the death (the code runs it)", done: has(s, 'kogashira_head') > 0 }];
     case 'raizen':
       return [{ text: `Raizen's trust: ${pct(Math.floor(raizen.trust), 85)}`, done: raizen.trust >= 85 },

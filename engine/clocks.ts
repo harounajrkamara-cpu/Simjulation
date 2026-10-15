@@ -63,7 +63,11 @@ export function clockFeelings(s: GameState): string[] {
 
 /** A due threat that the scene neither delivers nor closes goes back once (soft, like pacing: a rewrite is shown). */
 export function checkClocks(s: GameState, t: { fight?: unknown; changes?: { kind: string; id?: unknown; close?: unknown }[] }): FactProblem[] {
-  const due = open(s).filter((c) => c.filled >= c.size);
+  // Asked once: only while no scene has followed the clock's last change (night review: a due clock Claude never closed
+  // doubled every Claude call). After that the memory still says DUE NOW.
+  const lastScene = s.events.map((e) => e.type).lastIndexOf('scene');
+  const lastChange = (id: string) => s.events.map((e) => (e.data as { clock?: { id?: string } }).clock?.id === id).lastIndexOf(true);
+  const due = open(s).filter((c) => c.filled >= c.size && lastChange(c.id) > lastScene);
   if (!due.length || t.fight) return [];
   const closed = new Set((t.changes ?? []).filter((c) => c.kind === 'clock' && c.close).map((c) => slug(String(c.id ?? ''))));
   const left = due.filter((c) => !closed.has(c.id));

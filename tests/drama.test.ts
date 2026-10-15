@@ -7,8 +7,9 @@ import type { GameState } from '../engine/types';
 // The drama layer (owner, Oct 16: "find ways to make it more interesting, and build it").
 const scene = (t: Partial<GmTurn> = {}): GmTurn => ({ scene: 'The camp goes about its work.', summary: 'x', ...t });
 /** A fight the code ran against Gonza, as the event log records it (start with the foe, end with the result). */
-function fought(s: GameState, result: 'won' | 'lost') {
+function fought(s: GameState, result: 'won' | 'lost', deadly = true) {
   const id = `gm_t${s.nextSeq}`;
+  s.gm!.duels[id] = { maxWound: deadly ? 3 : 1 } as never; // as gmDuelStart records it
   const at = { day: s.events.at(-1)!.day, part: s.date.part };
   s.events.push({ seq: s.nextSeq++, ...at, type: 'duel', fact: 'fight begins: Gonza', visible: false, data: { state: { id, foe: { id: 'gonza', name: 'Gonza' } } } });
   s.events.push({ seq: s.nextSeq++, ...at, type: 'story', fact: 'the fight ends', visible: true, data: { duelEnd: id, result } });
@@ -28,6 +29,34 @@ describe('K. rivals who remember (Nemesis)', () => {
     gmApply(s, scene());
     expect(s.gm!.clocks!.filter((c) => c.id === 'revenge_gonza')).toHaveLength(1);
     expect(dramaText(s)).toMatch(/SCORES WITH LI.*Gonza[^:]*: 2 fights, Li won 1, lost 1; last won/);
+  });
+});
+
+describe('K. night review fixes', () => {
+  it('a won spar opens no revenge; a second win while revenge is open does not reopen it later', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ days: 1 }));
+    fought(s, 'won', false);
+    gmApply(s, scene());
+    expect(s.gm?.clocks ?? []).toEqual([]); // a spar between camp mates is not a feud
+    fought(s, 'won');
+    gmApply(s, scene());
+    fought(s, 'won');
+    gmApply(s, scene());
+    expect(s.gm!.clocks!.filter((c) => c.id === 'revenge_gonza')).toHaveLength(1);
+    gmApply(s, scene({ changes: [{ kind: 'clock', id: 'revenge_gonza', close: true } as never] }));
+    gmApply(s, scene());
+    expect(s.gm!.clocks!.filter((c) => c.id === 'revenge_gonza' && c.open)).toHaveLength(0); // no stale reopen
+  });
+
+  it('a seed that grew is no longer a setup waiting; long-goal storylines are never pushed to close', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ changes: [{ kind: 'seed', id: 'bridge', state: 'planted' } as never, { kind: 'thread', id: 'goal4_lead', text: 'A traveller spoke of a white rock' } as never] }));
+    gmApply(s, scene({ days: 15 }));
+    expect(dramaText(s)).toMatch(/seed: Raizen's bridge/);
+    expect(dramaText(s)).not.toMatch(/white rock/);
+    gmApply(s, scene({ changes: [{ kind: 'seed', id: 'bridge', state: 'grown' } as never] }));
+    expect(dramaText(s)).not.toMatch(/seed: Raizen's bridge/);
   });
 });
 

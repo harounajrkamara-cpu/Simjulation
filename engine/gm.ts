@@ -399,7 +399,7 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
     suggestions: Array.isArray(o.suggestions) ? o.suggestions.map((x) => str(x, 120)).filter(Boolean).slice(0, 4) : [],
     stop: o.stop === true,
     routine: o.routine === true || undefined,
-    turns: str(o.turns, 160) || undefined,
+    turns: typeof o.turns === 'string' ? str(o.turns, 160) : undefined, // '' = Claude says nothing turned; missing = unknown
     gmNote: str(o.gmNote, 240) || undefined,
   };
 }
@@ -434,7 +434,7 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   const drafts: Draft[] = [];
   drafts.push(...battleClearDrafts(s)); // the aftermath has been told: clear the field
   drafts.push(...nemesisDrafts(s)); // a known person Li beat wants it back (Nemesis system, owner Oct 16)
-  drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null, ...(t.routine ? { routine: true } : {}), ...(t.turns ? { turns: t.turns } : {}) } });
+  drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null, ...(t.routine ? { routine: true } : {}), ...(t.turns !== undefined ? { turns: t.turns } : {}) } });
   if (t.place) drafts.push({ type: 'place', fact: `Li is at ${t.place}`, visible: false, data: { char: c.id, place: t.place } });
   drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false, `${t.title ?? ''}. ${t.scene}`));
 

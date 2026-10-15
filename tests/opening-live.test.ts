@@ -22,3 +22,9 @@ it('"you" in single-quoted dialogue or *italic thoughts* is not story prose', as
   expect(checkGmScene(s, 'Li grips the sticks. *You fool, he saw you.*').map((p) => p.kind)).not.toContain('person');
   expect(checkGmScene(s, 'You grip the sticks.').map((p) => p.kind)).toContain('person');
 });
+
+it('**bold** is not a thought: a win written in bold is still refused (night review)', async () => {
+  const { checkGmScene } = await import('../engine/factcheck');
+  const s = beginLife({ gm: true, skipped: true }).state;
+  expect(checkGmScene(s, '**Li beats Gonza.**').map((p) => p.kind)).toContain('fight');
+});

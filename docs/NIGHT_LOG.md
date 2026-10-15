@@ -20,3 +20,13 @@ Owner's permission (Oct 16, /loop): build on `build/stage-1`; new features allow
 - Checked in the browser: the five buttons, choosing "Escape" shows stealth 15 of 25, endurance 25 of 40, fit ✓, winter quarters ○.
 - Canon: World Bible ch. 11 "(nacht Oct 16, owner kan terugdraaien)". Tests: `tests/plan.test.ts`. To undo: revert the commit "Li's plan".
 - Later idea (not built): plans beyond freedom (family lead, first battle, a rank) once Li is free.
+
+## 4. Hermes review: NOT POSSIBLE tonight
+- `hermes -z` answered: "No LLM provider configured. Run `hermes model`…". Setting a provider needs the owner's account or key, so I left it. The diff for Hermes is ready in WSL at `/tmp/hermes-review-oct16/today.diff` if the owner wants to run it later.
+- Instead: my own review of all of today's code with the code-review skill (below).
+- **Review of all of today's code (code-review skill, high): 10 findings, all fixed with tests (357 tests).** The important ones:
+  1. A scene where Claude left out the new "turns" field was treated as "nothing turned" and auto-skipped by the montage, so a real decision could be lost. Now only an explicit `"turns": ""` counts; missing = unknown = shown.
+  2. Winning a friendly spar opened a revenge threat ("Hisame wants it back"). Now only a won fight to the death does.
+  3. A due threat that Claude never closed doubled every Claude call (one rewrite per scene). Now it asks once; the memory keeps saying DUE NOW.
+  4. Seeds that had already grown stayed listed as "waiting for a payoff"; long-goal storylines were pushed to close. Both fixed.
+  5. Smaller: "push after 5 quiet days" could fire every scene if Claude never fills "turns"; a second win reopened revenge later without a new fight; **bold** text hid a win from the checks; the "big moment" weight lingered for several scenes after a fight; the plan's ford step never showed progress.

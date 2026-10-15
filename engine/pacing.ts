@@ -63,9 +63,10 @@ export function alreadySaid(s: GameState, max = 8): string[] {
   return [...seen].filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, max).map(([p]) => p);
 }
 
-/** A scene that turns nothing (McKee): no "turns", no change, no fight, no time passed. It plays as routine (owner, Oct 16). */
+/** A scene that turns nothing (McKee): Claude says so ("turns": ""), no change, no fight, no time passed. It plays as
+ * routine (owner, Oct 16). A missing "turns" is unknown, not empty: a real decision must never be skipped (night review). */
 export function nonEvent(t: Pick<GmTurn, 'turns' | 'changes' | 'fight'>, events: GameEvent[]): boolean {
-  return !t.turns?.trim() && !(t.changes ?? []).length && !t.fight && !events.some((e) => e.type === 'time');
+  return t.turns === '' && !(t.changes ?? []).length && !t.fight && !events.some((e) => e.type === 'time');
 }
 
 /** A big moment since the scene before the newest one: a fight ended, Li's or someone's status changed (death, promotion,
@@ -89,17 +90,20 @@ export function lastPlan(s: GameState): string {
 /** How much a moment weighs, so Claude gives detail where it is due (Wang et al. 2023: LLMs over-describe minor events
  * and skip key ones). */
 export function momentWeight(s: GameState): 'big' | 'scene' {
-  const lastFight = s.events.slice(-40).some((e) => !!(e.data as { duelEnd?: unknown }).duelEnd);
+  // Only a fight that ended since the last scene (night review: a 40-event window kept several scenes "big").
+  const lastScene = s.events.map((e) => e.type).lastIndexOf('scene');
+  const lastFight = s.events.slice(lastScene + 1).some((e) => !!(e.data as { duelEnd?: unknown }).duelEnd);
   const due = (s.gm?.clocks ?? []).some((c) => c.open && c.filled >= c.size);
   return lastFight || due || afterPeak(s) ? 'big' : 'scene';
 }
 
-/** Days without a moment that mattered: since the last scene that turned something and was not routine, or a fight. */
+/** Days without a moment that mattered: since the last scene that was neither routine nor marked as turning nothing
+ * ("turns": ""), or a fight. A scene without "turns" counts as mattering (night review: no push storm if Claude omits it). */
 export function quietDays(s: GameState): number {
   for (let k = s.events.length - 1; k >= 0; k--) {
     const e = s.events[k];
     const d = e.data as { routine?: unknown; turns?: unknown; duelEnd?: unknown };
-    if (e.type === 'duel' || d.duelEnd || e.type === 'status' || (e.type === 'scene' && !d.routine && d.turns)) return today(s) - e.day;
+    if (e.type === 'duel' || d.duelEnd || e.type === 'status' || (e.type === 'scene' && !d.routine && d.turns !== '')) return today(s) - e.day;
   }
   return today(s);
 }

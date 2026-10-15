@@ -68,10 +68,14 @@ describe('C. threat clocks', () => {
     expect(clockFeelings(s)).toEqual(["Gonza's revenge: it is getting close"]);
     gmApply(s, scene({ days: 3 }));
     expect(s.gm!.clocks![0].filled).toBe(4);
-    expect(gmApply(s, scene()).notes).toEqual([]);
     expect(checkClocks(s, scene()).map((p) => p.kind)).toEqual(['pacing']); // due: the scene must deliver it
     expect(checkClocks(s, scene({ fight: { foe: 'Gonza', rank: 'D', look: 'x', deadly: false } }))).toEqual([]);
     expect(checkClocks(s, scene({ changes: [{ kind: 'clock', id: 'gonza', close: true, reason: 'it happened' }] }))).toEqual([]);
+    expect(gmApply(s, scene()).notes).toEqual([]);
+    // Asked once: after a scene has followed, a due clock no longer costs a rewrite (night review); the memory still says it.
+    expect(checkClocks(s, scene())).toEqual([]);
+    const { clocksText } = await import('../engine/clocks');
+    expect(clocksText(s)).toMatch(/DUE NOW/);
   });
 
   it('Claude moves a clock at most one step per scene, and only 3 threats are open at once', () => {
@@ -119,7 +123,8 @@ describe('interesting scenes (owner, Oct 16: I + F + E + H, then J + G)', () => 
     const r = gmApply(s, scene({ turns: 'Gonza now suspects Li' }));
     expect((s.events.filter((e) => e.type === 'scene').at(-1)!.data as { turns?: string }).turns).toBe('Gonza now suspects Li');
     expect(nonEvent(parseGmTurn({ scene: 'x', summary: 'x', turns: 'Gonza now suspects Li' })!, r.events)).toBe(false);
-    expect(nonEvent(parseGmTurn({ scene: 'x', summary: 'x' })!, gmApply(s, scene()).events)).toBe(true);
+    expect(nonEvent(parseGmTurn({ scene: 'x', summary: 'x', turns: '' })!, gmApply(s, scene()).events)).toBe(true); // Claude says nothing turned
+    expect(nonEvent(parseGmTurn({ scene: 'x', summary: 'x' })!, gmApply(s, scene()).events)).toBe(false); // missing = unknown: never skipped (night review)
     expect(nonEvent(parseGmTurn({ scene: 'x', summary: 'x', days: 2 })!, gmApply(s, scene({ days: 2 })).events)).toBe(false);
   });
 
