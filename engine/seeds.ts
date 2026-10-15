@@ -31,7 +31,7 @@ const STATE = { planted: 1, grown: 2, dead: 3 } as const;
 const key = (id: string) => `seed_${id}`;
 const where = (s: GameState) => { const loc = s.characters[s.liId].location; return (PLACES[loc] ?? loc).toLowerCase(); };
 /** The seed fits Li now: his life stage, and his place (a seed without places can grow anywhere). */
-const fits = (s: GameState, x: Seed) => x.stages.includes(lifeStage(s)) && (!x.where.length || x.where.some((w) => where(s).includes(w.toLowerCase())));
+export const fits = (s: GameState, x: Seed) => x.stages.includes(lifeStage(s)) && (!x.where.length || x.where.some((w) => where(s).includes(w.toLowerCase())));
 
 /** A seed change from the Game Master: planted only when it fits now; grown or dead only once planted. */
 export function seedDrafts(s: GameState, x: { id?: unknown; state?: unknown; note?: unknown }, notes: string[]): Draft[] {

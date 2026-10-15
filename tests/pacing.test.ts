@@ -110,3 +110,50 @@ describe('the opening (owner, Oct 16: "story does not start")', () => {
     expect(r.turn.scene).toMatch(/Who taught you/);
   });
 });
+
+describe('interesting scenes (owner, Oct 16: I + F + E + H, then J + G)', () => {
+  it('E. a scene that turns nothing plays as routine; "turns" is kept with the scene', async () => {
+    const { nonEvent } = await import('../engine/pacing');
+    const { parseGmTurn } = await import('../engine/gm');
+    const s = startGmGame();
+    const r = gmApply(s, scene({ turns: 'Gonza now suspects Li' }));
+    expect((s.events.filter((e) => e.type === 'scene').at(-1)!.data as { turns?: string }).turns).toBe('Gonza now suspects Li');
+    expect(nonEvent(parseGmTurn({ scene: 'x', summary: 'x', turns: 'Gonza now suspects Li' })!, r.events)).toBe(false);
+    expect(nonEvent(parseGmTurn({ scene: 'x', summary: 'x' })!, gmApply(s, scene()).events)).toBe(true);
+    expect(nonEvent(parseGmTurn({ scene: 'x', summary: 'x', days: 2 })!, gmApply(s, scene({ days: 2 })).events)).toBe(false);
+  });
+
+  it('F. the montage carries on with the player\'s last plan, without the skip label', async () => {
+    const { lastPlan } = await import('../engine/pacing');
+    const s = startGmGame();
+    expect(lastPlan(s)).toBe('his usual work and routine');
+    gmApply(s, scene({ days: 1 }), '(Time skip until something important happens) I train with the sticks every night');
+    expect(lastPlan(s)).toBe('I train with the sticks every night');
+  });
+
+  it('H + calm scene: a fight just ended is a big moment and the next routine scene is the calm one', async () => {
+    const { afterPeak, momentWeight, pacingText } = await import('../engine/pacing');
+    const s = startGmGame();
+    gmApply(s, scene({ days: 1 }));
+    expect(afterPeak(s)).toBe(false);
+    expect(momentWeight(s)).toBe('scene');
+    s.events.push({ seq: s.nextSeq++, day: s.events.at(-1)!.day, part: s.date.part, type: 'story', fact: 'the fight ends', visible: true, data: { duelEnd: 'gm_x' } });
+    expect(afterPeak(s)).toBe(true);
+    expect(momentWeight(s)).toBe('big');
+    expect(pacingText(s)).toMatch(/big moment/);
+  });
+
+  it('J + G. stories in motion are listed, and after 5 quiet days the world pushes one thing in', async () => {
+    const { quietDays, quietPush, storiesInMotion } = await import('../engine/pacing');
+    const s = startGmGame();
+    gmApply(s, scene({ changes: [{ kind: 'clock', id: 'gonza', name: "Gonza's revenge", doom: 'a fight', size: 8 }], turns: 'Gonza swears revenge' }));
+    expect(storiesInMotion(s).join(' ')).toMatch(/threat: Gonza's revenge/);
+    expect(quietPush(s)).toBeUndefined();
+    gmApply(s, scene({ days: 3, routine: true }));
+    gmApply(s, scene({ days: 3, routine: true }));
+    expect(quietDays(s)).toBeGreaterThanOrEqual(5);
+    expect(quietPush(s)).toBeTruthy();
+    s.characters[s.liId].wound = 1;
+    expect(quietPush(s)).toBeUndefined(); // not while Li is wounded (RimWorld weighs recent wounds)
+  });
+});

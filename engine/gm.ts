@@ -52,6 +52,8 @@ export interface GmTurn {
   stop?: boolean;
   /** Only routine happened: the story goes on by itself to the next moment that matters (pacing, owner Oct 12). */
   routine?: boolean;
+  /** What this scene changed (McKee: every scene turns). Empty = nothing turned: it plays as routine (owner, Oct 16). */
+  turns?: string;
   /** One short out-of-character line to the player (e.g. why a wish could not be granted). Shown apart from the scene. */
   gmNote?: string;
 }
@@ -394,6 +396,7 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
     suggestions: Array.isArray(o.suggestions) ? o.suggestions.map((x) => str(x, 120)).filter(Boolean).slice(0, 4) : [],
     stop: o.stop === true,
     routine: o.routine === true || undefined,
+    turns: str(o.turns, 160) || undefined,
     gmNote: str(o.gmNote, 240) || undefined,
   };
 }
@@ -427,7 +430,7 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   const secretNotes: string[] = [];
   const drafts: Draft[] = [];
   drafts.push(...battleClearDrafts(s)); // the aftermath has been told: clear the field
-  drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null } });
+  drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null, ...(t.routine ? { routine: true } : {}), ...(t.turns ? { turns: t.turns } : {}) } });
   if (t.place) drafts.push({ type: 'place', fact: `Li is at ${t.place}`, visible: false, data: { char: c.id, place: t.place } });
   drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false, `${t.title ?? ''}. ${t.scene}`));
 

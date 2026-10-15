@@ -532,6 +532,14 @@ Possible outcomes: an ally reaches out · a Kurogane veteran turns hostile · wo
 - **Threat clocks:** a threat has a clock (3–8 steps, usually 4) that the code fills by itself, **one step per 2 days**; Claude may move it one step per scene; max 3 open. A full clock is due in the next scene. Li feels them in the Li tab ("something is brewing" · "it is getting close" · "it is coming now"), never as numbers.
 - **Already said:** phrases repeated in the last scenes are listed for the Game Master so it stops repeating them.
 
+### Interesting scenes ✅ (owner, Oct 16; from `docs/PROPOSAL_INTERESTING.md`)
+- **How much Li's life is shown** (a player setting, like Football Manager's highlights): *Key moments* (quiet time passes at once) · **Normal** (default: quiet time passes after 1.5 s; **one calm scene after a big moment**: a fight, a battle, a death, a promotion) · *Everything* (scene by scene).
+- **Montage:** quiet time is told in one go (hours or days in a few lines) with the player's last plan, and stops at the next story in motion or at danger.
+- **Every scene turns** (McKee): a scene that hands control back names what it changed; a scene that changes nothing plays as routine.
+- **Detail by importance:** an ordinary scene 120–200 words, a big moment 200–300, routine 60–150. Enter late, leave early; end on the decision.
+- **Stories in motion** (story sifting): the code lists open threats, grudges, strong bonds, seeds in play and world events near Li.
+- **A push after a calm:** after **5** quiet game days the code picks one thing for the next scene (a fitting seed, a threat showing itself, a person acting on their own plan); not while Li is wounded or right after a big moment.
+
 ### Turn loop (code decides, AI narrates)
 1. **Player** picks a numbered option or types freely.
 2. **AI** translates the input into a structured action (what, target, method, stat) – structured output with a fixed schema.

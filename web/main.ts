@@ -6,6 +6,7 @@ import { fromSave, li, liAge, met, options, recordNote, toSave } from '../engine
 import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../engine/game';
 import { SkipSummary, summaryText } from '../engine/summary';
 import { GmChange, gmApplyFix, gmOn, gmRewind, lastFightResult } from '../engine/gm';
+import { afterPeak, lastPlan, nonEvent } from '../engine/pacing';
 import { GmFixProposal, GmPlay, gmChapter, gmFix, gmSkip, gmTurn } from '../ai/gm';
 import { CHILDHOOD, TIME_JUMP, beginLife } from '../engine/prologue';
 import { BattleState, MAX_PHASES, Order, battleView, ordersFor } from '../engine/battle';
@@ -37,6 +38,12 @@ const SLOTS = [1, 2, 3];
 const slotKey = (n: number) => (n === 1 ? KEY : `${KEY}-${n}`);
 let slot = 1;
 try { const n = Number(localStorage.getItem(SLOT_KEY)); if (SLOTS.includes(n)) slot = n; } catch { /* storage blocked: slot 1 */ }
+// How much of Li's life the player sees (owner, Oct 16; Football Manager's highlight modes): a per-viewer preference.
+type Detail = 'key' | 'normal' | 'all';
+const DETAIL_KEY = 'sengoku-detail';
+const DETAIL_LABEL: Record<Detail, string> = { key: 'key moments', normal: 'normal', all: 'everything' };
+let detail: Detail = 'normal';
+try { const d = localStorage.getItem(DETAIL_KEY); if (d === 'key' || d === 'all') detail = d; } catch { /* storage blocked: normal */ }
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const log = $('log');
 const input = $<HTMLInputElement>('in');
@@ -214,6 +221,8 @@ function refresh() {
   const gmTools = !!ai && gmOn(state);
   $('wishbtn').hidden = !gmTools;
   $('skipbtn').hidden = !gmTools;
+  $('detailbtn').hidden = !gmTools;
+  $('detailbtn').textContent = `Show: ${DETAIL_LABEL[detail]}`;
   $('wrongbtn').hidden = !gmTools;
   $('waitbtn').hidden = gmTools;
   $<HTMLButtonElement>('skipbtn').disabled = busy || !gmMode() || battleOn();
@@ -292,7 +301,8 @@ async function gmStep(text?: string, said = text) {
     await paintPlay(turn, r, said, before, metBefore, true, fine);
     refresh();
     await afterPlays(r.events, r.turn.scene, seasonBefore, statusBefore, !!r.duelId, said);
-    routine = !!r.turn.routine && !r.duelId && !battleOn() && li(state).status === statusBefore;
+    // A scene that turns nothing is routine too (McKee: "no scene that doesn't turn"; owner, Oct 16).
+    routine = (!!r.turn.routine || nonEvent(r.turn, r.events)) && !r.duelId && !battleOn() && li(state).status === statusBefore;
     spar = !!r.duelId && !!r.turn.fight?.spar;
   } catch (e) {
     turn.querySelector('.wet')?.remove();
@@ -323,19 +333,33 @@ function sparPlaysOut(turn: HTMLElement) {
   }, 2500);
 }
 
-// ---------- pacing: routine plays itself (owner, Oct 12; a test version to judge in play) ----------
-// After a scene Claude marks as routine, the story goes on by itself to the next moment that matters. At most
-// AUTO_MAX scenes in a row (each one is a Claude call on the player's account); typing, a choice or "Take over" stops it.
+// ---------- pacing: routine plays itself (owner, Oct 12; montage and "how much do I see" Oct 16) ----------
+// After a routine scene the story goes on by itself to the next moment that matters. "Everything": scene by scene, at
+// most AUTO_MAX in a row. "Normal" and "Key moments": one montage (Skip ahead with the player's last plan) that stops at
+// the next thing that matters: fewer, faster Claude calls. Typing, a choice or "Take over" stops it.
 const AUTO_MAX = 4;
+const MONTAGE_SCENES = 4;
 let autoRun = 0;
 let autoTimer: ReturnType<typeof setTimeout> | undefined;
 function stopAuto() { if (autoTimer) clearTimeout(autoTimer); autoTimer = undefined; document.querySelectorAll('.auto-on').forEach((x) => x.remove()); }
 function goOn(turn: HTMLElement) {
-  if (autoRun >= AUTO_MAX) { autoRun = 0; turn.insertAdjacentHTML('beforeend', '<p class="text info">The days go on quietly. Your move.</p>'); return; }
+  if (detail === 'all' && autoRun >= AUTO_MAX) { autoRun = 0; turn.insertAdjacentHTML('beforeend', '<p class="text info">The days go on quietly. Your move.</p>'); return; }
+  // Normal: after a big moment the player gets one calm scene (the L4D Director's relax), then the montage runs again.
+  if (detail === 'normal' && afterPeak(state)) return;
   turn.insertAdjacentHTML('beforeend', '<p class="text info auto-on">The story goes on… <button type="button" class="quiet-tool takeover">Take over</button></p>');
   turn.querySelector<HTMLButtonElement>('.takeover')!.onclick = () => { stopAuto(); autoRun = 0; input.focus(); };
-  autoTimer = setTimeout(() => { autoTimer = undefined; document.querySelectorAll('.auto-on').forEach((x) => x.remove()); if (busy || input.value.trim()) { autoRun = 0; return; } autoRun++; gmStep(); }, 2500);
+  autoTimer = setTimeout(() => {
+    autoTimer = undefined;
+    document.querySelectorAll('.auto-on').forEach((x) => x.remove());
+    if (busy || input.value.trim()) { autoRun = 0; return; }
+    if (detail === 'all') { autoRun++; gmStep(); } else runSkip('until something important happens', lastPlan(state), MONTAGE_SCENES, 'The days go on');
+  }, detail === 'all' ? 2500 : detail === 'normal' ? 1500 : 300);
 }
+$('detailbtn').onclick = () => {
+  detail = detail === 'normal' ? 'key' : detail === 'key' ? 'all' : 'normal';
+  try { localStorage.setItem(DETAIL_KEY, detail); } catch { /* this session only */ }
+  refresh();
+};
 input.addEventListener('input', () => { if (autoTimer) { stopAuto(); autoRun = 0; } });
 
 /** One Game Master scene in the log: the story (inked or at once), its chips, the GM's out-of-character note, "Why?". */
@@ -451,10 +475,10 @@ function openSkip() {
   until.focus();
 }
 
-async function runSkip(until: string, plan: string) {
+async function runSkip(until: string, plan: string, maxScenes?: number, label = `Skip ahead ${until}. ${plan}`) {
   if (!ai || busy) return;
   setBusy(true);
-  const head = newTurn(`Skip ahead ${until}. ${plan}`);
+  const head = newTurn(label);
   head.insertAdjacentHTML('beforeend', '<p class="text info wet">The days pass…</p>');
   head.scrollIntoView({ block: 'start' });
   const from = strip(state).date;
@@ -467,7 +491,7 @@ async function runSkip(until: string, plan: string) {
   let prevFine = growthSnapshot(state);
   let metPrev = new Set(Object.keys(state.relations).filter((id) => met(state, id)));
   try {
-    const plays = await gmSkip(ai, state, { until, plan }, (r) => {
+    const plays = await gmSkip(ai, state, { until, plan, maxScenes }, (r) => {
       events.push(...r.events);
       last = r;
       paintPlay(newTurn(), r, undefined, prev, metPrev, false, prevFine);

@@ -1,4 +1,6 @@
-# 📝 Proposal: interesting scenes, boring parts pass by themselves (Oct 16, deeper research, for the owner's approval)
+# ✅ Proposal: interesting scenes, boring parts pass by themselves (Oct 16, approved and built)
+
+**Owner decisions (Oct 16):** default level Normal; a push after 5 quiet days; one calm scene after a big moment; build I + F + E + H, then J + G. All six built the same day (`engine/pacing.ts`, `web/main.ts`, `tests/pacing.test.ts`); canon WB ch. 11.
 
 **Owner's ask (Oct 16):** make the story interesting and the text not boring; when nothing happens it should go on by itself, faster; don't hand him boring parts ("now and then is fine"). He asked for deeper research.
 
