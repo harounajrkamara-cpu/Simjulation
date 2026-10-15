@@ -6,6 +6,7 @@ import { checkGmDeaths, checkGmScene, checkGmSuggestions, factFixPrompt } from '
 import { checkPacing, pacingText } from '../engine/pacing';
 import { checkClocks } from '../engine/clocks';
 import { dramaText } from '../engine/drama';
+import { epilogueDrafts, epiloguePrompt } from '../engine/epilogue';
 import { GameEvent, GameState } from '../engine/types';
 
 export type { GmFixProposal } from '../engine/gm';
@@ -302,6 +303,15 @@ export function gmTier(s: GameState, said?: string): ModelTier {
 }
 
 /** Close the chapter when it is due: Claude writes its recap once; it is recorded and never rewritten. Nothing when not due. */
+/** The epilogue (GE ch. 9): Claude tells it from the record; if Claude fails, the plain chronicle of facts closes the life. */
+export async function gmEpilogue(ai: AiAdapter | null, s: GameState, why: 'retired' | 'old age', signal?: AbortSignal): Promise<GameEvent[]> {
+  let told: { title?: unknown; text?: unknown } = {};
+  if (ai) {
+    try { const p = parseJson(await ai.ask(epiloguePrompt(s, why), { json: true, tier: 'complex', signal })); if (p && typeof p === 'object') told = p as typeof told; } catch { /* plain epilogue */ }
+  }
+  return commitDrafts(s, epilogueDrafts(s, told, why));
+}
+
 export async function gmChapter(ai: AiAdapter, s: GameState, signal?: AbortSignal): Promise<GameEvent[]> {
   if (!chapterDue(s)) return [];
   for (let attempt = 0; attempt < 2; attempt++) {

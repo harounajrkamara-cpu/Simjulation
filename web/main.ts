@@ -11,7 +11,8 @@ import { Reply, handleAction, handleInput, newGame, parseFreeText } from '../eng
 import { SkipSummary, summaryText } from '../engine/summary';
 import { GmChange, gmApplyFix, gmOn, gmRewind, lastFightResult } from '../engine/gm';
 import { afterPeak, lastPlan, nonEvent } from '../engine/pacing';
-import { GmFixProposal, GmPlay, gmChapter, gmFix, gmSkip, gmTurn } from '../ai/gm';
+import { GmFixProposal, GmPlay, gmChapter, gmEpilogue, gmFix, gmSkip, gmTurn } from '../ai/gm';
+import { canRetire, ended, oldAge } from '../engine/epilogue';
 import { CHILDHOOD, TIME_JUMP, beginLife } from '../engine/prologue';
 import { BattleState, MAX_PHASES, Order, battleView, ordersFor } from '../engine/battle';
 import { battlePhase, battleToEnd } from '../engine/gm-battle';
@@ -226,6 +227,8 @@ function refresh() {
   $('wishbtn').hidden = !gmTools;
   $('skipbtn').hidden = !gmTools;
   $('detailbtn').hidden = !gmTools;
+  $('retirebtn').hidden = !(canRetire(state) || oldAge(state));
+  $('retirebtn').textContent = oldAge(state) ? 'Epilogue (Li is old)' : 'Retire';
   $('detailbtn').textContent = `Show: ${DETAIL_LABEL[detail]}`;
   $('wrongbtn').hidden = !gmTools;
   $('waitbtn').hidden = gmTools;
@@ -470,6 +473,33 @@ async function maybeChapter() {
 
 const toolbox = $('toolbox');
 const closeTools = () => { toolbox.hidden = true; toolbox.innerHTML = ''; };
+
+/** Retire, or old age: confirm, then the epilogue closes the chronicle (GE ch. 9 decision 2; goal Oct 17). */
+function openRetire() {
+  if (busy || ended(state)) return;
+  const why = oldAge(state) ? 'old age' : 'retired';
+  toolbox.innerHTML = `<p class="text info">${why === 'retired' ? 'Li lays down his command and retires.' : 'Li has grown old.'} The chronicle ends with an epilogue: what became of him, his people and the kingdoms. This cannot be undone.</p>
+    <div class="row"><button type="button" class="yes">Write the epilogue</button><button type="button" class="no">Not yet</button></div>`;
+  toolbox.hidden = false;
+  toolbox.querySelector<HTMLButtonElement>('.no')!.onclick = closeTools;
+  toolbox.querySelector<HTMLButtonElement>('.yes')!.onclick = async () => {
+    closeTools();
+    setBusy(true);
+    const turn = newTurn(why === 'retired' ? 'I lay down my command.' : undefined);
+    turn.insertAdjacentHTML('beforeend', '<p class="text ink wet">The last pages are written…</p>');
+    const ev = await gmEpilogue(ai, state, why);
+    turn.querySelector('.wet')?.remove();
+    const e = ev.find((x) => x.type === 'story');
+    if (e) {
+      const title = String((e.data as { epilogueTitle?: string }).epilogueTitle ?? 'Epilogue');
+      turn.insertAdjacentHTML('beforeend', `<p class="label">Epilogue · ${esc(title)}</p><p class="text">${esc(e.fact)}</p><p class="text info">Li's chronicle is complete. Start a New life to play again.</p>`);
+      persist();
+      refresh();
+      await Film.play(Scenes.chapterEnd({ n: (state.gm?.chapters?.length ?? 0) + 1, title: `Epilogue: ${title}`, text: e.fact.slice(0, 300) }));
+    }
+    setBusy(false);
+  };
+}
 
 function openSkip() {
   if (busy || !ai || !gmMode() || battleOn()) return;
@@ -739,6 +769,8 @@ async function send(raw: string, said = raw) {
   fineMark = growthSnapshot(state);
   if (shownHint) markHint(shownHint); // a hint closes itself once the player acts (ch. 8 §4)
   const text = raw.trim();
+  // After the epilogue the life is complete (GE ch. 9): only a new life, loading or saving.
+  if (ended(state) && !/^(NEW|LOAD|SAVE)\b/i.test(text)) return show("Li's chronicle is complete. Start a New life to play again.", said);
   if (isQuestion(text)) return askQuestion(text, said);
   if (/^help$/i.test(text)) return openHowTo();
   if (gmMode() && !/^(HELP|STATUS|INFOCHAR|RELATIONS|RECAP|LOG|SAVE|LOAD|NEW)\b/i.test(text)) return gmStep(text, said);
@@ -1156,6 +1188,7 @@ $('nr-rate').onchange = () => setNarrator({ rate: Number($<HTMLSelectElement>('n
 $('nr-test').onclick = () => { if (!narratorOn()) { setNarrator({ on: true }); $<HTMLInputElement>('nr-on').checked = true; setNarratorBtn(); } speak('Li carries the water past the horse lines. Somewhere in the dark, a guard coughs.'); };
 $('nr-close').onclick = () => { $('narratorbox').hidden = true; };
 $('skipbtn').onclick = openSkip;
+$('retirebtn').onclick = openRetire;
 $('wrongbtn').onclick = openWrong;
 // Number keys pick an option while the input is empty (desktop speed).
 document.addEventListener('keydown', (e) => {
