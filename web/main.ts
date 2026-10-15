@@ -80,8 +80,7 @@ function openTab(t: Tab) {
   tab = t;
   document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
   for (const name of ['story', 'map', 'li', 'army', 'people', 'journal', 'encyclopedia'] as Tab[]) $(`tab-${name}`).hidden = name !== t;
-  const page = PAGES[t];
-  if (page) $(`tab-${t}`).innerHTML = page(state);
+  renderPage(t);
   markSeen(t);
   dots();
   if (t === 'story') input.focus({ preventScroll: true });
@@ -219,8 +218,18 @@ function refresh() {
   $('waitbtn').hidden = gmTools;
   $<HTMLButtonElement>('skipbtn').disabled = busy || !gmMode() || battleOn();
   $<HTMLButtonElement>('wrongbtn').disabled = busy;
-  if (tab !== 'story' && PAGES[tab]) { $(`tab-${tab}`).innerHTML = PAGES[tab]!(state); markSeen(tab); }
+  if (tab !== 'story' && PAGES[tab]) { renderPage(tab); markSeen(tab); }
   dots();
+}
+
+/** Draw a tab's page. If something in it breaks, say so on the page instead of leaving it blank (owner, Oct 12). */
+function renderPage(t: Tab) {
+  const page = PAGES[t];
+  if (!page) return;
+  try { $(`tab-${t}`).innerHTML = page(state); } catch (e) {
+    console.error(e);
+    $(`tab-${t}`).innerHTML = `<p class="empty">This page could not be drawn (${esc(String((e as Error).message ?? e))}). Your game is safe; please tell Claude what you did just before.</p>`;
+  }
 }
 
 // ---------- the AI layer (GE ch. 5, 7) ----------
@@ -239,10 +248,15 @@ function setStoryteller() {
   storyteller.disabled = !ai;
 }
 
-function aiFailed(e: unknown, turn: HTMLElement) {
+function aiFailed(e: unknown, turn: HTMLElement, gm = false) {
   const code = errorCode(e);
   if (code === 'cancelled') return;
   if (PERMANENT.has(code)) { ai = null; setStoryteller(); }
+  // Game Master mode does not switch to the plain chronicle: nothing happened, so say that (owner, Oct 12: the old line confused him).
+  if (gm && !PERMANENT.has(code)) {
+    turn.insertAdjacentHTML('beforeend', `<p class="text info">${code === 'rate_limited' ? 'Claude needs a rest (usage limit). Nothing happened in the story; try again later.' : 'Claude did not answer this time. Nothing happened in the story; press Send to try again.'}</p>`);
+    return;
+  }
   const why = code === 'rate_limited' ? 'Claude needs a rest (usage limit); the plain chronicle continues.' : PERMANENT.has(code) ? 'Claude is not available here; the chronicle continues in plain text.' : 'Claude did not answer this time; the plain chronicle is shown.';
   turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc(why)}</p>`);
 }
@@ -278,8 +292,8 @@ async function gmStep(text?: string, said = text) {
     await afterPlays(r.events, r.turn.scene, seasonBefore, statusBefore, !!r.duelId, said);
   } catch (e) {
     turn.querySelector('.wet')?.remove();
-    if (errorCode(e) === 'bad_answer') turn.insertAdjacentHTML('beforeend', `<p class="text info">${esc((e as Error).message)} Try again.</p>`);
-    else aiFailed(e, turn);
+    if (errorCode(e) === 'bad_answer') turn.insertAdjacentHTML('beforeend', `<p class="text info">Claude's scene did not hold up to the facts, so it was not used. Nothing happened in the story; press Send to try again.</p>`);
+    else aiFailed(e, turn, true);
     if (text) input.value = text;
   }
   refresh();
@@ -422,7 +436,7 @@ async function runSkip(until: string, plan: string) {
   } catch (e) {
     head.querySelector('.wet')?.remove();
     if (errorCode(e) === 'bad_answer') head.insertAdjacentHTML('beforeend', `<p class="text info">${esc((e as Error).message)} The scenes before it are kept.</p>`);
-    else aiFailed(e, head);
+    else aiFailed(e, head, true);
   }
   refresh();
   persist();
@@ -982,7 +996,15 @@ async function playPrologue() {
 $('opts').addEventListener('click', (e) => {
   const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.opt');
   if (b?.dataset.battle) { runBattle(b.dataset.battle as Order | 'auto', b.querySelector('.l')!.textContent ?? ''); return; }
-  if (b) send(b.dataset.key!, b.querySelector('.l')!.textContent ?? b.dataset.key!);
+  if (!b) return;
+  // Game Master mode (owner, Oct 12): a click puts the choice in the box, to change or add a (wish) before Send.
+  // A double click, Enter, or the number key sends it as it is.
+  if (gmMode()) { input.value = b.dataset.key!; input.focus(); input.setSelectionRange(input.value.length, input.value.length); return; }
+  send(b.dataset.key!, b.querySelector('.l')!.textContent ?? b.dataset.key!);
+});
+$('opts').addEventListener('dblclick', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.opt');
+  if (b && !b.dataset.battle && gmMode() && !busy) { input.value = ''; send(b.dataset.key!); }
 });
 
 /** One battle phase (or the rest of the battle) with Li's order; the code decides it. At the end Claude tells the aftermath. */

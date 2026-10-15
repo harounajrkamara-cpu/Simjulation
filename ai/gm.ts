@@ -92,7 +92,7 @@ ANSWER WITH JSON ONLY:
   "fight": null or {"foe":"who","rank":"F|E|D|C|B|A (how strong he looks)","look":"what Li sees","officer":"Gochō|Kogashira|null","deadly":true,"witnessedEnemy":true,"place":"where"},
   "suggestions": ["3 or 4 short things Li could do next, written as 'I ...'"],
   "stop": false (true only in a time skip: something important happened, or the target is reached),
-  "gmNote": "optional: one short out-of-character line to the player, e.g. why a wish cannot be granted"
+  "gmNote": "almost always empty: ONLY to refuse a wish that asks to change numbers, powers or rules. Never to explain how you read or combined the player's choices, never to refuse an action (refuse those inside the story)"
 }
 Use person ids from the memory (the [id: ...] tags). Leave out changes that did not happen.`;
 

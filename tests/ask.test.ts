@@ -60,3 +60,15 @@ describe('Ask the guide: houses and facts', () => {
     expect(a.text).not.toMatch(/Your goals/);
   });
 });
+
+describe('People tab (owner, Oct 12: it opened empty)', () => {
+  it('a person the Game Master adds without a name still shows, and does not blank the page', async () => {
+    const { startGmGame, gmApply } = await import('../engine/gm');
+    const { peoplePage } = await import('../web/panels');
+    const s = startGmGame();
+    gmApply(s, { scene: 'A groom watches.', summary: 'x', changes: [{ kind: 'person', id: 'genji_groom', role: 'groom' } as never] });
+    const html = peoplePage(s);
+    expect(html).toContain('Genji groom');
+    expect(html).toContain('Mikumo Raizen');
+  });
+});

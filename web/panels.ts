@@ -135,20 +135,22 @@ export function liPage(s: GameState): string {
 
 function personCard(s: GameState, id: string): string {
   const p = s.characters[id];
-  return `<article class="person"><div class="top"><div class="crest small" aria-hidden="true">${esc(p.name[0])}</div>
-    <div class="who"><span class="name">${esc(p.name)}</span><span class="sub">${esc(p.role)}</span></div></div>
-    <p>${esc(p.desc)}</p><p>Strength (Li's guess): ${esc(p.publicRank ?? '?')}</p>
+  // Owner playtest (Oct 12): one person with no name (added by the Game Master with only an id) blanked the whole People tab.
+  const name = p.name || id.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+  return `<article class="person"><div class="top"><div class="crest small" aria-hidden="true">${esc(name[0] ?? '?')}</div>
+    <div class="who"><span class="name">${esc(name)}</span><span class="sub">${esc(p.role ?? '')}</span></div></div>
+    <p>${esc(p.desc ?? '')}</p><p>Strength (Li's guess): ${esc(p.publicRank ?? '?')}</p>
     <p class="op">Toward Li: ${esc(visibleOpinion(s, id))}</p></article>`;
 }
 
 export function peoplePage(s: GameState): string {
-  const ids = Object.keys(s.relations).filter((id) => met(s, id));
+  const ids = Object.keys(s.relations).filter((id) => met(s, id) && s.characters[id]);
   return `<h1>People</h1><p class="lead">Everyone Li knows, and how they seem to see him. Close friends are easy to read; others are a guess.</p>
     <div class="grid">${ids.map((id) => personCard(s, id)).join('')}</div>`;
 }
 
 export function armyPage(s: GameState): string {
-  const ids = BAND.filter((id) => met(s, id));
+  const ids = BAND.filter((id) => met(s, id) && s.characters[id]);
   return `<h1>The Red Crane band</h1><p class="lead">Seen from the baggage line. About 120 hired swords; Li carries their gear but is not one of them. The full roster opens when Li leads men of his own.</p>
     <div class="grid">${ids.map((id) => personCard(s, id)).join('')}</div>`;
 }

@@ -466,7 +466,9 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         if (!id || known(id) || newPeople.has(id)) { if (id && known(id) && !met(s, id)) drafts.push({ type: 'flag', fact: `met ${id}`, visible: false, data: { key: `met_${id}`, value: 1 } }); break; }
         newPeople.add(id);
         const base = { trust: clamp(num(x.trust, 40), 0, 80), respect: clamp(num(x.respect, 40), 0, 80), affection: clamp(num(x.affection, 40), 0, 80), fear: 0, rivalry: clamp(num(x.rivalry, 0), 0, 60) };
-        drafts.push({ type: 'person', fact: `Li meets ${str(x.name, 60)}`, visible: true, data: { id, name: str(x.name, 60), role: str(x.role, 80), desc: str(x.desc, 300), goal: str(x.goal, 300), secret: str(x.secret, 300) || undefined, base, day: today(s) } });
+        // A person always has a name (one without blanked the People tab); fall back to the id, readable.
+        const name = str(x.name, 60) || id.replace(/_/g, ' ').replace(/^\w/, (ch) => ch.toUpperCase());
+        drafts.push({ type: 'person', fact: `Li meets ${name}`, visible: true, data: { id, name, role: str(x.role, 80), desc: str(x.desc, 300), goal: str(x.goal, 300), secret: str(x.secret, 300) || undefined, base, day: today(s) } });
         break;
       }
       case 'relation': {
