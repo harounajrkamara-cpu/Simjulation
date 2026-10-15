@@ -1,5 +1,15 @@
 # Night log (Oct 16–17): Claude builds on its own, owner asleep
 
+## Voor Harouna (samenvatting)
+- **Het verhaal start weer (v37).** Oorzaak: Claude noemt de openingsscène "Who Taught You", en de regel "geen *you* buiten dialoog" las de titel mee. Elke opening werd geweigerd. Gerepareerd, met tests.
+- **Li's plan (v38):** in het tabblad Li kies je wat Li najaagt (vrijheid verdienen, een officiershoofd, Raizen winnen, vrijkopen, ontsnappen). De code toont de echte stappen en Claude bouwt kansen richting de volgende stap.
+- **Review van al het werk van vandaag (v39):** 10 fouten gevonden en gerepareerd. De belangrijkste: een echte keuze kon automatisch overgeslagen worden als Claude het nieuwe veld "turns" vergat, en een gewonnen oefengevecht maakte iemand wraakzuchtig.
+- **Sparks (v40):** na elke scène tot 3 gouden regels met wat er veranderde: iemand denkt anders over Li, een vaardigheid groeit, een stap van je plan is af, een dreiging broeit.
+- **Niet gelukt:** live spelen (de ingebouwde browser is niet ingelogd op claude.ai, en inloggen mag ik niet voor je doen) en Hermes (geen AI-provider ingesteld). De diff voor Hermes staat klaar in WSL: `/tmp/hermes-review-oct16/today.diff`.
+- **Alles terugdraaien kan per commit:** "Li's plan" en "Sparks" hebben elk een eigen commit.
+- **Wat jij nu doet:** speel 30 minuten op versie 40. Let op: start het verhaal, zie je gouden ◆ regels, en voelen saaie stukken sneller aan? Bij een geweigerde scène staat de reden er nu direct onder ("Reason:"). Stuur me die.
+- 359 tests groen, typecheck schoon, balans onveranderd (14,7%). Niets is getest met de echte Claude.
+
 Owner's permission (Oct 16, /loop): build on `build/stage-1`; new features allowed if they fit the World Bible and the end goal; each new feature its own commit; each design choice in the World Bible marked "(nacht Oct 16, owner kan terugdraaien)"; tests, typecheck and balance green before every commit; never main; PR #5 not merged.
 
 ## 1. Why the opening was refused live: FOUND and FIXED (page v37)
