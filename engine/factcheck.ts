@@ -75,6 +75,20 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
     if (n !== undefined && n !== age && !others) { problems.push({ kind: 'age', text: `Li is ${age}, not ${n}.` }); break; }
   }
 
+  // 3b. Other known people's ages (owner playtest, Oct 12: Sayo was "fourteen", then "fifteen"; she is 13).
+  for (const sen of sentences(prose)) {
+    const m = sen.match(/\b(\d{1,2}|[a-z]+)[- ]years?[- ]old\b/i) ?? sen.match(/\bperhaps\s+(\d{1,2}|[a-z]+)\b/i);
+    if (!m) continue;
+    const n = /^\d+$/.test(m[1]) ? Number(m[1]) : NUMBER_WORDS[m[1].toLowerCase()];
+    if (n === undefined) continue;
+    const named = people.filter((c) => c.alive && c.name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'u').test(sen)));
+    if (named.length !== 1 || /\bLi\b/.test(sen)) continue; // only a sentence clearly about one known person
+    const real = ageOn(named[0].born, s.date);
+    const thisYear = s.date.year - named[0].born.year; // the age the canon gives for this year (the birthday may still come)
+    const off = n < real ? real - n : n > thisYear ? n - thisYear : 0;
+    if (off >= 2 || (off === 1 && !/\b(perhaps|about|maybe|looks|seems)\b/i.test(sen))) { problems.push({ kind: 'age', text: `${named[0].name} is ${real === thisYear ? real : `${real} (${thisYear} this year)`}, not ${n}.` }); break; }
+  }
+
   // 4. Li's rank and status, when the scene names them directly ("Li the Kogashira", "Kogashira Li", "Li, a free man").
   const rank = RANK_TITLES.find((r) => new RegExp(`${B}${esc(r)}${E}`, 'iu').test(li.role));
   for (const r of RANK_TITLES) {

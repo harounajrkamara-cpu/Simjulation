@@ -101,3 +101,20 @@ describe('the Game Master turn uses it', () => {
     expect(checkGmSuggestions(s, { suggestions: ['I practise strikes alone behind the horse lines'] })).toHaveLength(0);
   });
 });
+
+describe('the world facts reach the Game Master (owner, Oct 12: "the Lord" without a name)', () => {
+  it('the memory names the houses and lords of Kurogane, without their secrets', async () => {
+    const { gmMemoryText } = await import('../engine/gm');
+    const m = gmMemoryText(startGmGame());
+    expect(m).toContain('Lord Hagiwara Munenori (49)');
+    expect(m).toContain('Hagiwara Sayo (13)');
+    expect(m).not.toMatch(/smuggles rice/); // the Hagiwara secret stays in the Atlas
+  });
+
+  it('a wrong age for a known person is caught; a guess that is close is fine', () => {
+    const s = startGmGame();
+    expect(checkGmScene(s, 'Hagiwara Sayo is fifteen years old and very sure of herself.').map((p) => p.kind)).toContain('age');
+    expect(checkGmScene(s, 'Hagiwara Sayo looks perhaps fourteen.').map((p) => p.kind)).not.toContain('age');
+    expect(checkGmScene(s, 'Hagiwara Sayo is thirteen years old.').map((p) => p.kind)).not.toContain('age');
+  });
+});

@@ -384,7 +384,7 @@ export const ENCYCLOPEDIA: Entry[] = [
   { id: 'contract_renewed', title: 'A year at a time', text: 'Each autumn, when the raiding season ends, Lord Hagiwara renews the band\'s contract for another year.', needs: 'story_contract_100' },
   { id: 'levy', title: 'The Hagiwara levy', text: 'Men called up for the summer to hold the fords of the Kurose. In the levy a slave is in Kurogane service, and his deeds count under the merit law.', needs: 'story_levy_call' },
   { id: 'tatara', title: 'Tatara, the Smiths\' Kingdom', text: 'East over the Black Hills. Its king forbids slavery: a runaway who reaches it is nobody\'s property.', needs: 'tatara_refuge' },
-  { id: 'hagiwara', title: 'The Hagiwara', text: 'The border lords of Akaishi. They lost two thousand men last year and hired the band.' },
+  { id: 'hagiwara', title: 'The Hagiwara', text: 'A great house of Kurogane, the border lords of Akaishi on the Suiren border. Head: Lord Hagiwara Munenori, cautious and pragmatic; heir Tadaoki, daughter Sayo. They lost two thousand men last year and hired the band.' },
   { id: 'kori', title: 'Kōri fort', text: 'A border fort in Akaishi province, held by Commander Ishizue Gonroku. The band camps below its walls.', needs: 'story_inspection' },
   { id: 'sasabe', title: 'Sasabe', text: 'A village near the camp. Its people bring rice to the band.', needs: 'story_sasabe_rice' },
   { id: 'merit_law', title: 'The merit law', text: 'In Kurogane, a slave who takes an enemy officer\'s head in the kingdom\'s army walks free, and the kingdom pays the owner.', needs: 'kurogane_merit_law' },

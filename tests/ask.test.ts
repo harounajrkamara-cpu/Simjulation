@@ -51,7 +51,7 @@ describe('Ask the guide: houses and facts', () => {
   it('an answer may name a house that shares a name with someone Li has not met', () => {
     const s = newGame().state;
     expect(checkAnswer(s, 'The Hagiwara are the border lords of Akaishi.')).toEqual([]);
-    expect(checkAnswer(s, 'Sayo will help you.').length).toBeGreaterThan(0);
+    expect(checkAnswer(s, 'Kaname will help you.').length).toBeGreaterThan(0); // unmet and not public (Sayo is public: the lord's daughter)
   });
   it('without Claude, a question about a known thing gets what Li knows about it', async () => {
     const s = newGame().state;

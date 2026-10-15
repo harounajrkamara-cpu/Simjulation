@@ -11,6 +11,7 @@ import { opinion, opinionLabel } from '../engine/relations';
 import { shortDashboard } from '../engine/render';
 import type { GameState } from '../engine/types';
 import { knownEntries, goalsHtml } from './panels';
+import { KUROGANE_HOUSES } from '../engine/atlas-public';
 
 export const isQuestion = (text: string) => /^\s*\?/.test(text);
 export const questionOf = (text: string) => text.replace(/^\s*\?+\s*/, '').trim();
@@ -45,6 +46,7 @@ export function askSheet(s: GameState, recentStory = ''): string {
     scenes && `THE STORY SO FAR (latest last):\n${scenes}`,
     journal && `LI'S JOURNAL:\n${journal}`,
     recentStory && `THE LAST SCENE ON SCREEN:\n${recentStory.slice(-1800)}`,
+    `GREAT HOUSES OF KUROGANE (known to everyone):\n${KUROGANE_HOUSES.map((h) => `- ${h.name}: ${h.land}. Head: ${h.head}.${h.family ? ` ${h.family}.` : ''}`).join('\n')}`,
     lore && `WHAT LI HAS LEARNED ABOUT THE WORLD:\n${lore.slice(0, 3000)}`,
   ].filter(Boolean).join('\n\n');
 }
@@ -74,6 +76,7 @@ export function checkAnswer(s: GameState, answer: string): string[] {
   const out = checkGmScene(s, answer).filter((p) => p.kind === 'name' || p.kind === 'dead').map((p) => p.text);
   for (const c of Object.values(s.characters)) {
     if (c.id === s.liId || met(s, c.id)) continue;
+    if (KUROGANE_HOUSES.some((h) => `${h.head} ${h.family}`.includes(c.name))) continue; // publicly known: not a spoiler
     // Only the given name (last word): family names like "Hagiwara" are houses Li may well know about.
     const given = c.name.split(/\s+/).pop()!;
     if (given.length >= 4 && new RegExp(`(?<!\\p{L})${given.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?!\\p{L})`, 'u').test(answer)) out.push(`${c.name} is someone Li has not met.`);
