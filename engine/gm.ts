@@ -65,6 +65,8 @@ export interface GmFight {
   officer?: 'Gochō' | 'Kogashira' | 'Gojū-gashira' | 'Hyakunin-gashira';
   /** Sticks and fists (worst: Hurt) or real weapons (worst: Badly wounded). */
   deadly: boolean;
+  /** A spar or drill: the page simulates it unless the player takes over (owner, Oct 15). Never deadly. */
+  spar?: boolean;
   /** An enemy of Kurogane, fought in Kurogane service, with witnesses (merit counts). */
   witnessedEnemy?: boolean;
   place?: string;
@@ -384,7 +386,7 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
     fight: f && str(f.foe) ? {
       foe: str(f.foe, 80), rank: (ranks.includes(String(f.rank)) ? f.rank : 'E') as GmFight['rank'], look: str(f.look, 120) || str(f.foe, 80),
       officer: officers.includes(String(f.officer)) ? (f.officer as GmFight['officer']) : undefined,
-      deadly: f.deadly !== false, witnessedEnemy: f.witnessedEnemy === true, place: str(f.place, 80) || undefined,
+      deadly: f.deadly !== false, spar: f.spar === true && f.deadly === false, witnessedEnemy: f.witnessedEnemy === true, place: str(f.place, 80) || undefined,
     } : undefined,
     suggestions: Array.isArray(o.suggestions) ? o.suggestions.map((x) => str(x, 120)).filter(Boolean).slice(0, 4) : [],
     stop: o.stop === true,

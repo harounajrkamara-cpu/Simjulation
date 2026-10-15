@@ -36,6 +36,12 @@ function distance(a: string, b: string): number {
 }
 
 /** Check one scene's text against the memory. `extraNames` are names that are fine even if unknown (new people this scene). */
+/** A fight the duel engine ran ended since the last scene (its aftermath may tell the blows). */
+const justFought = (s: GameState) => {
+  const lastScene = [...s.events].reverse().find((e) => e.type === 'scene')?.seq ?? -1;
+  return s.events.some((e) => e.seq > lastScene && e.type === 'story' && (e.data as { duelEnd?: string }).duelEnd);
+};
+
 export function checkGmScene(s: GameState, text: string, extraNames: string[] = []): FactProblem[] {
   const problems: FactProblem[] = [];
   const story = text.normalize('NFC');
@@ -101,16 +107,14 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
 
   // 5. No win the code did not decide (owner, Oct 11: a rank-F slave "won" a spar against Gonza in story text). Li may
   // beat or kill a known person only right after a fight the duel engine ran (a duelEnd since the last scene).
-  const lastScene = [...s.events].reverse().find((e) => e.type === 'scene')?.seq ?? -1;
-  const justFought = s.events.some((e) => e.seq > lastScene && e.type === 'story' && (e.data as { duelEnd?: string }).duelEnd);
-  if (!justFought) {
+  if (!justFought(s)) {
     // Copilot QA (PR #5) found wordings that slipped through ("won the spar", "punches Gonza to the ground", "leaves
     // Gonza unable to rise"): the list now covers winning, felling and leaving someone beaten.
     // Every verb in the sentence is checked, not only the first ("Li sends Hachi a look and defeats Gonza").
     const WIN = /\b(kills|killed|slays|slew|beheads|cuts down|cut down|strikes down|struck down|knocks|knocked|punches|punched|throws|threw|floors|floored|pins|pinned|beats|beat|defeats|defeated|disarms|disarmed|bests|bested|overpowers|overpowered|wins|won|takes the head of|took the head of|poisons|poisoned|stabs|stabbed|strangles|strangled|drowns|drowned|leaves|left|drops|dropped|puts|put|sends|sent)\b/g;
-    const BEATEN = /\b(?:down|to the ground|into the dirt|in the dirt|in the mud|unable to rise|senseless|unconscious|helpless|on his back|flat|sprawling|wins|won|beats|beat|defeats|defeated|bests|bested|kills|killed|slays|slew|beheads|disarms|overpowers|the head of|poisons|poisoned|stabs|stabbed|strangles|strangled|drowns|drowned|the spar|the fight|the duel|the bout)\b/i;
-    // Plain verbs ("puts", "leaves", "knocks") count only with the person and a beaten-word after them
-    // ("leaves Gonza unable to rise", not "puts the bucket down near Gonza").
+    // The person must be the verb's object ("Li beats Gonza", "Li won the spar against Gonza"), not just named later in
+    // the sentence: owner playtest v30 lost a calm horse scene to "Li puts Hachi to bed and lies down".
+    // Plain verbs ("puts", "leaves", "knocks") also need a beaten-word in the same clause ("leaves Gonza unable to rise").
     const PLAIN = /^(?:knocks|knocked|punches|punched|throws|threw|pins|pinned|leaves|left|drops|dropped|puts|put|sends|sent)$/i;
     const hits = sentences(prose).flatMap((sen) => [...sen.matchAll(WIN)]
       .filter((m) => /\bLi\b[^.!?]{0,80}$/.test(sen.slice(0, m.index)))
@@ -118,10 +122,9 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
     for (const { verb, rest } of hits) {
       const foe = people.find((c) => c.alive && c.name.split(/\s+/).some((w) => {
         if (w.length < 3) return false;
-        const named = new RegExp(`${B}${esc(w)}${E}`, 'u');
-        if (!named.test(rest)) return false;
-        if (!PLAIN.test(verb)) return BEATEN.test(rest);
-        return new RegExp(`${B}${esc(w)}${E}[^.!?]{0,30}?\\b(?:down|to the ground|into the dirt|in the dirt|in the mud|unable to rise|senseless|unconscious|helpless|on his back|sprawling|flat)\\b`, 'iu').test(rest);
+        const obj = `^${esc(verb)}\\s+(?:the (?:spar|fight|duel|bout) (?:against|with)\\s+)?${B}${esc(w)}${E}(?!['’]s)`;
+        if (!PLAIN.test(verb)) return new RegExp(obj, 'iu').test(rest);
+        return new RegExp(`${obj}(?:(?! and )[^.!?,;]){0,30}?\\b(?:down|to the ground|into the dirt|in the dirt|in the mud|unable to rise|senseless|unconscious|helpless|on his back|sprawling|flat)\\b`, 'iu').test(rest);
       }));
       if (foe) { problems.push({ kind: 'fight', text: `The scene has Li beat ${foe.name}, but no fight decided that. An exchange of blows that matters is a fight the code runs: end the scene where the fight starts and set "fight".` }); break; }
     }
@@ -138,10 +141,16 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
  * A scene that offers blows against a known person must start the fight (owner, Oct 11: the Gonza spar stayed story
  * text, so Claude decided it). Training alone, or blows against nobody the code knows, stays story.
  */
-export function checkGmSuggestions(s: GameState, t: { suggestions?: string[]; fight?: unknown }): FactProblem[] {
+export function checkGmSuggestions(s: GameState, t: { suggestions?: string[]; fight?: unknown; scene?: string }): FactProblem[] {
   if (t.fight || (s.duel && !s.duel.over)) return [];
   const BLOW = /\b(strike|strikes|hit|slash|thrust|stab|cut at|attack|lunge|feint|parry|block|spar with|fight)\b/i;
   const people = Object.values(s.characters).filter((c) => c.id !== s.liId && c.alive);
+  // Li resisting blows is a fight too (owner playtest v30: Li slipped Gonza's strap three times in story text). A known
+  // person must be in the scene; a punishment Li takes without resisting stays story.
+  const prose = outsideQuotes(t.scene ?? '');
+  const DODGE = /\bLi\b[^.!?]{0,60}?\b(?:dodges|dodged|slips|slipped|ducks|ducked|sidesteps|sidestepped|parries|parried|blocks|blocked|evades|evaded|twists free|hits back|strikes back)\b[^.!?]{0,40}?\b(?:blow|blows|lash|lashes|strap|fist|fists|punch|punches|swing|swings|strike|kick|kicks|grab|stick|blade|sword|spear|cut)\b/i;
+  const foe = people.find((c) => c.name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'iu').test(prose)));
+  if (foe && !justFought(s) && sentences(prose).some((x) => DODGE.test(x))) return [{ kind: 'fight', text: `The scene has Li dodging or blocking blows, but no fight was started. When someone attacks Li and he resists, that is a fight the code runs: stop at the first blow and set "fight" ("deadly" false unless it is to the death). If Li takes a punishment without resisting, he does not dodge or block.` }];
   for (const line of (t.suggestions ?? []).filter((x) => BLOW.test(x))) {
     const foe = people.find((c) => c.name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'iu').test(line)));
     if (foe) return [{ kind: 'fight', text: `The choices offer blows against ${foe.name} ("${line}"), but no fight was started. An exchange of blows that matters is a fight the code runs: set "fight" (deadly false for practice) and end the scene where it starts.` }];

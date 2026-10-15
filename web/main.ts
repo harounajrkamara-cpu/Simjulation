@@ -285,6 +285,7 @@ async function gmStep(text?: string, said = text) {
   const statusBefore = li(state).status;
   const seasonBefore = state.seasonKey;
   let routine = false;
+  let spar = false;
   try {
     const r = await gmTurn(ai, state, text);
     turn.querySelector('.wet')?.remove();
@@ -292,9 +293,14 @@ async function gmStep(text?: string, said = text) {
     refresh();
     await afterPlays(r.events, r.turn.scene, seasonBefore, statusBefore, !!r.duelId, said);
     routine = !!r.turn.routine && !r.duelId && !battleOn() && li(state).status === statusBefore;
+    spar = !!r.duelId && !!r.turn.fight?.spar;
   } catch (e) {
     turn.querySelector('.wet')?.remove();
-    if (errorCode(e) === 'bad_answer') turn.insertAdjacentHTML('beforeend', `<p class="text info">Claude's scene did not hold up to the facts, so it was not used. Nothing happened in the story; press Send to try again.</p>`);
+    if (errorCode(e) === 'bad_answer') {
+      // Say why, and keep the refused scenes in the console, so every refusal can be diagnosed (owner playtest v30).
+      console.warn('[Game Master] scene refused:', (e as Error).message, (e as { scenes?: string[] }).scenes ?? []);
+      turn.insertAdjacentHTML('beforeend', `<p class="text info">Claude's scene did not hold up to the facts, so it was not used. Nothing happened in the story; press Send to try again.</p><details class="why"><summary>Why?</summary><p>${esc((e as Error).message)}</p></details>`);
+    }
     else aiFailed(e, turn, true);
     if (text) input.value = text;
   }
@@ -303,6 +309,18 @@ async function gmStep(text?: string, said = text) {
   await maybeChapter();
   setBusy(false);
   if (routine) goOn(turn); else autoRun = 0;
+  if (spar) sparPlaysOut(turn);
+}
+
+/** A spar plays itself out (the duel engine's "simulate") unless the player takes over (owner, Oct 15). */
+function sparPlaysOut(turn: HTMLElement) {
+  turn.insertAdjacentHTML('beforeend', '<p class="text info auto-on">The spar plays out… <button type="button" class="quiet-tool takeover">Fight it yourself</button></p>');
+  turn.querySelector<HTMLButtonElement>('.takeover')!.onclick = () => stopAuto();
+  autoTimer = setTimeout(() => {
+    autoTimer = undefined;
+    document.querySelectorAll('.auto-on').forEach((x) => x.remove());
+    if (!busy && !input.value.trim() && state.duel && !state.duel.over) send('5', 'Let the spar play out');
+  }, 2500);
 }
 
 // ---------- pacing: routine plays itself (owner, Oct 12; a test version to judge in play) ----------

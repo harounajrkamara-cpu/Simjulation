@@ -235,6 +235,7 @@ Rules:
 ### 6a – Duels ✅
 - **Fully deterministic**: same situation → same outcome. Unpredictability comes only from hidden information (fog of war, hidden abilities) and the opponent's own choices (personality, general type, learning).
 - Only important opponents (officers, commanders, named characters) trigger a duel; before each duel the player chooses: play it or auto-simulate.
+- ✅ **Which moments are fights (owner, Oct 15):** someone attacking Li when he resists (dodges, blocks, hits back) is a fight; a punishment Li takes without resisting stays story. A **spar** (practice, never deadly) simulates by itself unless the player takes over ("Fight it yourself"); any other fight offers "fight or simulate"; a fight to the death always waits for the player.
 - Flow: size up → exchanges → decision → aftermath.
 - Choices per round (numbered + free text): attack · defend/counter · feint · observe · use ability · use environment · talk/taunt.
 - **Choice clash**: counter beats reckless attack · attack beats observing · feint beats defense · observing gives info and a later bonus. Combined with stats, so the stronger fighter usually still wins.

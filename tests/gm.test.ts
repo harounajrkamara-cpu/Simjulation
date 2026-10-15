@@ -229,7 +229,20 @@ describe('Copilot QA of PR #5 (6dfcc42): the four reproduced exploits stay close
     for (const t of ['Li won the spar against Gonza.', 'Li punches Gonza to the ground.', 'Li leaves Gonza unable to rise.',
       'Li takes the head of Gonza.', 'Li sends Hachi a look and defeats Gonza.', 'Li poisons Gonza at dinner.'])
       expect(checkGmScene(s, t).map((p) => p.kind)).toContain('fight');
-    for (const t of ['Li puts the bucket down near Gonza.', "Li leaves Gonza's tent.", 'Li sends Hachi to fetch water.'])
+    // Owner playtest v30: calm horse-scene sentences refused a harmless scene.
+    for (const t of ['Li puts the bucket down near Gonza.', "Li leaves Gonza's tent.", 'Li sends Hachi to fetch water.',
+      "Li puts a hand on Hachi's shoulder and sits him down on a bucket.", 'Li beats the dust out of the blanket while Gonza watches.',
+      'Li wins a smile from Hachi.', 'Li drops beside Hachi in the straw, flat on his back.', 'Li puts Hachi to bed and lies down.'])
       expect(checkGmScene(s, t).map((p) => p.kind)).not.toContain('fight');
+  });
+});
+
+describe('spars (owner, Oct 15)', () => {
+  it('a spar is never deadly: only a non-deadly fight can be simulated by itself', async () => {
+    const { parseGmTurn } = await import('../engine/gm');
+    const f = (fight: object) => parseGmTurn({ scene: 'x', summary: 'x', fight: { foe: 'Daisuke', rank: 'E', ...fight } })!.fight!;
+    expect(f({ deadly: false, spar: true }).spar).toBe(true);
+    expect(f({ deadly: true, spar: true }).spar).toBe(false);
+    expect(f({ spar: true }).spar).toBe(false); // deadly by default
   });
 });

@@ -99,6 +99,12 @@ describe('the Game Master turn uses it', () => {
     expect(checkGmSuggestions(s, { suggestions: ['I strike at Gonza\'s bad knee', 'I yield'] })).toHaveLength(1);
     expect(checkGmSuggestions(s, { suggestions: ['I strike at Gonza\'s bad knee'], fight: {} })).toHaveLength(0);
     expect(checkGmSuggestions(s, { suggestions: ['I practise strikes alone behind the horse lines'] })).toHaveLength(0);
+    // Owner playtest v30: Li slipping Gonza's strap in story text is a fight the code must run; a punishment he takes is story.
+    const strap = "Gonza swings the strap at Li's knees. Li slips the first lash and the second.";
+    expect(checkGmSuggestions(s, { scene: strap })).toHaveLength(1);
+    expect(checkGmSuggestions(s, { scene: strap, fight: {} })).toHaveLength(0);
+    expect(checkGmSuggestions(s, { scene: 'Gonza lashes Li twice across the back. Li keeps his head down and takes it.' })).toHaveLength(0);
+    expect(checkGmSuggestions(s, { scene: 'Li ducks under the tent flap and slips the rope off the post while Gonza snores.' })).toHaveLength(0);
   });
 });
 
