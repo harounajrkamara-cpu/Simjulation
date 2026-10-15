@@ -117,7 +117,7 @@ Old chats and docs: ARC 1/2 (old slave "Ali" story), ARC 1 manhwa + Li Hattori s
 5. AI players: `npm run ai-players` (scripts/ai-players.ts) lets 2 free models play via OmniRoute and write a review to saves/ai-players/. Needs OMNIROUTE_URL / OMNIROUTE_KEY / AI_MODELS in .env (owner sets the key; never in chat).
 Note: someone ran npm install for Linux in this folder (esbuild broke); fixed with `npm install` on Windows. Hermes left loose simulate*.js/.cjs/.ts files in the root (uncommitted).
 
-## ⏸ Stopped mid-build (Oct 15, usage limit) — the free world
-- Owner approved the proposal: news **faster** (here 0 · same kingdom 3 days · elsewhere 10), Li may serve **either side**, keep all 15 seeds, build everything. Canon written: World Bible **ch. 13d**, Numbers **§11b** (fuse days and weights PROVISIONAL).
-- Built, NOT wired yet: `engine/fuses.ts` (8 canon fuses, `fuseOutcome`, `leverDrafts`, `fuseDrafts`, `fusesText`, news delay). No tests yet.
-- **Next:** (1) wire it: `gmTimeDrafts` calls `fuseDrafts(s, today, today+n)`; `checkChanges` gets `case 'lever'` → `leverDrafts`; `gmMemoryText` adds `fusesText(s)`; GM answer format documents `{"kind":"lever","fuse","toward","reason"}`; (2) `engine/seeds.ts` with the 15 seeds of `docs/PROPOSAL_FREE_WORLD.md` §C, a `seed` change (planted/grown/dead) and a memory block; (3) tests (a fuse fires on its day, a lever only where it plays out, news by distance, replay stays deterministic); (4) build + publish.
+## ✅ The free world is built (Oct 15, after the usage-limit pause)
+- Canon: World Bible **ch. 13d**, Numbers **§11b** (fuse days and weights PROVISIONAL). Code: `engine/fuses.ts` (8 canon fuses fire on their days; outcome = base weight + 2 per lever of Li; news reaches Li at once where it happens, 3 days in the same kingdom, 10 elsewhere; hidden signs for Claude 90 days ahead) and `engine/seeds.ts` (the 15 seeds; planted only where and when they fit; planted / grown / dead). Wired: `gmTimeDrafts` → `fuseDrafts`; changes `lever` and `seed`; memory `fusesText` + `seedsText`. Tests: `tests/free-world.test.ts`.
+- **Copilot QA (issue #6)** reproduced 4 exploits on 6dfcc42; all fixed in d447d9b with regression tests (officer rewards need a deadly fight; `dies` default-deny when Li is named; raids count only at the ford; more unearned-win wordings).
+- 318 tests. Not yet tried live on claude.ai.

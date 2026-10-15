@@ -6,6 +6,8 @@ import { commitDrafts, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { publicWorldText } from './atlas-public';
 import { liLifeText } from './life';
+import { fuseDrafts, fusesText, leverDrafts } from './fuses';
+import { seedDrafts, seedsText } from './seeds';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -74,6 +76,8 @@ export type GmChange =
   | { kind: 'fatigue'; level: number }
   | { kind: 'train'; focus: string; days: number }
   | { kind: 'time'; days: number; part?: Part; reason: string }
+  | { kind: 'lever'; fuse: string; toward: string; reason: string }
+  | { kind: 'seed'; id: string; state: 'planted' | 'grown' | 'dead'; note?: string }
   | { kind: 'skill'; skill: string; delta: number }
   | { kind: 'memory'; npc: string; what: string; weight?: number }
   | { kind: 'person'; id: string; name: string; role: string; desc: string; goal: string; secret?: string; trust?: number; respect?: number; affection?: number; rivalry?: number }
@@ -319,6 +323,8 @@ export function gmMemoryText(s: GameState): string {
     stageText(s),
     publicWorldText(s),
     liLifeText(s),
+    fusesText(s),
+    seedsText(s),
     domainText(s),
     battleText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
@@ -565,6 +571,12 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         drafts.push(...gmTimeDrafts(s, ...sceneTime(s, { days: clamp(Math.round(num(x.days)), 0, stageDayCap(s)), part })));
         break;
       }
+      case 'lever':
+        drafts.push(...leverDrafts(s, x, notes));
+        break;
+      case 'seed':
+        drafts.push(...seedDrafts(s, x, notes));
+        break;
       case 'service': {
         if (!inService(s)) drafts.push({ type: 'flag', fact: 'Li joins Kurogane service (the Hagiwara levy)', visible: true, data: { key: 'levy_service', value: 1 } });
         break;
@@ -774,6 +786,8 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   }
   // Li's land runs on by itself through every month that ends in these days.
   out.push(...domainMonthDrafts(s, today(s), today(s) + n));
+  // The world moves on (World Bible 13d): fuses fire on their days, and their news reaches Li by distance.
+  out.push(...fuseDrafts(s, today(s), today(s) + n));
   // Everyone Li knows grows with the seasons too.
   out.push(...seasonGrowthDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.

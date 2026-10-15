@@ -1,4 +1,4 @@
-# 📝 PROPOSAL — The free world (Oct 15) · NOT canon until the owner approves
+# ✅ APPROVED (Oct 15) — The free world · canon: World Bible ch. 13d, Numbers §11b · built: engine/fuses.ts, engine/seeds.ts
 
 Owner question (Oct 12): *"If I can go to any kingdom, how does the world stay fixed but free, with cool events?"*
 Owner decision (Oct 15): write a proposal now; the game has **no end** (a life story, big goals are milestones).

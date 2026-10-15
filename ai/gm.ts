@@ -80,6 +80,8 @@ ANSWER WITH JSON ONLY:
     {"kind":"knowledge","key":"short_key (the long goals name theirs)"},
     {"kind":"service","reason":"Li joins the Hagiwara levy (Kurogane service)"},
     {"kind":"dies","npc":"<id>","reason":"..."},
+    {"kind":"lever","fuse":"<fuse id from WORLD EVENTS COMING>","toward":"<one of its outcomes>","reason":"what Li did"} (only where the fuse plays out; either side),
+    {"kind":"seed","id":"<id from STORY SEEDS>","state":"planted|grown|dead","note":"short"},
     {"kind":"freedom","route":"merit|head|bought|raizen|escape"},
     {"kind":"deed","deed":"standard|first_over_wall|saved_officer|scouting|objective|won|low_losses|withdrawal|steady_morale|supply_kept|disobeyed_paid_off|disobeyed_failed|negotiation|intelligence|governance|civilians","amount":<only for negotiation/intelligence/civilians>,"reason":"what Li did and who saw it"},
     {"kind":"promotion","reason":"why a post is free now (an officer fell, a new unit, a reward ceremony)","sponsor":"<id of a superior, needed from Sanbyakunin-shō up>"},
