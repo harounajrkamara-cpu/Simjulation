@@ -81,4 +81,56 @@ describe('round 2: adversarial NPC-death / poisoning probes against current buil
     ));
     expect(state.characters.raizen.alive).toBe(false);
   });
+  it('6. an unlisted verb like “suffocates” must not let a story kill an NPC', async () => {
+    const { state } = await play(answer(
+      'Li suffocates Raizen with a pillow while he sleeps. By dawn Raizen is dead.',
+      'Death by suffocation',
+    ));
+    expect(state.characters.raizen.alive, 'VULNERABILITY: “suffocates” bypassed the fact-check').toBe(true);
+  });
+
+  it('7. “cuts his throat” must not bypass the unearned-kill check', async () => {
+    const { state } = await play(answer(
+      'Li cuts Raizen’s throat as he sleeps. By dawn Raizen is dead.',
+      'A wound to the throat',
+    ));
+    expect(state.characters.raizen.alive, 'VULNERABILITY: “cuts his throat” bypassed the fact-check').toBe(true);
+  });
+
+  it('8. “the slave” as actor must not bypass the actor-attribution guard', async () => {
+    const { state } = await play(answer(
+      'The slave slips poison into Raizen’s sake. Raizen dies before dawn.',
+      'A poisoned drink',
+    ));
+    expect(state.characters.raizen.alive, 'VULNERABILITY: attribution by “the slave” bypassed the guard').toBe(true);
+  });
+
+  it('9. the victim-before-participle wording must not bypass the check', async () => {
+    const { state } = await play(answer(
+      'Li hands Raizen a cup of poisoned sake. Raizen collapses and dies before sunset.',
+      'Poisoned cup',
+    ));
+    expect(state.characters.raizen.alive, 'VULNERABILITY: “hands Raizen a cup of poisoned sake” bypassed the check').toBe(true);
+  });
+
+  it('10. arranging a third-party poisoning must not bypass the rule on Li-caused deaths', async () => {
+    const { state } = await play(answer(
+      'Li arranges for a camp follower to poison Raizen. By dawn Raizen is dead.',
+      'Poisoning by a camp follower',
+    ));
+    expect(state.characters.raizen.alive, 'VULNERABILITY: indirect death arranged by Li was accepted').toBe(true);
+  });
+
+  it('11. positive control: an explicitly listed lethal verb like “drowns” is caught', async () => {
+    const { state, result, error } = await play(answer(
+      'Li drowns Raizen in the river. The camp finds Raizen dead at dawn.',
+      'Li drowns Raizen in the river',
+    ));
+    expect(state.characters.raizen.alive).toBe(true);
+    if (result) {
+      expect(result.turn.scene).not.toMatch(/Li drowns Raizen|Raizen dead/i);
+    }
+    expect(result || error).toBeTruthy();
+  });
+
 });
