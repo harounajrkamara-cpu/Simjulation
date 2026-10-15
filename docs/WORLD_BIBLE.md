@@ -526,6 +526,12 @@ Possible outcomes: an ally reaches out · a Kurogane veteran turns hostile · wo
 
 ## Chapter 11 – Turn, dashboard & session rules ✅
 
+### The pacing director ✅ (owner, Oct 16; from `docs/PROPOSAL_PACING.md`)
+- **Waiting rule:** when the player waits or obeys twice, the world acts (an order played through, time moves, the threat comes); a slave or soldier gets orders, not questions he cannot answer.
+- **Stall counter:** after **2** scenes in a row without time passing the Game Master is told to make a hard move; a 3rd still scene goes back once (soft: a rewrite is shown, never lost).
+- **Threat clocks:** a threat has a clock (3–8 steps, usually 4) that the code fills by itself, **one step per 2 days**; Claude may move it one step per scene; max 3 open. A full clock is due in the next scene. Li feels them in the Li tab ("something is brewing" · "it is getting close" · "it is coming now"), never as numbers.
+- **Already said:** phrases repeated in the last scenes are listed for the Game Master so it stops repeating them.
+
 ### Turn loop (code decides, AI narrates)
 1. **Player** picks a numbered option or types freely.
 2. **AI** translates the input into a structured action (what, target, method, stat) – structured output with a fixed schema.

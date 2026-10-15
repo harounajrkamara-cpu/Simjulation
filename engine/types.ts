@@ -183,6 +183,20 @@ export interface GmMemory {
   suggestions: string[];
   /** Chapter recaps (owner vision Oct 10): written once by Claude every ~20 scenes, never rewritten. `scenes` = scene count at its end. */
   chapters?: { title: string; text: string; from: number; to: number; scenes: number }[];
+  /** Threat clocks (pacing director, owner Oct 16): a threat that comes due unless Li acts. engine/clocks.ts. */
+  clocks?: ThreatClock[];
+}
+
+export interface ThreatClock {
+  id: string;
+  name: string;
+  /** What happens when it is full ("Gonza catches Li alone: a fight the code runs"). */
+  doom: string;
+  size: number;
+  filled: number;
+  open: boolean;
+  /** Day the code last ticked it by time. */
+  ticked: number;
 }
 
 /** Canonical action (ch. 12b #1): what the engine resolves, stored with the event log. */

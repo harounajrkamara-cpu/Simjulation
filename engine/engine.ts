@@ -105,6 +105,7 @@ export function apply(state: GameState, ev: GameEvent): void {
     case 'thread': {
       const g = gmMemOf(state);
       if (d.agenda) { g.agendas[d.agenda.npc] = { goal: d.agenda.goal, secret: d.agenda.secret }; break; }
+      if (d.clock) { const cl = (g.clocks ??= []); const k = cl.findIndex((x) => x.id === d.clock.id); if (k >= 0) cl[k] = { ...d.clock }; else cl.push({ ...d.clock }); break; }
       const t = g.threads.find((x) => x.id === d.id);
       if (t) { t.open = d.open; t.text = d.text || t.text; } else g.threads.push({ id: d.id, text: d.text, open: d.open, day: ev.day });
       break;

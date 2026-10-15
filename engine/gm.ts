@@ -9,6 +9,7 @@ import { publicWorldText } from './atlas-public';
 import { liLifeText } from './life';
 import { fuseDrafts, fusesText, leverDrafts } from './fuses';
 import { seedDrafts, seedsText } from './seeds';
+import { clockDrafts, clocksText, clockTimeDrafts } from './clocks';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -81,6 +82,7 @@ export type GmChange =
   | { kind: 'time'; days: number; part?: Part; reason: string }
   | { kind: 'lever'; fuse: string; toward: string; reason: string }
   | { kind: 'seed'; id: string; state: 'planted' | 'grown' | 'dead'; note?: string }
+  | { kind: 'clock'; id: string; name?: string; doom?: string; size?: number; tick?: number; back?: number; close?: boolean; reason?: string }
   | { kind: 'skill'; skill: string; delta: number }
   | { kind: 'memory'; npc: string; what: string; weight?: number }
   | { kind: 'person'; id: string; name: string; role: string; desc: string; goal: string; secret?: string; trust?: number; respect?: number; affection?: number; rivalry?: number }
@@ -328,6 +330,7 @@ export function gmMemoryText(s: GameState): string {
     liLifeText(s),
     fusesText(s),
     seedsText(s),
+    clocksText(s),
     domainText(s),
     battleText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
@@ -577,6 +580,9 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       case 'lever':
         drafts.push(...leverDrafts(s, x, notes));
         break;
+      case 'clock':
+        drafts.push(...clockDrafts(s, x, notes));
+        break;
       case 'seed':
         drafts.push(...seedDrafts(s, x, notes));
         break;
@@ -791,6 +797,8 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   out.push(...domainMonthDrafts(s, today(s), today(s) + n));
   // The world moves on (World Bible 13d): fuses fire on their days, and their news reaches Li by distance.
   out.push(...fuseDrafts(s, today(s) + n));
+  // Open threats come closer by themselves (pacing director, owner Oct 16).
+  out.push(...clockTimeDrafts(s, today(s) + n));
   // Everyone Li knows grows with the seasons too.
   out.push(...seasonGrowthDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.

@@ -5,7 +5,7 @@ import { GameState } from './types';
 // the code compares it with the memory: the dead stay silent, known names are spelled right, Li's age and rank are right,
 // and the story has no game words or "you". A scene with problems gets one rewrite (ai/gm.ts). Pure and deterministic.
 
-export interface FactProblem { kind: 'dead' | 'name' | 'age' | 'rank' | 'mechanics' | 'person' | 'fight'; text: string }
+export interface FactProblem { kind: 'dead' | 'name' | 'age' | 'rank' | 'mechanics' | 'person' | 'fight' | 'pacing'; text: string }
 
 /** Command ranks (World Bible ch. 4), so a wrong rank for Li can be caught. */
 export const RANK_TITLES = ['Ashigaru', 'Gochō', 'Kogashira', 'Gojū-gashira', 'Hyakunin-gashira', 'Sanbyakunin-shō', 'Sennin-shō', 'Gosennin-shō', 'Taishō', 'Dai-Shōgun'];

@@ -3,6 +3,8 @@ import { GmFixProposal, GmResult, GmTurn, gmApply, gmDayCap, gmMemoryText, gmRec
 import { commitDrafts, today } from '../engine/engine';
 import { chapterDraft, chapterDue, chapterPrompt } from '../engine/recaps';
 import { checkGmDeaths, checkGmScene, checkGmSuggestions, factFixPrompt } from '../engine/factcheck';
+import { checkPacing, pacingText } from '../engine/pacing';
+import { checkClocks } from '../engine/clocks';
 import { GameEvent, GameState } from '../engine/types';
 
 export type { GmFixProposal } from '../engine/gm';
@@ -28,6 +30,8 @@ HOW TO RUN THE WORLD
    Hand control back ("routine" false, 2–4 real choices) only at a moment that matters: danger, a fight, a person who matters,
    a chance toward a goal, a real decision, an order Li must answer. Skip boring time yourself: if nothing matters for days, end the scene and set "days" so the next scene starts
    where something happens. A scene can be one tense hour; the next can be three weeks later. Keep the story moving.
+   A slave or a soldier gets orders, not questions he cannot answer. Never ask Li the same thing twice. When the player waits or obeys,
+   the world acts (PbtA: "when everyone looks to you, make a move"): an order, news, the threat strikes, time moves on.
 4. Rich storytelling: 150–350 words, third person present tense ("Li grips the spear"), sight, sound, smell, real dialogue in quotes,
    short paragraphs. End on a moment that invites the player to act. Never decide Li's big choices for him; never write what Li says
    unless the player wrote it.
@@ -83,6 +87,7 @@ ANSWER WITH JSON ONLY:
     {"kind":"dies","npc":"<id>","reason":"..."},
     {"kind":"lever","fuse":"<fuse id from WORLD EVENTS COMING>","toward":"<one of its outcomes>","reason":"what Li did"} (only where the fuse plays out; either side),
     {"kind":"seed","id":"<id from STORY SEEDS>","state":"planted|grown|dead","note":"short"},
+    {"kind":"clock","id":"<id>","name":"<who wants what>","doom":"<what happens when full>","size":4} (open a threat; or "tick":1 / "back":1 with "reason" / "close":true for an open one),
     {"kind":"freedom","route":"merit|head|bought|raizen|escape"},
     {"kind":"deed","deed":"standard|first_over_wall|saved_officer|scouting|objective|won|low_losses|withdrawal|steady_morale|supply_kept|disobeyed_paid_off|disobeyed_failed|negotiation|intelligence|governance|civilians","amount":<only for negotiation/intelligence/civilians>,"reason":"what Li did and who saw it"},
     {"kind":"promotion","reason":"why a post is free now (an officer fell, a new unit, a reward ceremony)","sponsor":"<id of a superior, needed from Sanbyakunin-shō up>"},
@@ -123,6 +128,8 @@ export function gmPrompt(s: GameState, said: string | undefined, extra: string[]
   const parts = [GM_RULES, fence('memory', gmMemoryText(s))];
   const fight = lastFightResult(s);
   if (fight) parts.push(fight);
+  const pacing = pacingText(s, said);
+  if (pacing) parts.push(pacing);
   parts.push(...extra);
   const { action, wishes } = splitWishes(said ?? '');
   if (task) parts.push(task);
@@ -159,7 +166,9 @@ async function play(ai: AiAdapter, s: GameState, said: string | undefined, signa
     if (!turn) continue;
     // Every scene is checked, the rewrite too: a scene the code knows breaks the facts is never shown (AI Lab issue #2).
     const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
-    const found = [...checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn), ...checkGmDeaths(s, turn, said)];
+    const all = [...checkGmScene(s, `${turn.title ?? ''}. ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn), ...checkGmDeaths(s, turn, said), ...checkPacing(s, turn, said), ...checkClocks(s, turn)];
+    // Pacing is soft: it asks for one rewrite, but a rewrite that still lingers is shown, never lost (owner, Oct 16).
+    const found = first ? all.filter((p) => p.kind !== 'pacing') : all;
     if (found.length) {
       if (first) throw Object.assign(new Error(`The Game Master's rewrite still broke the facts (${found.map((p) => p.text).join(' ')}).`), { code: 'bad_answer', scenes: [first.scene, turn.scene] });
       first = turn;

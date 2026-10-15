@@ -1,4 +1,6 @@
-# 📝 Proposal: the pacing director (Oct 16, for the owner's approval)
+# ✅ Proposal: the pacing director (Oct 16, approved and built)
+
+**Owner decisions (Oct 16):** (1) clocks faster: one step per **2** days; (2) stall limit left to Claude: warn after 2, send back at 3; (3) clocks shown as a feeling; (4) build A + B + D, then C. All four parts built the same day (`engine/pacing.ts`, `engine/clocks.ts`, tests in `tests/pacing.test.ts`). Canon: World Bible ch. 11. Note: Claude only sees one-line summaries of older scenes, so the repetition came from the people's descriptions in the memory; "already said" reads the last three full scenes, and the scene window was left as it was.
 
 **Problem (owner playtest of version 31, all three confirmed by the owner):**
 1. **The story stalls.** At the Kurose ford, 6–7 scenes on the same evening repeat one beat: Raizen asks "what do you hear?", the mailed rider waits, Gonza watches from the willows. Gonza threatens ("Tonight", "I can wait", "Spring is long") for weeks with no payoff.
