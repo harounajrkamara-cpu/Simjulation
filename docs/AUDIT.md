@@ -46,12 +46,28 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 | 17 | Phone layout; George on the claude.ai page; a Playwright run of the screens | 🟡 not proven |
 | 18 | **The real Claude on claude.ai has never played a long game** — only my offline playthrough | 🟡 not proven |
 
+### D. Second pass (Game Experience Bible, VISIE, the live page)
+| # | What the canon says | Code today | Status |
+|---|---|---|---|
+| 19 | **Aura** (WB ch. 5, VISIE §4): a general's aura acts on morale and on the opponent's choices | not in the code anywhere | ❌ |
+| 20 | **Ceremony screen** (GE ch. 3/3b): who stands where, every witness reacts by their own opinion and remembers it | ceremonies happen, but only as story text; no screen, no witness reactions | 🟡 |
+| 21 | **Legend page** in the Journal (GE 3b step 6): date, witnesses, title, kept forever | legend moments show once as an overlay, then are gone | ❌ |
+| 22 | **Nicknames per group** (GE 3b): soldiers, nobles and enemies may call Li different names, earned from deeds | one hand-written nickname (classic) and a GM title; not per group | 🟡 |
+| 23 | **Lies caught by a rule** (GE ch. 5): the NPC's INT vs Li's POL and what they know | Claude decides alone; no rule | ❌ |
+| 24 | **Li's own unit name and banner** (GE 3b legend list, like Shin's Hi Shin unit) | missing | ❌ |
+| 25 | **Feasts, funerals, oaths** as ceremonies (GE 3b) | missing (funeral only in the epilogue text) | ❌ |
+| 26 | **Title screen** with Continue / New life / Load (GE ch. 3) | the page opens straight into the game or the New life box | 🟡 |
+| 27 | A death needs a `by` field (who killed, from the code's record) — known gap from STATUS Oct 13 | missing | ❌ |
+| 28 | George narrator bundled, not loaded from jsdelivr (STATUS security note) | still loaded at runtime | 🟡 |
+
+**Live page (Chrome, Oct 17, read-only, no game action):** all seven tabs open and render (Story, Map with Close up / Li's eyes / The world, Li with the plan cards, Army as the band from outside, People, Journal, Encyclopedia). **Local page (Playwright):** loads with 0 console errors.
+
 ---
 
 ## Tools that can help (checked Oct 17)
 | Tool | Helps with | Verdict |
 |---|---|---|
-| **Playwright plugin** (installed in this app) | click through the real page and catch screen bugs (gap 17) | ✅ use it next build session |
+| **Playwright plugin** (installed in this app) | click through the real page and catch screen bugs (gap 17) | ✅ works (Oct 17) on the local dev server `npm run web` (port 5173); `file://` pages are blocked |
 | **Notion connector** (connected) | review packets for you after each big step (already agreed Oct 12) | ✅ if you want them |
 | **Claude in Chrome** | live test on claude.ai, slot 3, with you signed in | ✅ only when you say "play" |
 | feature-dev agents (architect, reviewer) | design the house system against the existing code; review after | ✅ for gap 1 |
@@ -65,5 +81,6 @@ Nothing in the plugin catalogue builds game systems for us; the gap list is desi
 ## Proposal: what to build first
 1. **Houses (gap 1) together with the world's people (gap 2)** — one system: a house record (land, troops, wealth, prestige, Crown loyalty, cohesion, head, heir) and its important people as real records that age and grow. Start with the Tier A houses of all 7 kingdoms from the Atlas, then marriages/hostages/succession. Design chapter first, your OK, then build.
 2. Small fixes that are cheap and felt now: **soldier pay (3)**, loyalty/promises (4).
-3. Abilities, the Zone and style unlocks (5, 6).
+3. Abilities, the Zone, aura and style unlocks (5, 6, 19).
+3b. The big-moment layer: ceremony screen with witnesses, legend pages, nicknames per group, Li's unit banner (20–22, 24, 25).
 4. Then B in order, C last.
