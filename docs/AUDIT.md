@@ -32,8 +32,8 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 | 7 | Command capacity and **overload** in battle (Numbers §3, delegation) | only the label in `rules.ts`; battles ignore it | ✅ Oct 17 |
 | 8 | **Life and death of NPCs**: lifespan, death of age, heirs take over (WB 13c rule 4), genpuku | missing (only the Tatara king's fuse) | ✅ Oct 17 |
 | 9 | **Defeat ladder**: rank loss, capture, ransom | missing (battles count captured men, Li is never captured) | ✅ Oct 17 |
-| 10 | Kingdom values beyond authority: treasury, unity, succession, the Crown's share | only authority + dread (`discontent.ts`) | 🟡 |
-| 11 | **Laws per kingdom** (Atlas §12): slavery, duels, debt slavery, Tatara as refuge | only Kurogane's merit law and the Tatara runaway road | 🟡 |
+| 10 | Kingdom values beyond authority: treasury, unity, succession, the Crown's share | only authority + dread (`discontent.ts`) | ✅ Oct 17 |
+| 11 | **Laws per kingdom** (Atlas §12): slavery, duels, debt slavery, Tatara as refuge | only Kurogane's merit law and the Tatara runaway road | ✅ Oct 17 |
 | 12 | **Neutral powers**: Mount Shōgen (Abbot Kakushin, the Mirror), Mist Valley shinobi ("Grey Crow"), Kinza (mercenary market, loans, Speaker Ganzō), the Single Path sect, Seiran Academy (Master Hakuun) | names in public text or seeds only; no hiring, loans, exams or uprisings | ❌ |
 | 13 | Trade and needs (Atlas §8): salt, grain, horses, embargoes; weather and hidden causes | missing | ❌ |
 | 14 | Festivals, Imperial treasures as objects, governors | missing (treasures are text) | ❌ |
@@ -63,7 +63,7 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 ### E. Third pass (every owner message in all 74 sessions, the proposals, NIGHT_LOG, the Notion briefing)
 | # | Where it was said | What | Status |
 |---|---|---|---|
-| 29 | Numbers §11, Free World proposal | **Real fuse decision trees** (who acts, scored choices, visible signs). Today each fuse fires on a fixed day with weights (PROVISIONAL) | 🟡 |
+| 29 | Numbers §11, Free World proposal | **Real fuse decision trees** (who acts, scored choices, visible signs). Today each fuse fires on a fixed day with weights (PROVISIONAL) | ✅ Oct 17 |
 | 30 | NIGHT_LOG Oct 16, WB ch. 8 | **Rumours about Li** spreading in Game Master mode (rumours exist only in the classic chronicle) | ✅ Oct 17 |
 | 31 | PROPOSAL_PACING | The code opens obvious **threat clocks** itself (a rival who threatened Li); today only after a deadly win | 🟡 |
 | 32 | SENGOKU_SOLDIER_COMPLETE (owner's plan) | Other storytellers on the page (Gemini, DeepSeek, Ollama, OmniRoute); today only Claude or plain | ❌ |

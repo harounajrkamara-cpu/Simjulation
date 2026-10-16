@@ -1,4 +1,5 @@
 import { PLACES } from './data';
+import { deathDrafts, patchHouseDraft } from './houses';
 import { has, today } from './engine';
 import { Draft, GameState } from './types';
 import { KingdomId, WORLD_START } from './world-public';
@@ -90,6 +91,67 @@ export const FUSES: Fuse[] = [
     signs: 'The old king of Tatara tires easily and holds his chest.' },
 ];
 
+// ── Decision trees (Numbers §11 "build stage 4"; Phase 6 block F, Oct 17, PROVISIONAL, owner kan terugdraaien) ──
+// Who must still be alive for a fuse to happen; how the world as it stands scores each outcome (on top of the base
+// weights and Li's levers); and what the outcome does to the world's people and houses. Mood factors are small (0.2):
+// Li's one push still wins a tie (owner, Oct 15); only what makes an outcome impossible, or what Li caused, weighs more.
+
+const alive = (s: GameState, id: string) => !s.characters[id] || s.characters[id].alive;
+const house = (s: GameState, id: string) => s.houses?.[id];
+const loyal = (s: GameState, id: string, min: number) => (house(s, id)?.crownLoyalty ?? 0) >= min;
+
+interface Tree { actors: string[]; score: (s: GameState) => Record<string, number>; effects: (s: GameState, outcome: string) => Draft[] }
+export const FUSE_TREES: Record<string, Tree> = {
+  coup: {
+    actors: ['goda_ensai', 'asagiri_tokinari'],
+    score: (s) => ({ crushed: (loyal(s, 'kamio', 70) ? 0.2 : 0) + (alive(s, 'otori_gensai') ? 0.2 : 0), purge: (house(s, 'goda')?.troops ?? 0) >= 6_500 ? 0.2 : 0, king_killed: (house(s, 'asagiri')?.cohesion ?? 50) < 40 ? 0.2 : 0 }),
+    effects: (s, o) => o === 'crushed' ? deathDrafts(s, 'goda_ensai', 'killed when his coup failed') : o === 'purge' ? deathDrafts(s, 'ebisawa_rokusai', 'purged in the night of blood') : deathDrafts(s, 'asagiri_tokinari', 'murdered in the coup'),
+  },
+  revenge: {
+    actors: ['fuyutsuki_hayato', 'asagiri_tokinari'],
+    score: (s) => ({ discovered: (house(s, 'kamio')?.cohesion ?? 0) >= 60 ? 0.2 : 0, succeeded: alive(s, 'utsugi_kyosuke') ? 0 : -3 }),
+    effects: (s, o) => o === 'succeeded' ? deathDrafts(s, 'asagiri_tokinari', 'killed by the Kitakaze assassin') : o === 'failed' ? deathDrafts(s, 'utsugi_kyosuke', 'cut down after his failed strike') : [],
+  },
+  slander: {
+    actors: ['ugaki_joan', 'kagami_soun'],
+    score: (s) => ({ exposed: (house(s, 'kagami')?.prestige ?? 0) >= 80 ? 0.2 : 0, rebels: loyal(s, 'kagami', 50) ? 0 : 0.2, executed: (house(s, 'shinonome')?.cohesion ?? 60) < 60 ? 0.2 : 0 }),
+    effects: (s, o) => o === 'executed' ? deathDrafts(s, 'kagami_soun', 'executed as a traitor') : o === 'exposed' ? deathDrafts(s, 'ugaki_joan', 'put to death for the slander') : patchHouseDraft(s, 'kagami', { crownLoyalty: 0 }, 'the Kagami rise against the king'),
+  },
+  pass: {
+    actors: ['sakaguchi_sadatomo'],
+    score: (s) => ({ opens: (loyal(s, 'sakaguchi', 40) ? 0 : 0.2) + (alive(s, 'tobita_kojuro') ? 0.2 : -1), crushed: (house(s, 'kiriyama')?.troops ?? 0) > 2 * (house(s, 'sakaguchi')?.troops ?? 1) ? 0.2 : 0 }),
+    effects: (s, o) => o === 'opens' ? patchHouseDraft(s, 'sakaguchi', { crownLoyalty: 0, liege: undefined }, 'the Sakaguchi break from the crown') : o === 'crushed' ? deathDrafts(s, 'sakaguchi_sadatomo', 'killed when his revolt was crushed') : [],
+  },
+  canal: {
+    actors: ['kawabe_sekkei'],
+    score: (s) => ({ bankrupt: (s.flags.treasury_kurogane ?? 55) < 40 ? 0.2 : 0, green: (s.flags.treasury_kurogane ?? 55) >= 60 ? 0.2 : 0 }),
+    effects: (s, o) => o === 'bankrupt' ? [{ type: 'flag', fact: 'Kurogane treasury emptied', visible: false, data: { key: 'treasury_kurogane', value: 10 } }]
+      : o === 'green' ? [{ type: 'flag', fact: 'the canal pays off', visible: false, data: { key: 'treasury_kurogane', value: Math.min(100, (s.flags.treasury_kurogane ?? 55) + 20) } }]
+        : deathDrafts(s, 'kawabe_sekkei', 'executed as a Tatara agent'),
+  },
+  hostage: {
+    actors: ['okitsu_hirotsugu'],
+    score: (s) => ({ breaks: (loyal(s, 'okitsu', 30) ? 0 : 0.2) + (house(s, 'okitsu')?.hostage ? 0 : 2), crushed: (house(s, 'akabane')?.troops ?? 0) > 3 * (house(s, 'okitsu')?.troops ?? 1) ? 0.2 : 0 }),
+    effects: (s, o) => o === 'breaks' ? patchHouseDraft(s, 'okitsu', { crownLoyalty: 0, liege: undefined, hostage: undefined }, 'the Okitsu break away from Hanaoka') : o === 'crushed' ? deathDrafts(s, 'okitsu_hirotsugu', 'killed when his break was crushed') : [],
+  },
+  usurp: {
+    actors: ['tagami_kanemitsu', 'wadatsumi_chikamaru'],
+    score: (s) => ({ smooth: alive(s, 'isonokami_hyobu') ? 0 : 2, civil_war: alive(s, 'isonokami_hyobu') && loyal(s, 'isonokami', 80) ? 0.2 : 0, child_killed: alive(s, 'tagami_shinsuke') ? 0 : -3 }),
+    effects: (s, o) => o === 'child_killed' ? deathDrafts(s, 'wadatsumi_chikamaru', 'murdered for the crown') : o === 'smooth' ? patchHouseDraft(s, 'wadatsumi', { head: 'tagami_kanemitsu' }, 'the regent takes the throne') : [],
+  },
+  tatara_king: {
+    actors: ['tatara_shigekuni'],
+    score: (s) => ({ prince: s.characters.tatara_kunimaru && s.characters.tatara_kunimaru.alive ? 0 : 3 }),
+    effects: (s, o) => [...deathDrafts(s, 'tatara_shigekuni', 'his heart gave out'), ...(o === 'prince' ? patchHouseDraft(s, 'tatara', { head: 'tatara_akifumi' }, 'Prince Akifumi rules in the heir\'s name') : [])],
+  },
+};
+
+/** The flag value of a fuse that never happened (its actor died first). */
+export const NEVER = 99;
+
+/** PROVISIONAL: a visible sign of a coming fuse reaches Li this many days before it fires, when he is in its kingdom. */
+export const SIGN_DAYS = 30;
+
 const fuseById = (id: string) => FUSES.find((f) => f.id === id);
 const KINGDOM_WORDS: [KingdomId, string[]][] = WORLD_START.kingdoms.map((k) => [k.id, [k.name, k.capital]]);
 
@@ -110,10 +172,11 @@ const leverKey = (fuse: string, outcome: string) => `lever_${fuse}_${outcome}`;
 /** The outcome a fuse takes: base weight + 2 per lever Li pulled toward it; ties go to Li's side, then the first listed. */
 export function fuseOutcome(s: GameState, f: Fuse) {
   let best = f.outcomes[0];
-  let bestW = -1;
+  let bestW = -Infinity;
+  const world = s.houses ? FUSE_TREES[f.id]?.score(s) ?? {} : {}; // the decision tree reads the living world (houses, people)
   for (const o of f.outcomes) {
     const n = has(s, leverKey(f.id, o.id));
-    const w = o.weight + 2 * n + (n ? 0.5 : 0); // the half point: Li's push wins a tie (owner, Oct 15)
+    const w = o.weight + (world[o.id] ?? 0) + 2 * n + (n ? 0.5 : 0); // the half point: Li's push wins a tie (owner, Oct 15)
     if (w > bestW) { best = o; bestW = w; }
   }
   return best;
@@ -139,9 +202,23 @@ export function fuseDrafts(s: GameState, to: number): Draft[] {
   for (const f of FUSES) {
     // Every unfired day up to now fires: a day passed by another clock (classic mode, a battle) still fires, late.
     if (!has(s, `fuse_${f.id}`) && f.day <= to) {
+      const tree = s.houses ? FUSE_TREES[f.id] : undefined;
+      const gone = tree?.actors.find((a) => s.characters[a] && !s.characters[a].alive);
+      if (gone) {
+        // The one who would act is dead: it never happens (the world moved first).
+        out.push({ type: 'flag', fact: `${f.name} never happens: ${s.characters[gone].name} is dead`, visible: false, data: { key: `fuse_${f.id}`, value: NEVER } });
+        out.push({ type: 'flag', fact: `${f.name} fizzled`, visible: false, data: { key: `fuse_${f.id}_day`, value: f.day } });
+        out.push({ type: 'flag', fact: 'no news', visible: false, data: { key: `news_${f.id}`, value: 1 } });
+        continue;
+      }
       const o = fuseOutcome(s, f);
       out.push({ type: 'flag', fact: `${f.name}: ${o.id}`, visible: false, data: { key: `fuse_${f.id}`, value: f.outcomes.indexOf(o) + 1 } });
       out.push({ type: 'flag', fact: `${f.name} fired`, visible: false, data: { key: `fuse_${f.id}_day`, value: f.day } });
+      if (tree) out.push(...tree.effects(s, o.id)); // what the outcome does to the world's people and houses
+    } else if (!has(s, `fuse_${f.id}`) && !has(s, `sign_${f.id}`) && f.day - SIGN_DAYS <= to && liKingdom(s) === f.kingdom) {
+      // A visible sign before it fires (WB 12b #11: hidden causes show a sign first).
+      out.push({ type: 'story', fact: `People in ${f.where[0]} talk: ${f.signs}`, visible: true, data: { sign: f.id } });
+      out.push({ type: 'flag', fact: `sign of ${f.name}`, visible: false, data: { key: `sign_${f.id}`, value: 1 } });
     }
   }
   for (const f of FUSES) {
@@ -150,6 +227,7 @@ export function fuseDrafts(s: GameState, to: number): Draft[] {
     const idx = (out.find((d) => d.data.key === `fuse_${f.id}`)?.data.value as number | undefined) ?? has(s, `fuse_${f.id}`);
     const day = (out.find((d) => d.data.key === `fuse_${f.id}_day`)?.data.value as number | undefined) ?? has(s, `fuse_${f.id}_day`);
     if (day + newsDelay(s, f) > to) continue;
+    if (idx === NEVER) continue; // it never happened: no news
     const news = f.outcomes[idx - 1].news;
     out.push({ type: 'story', fact: `News reaches Li: ${news}`, visible: true, journal: `News: ${news}`, data: { news: f.id } });
     out.push({ type: 'flag', fact: `news of ${f.name} heard`, visible: false, data: { key: `news_${f.id}`, value: 1 } });
@@ -160,7 +238,7 @@ export function fuseDrafts(s: GameState, to: number): Draft[] {
 /** The world as it reaches Li, and what is coming near him (hidden), for Claude's memory. */
 export function fusesText(s: GameState): string {
   const now = today(s);
-  const heard = FUSES.filter((f) => has(s, `news_${f.id}`)).map((f) => `- ${f.outcomes[has(s, `fuse_${f.id}`) - 1].news}`);
+  const heard = FUSES.filter((f) => has(s, `news_${f.id}`) && has(s, `fuse_${f.id}`) !== NEVER).map((f) => `- ${f.outcomes[has(s, `fuse_${f.id}`) - 1].news}`);
   const soon = FUSES.filter((f) => !has(s, `fuse_${f.id}`) && f.day - now <= 90 && (f.kingdom === liKingdom(s) || liIsAt(s, f)));
   const coming = soon.map((f) => `- ${f.name} (in ${f.day - now} days, ${f.where[0]}). Signs you may show: ${f.signs}${liIsAt(s, f) ? ` LI IS THERE: he can push it with a "lever" change (fuse "${f.id}", toward one of ${f.outcomes.map((o) => `"${o.id}"`).join(', ')}): ${f.levers.map((l) => `${l.text} → ${l.toward}`).join('; ')}. Either side; never force it.` : ''}`);
   return [

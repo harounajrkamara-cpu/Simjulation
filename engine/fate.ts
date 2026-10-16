@@ -6,6 +6,8 @@ import { reputation } from './reputation';
 import { underLi } from './loyalty';
 import { FADE, opinion } from './relations';
 import { Draft, GameState } from './types';
+import { KINGDOMS, LAWS, captorOf } from './kingdoms';
+import type { KingdomId } from './world-public';
 
 // Li's fate when things go wrong (Phase 6 block E, audit gaps 9 and 23; built Oct 17, PROVISIONAL, owner kan terugdraaien).
 // - Lies are caught or believed by a fixed rule (Game Experience ch. 5): the listener's INT and eye against Li's POL.
@@ -94,7 +96,9 @@ export function defeatDrafts(s: GameState, cause: string): Draft[] {
       else out.push({ type: 'flag', fact: 'the soldiers talk of Li\'s defeat', visible: true, data: { key: 'rep_soldiers', value: Math.max(0, reputation(s, 'soldiers') - 10) } });
       break;
     case 7:
-      out.push({ type: 'flag', fact: 'Li is taken captive', visible: true, journal: 'They have me. Chains again.', data: { key: 'captive', value: 1 } });
+      out.push({ type: 'flag', fact: `Li is taken captive by ${captorOf(s)}`, visible: true, journal: 'They have me. Chains again.', data: { key: 'captive', value: 1 } });
+      out.push({ type: 'flag', fact: 'captive since', visible: false, data: { key: 'captive_day', value: today(s) } });
+      out.push({ type: 'flag', fact: 'captors', visible: false, data: { key: 'captive_by', value: KINGDOMS.indexOf(captorOf(s)) + 1 } });
       out.push({ type: 'thread', fact: 'open: Li is a captive', visible: false, data: { id: 'captive', text: 'Li is held captive by the enemy: ransom, escape (a fight the code runs) or release ends it ({"kind":"captivity","end":"ransom|escape|released"})', open: true } });
       break;
     case 8: {
@@ -127,7 +131,8 @@ export function captivityDrafts(s: GameState, x: Record<string, unknown>, notes:
     return close;
   }
   if (end === 'ransom') {
-    const price = 2_000 * (rankLevel(careerOf(s).rank) + 1); // PROVISIONAL: 2 ryō per rank step, in mon
+    // PROVISIONAL: 2 ryō per rank step, in mon, times the captors' law (Suiren ×2, Ushio ×½; Atlas §12).
+    const price = Math.round(2_000 * (rankLevel(careerOf(s).rank) + 1) * LAWS[captors(s)].ransom);
     if (s.money >= price) return [{ type: 'money', fact: `Li pays his own ransom: ${price} mon`, visible: true, data: { amount: -price } }, ...close];
     return [{ type: 'flag', fact: 'Li\'s lord pays the ransom; it is remembered', visible: true, data: { key: 'rep_nobles', value: Math.max(0, reputation(s, 'nobles') - 5) } }, ...close];
   }
@@ -136,12 +141,22 @@ export function captivityDrafts(s: GameState, x: Record<string, unknown>, notes:
   return [];
 }
 
+const captors = (s: GameState): KingdomId => KINGDOMS[has(s, 'captive_by') - 1] ?? captorOf(s);
+
+/** The law of the captors frees a captive in time (Tatara keeps no man; Kitakaze's captives work a year). */
+export function captivityTimeDrafts(s: GameState, to: number): Draft[] {
+  if (!has(s, 'captive')) return [];
+  const law = LAWS[captors(s)];
+  if (!law.releaseDays || to - has(s, 'captive_day') < law.releaseDays) return [];
+  return [{ type: 'flag', fact: `By the law of ${captors(s)}, Li is let go`, visible: true, journal: 'They let me go. Their law, not their mercy.', data: { key: 'captive', value: 0 } }, { type: 'thread', fact: 'closed: captive', visible: false, data: { id: 'captive', text: 'Li was a captive', open: false } }];
+}
+
 /** For Claude: where Li stands on the ladder, and captivity. */
 export function fateText(s: GameState): string {
   const step = ladderStep(s);
   return [
     step ? `DEFEAT LADDER: Li has lost ${step} time${step > 1 ? 's' : ''} within a year (last cost: ${LADDER[step - 1]}). The next defeat costs: ${LADDER[Math.min(LADDER.length - 1, step)]}. A win steadies him a step.` : '',
-    has(s, 'captive') ? 'LI IS A CAPTIVE: no service, no promotion; the story is about getting out.' : '',
+    has(s, 'captive') ? `LI IS A CAPTIVE of ${captors(s)} (their law: ${LAWS[captors(s)].captive}): no service, no promotion; the story is about getting out.` : '',
     has(s, 'chance_lost_until') > today(s) ? 'Li lost his chance: no promotion until the shame fades.' : '',
     liesText(s),
   ].filter(Boolean).join('\n');

@@ -62,10 +62,10 @@ describe('the defeat ladder (WB 12b #10)', () => {
     expect(has(s, 'captive')).toBe(1);
     expect(gmMemoryText(s)).toMatch(/LI IS A CAPTIVE/);
     expect(gmApply(s, scene({ changes: [{ kind: 'captivity', end: 'escape' } as never] })).notes.join(' ')).toMatch(/a fight the code runs/);
-    s.money = 10_000;
+    s.money = 20_000; // held by Suiren: the law is for sale, ransom ×2
     gmApply(s, scene({ changes: [{ kind: 'captivity', end: 'ransom' } as never] }));
     expect(has(s, 'captive')).toBe(0);
-    expect(s.money).toBe(10_000 - 8_000);
+    expect(s.money).toBe(20_000 - 16_000);
   });
 
   it('a lost real fight climbs the ladder by itself', () => {

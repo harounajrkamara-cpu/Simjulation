@@ -328,3 +328,20 @@ export function knownHouses(s: GameState): { name: string; kingdom: string; land
     men: `about ${(Math.round(h.troops / 500) * 500 || h.troops).toLocaleString('en')} men`, standing: `${prestigeWord(h.prestige)}, ${cohesionWord(h.cohesion)}`,
   }));
 }
+
+/** A change to a house from elsewhere (a fuse's outcome, engine/fuses.ts). */
+export function patchHouseDraft(s: GameState, id: string, patch: Partial<House>, fact: string): Draft[] {
+  const h = s.houses?.[id];
+  return h ? [houseDraft({ ...h, ...patch }, fact, newsFor(s, h))] : [];
+}
+
+/** A person dies outside Li's hands (a fuse's outcome): the death, then the house's succession. */
+export function deathDrafts(s: GameState, id: string, why: string): Draft[] {
+  const c = s.characters[id];
+  if (!c || !c.alive) return [];
+  const out: Draft[] = [{ type: 'status', fact: `${c.name} dies (${why})`, visible: met(s, id), data: { char: id, status: c.status, role: c.role, alive: false } }];
+  c.alive = false;
+  out.push(...successionDrafts(s, id));
+  c.alive = true;
+  return out;
+}

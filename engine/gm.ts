@@ -21,7 +21,8 @@ import { payDrafts } from './pay';
 import { adoptDrafts, allianceDrafts, foundHouseDrafts, hostageDrafts, houseChangeDrafts, houseTimeDrafts, housesText, successionDrafts, worldDrafts } from './houses';
 import { HIDDEN_PEOPLE } from './world-people';
 import { abilitiesText, abilityDrafts, ABILITIES } from './abilities';
-import { captivityDrafts, defeatDrafts, fateText, lieDrafts } from './fate';
+import { kingdomYearDrafts, kingdomsText } from './kingdoms';
+import { captivityTimeDrafts, captivityDrafts, defeatDrafts, fateText, lieDrafts } from './fate';
 import { bannerDrafts, gatheringDrafts, legendDrafts, momentsText, rumourChangeDrafts, rumourTimeDrafts } from './moments';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
@@ -371,6 +372,7 @@ export function gmMemoryText(s: GameState): string {
     abilitiesText(s),
     momentsText(s),
     fateText(s),
+    kingdomsText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -908,6 +910,9 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   out.push(...houseTimeDrafts(s, today(s), today(s) + n));
   // Talk travels (engine/moments.ts).
   out.push(...rumourTimeDrafts(s, today(s), today(s) + n));
+  // The kingdoms' treasuries move with the years; a captive may be freed by the law of his captors.
+  out.push(...kingdomYearDrafts(s, today(s), today(s) + n));
+  out.push(...captivityTimeDrafts(s, today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.
   const later = part && PARTS.indexOf(part) > PARTS.indexOf(s.date.part);
   const to = dateFromIndex(today(s) + n, n > 0 ? part ?? 'morning' : later ? part! : s.date.part);
