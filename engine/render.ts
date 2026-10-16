@@ -1,5 +1,6 @@
 import { ageOn, dateFromIndex, formatDate, season } from './calendar';
 import { PLACES } from './data';
+import { PRICE_MON } from './campaign';
 import { duelTemplate, has, li, met, options, today } from './engine';
 import { opinion, relSnapshot, visibleOpinion } from './relations';
 import { STAT_NAMES, WOUND_LABEL, capacityLabel, masteryLabel, rankLetter, rankScores, rankSummary } from './rules';
@@ -15,7 +16,9 @@ export function shortDashboard(s: GameState): string {
   const inDuel = s.duel && !s.duel.over;
   const wound = inDuel ? s.duel!.li.wound : c.wound;
   const fat = inDuel ? s.duel!.li.fatigue : c.fatigue;
-  return `📅 ${formatDate(s.date)}\n📍 ${place} | ❤ ${WOUND_LABEL[wound]} · Fatigue ${fat}/3 | 💰 ${s.money} mon`;
+  // Hermes bot test: a clear FREE line once Li is free; the price as progress once Li knows it.
+  const bond = c.status !== 'slave' ? `\n🕊 FREE · ${c.role}` : s.knowledge.includes('own_price_15') ? `\n⛓ His price: fifteen ryō · ${s.money} of ${PRICE_MON} mon` : '';
+  return `📅 ${formatDate(s.date)}\n📍 ${place} | ❤ ${WOUND_LABEL[wound]} · Fatigue ${fat}/3 | 💰 ${s.money} mon${bond}`;
 }
 
 /** Snapshot of what Li can notice, for the ▲▼ changes line. */

@@ -42,8 +42,11 @@ export function parseFreeText(s: GameState, input: string): { action?: Action; a
   const who = (words: string) => findPerson(s, words);
   const m = t.match(/(?:talk|speak|ask|chat)(?: to| with)?\s+(.+)/);
   if (m) {
-    const id = who(m[1]);
-    return id ? { action: { kind: 'talk', target: id } } : { ask: `Talk to whom? Li knows: ${Object.keys(s.relations).filter((id) => has(s, `met_${id}`)).join(', ')}.` };
+    // Hermes bot test: list known people by number and name, and accept "talk 2".
+    const known = Object.keys(s.relations).filter((id) => has(s, `met_${id}`) && s.characters[id]?.alive);
+    const n = Number(m[1].trim());
+    const id = Number.isInteger(n) && n >= 1 && n <= known.length ? known[n - 1] : who(m[1]);
+    return id ? { action: { kind: 'talk', target: id } } : { ask: `Talk to whom? Li knows: ${known.map((k, i) => `${i + 1} ${s.characters[k].name}`).join(', ')}. Type for example "talk 1".` };
   }
   const want = (re: RegExp) => re.test(t);
   const matches: Action[] = [];
