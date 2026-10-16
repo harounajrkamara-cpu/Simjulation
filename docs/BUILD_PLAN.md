@@ -163,5 +163,26 @@ All four stages are playable through the referee: `tests/whole-life.test.ts` pla
 5. **PROVISIONAL numbers** in `domain.ts`, `family.ts`, `court.ts`, `discontent.ts`, `clocks.ts`, `reputation.ts`: kept as defaults; each is marked in the code and the World Bible.
 **Not proven:** none of this has been played with the real Claude on claude.ai.
 
+## Phase 6 – The world, Li's people, big moments (owner, Oct 17, from `docs/AUDIT.md`)
+Scope: audit gaps 1–28 plus 10 (rumours). **Skipped for now (owner):** engine & polish (29–33 except what a block needs) and later/parked (34–35).
+**"Done" rule:** a block is done only when its AUDIT rows are ✅, it has tests, and it is playable on the page. Nothing is called finished before every row is ✅ or parked by the owner.
+
+**How every block runs:** canon check (WB, Atlas, Numbers) → if the canon has no numbers or rules: a short design chapter with research, **owner approves** → write it into the World Bible / Numbers Sheet → build in small commits (tests + typecheck + balance green) → push `build/stage-1`, publish the page → AUDIT row ✅ → STATUS.
+**Canon ready** = the rules and numbers already exist, so it can be built straight away. **Design first** = the canon says *what*, not *how much*; the owner approves before building.
+
+| Block | Gaps | What | Canon | Depends on |
+|---|---|---|---|---|
+| **A. Quick rules** | 11, 12, 13, 20, 22 | soldier pay · loyalty, obedience, betrayal · promises (+10 / −25, trust scar) · permanent injury · command overload in battle | ready (Numbers §3, §4, §7, §8) | – |
+| **B. Houses and people** | 1, 2, 3 | house records for every Tier A house of the 7 kingdoms (land, wealth, troops, prestige, Crown loyalty, cohesion, head, heir, branches) · the Atlas people as real records (stats, age, goals, secrets) who age, grow, die of age, and are replaced by heirs · genpuku · house marriages, hostages, adoption, succession, gekokujō | design first: WB ch. 2–3 and 13c say what is tracked, not how it changes (prestige, cohesion → split, lifespans, succession) | – |
+| **C. Abilities** | 15–19 | abilities as records (rank, mastery, type, limit, cost, trigger, weakness) · the Zone with rounds and uses in the duel ("Zone: 2 of 3"), collapse after · Kage no Yaiba, Twin Demon Dance · style choice at 30/50/70/100 · aura on morale and the opponent's hesitation | mostly ready (WB ch. 5, 10.5); design first for the exact Zone effect, aura size and the style unlock pairs | A (injuries can block abilities) |
+| **D. Big moments** | 23–28, 10 | ceremony screen with witnesses reacting by opinion · legend pages in the Journal · rumours about Li in GM mode · nicknames per group from deeds and witnesses · Li's own unit name and banner · feasts, funerals, oaths · title screen (Continue / New life / Load) | mostly ready (GE ch. 3, 3b); design first for rumour spread and nickname rules | B (witnesses are real people) |
+| **E. Li's fate** | 14, 21 | lies caught by a rule (NPC INT + knowledge vs Li POL) · the defeat ladder: beaten, chained, sold, branded, hunted, captured, ransom, rank loss | design first: WB ch. 12b names the ladder, no numbers | B |
+| **F. Kingdoms** | 4, 5, 9 | kingdom values (treasury, unity, succession, Crown share) · laws and slavery per kingdom with real effects · fuse decision trees (who acts, scored choices, visible signs) replacing the fixed days | design first (Numbers §11 leaves the trees to "stage 4") | B |
+| **G. World texture** | 6, 7, 8 | neutral powers you can deal with (Shōgen, Mist Valley shinobi, Kinza market and loans, Single Path, Seiran exams) · trade and embargoes (Atlas §8) · weather and hidden causes · festivals · the Imperial treasures as objects · governors | design first | F |
+
+**Order:** A → B → C → D → E → F → G. Reason: A is felt in the first hour and needs no design; B is the owner's first ask and what D, E and F build on; C and D are the hype of the soldier years; E, F and G matter most in the officer and general years.
+**While a block is being built, the next block's design chapter is written** so the owner never waits.
+**Size (honest guess):** A ≈ 1 session · B ≈ 2–3 · C ≈ 1–2 · D ≈ 2 · E ≈ 1 · F ≈ 2 · G ≈ 2. Wrong guesses get corrected in STATUS, not hidden.
+
 ## Testing (every phase)
 Unit · determinism replay · Monte Carlo balance (Numbers §12) · narrator golden set · Playwright UI (1440 / 390 px) · owner playtest at the end of the slice and of each phase.
