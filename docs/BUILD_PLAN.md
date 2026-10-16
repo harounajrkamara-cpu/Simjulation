@@ -132,5 +132,30 @@ Wishes in (brackets), five long goals, early family lead, chained Skip ahead, So
 ## Phase 3 – Stage 2: soldier life · Phase 4 – Stage 3: land & family · Phase 5 – Stage 4: court & kingdoms + epilogue
 Each phase gets its own milestone table at its start (spec → plan → tasks). Details: GE ch. 10 Part B.
 
+### Status (Oct 17, owner goal "finish the whole game, all stages") ✅ built in code, Game Master mode
+All four stages are playable through the referee: `tests/whole-life.test.ts` plays one life from slave to freedom, every rank to Sennin-shō with a sponsor, land, marriage and a child, the court, retirement and the epilogue, and the save replays it exactly. A probe run reaches Dai-Shōgun at 60 with only two deeds per two months.
+
+| Phase | Milestone (GE Part B) | Where | Status |
+|---|---|---|---|
+| 3 | Units and battles (WB 6b) | `engine/battle.ts`, `engine/gm-battle.ts` | ✅ (Oct 10) |
+| 3 | The battle map | `web/main.ts` battleMap | ✅ Oct 17 (Li's view, fog kept) |
+| 3 | Merit, promotion, reward ceremonies, titles | `engine/career.ts`, `engine/gm-career.ts` | ✅ (Oct 10) |
+| 3 | Army roster | `web/panels.ts` armyPage | ✅ Oct 17 (from Gochō: his command, land troops, people under him) |
+| 3 | Time zoom to days | `engine/stages.ts` | ✅ (soldier 90 days per scene max) |
+| 3 | The runaway road (Phase 2 question 4) | serve Tatara after escape | ✅ works in code (test) |
+| 4 | Land, economy, domain | `engine/domain.ts`, `engine/gm-domain.ts` | ✅ (Oct 10; PROVISIONAL numbers) |
+| 4 | Family: marriage and children | `engine/family.ts` | ✅ Oct 17 (PROVISIONAL numbers) |
+| 4 | Close-up map of the camp and Li's land | `web/close-map.ts` | ✅ Oct 17 |
+| 4 | Time zoom to weeks | `engine/stages.ts` | ✅ (officer/general 360 days per scene max) |
+| 5 | Fuses and the free world | `engine/fuses.ts`, `engine/seeds.ts` | ✅ (Oct 15) |
+| 5 | Factions: Li at court | `engine/court.ts` | ✅ Oct 17 (Kurogane only) |
+| 5 | Reputation per group (WB ch. 8) | `engine/reputation.ts` | ✅ Oct 17 |
+| 5 | Epilogue (GE ch. 9 decision 2) | `engine/epilogue.ts` | ✅ Oct 17 (retire, or 60+) |
+| all | Li's plan for every stage, milestone films, sparks, pacing director, drama layer | `engine/plan.ts` and others | ✅ Oct 16–17 |
+
+**Not built (honest):** faction *discontent* as its own simulation (the great crises are the fuses instead); courts of the other six kingdoms (Li may serve them, but only Kurogane's factions are modelled); reputation feeding the promotion score (owner question on its scale); a Playwright run of the new screens (no Chrome here; checked by hand in the built-in browser).
+**Owner decisions still open:** buying freedom is slow (Phase 2 #2); officers' rhythm (Phase 2 #3); Raizen's share (Phase 2 #5); the battle stall drain; the PROVISIONAL numbers in `domain.ts`, `family.ts`, `court.ts`, `clocks.ts`.
+**Not proven:** none of this has been played with the real Claude on claude.ai.
+
 ## Testing (every phase)
 Unit · determinism replay · Monte Carlo balance (Numbers §12) · narrator golden set · Playwright UI (1440 / 390 px) · owner playtest at the end of the slice and of each phase.
