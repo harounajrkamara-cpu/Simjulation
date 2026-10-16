@@ -159,8 +159,8 @@ All four stages are playable through the referee: `tests/whole-life.test.ts` pla
 1. **Buying freedom is slow** (Phase 2 #2): kept as a slow, late route (15 ryō), but the Game Master now knows the real ways to earn (tips, stitching the wounded, Sukezō's remedies, levy loot, dice with risk). Reason: freedom by money should feel earned; merit and Raizen stay the main roads.
 2. **Officers' rhythm** (Phase 2 #3): kept (a Gochō and a Kogashira once a year each in the classic chronicle; in Game Master mode officers come only through raids and battles the code records). Reason: the GM mode already follows Numbers §6.
 3. **Raizen's share** (Phase 2 #5): kept (respect > 50, half of 0.1 ryō per merit). Reason: small, and it makes Raizen's goodwill matter.
-4. **Battle stall drain** −3 per phase (sheet −5): kept. Reason: equal armies then pull back at night instead of breaking together, which reads better;  shows it.
-5. **PROVISIONAL numbers** in , , , , , : kept as defaults; each is marked in the code and the World Bible.
+4. **Battle stall drain** −3 per phase (sheet −5): kept. Reason: equal armies then pull back at night instead of breaking together, which reads better; `scripts/battle-sim.ts` shows it.
+5. **PROVISIONAL numbers** in `domain.ts`, `family.ts`, `court.ts`, `discontent.ts`, `clocks.ts`, `reputation.ts`: kept as defaults; each is marked in the code and the World Bible.
 **Not proven:** none of this has been played with the real Claude on claude.ai.
 
 ## Testing (every phase)
