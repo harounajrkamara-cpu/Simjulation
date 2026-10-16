@@ -59,7 +59,10 @@ export function epilogueDrafts(s: GameState, e: { title?: unknown; text?: unknow
   if (ended(s)) return [];
   const fallback = plainEpilogue(s, why);
   const title = typeof e.title === 'string' && e.title.trim() ? e.title.trim().slice(0, 60) : fallback.title;
-  const text = typeof e.text === 'string' && e.text.trim().length > 80 ? e.text.trim().slice(0, 4000) : fallback.text;
+  // The hidden rule: the epilogue never shows Li dying (GE ch. 9). A told epilogue that does is replaced by the plain one.
+  const dies = /\bLi\b[^.!?]{0,80}\b(?:died|dies|dead|death|buried|grave|funeral|passed away|breathed his last|last breath)\b/i;
+  const told = typeof e.text === 'string' && e.text.trim().length > 80 && !dies.test(e.text) ? e.text.trim().slice(0, 4000) : undefined;
+  const text = told ?? fallback.text;
   return [
     { type: 'story', fact: text, visible: true, journal: 'Here the chronicle of Li ends.', data: { epilogueTitle: title, why } },
     { type: 'flag', fact: 'the epilogue is written', visible: false, data: { key: 'epilogue', value: 1 } },

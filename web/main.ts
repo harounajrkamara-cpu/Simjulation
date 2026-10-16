@@ -189,7 +189,7 @@ function battleMap(v: ReturnType<typeof battleView>): string {
     <line x1="8" x2="396" y1="92" y2="92" class="bm-front"/>
     ${cols.map((c, n) => block(c, n, 'theirs') + block(c, n, 'ours')).join('')}
     ${reserve ? `<g class="bm-unit ours ${mood(reserve.ours)}"><rect x="142" y="184" width="118" height="40" rx="4"/><text x="201" y="208" text-anchor="middle">reserve · ${esc(reserve.ours.split(' · ')[0])}</text></g>` : ''}
-    ${k >= 0 ? `<g class="bm-li"><circle cx="${116 + k * 130}" cy="120" r="6"/><text x="${92 + k * 130}" y="124">Li</text></g>` : ''}
+    ${k >= 0 ? `<g class="bm-li"><circle cx="${116 + k * 130}" cy="120" r="6"/><text x="${92 + k * 130}" y="124">Li</text></g>` : li?.sector === 'reserve' && reserve ? '<g class="bm-li"><circle cx="250" cy="196" r="6"/><text x="226" y="200">Li</text></g>' : ''}
   </svg>`;
 }
 
@@ -312,6 +312,7 @@ function setBusy(on: boolean) {
 
 /** One Game Master turn (owner decision Oct 7): Claude writes the scene, the code checks and records it. */
 async function gmStep(text?: string, said = text) {
+  if (ended(state)) return; // the life is complete after the epilogue (review Oct 17)
   if (!ai) {
     show('Game Master mode needs Claude, and Claude is only here when this page is opened on claude.ai. Start a New life and pick "Classic chronicle" to play without it.', said);
     return;
@@ -453,7 +454,8 @@ async function filmsFor(events: GameEvent[], said?: string) {
   if (wed) marks.push({ kicker: 'A marriage', title: wed.fact.replace(/ \(.*\)$/, ''), line: wed.journal ?? '', seal: '縁' });
   for (const e of events.filter((x) => x.type === 'person' && String((x.data as { id?: string }).id).startsWith('child_'))) marks.push({ kicker: 'A child is born', title: String((e.data as { name?: string }).name), line: e.journal ?? '', seal: '子' });
   const land = flag(/^land_koku$/);
-  if (land) marks.push({ kicker: 'Land of his own', title: state.domain?.name ?? 'Li\'s land', line: `About ${Number((land.data as { value: number }).value).toLocaleString('en-US')} koku a year.`, seal: '地' });
+  // Only his first land: a later, larger grant is not a new milestone (review Oct 17).
+  if (land && state.events.filter((e) => (e.data as { key?: string }).key === 'land_koku').length === 1) marks.push({ kicker: 'Land of his own', title: state.domain?.name ?? 'Li\'s land', line: `About ${Number((land.data as { value: number }).value).toLocaleString('en-US')} koku a year.`, seal: '地' });
   if (knows('family_found')) marks.push({ kicker: 'Home', title: 'He found them', line: 'His mother and sisters, alive.', seal: '家' });
   else if (knows('family_alive')) marks.push({ kicker: 'A lead', title: 'They are alive', line: 'Somewhere, his family lives.', seal: '家' });
   if (knows('father_killers')) marks.push({ kicker: 'The truth', title: 'Who killed his father', line: 'Now he knows the names.', seal: '真' });
@@ -563,7 +565,7 @@ function openSkip() {
 }
 
 async function runSkip(until: string, plan: string, maxScenes?: number, label = `Skip ahead ${until}. ${plan}`) {
-  if (!ai || busy) return;
+  if (!ai || busy || ended(state)) return;
   setBusy(true);
   const head = newTurn(label);
   head.insertAdjacentHTML('beforeend', '<p class="text info wet">The days pass…</p>');
@@ -643,7 +645,7 @@ function openWrong() {
 }
 
 async function runWrong(report: string) {
-  if (!ai || busy) return;
+  if (!ai || busy || ended(state)) return;
   setBusy(true);
   toolbox.innerHTML = '<p class="text info wet">The Game Master checks the memory…</p>';
   let p: GmFixProposal;

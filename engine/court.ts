@@ -34,7 +34,12 @@ export function factionDrafts(s: GameState, x: { faction?: unknown; delta?: unkn
     if (rankLevel(careerOf(s).rank) < rankLevel(COURT.joinRank)) { notes.push(`${f.name} does not take men below Sennin-shō`); return []; }
     if (standing(s, f.id) < COURT.joinStanding) { notes.push(`${f.name} does not trust Li enough (standing ${standing(s, f.id)} of ${COURT.joinStanding})`); return []; }
     if (f.hatesLowBorn && careerOf(s).bond === 'freed') { notes.push(`${f.name} will never take a freed slave`); return []; }
-    return [{ type: 'flag', fact: `Li joins ${f.name}`, visible: true, journal: `I have chosen a side at court: ${f.name}.`, data: { key: 'court_member', value: k + 1 } }];
+    // Changing sides costs the old side's trust (review Oct 17: a switch was silent).
+    const old = FACTIONS.find((o) => o.id === memberOf(s) && o.id !== f.id);
+    return [
+      ...(old ? [{ type: 'flag' as const, fact: `Li leaves ${old.name} for ${f.name}`, visible: true, data: { key: key(old.id), value: Math.max(-100, standing(s, old.id) - 30) + 100 } }] : []),
+      { type: 'flag', fact: `Li joins ${f.name}`, visible: true, journal: `I have chosen a side at court: ${f.name}.`, data: { key: 'court_member', value: k + 1 } },
+    ];
   }
   const d = Math.max(-COURT.delta, Math.min(COURT.delta, Math.round(Number(x.delta) || 0)));
   if (!d) return [];

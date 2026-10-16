@@ -12,11 +12,17 @@ import { Draft, GameState } from './types';
 /** PROVISIONAL (goal Oct 17): ages, the love bar, time between children. */
 export const FAMILY = { liMinAge: 16, spouseMinAge: 15, loveAffection: 70, loveTrust: 50, childEveryDays: 300, maxChildren: 6 } as const;
 
+/** Li's own blood: his children, his mother and sisters (World Bible ch. 10). */
+const KIN = /^(?:child_|yuki$|mei$|kenjiko$)/;
 const NOBLE = /\b(?:Hagiwara|Ishizue|Tsurumaki|Kamio|Gōda|Ebisawa|Kirishima|Asagiri|lord|lady|princess|prince|heir|daughter of Lord)\b/i;
 /** A person of a noble house (World Atlas houses, or a lord's family by role). */
 export const isNoble = (s: GameState, id: string) => NOBLE.test(`${s.characters[id]?.name ?? ''} ${s.characters[id]?.role ?? ''}`);
 
-export const spouseOf = (s: GameState): string | undefined => Object.keys(s.flags).find((k) => k.startsWith('spouse_') && s.flags[k] > 0)?.slice(7);
+/** The living spouse, else the last one (a widower who married again has his new wife; review Oct 17). */
+export const spouseOf = (s: GameState): string | undefined => {
+  const all = Object.keys(s.flags).filter((k) => k.startsWith('spouse_') && s.flags[k] > 0).map((k) => k.slice(7));
+  return all.filter((id) => s.characters[id]?.alive).at(-1) ?? all.at(-1);
+};
 export const childrenOf = (s: GameState): string[] => Object.keys(s.characters).filter((id) => id.startsWith('child_'));
 
 const slug = (x: string) => x.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24);
@@ -32,6 +38,7 @@ export function marryDrafts(s: GameState, x: { npc?: unknown; alliance?: unknown
   if (ageOn(c.born, s.date) < FAMILY.liMinAge) { notes.push(`Li is too young to marry (${FAMILY.liMinAge})`); return []; }
   if (spouse && s.characters[spouse]?.alive) { notes.push(`Li is already married to ${s.characters[spouse].name}`); return []; }
   if (!p || id === s.liId || !p.alive || !met(s, id)) { notes.push(`no living person "${id}" Li knows to marry`); return []; }
+  if (KIN.test(id)) { notes.push(`${p.name} is Li's own family`); return []; }
   if (ageOn(p.born, s.date) < FAMILY.spouseMinAge) { notes.push(`${p.name} is too young to marry`); return []; }
   const v = relSnapshot(s.relations[id], today(s));
   const rank = rankLevel(careerOf(s).rank);
@@ -62,7 +69,7 @@ export function childDrafts(s: GameState, x: { name?: unknown; son?: unknown }, 
   if (s.characters[id]) { notes.push(`there is already a child called ${name}`); return []; }
   const born = dateFromIndex(today(s));
   return [{ type: 'person', fact: `Li's ${son ? 'son' : 'daughter'} ${name} is born`, visible: true, journal: `My ${son ? 'son' : 'daughter'} ${name} was born.`,
-    data: { id, name, role: `Li's ${son ? 'son' : 'daughter'}`, desc: `Li's ${son ? 'son' : 'daughter'}, born ${born.year}/${born.month}.`, goal: 'Grow up in his father\'s house.', base: { trust: 80, respect: 60, affection: 85, fear: 0, rivalry: 0 }, day: today(s), born: { year: born.year, month: born.month, day: born.day } } }];
+    data: { id, name, role: `Li's ${son ? 'son' : 'daughter'}`, desc: `Li's ${son ? 'son' : 'daughter'}, born ${born.year}/${born.month}.`, goal: 'Grow up in his father\'s house.', base: { trust: 80, respect: 60, affection: 85, fear: 0, rivalry: 0 }, day: today(s), born: { year: born.year, month: born.month, day: born.day }, child: true } }];
 }
 
 /** For Claude's memory: Li's house. */

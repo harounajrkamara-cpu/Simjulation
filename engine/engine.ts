@@ -90,7 +90,7 @@ export function apply(state: GameState, ev: GameEvent): void {
     }
     case 'person': {
       state.characters[d.id] = {
-        id: d.id, name: d.name, born: d.born ?? { year: 80, month: 1, day: 1 }, role: d.role, status: 'free', stats: { LEA: 20, VAL: 20, INT: 20, POL: 20 },
+        id: d.id, name: d.name, born: d.born ?? { year: 80, month: 1, day: 1 }, role: d.role, status: 'free', stats: d.child ? { LEA: 2, VAL: 2, INT: 2, POL: 2 } : { LEA: 20, VAL: 20, INT: 20, POL: 20 },
         potential: { LEA: 30, VAL: 30, INT: 30, POL: 30 }, styles: {}, skills: {}, wound: 0, healDays: 0, fatigue: 0, traits: [],
         location: state.characters[state.liId].location, alive: true, desc: d.desc, publicRank: '?',
       };

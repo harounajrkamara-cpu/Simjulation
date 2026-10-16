@@ -41,6 +41,7 @@ const TERMS: Record<string, string> = {
 };
 
 /** Gold-underlined terms with a short explanation, only for what Li has learned (ch. 8 §5). Works on escaped HTML. */
+const COMMON = /^(?:Man|Men|Woman|Boy|Girl|Smith|Lord|Lady|Old|Young|Captain|Sergeant|Monk|Priest|Merchant|Farmer|Soldier|Guard|Cook|Archer|Stranger|Elder|Master)$/;
 const escRe = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const escHtml = (x: string) => x.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 
@@ -54,7 +55,8 @@ function termsFor(s: GameState): [string, string, string][] {
     if (!p || id === s.liId || !has(s, `met_${id}`)) continue;
     const short = p.name.replace(/"[^"]*"/g, '').trim().split(/\s+/);
     const word = short[short.length - 1]; // how people are called: Raizen, Sukezō, Rokubei, Sayo
-    if (word.length >= 3) out.push([escRe(word), p.name, `${p.role}${p.alive ? `. ${visibleOpinion(s, id)}` : '. Dead.'}`]);
+    // A name, not a common word ("the Old Man" must not tip every "Man"; review Oct 17).
+    if (word.length >= 3 && /^\p{Lu}/u.test(word) && !COMMON.test(word)) out.push([escRe(word), p.name, `${p.role}${p.alive ? `. ${visibleOpinion(s, id)}` : '. Dead.'}`]);
   }
   for (const r of RANKS) if (r.id !== 'ashigaru') out.push([escRe(r.title), r.title, `${r.english ? `${r.english}: ` : ''}an officer of ${r.men} men.`]);
   for (const k of WORLD_START.kingdoms) out.push([escRe(k.name), `${k.name}, ${k.epithet}`, `Capital ${k.capital}. ${k.ruler}`]);
