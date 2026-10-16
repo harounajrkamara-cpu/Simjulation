@@ -1,3 +1,4 @@
+import { WEATHER_LOSS, weatherOf } from './texture';
 import { dateFromIndex } from './calendar';
 import { checkLandGrant, rankLevel } from './career';
 import {
@@ -78,6 +79,8 @@ export function domainMonthDrafts(s: GameState, from: number, to: number): Draft
   for (let k = from + 1; k <= to; k++) {
     if (k % 30 !== 0) continue; // day 1 of a month: the month before has ended
     const ended = dateFromIndex(k - 1);
+    // The year's weather where the land lies reaches the harvest at tax day (engine/texture.ts).
+    if (ended.month === 9) d = { ...d, weather: WEATHER_LOSS[weatherOf(s, careerOf(s).kingdom, ended.year)] };
     const step = endMonth(d, ended.year, ended.month);
     d = step.domain;
     const news = step.events.filter((e) => !['maintenance'].includes(e.kind)).map((e) => e.text);

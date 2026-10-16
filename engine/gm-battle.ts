@@ -1,3 +1,4 @@
+import { mercsNow } from './texture';
 import { defeatDrafts, victoryDrafts } from './fate';
 import { bannerOf } from './moments';
 import { ABILITIES, auraBattleShock, hasAbility } from './abilities';
@@ -37,7 +38,8 @@ function liUnit(s: GameState): { men: number; leads: boolean; name: string } {
   if (car.rank === 'ashigaru') return { men: 100, leads: false, name: "Li's company" };
   const r = rankInfo(car.rank);
   // His unit's own name, once it has one (engine/moments.ts banner).
-  return { men: Math.max(5, r.min), leads: true, name: bannerOf(s)?.split(' — ')[0] ?? `Li's ${r.title}` };
+  // Hired Kinza swords march with him (engine/texture.ts).
+  return { men: Math.max(5, r.min) + mercsNow(s), leads: true, name: bannerOf(s)?.split(' — ')[0] ?? `Li's ${r.title}` };
 }
 
 /** A battle Claude sets up. Refused while a fight or another battle is on, or when either side has nobody. */

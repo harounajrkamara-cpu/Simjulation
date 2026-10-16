@@ -22,6 +22,7 @@ import { adoptDrafts, allianceDrafts, foundHouseDrafts, hostageDrafts, houseChan
 import { HIDDEN_PEOPLE } from './world-people';
 import { abilitiesText, abilityDrafts, ABILITIES } from './abilities';
 import { kingdomYearDrafts, kingdomsText } from './kingdoms';
+import { debtClockDrafts, embargoDrafts, examDrafts, festivalDrafts, governorDrafts, hireDrafts, loanDrafts, shinobiDrafts, shogenDrafts, textureText, treasureDrafts, worldYearDrafts } from './texture';
 import { captivityTimeDrafts, captivityDrafts, defeatDrafts, fateText, lieDrafts } from './fate';
 import { bannerDrafts, gatheringDrafts, legendDrafts, momentsText, rumourChangeDrafts, rumourTimeDrafts } from './moments';
 import { storyWindow } from './recaps';
@@ -104,6 +105,14 @@ export type GmChange =
   | { kind: 'banner'; name: string; sign: string }
   | { kind: 'lie'; npc: string; about?: string; truthKnown?: boolean; believed?: boolean; discovered?: boolean }
   | { kind: 'captivity'; end: string; reason?: string }
+  | { kind: 'embargo'; from: string; to: string; end?: boolean }
+  | { kind: 'loan'; ryo?: number; repay?: number | boolean }
+  | { kind: 'hire'; men: number; months: number }
+  | { kind: 'shinobi'; target: string }
+  | { kind: 'shogen'; gift?: number }
+  | { kind: 'exam' }
+  | { kind: 'treasure'; id: string; holder: string; reason?: string }
+  | { kind: 'governor'; state: string }
   | { kind: 'money'; amount: number; reason: string }
   | { kind: 'wound'; level: number; reason: string }
   | { kind: 'fatigue'; level: number }
@@ -373,6 +382,7 @@ export function gmMemoryText(s: GameState): string {
     momentsText(s),
     fateText(s),
     kingdomsText(s),
+    textureText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -665,6 +675,30 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       case 'banner':
         drafts.push(...bannerDrafts(s, x, notes));
         break;
+      case 'embargo':
+        drafts.push(...embargoDrafts(s, x, notes));
+        break;
+      case 'loan':
+        drafts.push(...loanDrafts(s, x, notes));
+        break;
+      case 'hire':
+        drafts.push(...hireDrafts(s, x, notes));
+        break;
+      case 'shinobi':
+        drafts.push(...shinobiDrafts(s, x, notes));
+        break;
+      case 'shogen':
+        drafts.push(...shogenDrafts(s, x, notes));
+        break;
+      case 'exam':
+        drafts.push(...examDrafts(s, notes));
+        break;
+      case 'treasure':
+        drafts.push(...treasureDrafts(s, x, notes));
+        break;
+      case 'governor':
+        drafts.push(...governorDrafts(s, x, notes));
+        break;
       case 'lie':
         drafts.push(...lieDrafts(s, x, notes, secretNotes));
         break;
@@ -913,6 +947,10 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   // The kingdoms' treasuries move with the years; a captive may be freed by the law of his captors.
   out.push(...kingdomYearDrafts(s, today(s), today(s) + n));
   out.push(...captivityTimeDrafts(s, today(s) + n));
+  // The world's texture: weather and uprisings by the year, festivals, the Kinza debt (engine/texture.ts).
+  out.push(...worldYearDrafts(s, today(s), today(s) + n));
+  out.push(...festivalDrafts(s, today(s), today(s) + n));
+  out.push(...debtClockDrafts(s));
   // Time never runs backwards: a part earlier than now on the same day is ignored.
   const later = part && PARTS.indexOf(part) > PARTS.indexOf(s.date.part);
   const to = dateFromIndex(today(s) + n, n > 0 ? part ?? 'morning' : later ? part! : s.date.part);
