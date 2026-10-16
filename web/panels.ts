@@ -3,7 +3,8 @@ import { ageOn, formatDate } from '../engine/calendar';
 import { ENCYCLOPEDIA, STORY } from '../engine/content';
 import { ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PRICE_MON, inService } from '../engine/campaign';
 import { PLACES } from '../engine/data';
-import { has, li, met, today } from '../engine/engine';
+import { has, injuriesOf, li, met, today } from '../engine/engine';
+import { loyaltyLabel, openPromises } from '../engine/loyalty';
 import { journalArcs, pctToNext, trophies } from '../engine/render';
 import { visibleOpinion } from '../engine/relations';
 import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '../engine/rules';
@@ -138,6 +139,8 @@ export function liPage(s: GameState): string {
   return `<div class="card">${liCard(s)}</div>${planHtml}${lifeHtml}${threatHtml}
     <h2 class="label">Condition</h2>
     <table class="table"><tr><th>Wounds</th><td>${WOUND_LABEL[c.wound]}${c.wound ? ` · ${c.healDays} days to heal a step` : ''}</td></tr>
+      ${injuriesOf(s, c.id).length ? `<tr><th>Lasting injuries</th><td>${esc(injuriesOf(s, c.id).join(', '))}</td></tr>` : ''}
+      ${openPromises(s).length ? `<tr><th>His word given</th><td>${openPromises(s).map((x) => esc(x.text)).join('<br>')}</td></tr>` : ''}
       <tr><th>Fatigue</th><td>${c.fatigue} of 3</td></tr><tr><th>Money</th><td>${s.money} mon</td></tr>
       <tr><th>Rank</th><td>Overall ${rankLetter(r.overall)} · Warrior ${r.warrior.toFixed(1)} · Commander ${r.commander.toFixed(1)} · Statesman ${r.statesman.toFixed(1)}</td></tr></table>
     <h2 class="label">Stats</h2><table class="table">${stats}</table>
@@ -156,7 +159,7 @@ function personCard(s: GameState, id: string): string {
   return `<article class="person"><div class="top"><div class="crest small" aria-hidden="true">${esc(name[0] ?? '?')}</div>
     <div class="who"><span class="name">${esc(name)}</span><span class="sub">${esc(p.role ?? '')}</span></div></div>
     <p>${esc(p.desc ?? '')}</p><p>Strength (Li's guess): ${esc(p.publicRank ?? '?')}</p>
-    <p class="op">Toward Li: ${esc(visibleOpinion(s, id))}</p></article>`;
+    <p class="op">Toward Li: ${esc(visibleOpinion(s, id))}</p>${loyaltyLabel(s, id) ? `<p class="op">Loyalty: ${loyaltyLabel(s, id)}</p>` : ''}</article>`;
 }
 
 export function peoplePage(s: GameState): string {

@@ -3,7 +3,7 @@ import { BEATS, DUELS, DuelTemplate, Effect, RUMOURS, STORY as BASE_STORY, Story
 import { ARC, ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PAYDAY_TIP, PRICE_MON, SHARE_MIN_RESPECT, SHARE_PER_MERIT, STITCH_TIP, fordStory, inService, officerOf, officerTemplate, raidIndexOn, setRelField, skirmishTemplate } from './campaign';
 import { relValue } from './relations';
 import { restDone } from './director';
-import { DuelMove, DuelState, MOVE_LABEL, autoMove, duelRound } from './duel';
+import { DuelMove, DuelState, MOVE_LABEL, INJURY_VAL, autoMove, duelRound } from './duel';
 import { challengeFactor, rankLetter, rankScores, RANK_BANDS } from './rules';
 import { createWorld } from './data';
 import { hashValue } from './hash';
@@ -605,6 +605,8 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   if (liWound !== c.wound) out.push({ type: 'wound', fact: `Li is ${liWound >= 3 ? 'badly wounded' : liWound === 2 ? 'wounded' : liWound === 1 ? 'hurt' : 'unhurt'}`, visible: true, data: { char: c.id, wound: liWound, healDays: HEAL_DAYS[liWound] } });
   out.push(...fatigue(s, Math.min(3, d.li.fatigue + 1)));
   if (liWound >= 3) out.push({ type: 'flag', fact: 'near-death', visible: false, data: { key: 'near_death', value: has(s, 'near_death') + 1 } });
+  out.push(...injuryDrafts(s, c.id, liWound >= 3 ? d.li.injury : undefined));
+  if (s.characters[d.foe.id]) out.push(...injuryDrafts(s, d.foe.id, d.foe.injury));
   out.push({ type: 'story', fact: res.fact, visible: true, journal: res.journal, data: { duelEnd: d.id, result: d.result } });
   if (res.grow > 0) {
     for (const [kind, key] of [['stat', 'VAL'], ['style', 'two_swords']] as const) {
@@ -624,6 +626,22 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   out.push({ type: 'duel', fact: 'duel over', visible: false, data: { state: null } });
   return out;
 }
+
+/** A permanent injury: it never heals, costs VAL (Numbers §4, PROVISIONAL cost) and is remembered by its key. */
+export function injuryDrafts(s: GameState, char: string, area: string | undefined): Draft[] {
+  if (!area) return [];
+  const p = s.characters[char];
+  const key = `injury_${char}_${area.replace(/s+/g, '_')}`;
+  if (has(s, key)) return [];
+  const name = char === s.liId ? 'Li' : p.name;
+  return [
+    { type: 'flag', fact: `${name} carries a lasting injury: the ${area}`, visible: true, journal: char === s.liId ? `My ${area} will never be what it was.` : undefined, data: { key, value: 1 } },
+    { type: 'stat', fact: `the injured ${area} costs strength`, visible: false, data: { char, stat: 'VAL', amount: INJURY_VAL[area] ?? -1 } },
+  ];
+}
+
+/** Every lasting injury of a person, by area. */
+export const injuriesOf = (s: GameState, char: string) => Object.keys(s.flags).filter((k) => k.startsWith(`injury_${char}_`) && s.flags[k] > 0).map((k) => k.slice(`injury_${char}_`.length).replace(/_/g, ' '));
 
 function heal(s: GameState): Draft[] {
   const c = li(s);

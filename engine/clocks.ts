@@ -10,7 +10,7 @@ import { Draft, GameState, ThreatClock } from './types';
 export const CLOCK_DAYS_PER_STEP = 2;
 export const MAX_OPEN_CLOCKS = 3;
 
-const clocks = (s: GameState) => s.gm?.clocks ?? [];
+export const clocks = (s: GameState) => s.gm?.clocks ?? [];
 const open = (s: GameState) => clocks(s).filter((c) => c.open);
 const slug = (x: string) => x.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 30);
 const draft = (c: ThreatClock, fact: string): Draft => ({ type: 'thread', fact, visible: false, data: { clock: c } });

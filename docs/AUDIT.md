@@ -21,15 +21,15 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 |---|---|---|---|
 | 1 | **Houses as a living system** (WB ch. 2–3): each house has land, wealth, troops, prestige, loyalty to the Crown, cohesion, a head and heir, branches; marriages between houses, hostages, adoption, succession, gekokujō | Only Kurogane's 7 houses, as public text (`engine/atlas-public.ts`). Other kingdoms' Tier A houses (Atlas §3.2–3.7: Shirasagi, Akabane, Kinugasa, Tōno, Okitsu, Kagami, Homura, Tobita, Kurokoma, Tagami, Isonokami, Hamazaki, Ōkura, Shiraiwa, Haguro, Sakaguchi, Kanemori, Hibiki, Garyū, Shiramine) are not in the game at all. No house numbers, no succession, no house-to-house marriage | ❌ |
 | 2 | **The world's people are real people** (Atlas §3–5, §10): kings, generals, house heads and Li's generation (Akabane Hayame, Kagami Shion, Kirishima Ryūnosuke, Isonokami Nami, Shiraiwa Tōta, Shiramine Tsubasa, Tatara Kunimaru, "Ofuji") with stats, age, goals, and they grow | 11 people are records (Li's camp circle + Sayo, Kaname, Daisuke, Ishizue). Everyone else is a name in a text block or the checker's name list; they don't age, grow, fight or remember. Hayame/Tōta/Ryūnosuke exist only as seeds | ❌ |
-| 3 | **Soldier pay** (WB ch. 7, Numbers §7) | `rankIncome`/`checkPay` exist in `career.ts` but nothing calls them: a free soldier earns no pay | 🟡 |
-| 4 | **Loyalty, obedience, betrayal, promises** (Numbers §8) | `loyalty()` exists but is never used; obedience, the betrayal rule, promises as tracked objects (+10 / −25, trust scar) and Li's dread are missing. Fading over time exists | 🟡 |
+| 3 | **Soldier pay** (WB ch. 7, Numbers §7) | `rankIncome`/`checkPay` exist in `career.ts` but nothing calls them: a free soldier earns no pay | ✅ Oct 17 |
+| 4 | **Loyalty, obedience, betrayal, promises** (Numbers §8) | `loyalty()` exists but is never used; obedience, the betrayal rule, promises as tracked objects (+10 / −25, trust scar) and Li's dread are missing. Fading over time exists | ✅ Oct 17 |
 | 5 | **Abilities and the Zone** (WB ch. 5, VISIE) | The Zone is only a knowledge flag; it changes nothing in a duel. No ability records, no Twin Demon Dance, no style unlock choice at mastery 30/50/70/100 (the panel only shows "unlock at") | ❌ |
-| 6 | **Permanent injury** (Numbers §4: Badly wounded from a gap above 100%) | not in `duel.ts` | ❌ |
+| 6 | **Permanent injury** (Numbers §4: Badly wounded from a gap above 100%) | not in `duel.ts` | ✅ Oct 17 |
 
 ### B. Officer and general years
 | # | What the canon says | Code today | Status |
 |---|---|---|---|
-| 7 | Command capacity and **overload** in battle (Numbers §3, delegation) | only the label in `rules.ts`; battles ignore it | 🟡 |
+| 7 | Command capacity and **overload** in battle (Numbers §3, delegation) | only the label in `rules.ts`; battles ignore it | ✅ Oct 17 |
 | 8 | **Life and death of NPCs**: lifespan, death of age, heirs take over (WB 13c rule 4), genpuku | missing (only the Tatara king's fuse) | ❌ |
 | 9 | **Defeat ladder**: rank loss, capture, ransom | missing (battles count captured men, Li is never captured) | ❌ |
 | 10 | Kingdom values beyond authority: treasury, unity, succession, the Crown's share | only authority + dread (`discontent.ts`) | 🟡 |

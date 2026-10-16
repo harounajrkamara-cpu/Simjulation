@@ -331,3 +331,14 @@ Until the decision trees of build stage 4, each fuse fires on a fixed day (after
 | Hostage heir (Suiren) | Y102 M8 D1 (930) | stays a hostage (3) · breaks away (2) · crushed (1) |
 | Slow usurpation (Ushio) | Y103 M6 D1 (1230) | smooth (3) · civil war (2) · the child king murdered (1) |
 | King's death (Tatara) | Y103 M10 D1 (1350) | heir crowned, the prince loyal (3) · the prince rules (2) |
+
+## 13. Phase 6 additions (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+**Block A (audit gaps 11, 12, 13, 20, 22):**
+- **Pay:** a free man in service gets the middle of his rank's yearly pay (ch. 7) in twelve monthly parts, at the end of each month (Ashigaru 2.5 ryō → 208 mon a month). From Sanbyakunin-shō the land pays him instead.
+- **Obedience inputs:** Li's authority over his own people = 20 + 8 × his command rank level (Ashigaru 20 … Dai-Shōgun 92). Enforcement = 40, +20 when Li holds land, + half his dread.
+- **Loyalty modifiers** (§8): blood (spouse, child) +15 · oath +10 · passed over −15 · unpaid (his land left men unpaid) −20.
+- **Opportunity score** (betrayal): 30, +20 if Li lost his last fight, +20 if he is Wounded or worse, +20 if his kingdom is in civil war, +20 if his men went unpaid. When loyalty < 40, obedience < 50 and opportunity ≥ 60, a threat clock "X is thinking of leaving Li" opens at the end of the month; when full, the betrayal happens.
+- **Dread:** each act of cruelty Li becomes known for: +5 (max 100).
+- **Promises:** kept → Trust +10 (fades like shared hardship); broken → Trust −25: −12.5 permanent scar, −12.5 heals over 2 years.
+- **Permanent injury cost** (§4 area by attack): sword arm −2 VAL · shoulder −1.5 · leg −1 · side −1. Recorded once per area.
+- **Overload** (§3): the commander factor is divided by (1 + 0.1 × log₂ o); morale shocks from losses × (1 + 0.5 × log₂ o); a new order reaches the unit after floor(log₂ o) phases. Li's own unit now uses his real LEA (was a fixed 40).

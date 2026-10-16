@@ -75,7 +75,8 @@ ANSWER WITH JSON ONLY:
   "sleeps": true only when Li goes to sleep at the end of the scene (the next scene is the next morning),
   "place": "where Li is, short (optional)",
   "changes": [
-    {"kind":"relation","npc":"<id>","field":"trust|respect|affection|fear|rivalry","delta":<-15..15>,"reason":"short reason"},
+    {"kind":"relation","npc":"<id>","field":"trust|respect|affection|fear|rivalry","delta":<-15..15>,"reason":"short reason","fades":"slight|rumour|humiliation|hardship|permanent (how long it lasts; default hardship)"},
+    {"kind":"promise","npc":"<id>","text":"what Li promised","outcome":"made|kept|broken"} (Li gives his word, keeps it or breaks it: the code tracks it and people remember), {"kind":"cruelty","reason":"what Li did"} (an act of cruelty he becomes known for: people fear him more),
     {"kind":"money","amount":<mon, + or ->,"reason":"..."},
     {"kind":"wound","level":<0 fresh..3 badly wounded>,"reason":"..."},
     {"kind":"fatigue","level":<0..3>},

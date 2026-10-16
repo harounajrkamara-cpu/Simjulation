@@ -1,3 +1,4 @@
+import { commandCapacity } from './rules';
 // Battles (World Bible ch. 6b + 12b, Numbers §5): units in sectors, phases of part of a day, losses by strength ratio,
 // morale that breaks before men run out, chain routs, pursuit, and reports outside Li's sector. Pure and deterministic:
 // same battle + same orders = same result. Li commands only his own unit (size = his rank) and follows orders.
@@ -57,11 +58,14 @@ export interface BattleState {
   liRank: number;
   rallied: boolean;
   log: string[];
+  /** Li's order in force, and one on its way to his men (Numbers §3: +1 phase of delay per doubling of overload). */
+  liOrder?: Order;
+  pending?: { order: Order; at: number };
   over?: { winner: Side | 'none'; reason: string };
 }
 
 export interface UnitSetup { id?: string; sector: Sector; name: string; commander?: string; lea?: number; quality?: Quality; men: number; cavalry?: number; ground?: number }
-export interface BattleSetup { id: string; name: string; place: string; ally: UnitSetup[]; enemy: UnitSetup[]; liSector: Sector; liMen: number; liLeads: boolean; liInt: number; liRank: number; liUnitName?: string }
+export interface BattleSetup { id: string; name: string; place: string; ally: UnitSetup[]; enemy: UnitSetup[]; liSector: Sector; liMen: number; liLeads: boolean; liInt: number; liRank: number; liUnitName?: string; liLea?: number }
 
 const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x));
 const r1 = (x: number) => Math.round(x * 10) / 10;
@@ -87,7 +91,7 @@ export function createBattle(b: BattleSetup): BattleState {
   const host = ally.find((u) => u.sector === b.liSector);
   const liMen = Math.max(1, Math.round(b.liMen));
   if (host && host.men > liMen) { host.men -= liMen; host.start -= liMen; }
-  const li: Unit = { ...unit('ally', { sector: b.liSector, name: b.liUnitName ?? "Li's unit", commander: b.liLeads ? 'Li' : 'his officer', lea: 40, men: liMen }, 99), id: 'li' };
+  const li: Unit = { ...unit('ally', { sector: b.liSector, name: b.liUnitName ?? "Li's unit", commander: b.liLeads ? 'Li' : 'his officer', lea: b.liLeads ? b.liLea ?? 40 : 40, men: liMen }, 99), id: 'li' };
   return {
     id: b.id, name: b.name, place: b.place, phase: 0, stalled: 0, units: [...ally, li, ...enemy], liUnit: 'li', liLeads: b.liLeads,
     liInt: b.liInt, liRank: b.liRank, rallied: false, log: [],
@@ -95,7 +99,12 @@ export function createBattle(b: BattleSetup): BattleState {
 }
 
 const inLine = (u: Unit) => !u.gone && u.sector !== 'reserve' && u.men > 0;
-const strengthOf = (u: Unit, mods: number) => u.men * QUALITY[u.quality] * (1 + (u.lea - 50) / 200) * MORALE_FACTOR[moraleState(u)] * (1 + mods);
+/** Numbers §3 overload o = men ÷ capacity (at least 1). */
+export const overloadOf = (u: Unit) => Math.max(1, u.men / commandCapacity(u.lea));
+// Commander factor 1 + (LEA − 50) ÷ 200, reduced by overload (PROVISIONAL Oct 17: −10% per doubling, owner kan terugdraaien).
+const strengthOf = (u: Unit, mods: number) => u.men * QUALITY[u.quality] * (1 + (u.lea - 50) / 200) / (1 + 0.1 * Math.log2(overloadOf(u))) * MORALE_FACTOR[moraleState(u)] * (1 + mods);
+/** Numbers §3: morale losses × (1 + 0.5 × log₂ o) for an overloaded commander. */
+const lossShock = (u: Unit, n: number) => shock(u, Math.round(-5 * Math.floor((n / Math.max(1, u.men + n)) / 0.05) * (1 + 0.5 * Math.log2(overloadOf(u)))));
 const cavalryShare = (us: Unit[]) => { const men = us.reduce((s, u) => s + u.men, 0); return men ? us.reduce((s, u) => s + u.men * u.cavalry, 0) / men : 0; };
 
 /** Losses to one unit, split by Numbers §5 (40% dead · 45% wounded · 15% captured or missing). */
@@ -120,7 +129,16 @@ export function runPhase(b0: BattleState, order: Order = 'hold'): { battle: Batt
   b.phase++;
   const lines: string[] = [];
   const li = b.units.find((u) => u.id === b.liUnit)!;
-  const o: Order = b.liLeads || order === 'hold' || order === 'push' ? order : 'hold';
+  const asked: Order = b.liLeads || order === 'hold' || order === 'push' ? order : 'hold';
+  // Overload delays orders: a new order reaches a too-big unit only after floor(log₂ o) phases (Numbers §3).
+  const delay = b.liLeads ? Math.floor(Math.log2(overloadOf(li))) : 0;
+  if (b.pending && b.phase >= b.pending.at) { b.liOrder = b.pending.order; b.pending = undefined; }
+  if (b.liOrder === undefined) b.liOrder = asked; // the first order is given before the lines meet
+  else if (asked !== (b.pending?.order ?? b.liOrder)) {
+    if (delay > 0) { b.pending = { order: asked, at: b.phase + delay }; lines.push(`Li's order goes down the line; a unit this size needs time to answer (${delay} phase${delay > 1 ? 's' : ''}).`); }
+    else { b.liOrder = asked; b.pending = undefined; }
+  }
+  const o: Order = b.liOrder ?? asked;
   const routedBefore = new Set(b.units.filter((u) => moraleState(u) === 'Routing').map((u) => u.id));
 
   // Li's order.
@@ -154,11 +172,11 @@ export function runPhase(b0: BattleState, order: Order = 'hold'): { battle: Batt
     for (const u of allies) {
       const pct = (strongAlly ? strongLoss : weakLoss) * (u.id === li.id && pushing ? 1.3 : 1) * (u.id === li.id && flanking && !strongAlly ? 1.5 : 1);
       const n = hurt(u, u.men * pct);
-      shock(u, -5 * Math.floor((n / Math.max(1, u.men + n)) / 0.05));
+      lossShock(u, n);
     }
     for (const u of enemies) {
       const n = hurt(u, u.men * (strongAlly ? weakLoss : strongLoss));
-      shock(u, -5 * Math.floor((n / Math.max(1, u.men + n)) / 0.05));
+      lossShock(u, n);
     }
     // Giving ground costs morale (the line gives ground): −5, or −10 when badly outmatched.
     if (r >= 1.15) {

@@ -37,6 +37,8 @@ export interface DuelFighter {
   /** Rounds spent observing the other (max 3 → +15%). */
   observed: number;
   history: DuelMove[];
+  /** A permanent injury taken in this fight (Numbers §4: a Badly wounded hit with a gap above 100%). */
+  injury?: string;
 }
 
 export interface DuelState {
@@ -162,8 +164,18 @@ export function duelRound(prev: DuelState, liMove: DuelMove): RoundResult {
   const who = liWins ? d.foe.name : 'Li';
   if (steps === 0) lines.push(`${who} is pushed back and tires.`);
   else lines.push(`${who} is hit → ${WOUND_LABEL[loser.wound]}.`);
+  // Numbers §4: only a Badly wounded result from a gap above 100% leaves a permanent injury; the area follows the attack.
+  if (loser.wound >= 3 && g > 1 && !loser.injury) {
+    loser.injury = INJURY_AREA[liWins ? liMove : fm];
+    lines.push(`The blow goes deep: ${who === 'Li' ? 'Li\'s' : `${who}'s`} ${loser.injury} will never be the same.`);
+  }
   return finish(d, lines);
 }
+
+/** Numbers §4 "the engine picks the body area from the attack type, in a fixed order". */
+export const INJURY_AREA: Record<DuelMove, string> = { attack: 'sword arm', feint: 'leg', counter: 'side', observe: 'shoulder' };
+/** PROVISIONAL (Oct 17, owner kan terugdraaien): what a permanent injury costs, in VAL. */
+export const INJURY_VAL: Record<string, number> = { 'sword arm': -2, leg: -1, side: -1, shoulder: -1.5 };
 
 function finish(d: DuelState, lines: string[]): RoundResult {
   if (d.foe.wound >= 4) { d.over = true; d.result = 'won'; }

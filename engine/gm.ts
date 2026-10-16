@@ -16,13 +16,15 @@ import { planText } from './plan';
 import { childDrafts, familyText, marryDrafts } from './family';
 import { courtText, factionDrafts } from './court';
 import { reputationDrafts, reputationText } from './reputation';
+import { betrayalDrafts, crueltyDrafts, loyaltyText, promiseDrafts } from './loyalty';
+import { payDrafts } from './pay';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
 import { battleClearDrafts, battleStartDrafts, battleText } from './gm-battle';
 import { domainMonthDrafts, domainOrderDrafts, domainText, landDrafts, projectDrafts } from './gm-domain';
 import { growDrafts, roleDrafts, seasonGrowthDrafts } from './growth';
-import { opinion, opinionLabel, relSnapshot } from './relations';
+import { FADE, opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
 import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
 
@@ -82,7 +84,9 @@ export interface GmFight {
 }
 
 export type GmChange =
-  | { kind: 'relation'; npc: string; field: RelField; delta: number; reason: string }
+  | { kind: 'relation'; npc: string; field: RelField; delta: number; reason: string; fades?: string }
+  | { kind: 'promise'; npc: string; text?: string; outcome?: 'made' | 'kept' | 'broken' }
+  | { kind: 'cruelty'; reason: string }
   | { kind: 'money'; amount: number; reason: string }
   | { kind: 'wound'; level: number; reason: string }
   | { kind: 'fatigue'; level: number }
@@ -345,6 +349,7 @@ export function gmMemoryText(s: GameState): string {
     familyText(s),
     courtText(s),
     reputationText(s),
+    loyaltyText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -517,7 +522,10 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         if (d !== Math.round(num(x.delta))) notes.push(`${npc} ${String(x.field)} change cut to ${d} (limit ±${GM_LIMITS.relationDelta} per scene)`);
         if (!d) break;
         const reason = str(x.reason, 120) || 'Something Li did';
-        drafts.push({ type: 'relation', fact: `${npc}: ${String(x.field)} ${d > 0 ? '+' : ''}${d} (${reason})`, visible: false, data: { npc, field: x.field, value: d, reason, fade: 1095 } });
+        // Numbers §8 decay by kind, "fades" (slight, rumour, humiliation, hardship, permanent); default: shared hardship.
+        const kind = String(x.fades ?? '') as keyof typeof FADE;
+        const fade = Object.prototype.hasOwnProperty.call(FADE, kind) ? FADE[kind] : FADE.hardship;
+        drafts.push({ type: 'relation', fact: `${npc}: ${String(x.field)} ${d > 0 ? '+' : ''}${d} (${reason})`, visible: false, data: { npc, field: x.field, value: d, reason, fade } });
         break;
       }
       case 'money': {
@@ -613,6 +621,12 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         break;
       case 'clock':
         drafts.push(...clockDrafts(s, x, notes));
+        break;
+      case 'promise':
+        drafts.push(...promiseDrafts(s, x, notes));
+        break;
+      case 'cruelty':
+        drafts.push(...crueltyDrafts(s, x, notes));
         break;
       case 'seed':
         drafts.push(...seedDrafts(s, x, notes));
@@ -834,6 +848,9 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   out.push(...discontentDrafts(s, today(s), today(s) + n));
   // Everyone Li knows grows with the seasons too.
   out.push(...seasonGrowthDrafts(s, today(s), today(s) + n));
+  // Pay day for a free man in service, and men who would betray Li start to turn (Numbers §7, §8).
+  out.push(...payDrafts(s, today(s), today(s) + n));
+  out.push(...betrayalDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.
   const later = part && PARTS.indexOf(part) > PARTS.indexOf(s.date.part);
   const to = dateFromIndex(today(s) + n, n > 0 ? part ?? 'morning' : later ? part! : s.date.part);

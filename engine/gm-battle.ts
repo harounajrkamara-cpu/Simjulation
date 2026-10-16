@@ -47,7 +47,7 @@ export function battleStartDrafts(s: GameState, x: Record<string, unknown>, note
   const b = createBattle({
     id: `battle_${s.nextSeq}`, name: str(x.name, 80) || 'A battle', place: str(x.place, 80) || li(s).location,
     ally, enemy, liSector: SECTOR_SET.includes(x.sector as Sector) && x.sector !== 'reserve' ? (x.sector as Sector) : 'center',
-    liMen: u.men, liLeads: u.leads, liInt: li(s).stats.INT, liRank: has(s, 'rank_level'), liUnitName: u.name,
+    liMen: u.men, liLeads: u.leads, liInt: li(s).stats.INT, liRank: has(s, 'rank_level'), liUnitName: u.name, liLea: li(s).stats.LEA,
   });
   return [{ type: 'battle', fact: `Battle: ${b.name}`, visible: true, data: { battle: b } }];
 }
