@@ -35,5 +35,7 @@ export function publicWorldText(s: GameState): string {
   const w = publicWorld(s.date);
   const kingdoms = w.kingdoms.map((k) => `- ${k.name}, ${k.epithet} (capital ${k.capital}): ${k.ruler}`);
   const houses = KUROGANE_HOUSES.map((h) => `- House ${h.name} — ${h.land}. Head: ${h.head}.${h.family ? ` Family: ${h.family}.` : ''} ${h.stands}; ${h.known}.`);
-  return `THE WORLD AS EVERYONE KNOWS IT (public; use these names, never "the Lord" without one):\n${kingdoms.join('\n')}\nGREAT HOUSES OF KUROGANE (Li's kingdom):\n${houses.join('\n')}\nWhen a lord or a house appears in a scene, name him clearly the first time (e.g. "Lord Hagiwara Munenori, the border lord of Akaishi").`;
+  // Once the houses are records (engine/houses.ts), they come from there, with numbers; this list is for older lives.
+  const houseBlock = s.houses ? '' : `\nGREAT HOUSES OF KUROGANE (Li's kingdom):\n${houses.join('\n')}`;
+  return `THE WORLD AS EVERYONE KNOWS IT (public; use these names, never "the Lord" without one):\n${kingdoms.join('\n')}${houseBlock}\nWhen a lord or a house appears in a scene, name him clearly the first time (e.g. "Lord Hagiwara Munenori, the border lord of Akaishi").`;
 }

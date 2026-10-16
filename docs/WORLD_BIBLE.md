@@ -750,3 +750,14 @@ Claude only ever gets what has reached Li; the coming fuses near Li are given to
 **Li's levers.** Li can push any fuse **on either side** (owner: "he should be able to do anything he wants"): warn or betray, protect or kill, expose or carry the bribe. A lever counts only when Li is where the fuse plays out. The outcome stays one of the canon outcomes (ch. 13b) and is decided by the code; without Li the fuse runs on its own.
 
 **Story seeds** (the 15 of the proposal, owner: keep all): situations, never scripts. Claude plants one when Li's place and life stage fit; the code records planted / grown / dead, so nothing is repeated or forgotten. A missed seed may return in another form.
+
+### Chapter 3 addendum – Houses and the world's people in the code (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+Phase 6 block B (`engine/houses.ts`, `engine/world-people.ts`). Every house of the Atlas (royal and Tier A of all seven kingdoms, plus the Ishizue) is a record with what ch. 3 tracks: land (koku), troops, **prestige**, **loyalty to its lord**, **cohesion**, head, heir, branches, allies, a hostage. Every named person of Atlas §3–§5 and §10 is a real person with stats read from their ranks, an age, a goal and a secret (Claude sees a secret only once Li has met the person; Li's mother and sisters stay hidden until found).
+- **Age and death:** each person has a hidden lifespan of 60–79, fixed by their name (no chance), never sooner than 4 years from Year 100; the King of Tatara's death stays his fuse. Li never dies of age.
+- **Succession** (ch. 13c rule 4): when a head dies, the heir leads; without one, the oldest of the blood; without blood, a cousin of a side branch. Succession costs cohesion −10, and −15 more when the new head is a child (the elders rule) or a cousin.
+- **The house's year:** cohesion −5 when the head is 65 or older, −5 without a grown heir, otherwise +3 (up to 80). **Gekokujō:** below 25 at the turn of a year, the biggest branch breaks away with its land, or (no branch) a retainer seizes the house; cohesion is then 50.
+- **Claude's changes** (checked): a house moves ±10 prestige, loyalty or cohesion a scene with a reason (troops ±10%); a marriage alliance gives both houses +5 prestige and +5 cohesion; a hostage held gives +15 loyalty, harmed −30.
+- **Adoption** (ch. 2 extra 4): a house with no grown heir may adopt Li when he is free, a Hyakunin-gashira or higher, and the head knows him with an opinion of +60 or more. Li becomes noble and the house's heir.
+- **Li's own house:** from Sanbyakunin-shō with land, Li may found a house with its own name.
+- **Genpuku** at 15 (ch. 4): for the world's young and Li's children; for Li only when he is free (a legend moment).
+- Li's generation (Atlas §10) grows with the seasons whether Li has met them or not.

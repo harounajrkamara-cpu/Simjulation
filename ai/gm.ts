@@ -76,6 +76,7 @@ ANSWER WITH JSON ONLY:
   "place": "where Li is, short (optional)",
   "changes": [
     {"kind":"relation","npc":"<id>","field":"trust|respect|affection|fear|rivalry","delta":<-15..15>,"reason":"short reason","fades":"slight|rumour|humiliation|hardship|permanent (how long it lasts; default hardship)"},
+    {"kind":"house","house":"<house id>","prestige":<-10..10>,"loyalty":<-10..10>,"cohesion":<-10..10>,"troops":<-0.1..0.1 share>,"reason":"..."} (a house's fortunes move), {"kind":"alliance","a":"<house id>","b":"<house id>"} (a marriage between two houses), {"kind":"hostage","house":"<id>","npc":"<member id>"} (or "released":true / "harmed":true), {"kind":"adopt","house":"<id>"} (a house with no grown heir takes Li as its son: the code checks), {"kind":"found_house","name":"..."} (Li founds his own house, once he holds land),
     {"kind":"promise","npc":"<id>","text":"what Li promised","outcome":"made|kept|broken"} (Li gives his word, keeps it or breaks it: the code tracks it and people remember), {"kind":"cruelty","reason":"what Li did"} (an act of cruelty he becomes known for: people fear him more),
     {"kind":"money","amount":<mon, + or ->,"reason":"..."},
     {"kind":"wound","level":<0 fresh..3 badly wounded>,"reason":"..."},

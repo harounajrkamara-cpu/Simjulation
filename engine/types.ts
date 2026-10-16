@@ -39,6 +39,39 @@ export interface Character {
   desc: string;
   /** Estimated rank text Li would see (fog of war, ch. 5). */
   publicRank?: string;
+  /** The house this person belongs to (engine/houses.ts). */
+  house?: string;
+  /** One of the world's people from the Atlas (not met at the start; engine/houses.ts). */
+  world?: boolean;
+  /** Hidden age of a natural death (engine/houses.ts, PROVISIONAL). Undefined = never of age (Li). */
+  lifespan?: number;
+}
+
+/** A family (World Bible ch. 2–3): what is tracked per house (ch. 3) and how it stands. engine/houses.ts. */
+export interface House {
+  id: string;
+  name: string;
+  kingdom: string;
+  tier: 'royal' | 'A' | 'B' | 'C';
+  land: string;
+  koku: number;
+  troops: number;
+  /** 0–100: how great the name is. */
+  prestige: number;
+  /** 0–100: loyalty to its lord (the Crown, or its liege house). */
+  crownLoyalty: number;
+  /** 0–100: main house vs branches; low = split / gekokujō risk. */
+  cohesion: number;
+  head?: string;
+  heir?: string;
+  faction?: string;
+  liege?: string;
+  branches: { name: string; koku: number }[];
+  allies: string[];
+  hostage?: string;
+  goal?: string;
+  secret?: string;
+  fallen?: boolean;
 }
 
 export type RelField = 'trust' | 'respect' | 'affection' | 'fear' | 'rivalry';
@@ -120,7 +153,10 @@ export type EventType =
   // A battle's state after its start or a phase (engine/gm-battle.ts); null data clears it:
   | 'battle'
   // Li's land after a grant, an order, a project or a month (engine/gm-domain.ts):
-  | 'domain';
+  | 'domain'
+  // The world's houses and people arrive once (engine/houses.ts), and a house changes:
+  | 'world'
+  | 'house';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {
@@ -165,6 +201,8 @@ export interface GameState {
   domain?: import('./domain').Domain | null;
   /** Game Master mode memory (kept by events, so saves replay it). */
   gm?: GmMemory;
+  /** The world's houses (engine/houses.ts), kept by 'world' and 'house' events. */
+  houses?: Record<string, House>;
 }
 
 /** What the Game Master (Claude) has added to the world. Code keeps it; Claude reads it back every turn. */

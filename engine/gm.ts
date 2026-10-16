@@ -18,6 +18,8 @@ import { courtText, factionDrafts } from './court';
 import { reputationDrafts, reputationText } from './reputation';
 import { betrayalDrafts, crueltyDrafts, loyaltyText, promiseDrafts } from './loyalty';
 import { payDrafts } from './pay';
+import { adoptDrafts, allianceDrafts, foundHouseDrafts, hostageDrafts, houseChangeDrafts, houseTimeDrafts, housesText, successionDrafts, worldDrafts } from './houses';
+import { HIDDEN_PEOPLE } from './world-people';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -87,6 +89,11 @@ export type GmChange =
   | { kind: 'relation'; npc: string; field: RelField; delta: number; reason: string; fades?: string }
   | { kind: 'promise'; npc: string; text?: string; outcome?: 'made' | 'kept' | 'broken' }
   | { kind: 'cruelty'; reason: string }
+  | { kind: 'house'; house: string; prestige?: number; loyalty?: number; cohesion?: number; troops?: number; reason: string }
+  | { kind: 'alliance'; a: string; b: string; reason?: string }
+  | { kind: 'hostage'; house: string; npc?: string; harmed?: boolean; released?: boolean }
+  | { kind: 'adopt'; house: string }
+  | { kind: 'found_house'; name: string }
   | { kind: 'money'; amount: number; reason: string }
   | { kind: 'wound'; level: number; reason: string }
   | { kind: 'fatigue'; level: number }
@@ -323,7 +330,8 @@ export function gmMemoryText(s: GameState): string {
       ...s.memories.filter((m) => m.npc === id).slice(-3).map((m) => `  Remembers: ${m.what}`),
     ].filter(Boolean).join('\n');
   }).join('\n');
-  const unmet = Object.keys(s.characters).filter((id) => id !== s.liId && !met(s, id) && s.characters[id].alive).map((id) => `- ${s.characters[id].name} [id: ${id}] — ${s.characters[id].role}. ${s.characters[id].desc}`).join('\n');
+  // The world's people are listed apart (housesText); here only those truly near Li, never the hidden family.
+  const unmet = Object.keys(s.characters).filter((id) => id !== s.liId && !met(s, id) && s.characters[id].alive && !HIDDEN_PEOPLE.has(id) && (!s.characters[id].world || s.characters[id].location === c.location)).map((id) => `- ${s.characters[id].name} [id: ${id}] — ${s.characters[id].role}. ${s.characters[id].desc}`).join('\n');
   // All chapter recaps, then the scenes after them in full (engine/recaps.ts): nothing falls out of Claude's view.
   const window = storyWindow(s);
   const story = window.scenes;
@@ -350,6 +358,7 @@ export function gmMemoryText(s: GameState): string {
     courtText(s),
     reputationText(s),
     loyaltyText(s),
+    housesText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -625,6 +634,21 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       case 'promise':
         drafts.push(...promiseDrafts(s, x, notes));
         break;
+      case 'house':
+        drafts.push(...houseChangeDrafts(s, x, notes));
+        break;
+      case 'alliance':
+        drafts.push(...allianceDrafts(s, x, notes));
+        break;
+      case 'hostage':
+        drafts.push(...hostageDrafts(s, x, notes));
+        break;
+      case 'adopt':
+        drafts.push(...adoptDrafts(s, x, notes));
+        break;
+      case 'found_house':
+        drafts.push(...foundHouseDrafts(s, x, notes));
+        break;
       case 'cruelty':
         drafts.push(...crueltyDrafts(s, x, notes));
         break;
@@ -646,6 +670,7 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
           break;
         }
         drafts.push({ type: 'status', fact: `${s.characters[npc].name} dies (${str(x.reason, 100)})`, visible: true, data: { char: npc, status: s.characters[npc].status, role: s.characters[npc].role, alive: false } });
+        drafts.push(...successionDrafts(s, npc));
         break;
       }
       case 'freedom':
@@ -851,6 +876,8 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   // Pay day for a free man in service, and men who would betray Li start to turn (Numbers §7, §8).
   out.push(...payDrafts(s, today(s), today(s) + n));
   out.push(...betrayalDrafts(s, today(s), today(s) + n));
+  // People age: deaths of age, heirs take over, genpuku; houses drift, and split when they fall apart (engine/houses.ts).
+  out.push(...houseTimeDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.
   const later = part && PARTS.indexOf(part) > PARTS.indexOf(s.date.part);
   const to = dateFromIndex(today(s) + n, n > 0 ? part ?? 'morning' : later ? part! : s.date.part);
@@ -881,8 +908,10 @@ export function skipDaysLeft(s: GameState, until: string, startDay: number): num
 
 /** Record one scene: checked changes as events, then the time that passes (unless a fight starts now). */
 export function gmApply(s: GameState, t: GmTurn, said?: string): GmResult & { events: import('./types').GameEvent[] } {
+  // The world's houses and people arrive once: a new life, or an old save on its next scene (engine/houses.ts).
+  const world = commitDrafts(s, worldDrafts(s));
   const r = checkGmTurn(s, t, said);
-  const events = commitDrafts(s, r.drafts);
+  const events = [...world, ...commitDrafts(s, r.drafts)];
   // No time passes while a battle is being fought: its phases are the clock.
   if (!r.duelId && !(s.battle && !s.battle.over)) events.push(...commitDrafts(s, gmTimeDrafts(s, ...sceneTime(s, t))));
   events.push(...commitDrafts(s, refereeDrafts(r.notes, r.secretNotes ?? [])));
@@ -1003,6 +1032,7 @@ export function gmRecentScenes(s: GameState, n = 3): string {
 export function startGmGame(worldNumber = 1): GameState {
   const s = createWorld(worldNumber);
   commitDrafts(s, [{ type: 'flag', fact: 'Game Master mode', visible: false, data: { key: 'gm_mode', value: 1 } }]);
+  commitDrafts(s, worldDrafts(s));
   return s;
 }
 

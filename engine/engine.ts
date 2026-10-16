@@ -102,6 +102,29 @@ export function apply(state: GameState, ev: GameEvent): void {
     case 'place':
       state.characters[d.char].location = d.place;
       break;
+    case 'world': {
+      // The world's houses and people (engine/houses.ts), once.
+      state.houses = {};
+      for (const h of d.houses) state.houses[h.id] = structuredClone(h);
+      for (const p of d.people) {
+        state.characters[p.id] = structuredClone(p);
+        state.relations[p.id] ??= { base: { trust: 40, respect: 30, affection: 40, fear: 0, rivalry: 0 }, mods: [], heard: [], lastTalkDay: -1 };
+      }
+      for (const [id, a] of Object.entries(d.agendas as Record<string, { goal: string; secret?: string }>)) gmMemOf(state).agendas[id] ??= { goal: a.goal, secret: a.secret };
+      for (const [id, m] of Object.entries(d.members as Record<string, { house?: string; lifespan?: number }>)) {
+        if (!state.characters[id]) continue;
+        if (m.house) state.characters[id].house = m.house;
+        if (m.lifespan !== undefined) state.characters[id].lifespan = m.lifespan;
+      }
+      break;
+    }
+    case 'house':
+      (state.houses ??= {})[d.house.id] = structuredClone(d.house);
+      if (d.person) {
+        state.characters[d.person.id] = structuredClone(d.person);
+        state.relations[d.person.id] ??= { base: { trust: 40, respect: 30, affection: 40, fear: 0, rivalry: 0 }, mods: [], heard: [], lastTalkDay: -1 };
+      }
+      break;
     case 'thread': {
       const g = gmMemOf(state);
       if (d.agenda) { g.agendas[d.agenda.npc] = { goal: d.agenda.goal, secret: d.agenda.secret }; break; }

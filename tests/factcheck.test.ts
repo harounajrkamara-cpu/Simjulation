@@ -113,7 +113,7 @@ describe('the world facts reach the Game Master (owner, Oct 12: "the Lord" witho
     const { gmMemoryText } = await import('../engine/gm');
     const m = gmMemoryText(startGmGame());
     expect(m).toContain('Lord Hagiwara Munenori (49)');
-    expect(m).toContain('Hagiwara Sayo (13)');
+    expect(m).toMatch(/Hagiwara Sayo \(1[23]\)/); // 13 this year (Atlas); her birthday is in Month 3
     expect(m).not.toMatch(/smuggles rice/); // the Hagiwara secret stays in the Atlas
   });
 

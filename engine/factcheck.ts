@@ -89,7 +89,9 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
     if (!m) continue;
     const n = /^\d+$/.test(m[1]) ? Number(m[1]) : NUMBER_WORDS[m[1].toLowerCase()];
     if (n === undefined) continue;
-    const named = people.filter((c) => c.alive && c.name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'u').test(sen)));
+    // A full name in the sentence wins (many Hagiwara share a family name); otherwise any name word of one person.
+    const full = people.filter((c) => c.alive && sen.includes(c.name));
+    const named = full.length ? full : people.filter((c) => c.alive && c.name.split(/\s+/).some((w) => w.length >= 3 && new RegExp(`${B}${esc(w)}${E}`, 'u').test(sen)));
     if (named.length !== 1 || /\bLi\b/.test(sen)) continue; // only a sentence clearly about one known person
     const real = ageOn(named[0].born, s.date);
     const thisYear = s.date.year - named[0].born.year; // the age the canon gives for this year (the birthday may still come)

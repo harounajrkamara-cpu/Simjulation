@@ -5,6 +5,7 @@ import { ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PRICE_MON, inService } from '../engine
 import { PLACES } from '../engine/data';
 import { has, injuriesOf, li, met, today } from '../engine/engine';
 import { loyaltyLabel, openPromises } from '../engine/loyalty';
+import { knownHouses } from '../engine/houses';
 import { journalArcs, pctToNext, trophies } from '../engine/render';
 import { visibleOpinion } from '../engine/relations';
 import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '../engine/rules';
@@ -210,7 +211,10 @@ export function knownEntries(s: GameState) {
 
 export function encyclopediaPage(s: GameState): string {
   const list = knownEntries(s).map((e) => `<article class="entry"><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join('');
-  return `<h1>Encyclopedia</h1><p class="lead">What Li has learned about the world. It grows as he learns more.</p>${list}`;
+  // The houses Li can know (engine/houses.ts): his kingdom's, those of people he has met, his own. Never a secret.
+  const hs = knownHouses(s);
+  const houses = hs.length ? `<h2 class="label">The great houses</h2>${hs.map((h) => `<article class="entry"><h3>House ${esc(h.name)}</h3><p>${esc(h.land)}. Head: ${esc(h.head)}; heir: ${esc(h.heir)}. ${esc(h.men)}; ${esc(h.standing)}.</p></article>`).join('')}` : '';
+  return `<h1>Encyclopedia</h1><p class="lead">What Li has learned about the world. It grows as he learns more.</p>${list}${houses}`;
 }
 
 const KEY_SVG: Record<string, string> = {
