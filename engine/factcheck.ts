@@ -10,7 +10,8 @@ export interface FactProblem { kind: 'dead' | 'name' | 'age' | 'rank' | 'mechani
 /** Command ranks (World Bible ch. 4), so a wrong rank for Li can be caught. */
 export const RANK_TITLES = ['Ashigaru', 'Gochō', 'Kogashira', 'Gojū-gashira', 'Hyakunin-gashira', 'Sanbyakunin-shō', 'Sennin-shō', 'Gosennin-shō', 'Taishō', 'Dai-Shōgun'];
 
-const MECHANICS = /\b(VAL|LEA|INT|POL|stats?|dice|rolls?|rolled|hit points?|HP|XP|level(?:ed)? up|percent)\b|%/;
+// "rolls" alone is prose ("rolls his shoulders", live test Oct 17); only a dice roll is a game word.
+const MECHANICS = /\b(VAL|LEA|INT|POL|stats?|dice|roll(?:s|ed)? (?:a|the) (?:die|d\d+)|hit points?|HP|XP|level(?:ed)? up|percent)\b|%/;
 const NUMBER_WORDS: Record<string, number> = {
   five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15,
   sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20,

@@ -55,3 +55,13 @@ describe('signs of hidden changes (WB 12b #11; live test Oct 17)', () => {
     expect(lines).not.toMatch(/\d/);
   });
 });
+
+describe('live test Oct 17: "rolls" is prose', () => {
+  it('a man who rolls his shoulders is not a dice roll', async () => {
+    const { checkGmScene } = await import('../engine/factcheck');
+    const { startGmGame: start } = await import('../engine/gm');
+    const s = start();
+    expect(checkGmScene(s, 'Gonza drops the strap, rolls his heavy shoulders, and the water rolls back into the Kurose.').map((p) => p.kind)).not.toContain('mechanics');
+    expect(checkGmScene(s, 'Li rolls the dice.').map((p) => p.kind)).toContain('mechanics');
+  });
+});
