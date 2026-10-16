@@ -31,7 +31,7 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 |---|---|---|---|
 | 7 | Command capacity and **overload** in battle (Numbers §3, delegation) | only the label in `rules.ts`; battles ignore it | ✅ Oct 17 |
 | 8 | **Life and death of NPCs**: lifespan, death of age, heirs take over (WB 13c rule 4), genpuku | missing (only the Tatara king's fuse) | ✅ Oct 17 |
-| 9 | **Defeat ladder**: rank loss, capture, ransom | missing (battles count captured men, Li is never captured) | ❌ |
+| 9 | **Defeat ladder**: rank loss, capture, ransom | missing (battles count captured men, Li is never captured) | ✅ Oct 17 |
 | 10 | Kingdom values beyond authority: treasury, unity, succession, the Crown's share | only authority + dread (`discontent.ts`) | 🟡 |
 | 11 | **Laws per kingdom** (Atlas §12): slavery, duels, debt slavery, Tatara as refuge | only Kurogane's merit law and the Tatara runaway road | 🟡 |
 | 12 | **Neutral powers**: Mount Shōgen (Abbot Kakushin, the Mirror), Mist Valley shinobi ("Grey Crow"), Kinza (mercenary market, loans, Speaker Ganzō), the Single Path sect, Seiran Academy (Master Hakuun) | names in public text or seeds only; no hiring, loans, exams or uprisings | ❌ |
@@ -53,7 +53,7 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 | 20 | **Ceremony screen** (GE ch. 3/3b): who stands where, every witness reacts by their own opinion and remembers it | ceremonies happen, but only as story text; no screen, no witness reactions | ✅ Oct 17 |
 | 21 | **Legend page** in the Journal (GE 3b step 6): date, witnesses, title, kept forever | legend moments show once as an overlay, then are gone | ✅ Oct 17 |
 | 22 | **Nicknames per group** (GE 3b): soldiers, nobles and enemies may call Li different names, earned from deeds | one hand-written nickname (classic) and a GM title; not per group | ✅ Oct 17 |
-| 23 | **Lies caught by a rule** (GE ch. 5): the NPC's INT vs Li's POL and what they know | Claude decides alone; no rule | ❌ |
+| 23 | **Lies caught by a rule** (GE ch. 5): the NPC's INT vs Li's POL and what they know | Claude decides alone; no rule | ✅ Oct 17 |
 | 24 | **Li's own unit name and banner** (GE 3b legend list, like Shin's Hi Shin unit) | missing | ✅ Oct 17 |
 | 25 | **Feasts, funerals, oaths** as ceremonies (GE 3b) | missing (funeral only in the epilogue text) | ✅ Oct 17 |
 | 26 | **Title screen** with Continue / New life / Load (GE ch. 3) | the page opens straight into the game or the New life box | ✅ Oct 17 |

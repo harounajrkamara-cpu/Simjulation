@@ -5,6 +5,7 @@ import { relValue } from './relations';
 import { restDone } from './director';
 import { DuelMove, DuelState, MOVE_LABEL, INJURY_VAL, activateZone, autoMove, canZone, duelRound } from './duel';
 import { duelExtras, zoneGrowthDrafts } from './abilities';
+import { defeatDrafts, victoryDrafts } from './fate';
 import { challengeFactor, rankLetter, rankScores, RANK_BANDS } from './rules';
 import { createWorld } from './data';
 import { hashValue } from './hash';
@@ -663,6 +664,9 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   out.push(...injuryDrafts(s, c.id, liWound >= 3 ? d.li.injury : undefined));
   if (s.characters[d.foe.id]) out.push(...injuryDrafts(s, d.foe.id, d.foe.injury));
   out.push(...zoneGrowthDrafts(s, d.zone?.used ?? 0, t.maxWound >= 3));
+  // The defeat ladder (WB 12b #10): only a real fight counts (a spar or a scuffle does not).
+  if (t.maxWound >= 3 && d.result !== 'won' && d.result !== 'draw') out.push(...defeatDrafts(s, `lost a fight to ${d.foe.name}`));
+  if (t.maxWound >= 3 && d.result === 'won') out.push(...victoryDrafts(s));
   out.push({ type: 'story', fact: res.fact, visible: true, journal: res.journal, data: { duelEnd: d.id, result: d.result } });
   if (res.grow > 0) {
     for (const [kind, key] of [['stat', 'VAL'], ['style', 'two_swords']] as const) {

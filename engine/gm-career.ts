@@ -73,6 +73,9 @@ export function deedDrafts(s: GameState, x: Record<string, unknown>, count: numb
 /** A promotion Claude proposes (a ceremony, a post that opened), decided by Numbers §6. Blocks are shown to Li with their reason. */
 export function promotionDrafts(s: GameState, x: Record<string, unknown>, notes: string[]): Draft[] {
   const car = careerOf(s);
+  // The defeat ladder: a lost chance or a captivity holds a promotion back (engine/fate.ts).
+  if (has(s, 'captive')) { notes.push('a captive is promoted by nobody'); return []; }
+  if (has(s, 'chance_lost_until') > today(s)) { notes.push('after his defeat Li lost his chance: no promotion until the shame fades'); return []; }
   const reason = typeof x.reason === 'string' ? x.reason.trim().slice(0, 160) : '';
   const sponsor = typeof x.sponsor === 'string' && s.relations[x.sponsor] ? x.sponsor : undefined;
   const chk = checkPromotion({

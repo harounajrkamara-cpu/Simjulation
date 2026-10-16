@@ -21,6 +21,7 @@ import { payDrafts } from './pay';
 import { adoptDrafts, allianceDrafts, foundHouseDrafts, hostageDrafts, houseChangeDrafts, houseTimeDrafts, housesText, successionDrafts, worldDrafts } from './houses';
 import { HIDDEN_PEOPLE } from './world-people';
 import { abilitiesText, abilityDrafts, ABILITIES } from './abilities';
+import { captivityDrafts, defeatDrafts, fateText, lieDrafts } from './fate';
 import { bannerDrafts, gatheringDrafts, legendDrafts, momentsText, rumourChangeDrafts, rumourTimeDrafts } from './moments';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
@@ -100,6 +101,8 @@ export type GmChange =
   | { kind: 'rumour'; text: string; false?: boolean; about?: string }
   | { kind: 'gathering'; what: string; npc?: string; reason: string }
   | { kind: 'banner'; name: string; sign: string }
+  | { kind: 'lie'; npc: string; about?: string; truthKnown?: boolean; believed?: boolean; discovered?: boolean }
+  | { kind: 'captivity'; end: string; reason?: string }
   | { kind: 'money'; amount: number; reason: string }
   | { kind: 'wound'; level: number; reason: string }
   | { kind: 'fatigue'; level: number }
@@ -367,6 +370,7 @@ export function gmMemoryText(s: GameState): string {
     housesText(s),
     abilitiesText(s),
     momentsText(s),
+    fateText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -659,6 +663,12 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       case 'banner':
         drafts.push(...bannerDrafts(s, x, notes));
         break;
+      case 'lie':
+        drafts.push(...lieDrafts(s, x, notes, secretNotes));
+        break;
+      case 'captivity':
+        drafts.push(...captivityDrafts(s, x, notes));
+        break;
       case 'alliance':
         drafts.push(...allianceDrafts(s, x, notes));
         break;
@@ -699,7 +709,7 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         drafts.push(...freedomCheck(s, String(x.route), notes));
         break;
       case 'deed':
-        { const d = deedDrafts(s, x, deeds, notes, pendingMerit); if (d.length) deeds++; drafts.push(...d); }
+        { const d = deedDrafts(s, x, deeds, notes, pendingMerit); if (d.length) deeds++; drafts.push(...d); if (d.length && x.deed === 'disobeyed_failed') drafts.push(...defeatDrafts(s, 'an order disobeyed, and it failed')); }
         break;
       case 'promotion':
         drafts.push(...promotionDrafts(s, x, notes));

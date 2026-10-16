@@ -1,3 +1,4 @@
+import { defeatDrafts, victoryDrafts } from './fate';
 import { bannerOf } from './moments';
 import { ABILITIES, auraBattleShock, hasAbility } from './abilities';
 import { BattleState, MAX_PHASES, Order, Quality, Sector, UnitSetup, battleReport, battleView, createBattle, ordersFor, runPhase } from './battle';
@@ -90,6 +91,9 @@ function battleEndDrafts(s: GameState, b: BattleState): Draft[] {
     const merit = deeds.reduce((sum, d) => sum + meritOf({ kind: 'command', deed: d, unit: car.rank }).amount, 0);
     if (merit) out.push({ type: 'flag', fact: `command merit +${merit} (${b.name}: ${deeds.join(', ').replace('steady_morale', 'the unit never broke')})`, visible: true, data: { key: 'merit_command', value: has(s, 'merit_command') + merit } });
   }
+  // The defeat ladder (WB 12b #10): a lost battle costs Li a step; a won one steadies him.
+  if (b.over!.winner === 'enemy') out.push(...defeatDrafts(s, `${b.name} was lost`));
+  if (won) out.push(...victoryDrafts(s));
   return out;
 }
 
