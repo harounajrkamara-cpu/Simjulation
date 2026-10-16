@@ -4,6 +4,7 @@ import { Narration, narrate, shouldNarrate, templateText } from '../ai/narrate';
 import { FactPacket, buildPacket } from '../ai/packet';
 import { commitDrafts, fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
 import { planDrafts, PlanId } from '../engine/plan';
+import { chooseTechniqueDrafts } from '../engine/abilities';
 import { SparkSnapshot, sparkSnapshot, sparksSince } from '../engine/sparks';
 /** The state after the last painted scene, for sparks; unset until the first scene of this page visit. */
 let sparkMark: SparkSnapshot | undefined;
@@ -217,7 +218,9 @@ function renderOptions() {
     const d = state.duel;
     const track = (w: number) => `<span class="track" aria-label="${WOUND_LABEL[w as 0]}">${[0, 1, 2, 3].map((k) => `<i class="${k < w ? 'hit' : ''}"></i>`).join('')}</span>`;
     const card = (name: string, f: typeof d.li, sub: string) => `<div class="fighter"><span class="name">${esc(name)}</span><span class="sub">${esc(WOUND_LABEL[f.wound])} · fatigue ${f.fatigue} of 3${sub ? ` · ${esc(sub)}` : ''}</span>${track(f.wound)}</div>`;
-    duel.innerHTML = `<strong>Round ${d.round + 1} of 10</strong><div class="fighters">${card('Li', d.li, d.li.observed ? `read him ${Math.min(3, d.li.observed)} of 3` : '')}<span class="vs" aria-hidden="true">対</span>${card(d.foe.name.replace(/^the /, 'The '), d.foe, d.estimate ?? '')}</div>${d.hint ? `<p class="duel-meta">What Li has read: ${esc(d.hint)}</p>` : ''}`;
+    // The Zone counted in rounds and uses (VISIE §3): "Zone: 2 rounds left · 1 of 3 uses".
+    const zone = d.zone ? `<p class="duel-meta">Zone: ${d.zone.left ? `<b>${d.zone.left} round${d.zone.left > 1 ? 's' : ''} left</b>` : 'ready'} · ${d.zone.used} of ${d.zone.uses} uses</p>` : '';
+    duel.innerHTML = `<strong>Round ${d.round + 1} of 10</strong><div class="fighters">${card('Li', d.li, d.li.observed ? `read him ${Math.min(3, d.li.observed)} of 3` : '')}<span class="vs" aria-hidden="true">対</span>${card(d.foe.name.replace(/^the /, 'The '), d.foe, d.estimate ?? '')}</div>${d.hint ? `<p class="duel-meta">What Li has read: ${esc(d.hint)}</p>` : ''}${zone}${(state.characters[d.foe.id]?.abilities ?? []).length ? '<p class="duel-meta">His abilities: ???</p>' : ''}`;
   }
   if (gmMode()) {
     $('opts').innerHTML = gmChoices().map((t, k) => `<button type="button" class="opt" data-key="${esc(t)}"${busy ? ' disabled' : ''}><span class="k">${k + 1}</span><span class="l">${esc(t)}</span></button>`).join('');
@@ -392,6 +395,15 @@ function goOn(turn: HTMLElement) {
 }
 // Li's plan (night Oct 16): choosing one is an event, so the memory and Claude keep it.
 $('tab-li').addEventListener('click', (ev) => {
+  // A style technique (WB ch. 5: choose 1 of 2 at mastery 30/50/70/100) is an event too.
+  const tech = (ev.target as HTMLElement).closest<HTMLElement>('[data-tech]');
+  if (tech && !busy) {
+    const [style, level, pick] = tech.dataset.tech!.split(':');
+    commitDrafts(state, chooseTechniqueDrafts(state, style, Number(level), Number(pick) as 1 | 2));
+    persist();
+    refresh();
+    return;
+  }
   const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-plan]');
   if (!b || busy) return;
   commitDrafts(state, planDrafts(state, b.dataset.plan as PlanId));

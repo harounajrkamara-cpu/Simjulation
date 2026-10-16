@@ -3,7 +3,8 @@ import { BEATS, DUELS, DuelTemplate, Effect, RUMOURS, STORY as BASE_STORY, Story
 import { ARC, ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PAYDAY_TIP, PRICE_MON, SHARE_MIN_RESPECT, SHARE_PER_MERIT, STITCH_TIP, fordStory, inService, officerOf, officerTemplate, raidIndexOn, setRelField, skirmishTemplate } from './campaign';
 import { relValue } from './relations';
 import { restDone } from './director';
-import { DuelMove, DuelState, MOVE_LABEL, INJURY_VAL, autoMove, duelRound } from './duel';
+import { DuelMove, DuelState, MOVE_LABEL, INJURY_VAL, activateZone, autoMove, canZone, duelRound } from './duel';
+import { duelExtras, zoneGrowthDrafts } from './abilities';
 import { challengeFactor, rankLetter, rankScores, RANK_BANDS } from './rules';
 import { createWorld } from './data';
 import { hashValue } from './hash';
@@ -116,6 +117,13 @@ export function apply(state: GameState, ev: GameEvent): void {
         if (m.house) state.characters[id].house = m.house;
         if (m.lifespan !== undefined) state.characters[id].lifespan = m.lifespan;
       }
+      break;
+    }
+    case 'ability': {
+      const c = state.characters[d.char];
+      const list = (c.abilities ??= []);
+      const k = list.findIndex((a) => a.id === d.ability.id);
+      if (k >= 0) list[k] = { ...d.ability }; else list.push({ ...d.ability });
       break;
     }
     case 'house':
@@ -239,6 +247,7 @@ export function options(s: GameState): Option[] {
     const moves: Option[] = (['attack', 'counter', 'feint', 'observe'] as DuelMove[]).map((m, i) => ({ key: String(i + 1), label: MOVE_LABEL[m], action: { kind: 'duel', target: m }, test: '⚔️ VAL' }));
     moves.push({ key: '5', label: 'Let the fight play out (simulate)', action: { kind: 'duel', target: 'auto' } });
     moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: duelTemplate(s.duel.id, s).fleeRisk ?? 'shame' });
+    if (canZone(s.duel)) moves.push({ key: '7', label: `SHINKEN NO RYŪ — enter the Zone (${s.duel.zone!.uses - s.duel.zone!.used} of ${s.duel.zone!.uses} uses left)`, action: { kind: 'duel', target: 'zone' }, risk: 'exhaustion when it ends' });
     return moves;
   }
   const part = s.date.part;
@@ -576,17 +585,27 @@ const rankIndex = (score: number) => RANK_BANDS.length - 1 - RANK_BANDS.findInde
 
 function startDuel(s: GameState, id: string): Draft[] {
   const t = duelTemplate(id, s);
-  const c = li(s);
-  const mastery = Math.max(0, ...Object.values(c.styles));
-  const state: DuelState = {
-    id, round: 0, over: false, surprise: t.surprise, prefs: { ...t.prefs }, place: t.place, estimate: t.foe.estimate,
-    li: { id: c.id, name: 'Li', val: c.stats.VAL, mastery, wound: c.wound, fatigue: c.fatigue, observed: 0, history: [] },
-    foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: t.foe.wound, fatigue: t.foe.fatigue, observed: 0, history: [] },
-  };
+  const state = duelStateFor(s, id, t);
   return [
     { type: 'story', fact: `${t.intro}\n\nOpponent (Li\'s estimate): ${t.foe.estimate}.`, visible: true, data: { duel: id } },
     { type: 'duel', fact: `duel ${id} begins`, visible: false, data: { state } },
   ];
+}
+
+/** A fight's opening state, for the chronicle's duels and the Game Master's fights alike. */
+export function duelStateFor(s: GameState, id: string, t: DuelTemplate): DuelState {
+  const c = li(s);
+  const mastery = Math.max(0, ...Object.values(c.styles));
+  // Li fights with his best style; its chosen techniques, his abilities and his aura come with him (engine/abilities.ts).
+  const style = Object.entries(c.styles).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? 'two_swords';
+  const extra = duelExtras(s, style, t.foe.val, t.foe.mastery);
+  const state: DuelState = {
+    id, round: 0, over: false, surprise: t.surprise, prefs: { ...t.prefs }, place: t.place, estimate: t.foe.estimate,
+    li: { id: c.id, name: 'Li', val: c.stats.VAL, mastery, wound: c.wound, fatigue: Math.min(3, c.fatigue + extra.liFatigue), observed: 0, history: [] },
+    foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: t.foe.wound, fatigue: t.foe.fatigue, observed: 0, history: [] },
+    zone: extra.zone, liBonus: extra.liBonus, liAbilities: extra.liAbilities, foeHesitates: extra.foeHesitates, foeAbilities: (s.characters[t.foe.id]?.abilities ?? []).map((a) => a.id),
+  };
+  return state;
 }
 
 function duelTurn(s: GameState, choice: string): Draft[] {
@@ -599,10 +618,17 @@ function duelTurn(s: GameState, choice: string): Draft[] {
   } else if (choice === 'yield') {
     d = { ...structuredClone(d), over: true, result: 'yielded' };
     out.push({ type: 'work', fact: duelTemplate(d.id, s).yieldText, visible: true, data: {} });
+  } else if (choice === 'zone') {
+    const r = activateZone(d);
+    if (!r.lines.length) return [{ type: 'alert', fact: 'The Zone will not come now.', visible: true, data: {} }];
+    d = r.state;
+    out.push({ type: 'work', fact: r.lines.join(' '), visible: true, data: { round: d.round, zone: true } });
   } else {
     const auto = choice === 'auto';
     let guard = 0;
     do {
+      // Simulated: Li reaches for the Zone once he is hurt and it is there (a fixed rule, no chance).
+      if (auto && canZone(d) && d.li.wound >= 2) { const z = activateZone(d); d = z.state; out.push({ type: 'work', fact: z.lines.join(' '), visible: true, data: { round: d.round, zone: true } }); }
       const move = (auto ? autoMove(d) : choice) as DuelMove;
       const r = duelRound(d, move);
       d = r.state;
@@ -630,6 +656,7 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   if (liWound >= 3) out.push({ type: 'flag', fact: 'near-death', visible: false, data: { key: 'near_death', value: has(s, 'near_death') + 1 } });
   out.push(...injuryDrafts(s, c.id, liWound >= 3 ? d.li.injury : undefined));
   if (s.characters[d.foe.id]) out.push(...injuryDrafts(s, d.foe.id, d.foe.injury));
+  out.push(...zoneGrowthDrafts(s, d.zone?.used ?? 0, t.maxWound >= 3));
   out.push({ type: 'story', fact: res.fact, visible: true, journal: res.journal, data: { duelEnd: d.id, result: d.result } });
   if (res.grow > 0) {
     for (const [kind, key] of [['stat', 'VAL'], ['style', 'two_swords']] as const) {
@@ -654,7 +681,7 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
 export function injuryDrafts(s: GameState, char: string, area: string | undefined): Draft[] {
   if (!area) return [];
   const p = s.characters[char];
-  const key = `injury_${char}_${area.replace(/s+/g, '_')}`;
+  const key = `injury_${char}_${area.replace(/\s+/g, '_')}`;
   if (has(s, key)) return [];
   const name = char === s.liId ? 'Li' : p.name;
   return [

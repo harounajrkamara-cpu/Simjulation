@@ -45,6 +45,8 @@ export interface Character {
   world?: boolean;
   /** Hidden age of a natural death (engine/houses.ts, PROVISIONAL). Undefined = never of age (Li). */
   lifespan?: number;
+  /** Abilities as data records (WB ch. 5; engine/abilities.ts). */
+  abilities?: { id: string; name: string; kind: 'combat' | 'command' | 'political' | 'special'; rank: string; mastery: number }[];
 }
 
 /** A family (World Bible ch. 2–3): what is tracked per house (ch. 3) and how it stands. engine/houses.ts. */
@@ -156,7 +158,9 @@ export type EventType =
   | 'domain'
   // The world's houses and people arrive once (engine/houses.ts), and a house changes:
   | 'world'
-  | 'house';
+  | 'house'
+  // A person gains an ability, or it grows (engine/abilities.ts):
+  | 'ability';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {

@@ -761,3 +761,13 @@ Phase 6 block B (`engine/houses.ts`, `engine/world-people.ts`). Every house of t
 - **Li's own house:** from Sanbyakunin-shō with land, Li may found a house with its own name.
 - **Genpuku** at 15 (ch. 4): for the world's young and Li's children; for Li only when he is free (a legend moment).
 - Li's generation (Atlas §10) grows with the seasons whether Li has met them or not.
+
+### Chapter 5 addendum – Abilities, techniques and aura in the code (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+Phase 6 block C (`engine/abilities.ts`). Abilities are data records (rank, mastery, kind); limits, the ability count per overall rank and the rank+1 rule are enforced; bloodline abilities and Li's unique Zone use the prodigy exception. Every effect changes the clash of choices (Numbers §4), never adds hidden strength.
+- **Zone – SHINKEN NO RYŪ:** wakes only at a true near-death moment, C-rank, mastery 1. In a fight it is a move of its own; while it lasts, Li's choice beats his opponent's every round. **Rounds** 1 + mastery ÷ 25 (1–5), **uses** per fight 3 + mastery ÷ 50 (3–5); when it ends, +2 fatigue (Li's body pays). Mastery +2 for each use in a real fight. A simulated fight enters it once Li is Wounded.
+- **Twin Demon Dance** (bloodline): needs two-sword mastery 30 and a teacher who saw Takeshi fight and trusts Li (60+: Raizen, Tōno, Shiraiwa Yasutoki, Akabane) or the notes kept with Hikari. Li's feint also beats an attack. Blocked by a sword-arm or shoulder injury.
+- **Kage no Yaiba** (bloodline): needs the blade Kage; once a fight, an attack goes through a counter.
+- **Common abilities:** Zanshin (watching counts double, +10% a round, max +15%) · Iron Wall (command: half the morale shock from losses) · Gale March (command: a push +30% instead of +15%) · Silver Tongue (political: court and house standing ±15 a scene instead of ±10). The world's great carry theirs (Garyū, Kagami, Ōtori, Lady Kinugasa, …).
+- **Style techniques:** at mastery 30 / 50 / 70 / 100 the player chooses one of two in the Li tab: +10% (30, 50) or +15% (70, 100) to one move (attack, counter, feint or observe), inside the ±50% cap. A sword-arm injury blocks two-sword techniques.
+- **Aura** = overall rank score + a fifth of soldiers' and nobles' regard. In a duel a foe two bands below hesitates (only watches) one round, three bands below two rounds; a foe two bands above weighs on Li (+1 fatigue). In battle, when Li leads, the enemy in his sector loses 10 morale in the first phase (15 at three bands).
+- **General type:** Intellectual when INT is 10+ above LEA, Instinctual when LEA is 10+ above INT, otherwise Balanced (shown; its effect on command abilities comes later).

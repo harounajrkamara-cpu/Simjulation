@@ -150,3 +150,10 @@ export const WORLD_PLACES: Record<string, string> = {
   hinokuchi: 'Hinokuchi, the forge city of Tatara', shirotori: 'Shirotori, the capital of Kitakaze', long_palisade: 'the Long Palisade (Kitakaze)',
   horo_steppe: 'the Horo lands beyond the palisade', kinza: 'Kinza, the free harbour', shogen: 'Mount Shōgen', mist_valley: 'the Mist Valley',
 };
+
+/** Known abilities of the world's great (WB ch. 5: an A or S character has 2–5; listed here, the ones the code runs). */
+export const PEOPLE_ABILITIES: Record<string, string[]> = {
+  garyu_tessai: ['zanshin'], utsugi_kyosuke: ['zanshin'], homura_tetsuzan: ['iron_wall'], otori_gensai: ['iron_wall'],
+  kagami_soun: ['gale_march'], tobita_kojuro: ['gale_march'], kinugasa_ayane: ['silver_tongue'], ebisawa_rokusai: ['silver_tongue'],
+  tagami_kanemitsu: ['silver_tongue'], shirasagi_nobuhisa: ['silver_tongue'], akabane_gendayu: ['iron_wall'],
+};

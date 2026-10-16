@@ -60,12 +60,15 @@ export interface BattleState {
   log: string[];
   /** Li's order in force, and one on its way to his men (Numbers §3: +1 phase of delay per doubling of overload). */
   liOrder?: Order;
+  /** Li's command abilities (iron_wall, gale_march) and his aura's first-phase shock on the enemy in his sector. */
+  liAbilities?: string[];
+  liAuraShock?: number;
   pending?: { order: Order; at: number };
   over?: { winner: Side | 'none'; reason: string };
 }
 
 export interface UnitSetup { id?: string; sector: Sector; name: string; commander?: string; lea?: number; quality?: Quality; men: number; cavalry?: number; ground?: number }
-export interface BattleSetup { id: string; name: string; place: string; ally: UnitSetup[]; enemy: UnitSetup[]; liSector: Sector; liMen: number; liLeads: boolean; liInt: number; liRank: number; liUnitName?: string; liLea?: number }
+export interface BattleSetup { id: string; name: string; place: string; ally: UnitSetup[]; enemy: UnitSetup[]; liSector: Sector; liMen: number; liLeads: boolean; liInt: number; liRank: number; liUnitName?: string; liLea?: number; liAbilities?: string[]; liAuraShock?: number }
 
 const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x));
 const r1 = (x: number) => Math.round(x * 10) / 10;
@@ -94,7 +97,7 @@ export function createBattle(b: BattleSetup): BattleState {
   const li: Unit = { ...unit('ally', { sector: b.liSector, name: b.liUnitName ?? "Li's unit", commander: b.liLeads ? 'Li' : 'his officer', lea: b.liLeads ? b.liLea ?? 40 : 40, men: liMen }, 99), id: 'li' };
   return {
     id: b.id, name: b.name, place: b.place, phase: 0, stalled: 0, units: [...ally, li, ...enemy], liUnit: 'li', liLeads: b.liLeads,
-    liInt: b.liInt, liRank: b.liRank, rallied: false, log: [],
+    liInt: b.liInt, liRank: b.liRank, rallied: false, log: [], liAbilities: b.liAbilities ?? [], liAuraShock: b.liAuraShock ?? 0,
   };
 }
 
@@ -104,7 +107,7 @@ export const overloadOf = (u: Unit) => Math.max(1, u.men / commandCapacity(u.lea
 // Commander factor 1 + (LEA − 50) ÷ 200, reduced by overload (PROVISIONAL Oct 17: −10% per doubling, owner kan terugdraaien).
 const strengthOf = (u: Unit, mods: number) => u.men * QUALITY[u.quality] * (1 + (u.lea - 50) / 200) / (1 + 0.1 * Math.log2(overloadOf(u))) * MORALE_FACTOR[moraleState(u)] * (1 + mods);
 /** Numbers §3: morale losses × (1 + 0.5 × log₂ o) for an overloaded commander. */
-const lossShock = (u: Unit, n: number) => shock(u, Math.round(-5 * Math.floor((n / Math.max(1, u.men + n)) / 0.05) * (1 + 0.5 * Math.log2(overloadOf(u)))));
+const lossShock = (u: Unit, n: number, half = false) => shock(u, Math.round(-5 * Math.floor((n / Math.max(1, u.men + n)) / 0.05) * (1 + 0.5 * Math.log2(overloadOf(u))) * (half ? 0.5 : 1)));
 const cavalryShare = (us: Unit[]) => { const men = us.reduce((s, u) => s + u.men, 0); return men ? us.reduce((s, u) => s + u.men * u.cavalry, 0) / men : 0; };
 
 /** Losses to one unit, split by Numbers §5 (40% dead · 45% wounded · 15% captured or missing). */
@@ -149,6 +152,11 @@ export function runPhase(b0: BattleState, order: Order = 'hold'): { battle: Batt
     lines.push('Li steadies the line: his men and the units beside him take heart.');
   }
 
+  // Aura (WB ch. 5, 12b): when Li leads, the enemy facing him feels it in the first phase (morale only, never strength).
+  if (b.phase === 1 && b.liAuraShock && b.liLeads) {
+    for (const u of b.units.filter((x) => x.side === 'enemy' && x.sector === li.sector && inLine(x))) shock(u, b.liAuraShock);
+    lines.push('The men facing Li\'s unit feel something in him and falter.');
+  }
   let moved = false;
   for (const sector of LINE) {
     const allies = b.units.filter((u) => u.side === 'ally' && u.sector === sector && inLine(u));
@@ -157,7 +165,7 @@ export function runPhase(b0: BattleState, order: Order = 'hold'): { battle: Batt
     const pushing = o === 'push' && li.sector === sector && inLine(li);
     const flanking = o === 'flank' && li.sector === sector && inLine(li);
     const mod = (u: Unit, foes: Unit[]) => u.ground + (cavalryShare(foes) >= 0.2 && u.quality !== 'levy' && u.cavalry === 0 ? 0.3 * cavalryShare(foes) : 0)
-      + (u.id === li.id && pushing ? 0.15 : 0);
+      + (u.id === li.id && pushing ? ((b.liAbilities ?? []).includes('gale_march') ? 0.3 : 0.15) : 0);
     let A = allies.reduce((s, u) => s + strengthOf(u, mod(u, enemies)), 0);
     let E = enemies.reduce((s, u) => s + strengthOf(u, mod(u, allies)), 0);
     if (flanking) {
@@ -172,7 +180,7 @@ export function runPhase(b0: BattleState, order: Order = 'hold'): { battle: Batt
     for (const u of allies) {
       const pct = (strongAlly ? strongLoss : weakLoss) * (u.id === li.id && pushing ? 1.3 : 1) * (u.id === li.id && flanking && !strongAlly ? 1.5 : 1);
       const n = hurt(u, u.men * pct);
-      lossShock(u, n);
+      lossShock(u, n, u.id === li.id && (b.liAbilities ?? []).includes('iron_wall'));
     }
     for (const u of enemies) {
       const n = hurt(u, u.men * (strongAlly ? weakLoss : strongLoss));

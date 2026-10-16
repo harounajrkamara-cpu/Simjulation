@@ -6,6 +6,7 @@ import { PLACES } from '../engine/data';
 import { has, injuriesOf, li, met, today } from '../engine/engine';
 import { loyaltyLabel, openPromises } from '../engine/loyalty';
 import { knownHouses } from '../engine/houses';
+import { ABILITIES, auraScore, auraWord, chosenTechniques, generalType, hasAbility, liAbilities, pendingTechniques } from '../engine/abilities';
 import { journalArcs, pctToNext, trophies } from '../engine/render';
 import { visibleOpinion } from '../engine/relations';
 import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '../engine/rules';
@@ -135,9 +136,16 @@ export function liPage(s: GameState): string {
   const planHtml = `<h2 class="label">Li's plan</h2>
     <div class="slots">${plansFor(s).map((p) => `<button type="button" class="slot${p.id === chosen ? ' on' : ''}" data-plan="${p.id}" title="${esc(p.why)}"><b>${esc(p.label)}</b>${esc(p.why)}</button>`).join('')}</div>
     ${chosen ? `<ul class="chronicle">${planSteps(s, chosen).map((x) => `<li>${x.done ? '✓' : '○'} ${esc(x.text)}</li>`).join('')}</ul>` : '<p class="empty">Choose what Li is working toward. The story will bring chances toward the next step; the rules still decide.</p>'}`;
+  // Abilities, techniques, aura and general type (WB ch. 5; Phase 6 block C). A waiting technique is Li's choice of two.
+  const ab = liAbilities(s).map((a) => `<tr><th>${esc(a.name)}</th><td>rank ${esc(a.rank)} · mastery ${Math.floor(a.mastery)} · ${esc(ABILITIES[a.id]?.effect ?? '')}${hasAbility(s, a.id) ? '' : ' · <b>blocked by an injury</b>'}</td></tr>`).join('');
+  const pend = pendingTechniques(s).map((p) => `<p class="lead">${esc(p.style.replace('_', ' '))} reached ${p.level}: choose a technique</p><div class="slots">${p.options.map((o, k) => `<button type="button" class="slot" data-tech="${esc(p.style)}:${p.level}:${k + 1}"><b>${esc(o.name)}</b>+${Math.round(o.bonus * 100)}% when Li chooses to ${o.move}</button>`).join('')}</div>`).join('');
+  const techs = chosenTechniques(s);
+  const powerHtml = `<h2 class="label">Abilities</h2>${ab ? `<table class="table">${ab}</table>` : '<p class="empty">None yet. Abilities come through events: near death, a master, an old book.</p>'}
+    ${pend}${techs.length ? `<p>Techniques: ${esc(techs.join(', '))}</p>` : ''}
+    <p>Aura: ${esc(auraWord(auraScore(li(s), s)))} · General type: ${esc(generalType(li(s)))}</p>`;
   const threats = [...clockFeelings(s), ...courtFeelings(s).map((x) => `At court: ${x}`), ...reputationLines(s)];
   const threatHtml = threats.length ? `<h2 class="label">What Li feels coming</h2><ul class="chronicle">${threats.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
-  return `<div class="card">${liCard(s)}</div>${planHtml}${lifeHtml}${threatHtml}
+  return `<div class="card">${liCard(s)}</div>${planHtml}${powerHtml}${lifeHtml}${threatHtml}
     <h2 class="label">Condition</h2>
     <table class="table"><tr><th>Wounds</th><td>${WOUND_LABEL[c.wound]}${c.wound ? ` · ${c.healDays} days to heal a step` : ''}</td></tr>
       ${injuriesOf(s, c.id).length ? `<tr><th>Lasting injuries</th><td>${esc(injuriesOf(s, c.id).join(', '))}</td></tr>` : ''}

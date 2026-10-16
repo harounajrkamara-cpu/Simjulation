@@ -1,3 +1,4 @@
+import { influenceCap } from './abilities';
 import { KingdomId, rankLevel } from './career';
 import { has } from './engine';
 import { careerOf } from './gm-career';
@@ -69,7 +70,8 @@ export function factionDrafts(s: GameState, x: { faction?: unknown; delta?: unkn
       { type: 'flag', fact: `Li joins ${f.name}`, visible: true, journal: `I have chosen a side at court: ${f.name}.`, data: { key: 'court_member', value: k + 1 } },
     ];
   }
-  const d = Math.max(-COURT.delta, Math.min(COURT.delta, Math.round(Number(x.delta) || 0)));
+  const cap = influenceCap(s, COURT.delta); // Silver Tongue: ±15
+  const d = Math.max(-cap, Math.min(cap, Math.round(Number(x.delta) || 0)));
   if (!d) return [];
   const next = Math.max(-100, Math.min(100, standing(s, f.id) + d));
   return [{ type: 'flag', fact: `${f.name}: ${d > 0 ? '+' : ''}${d} (${String(x.reason ?? '').slice(0, 80)})`, visible: false, data: { key: key(f.id), value: next + 100 } }];

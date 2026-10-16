@@ -1,3 +1,4 @@
+import { ABILITIES, auraBattleShock, hasAbility } from './abilities';
 import { BattleState, MAX_PHASES, Order, Quality, Sector, UnitSetup, battleReport, battleView, createBattle, ordersFor, runPhase } from './battle';
 import { meritOf, rankInfo } from './career';
 import { careerOf } from './gm-career';
@@ -48,6 +49,8 @@ export function battleStartDrafts(s: GameState, x: Record<string, unknown>, note
     id: `battle_${s.nextSeq}`, name: str(x.name, 80) || 'A battle', place: str(x.place, 80) || li(s).location,
     ally, enemy, liSector: SECTOR_SET.includes(x.sector as Sector) && x.sector !== 'reserve' ? (x.sector as Sector) : 'center',
     liMen: u.men, liLeads: u.leads, liInt: li(s).stats.INT, liRank: has(s, 'rank_level'), liUnitName: u.name, liLea: li(s).stats.LEA,
+    liAbilities: Object.keys(ABILITIES).filter((id) => ABILITIES[id].kind === 'command' && hasAbility(s, id)),
+    liAuraShock: u.leads ? auraBattleShock(s, Math.max(0, ...units(x.enemy).map((e) => e.lea ?? 40))) : 0,
   });
   return [{ type: 'battle', fact: `Battle: ${b.name}`, visible: true, data: { battle: b } }];
 }

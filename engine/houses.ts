@@ -1,3 +1,4 @@
+import { influenceCap } from './abilities';
 import { ageOn, dateFromIndex } from './calendar';
 import { has, li, met, today } from './engine';
 import { careerOf } from './gm-career';
@@ -5,7 +6,8 @@ import { rankLevel } from './career';
 import { opinion } from './relations';
 import { domainSummary } from './domain';
 import { heirOf } from './family';
-import { HIDDEN_PEOPLE, HOUSES, PEOPLE, PersonRow, WORLD_PLACES } from './world-people';
+import { HIDDEN_PEOPLE, HOUSES, PEOPLE, PEOPLE_ABILITIES, PersonRow, WORLD_PLACES } from './world-people';
+import { ABILITIES } from './abilities';
 import { Character, Draft, GameState, House, StatKey } from './types';
 
 // Houses and the world's people (World Bible ch. 2–3, 13c; Atlas §3–§5, §10). Phase 6 block B (audit gaps 1, 2, 8),
@@ -63,6 +65,7 @@ function personOf(r: PersonRow): Character {
     styles: mastery > 22 ? { sword: mastery } : {}, skills: {}, wound: 0, healDays: 0, fatigue: 0,
     traits: traits ? traits.split(/,\s*/) : [], location: place, alive: true, desc: role, publicRank: '?',
     house: house || undefined, world: true, lifespan: lifespanOf(id, age),
+    abilities: (PEOPLE_ABILITIES[id] ?? []).map((a) => ({ id: a, name: ABILITIES[a].name, kind: ABILITIES[a].kind, rank: ABILITIES[a].rank, mastery: 60 })),
   };
 }
 
@@ -214,7 +217,8 @@ export function houseChangeDrafts(s: GameState, x: Record<string, unknown>, note
   if (!h) { notes.push(`no house "${String(x.house)}"`); return []; }
   const why = String(x.reason ?? '').trim().slice(0, 120);
   if (!why) { notes.push(`a change to the ${h.name} needs a reason`); return []; }
-  const d = (v: unknown) => Math.max(-HOUSE_RULES.delta, Math.min(HOUSE_RULES.delta, Math.round(Number(v) || 0)));
+  const cap = influenceCap(s, HOUSE_RULES.delta); // Silver Tongue: ±15
+  const d = (v: unknown) => Math.max(-cap, Math.min(cap, Math.round(Number(v) || 0)));
   const troops = Math.round(Math.max(-HOUSE_RULES.troopShare, Math.min(HOUSE_RULES.troopShare, Number(x.troops) || 0)) * h.troops);
   const next: House = { ...h, prestige: clamp(h.prestige + d(x.prestige)), crownLoyalty: clamp(h.crownLoyalty + d(x.loyalty)), cohesion: clamp(h.cohesion + d(x.cohesion)), troops: Math.max(0, h.troops + troops) };
   if (JSON.stringify(next) === JSON.stringify(h)) return [];

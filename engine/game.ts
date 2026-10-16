@@ -30,7 +30,7 @@ export function parseFreeText(s: GameState, input: string): { action?: Action; a
   const part = s.date.part;
   if (s.duel && !s.duel.over) {
     const map: [RegExp, string][] = [
-      [/\b(simulate|auto|play out)\b/, 'auto'], [/\b(run|flee|escape)\b/, 'flee'], [/\b(yield|surrender|give up)\b/, 'yield'],
+      [/\b(zone|shinken)\b/, 'zone'], [/\b(simulate|auto|play out)\b/, 'auto'], [/\b(run|flee|escape)\b/, 'flee'], [/\b(yield|surrender|give up)\b/, 'yield'],
       [/\b(feint|fake|trick)\b/, 'feint'], [/\b(counter|defend|block|parry|guard)\b/, 'counter'],
       [/\b(observe|watch|read|wait|study)\b/, 'observe'], [/\b(attack|strike|stab|slash|charge|hit)\b/, 'attack'],
     ];

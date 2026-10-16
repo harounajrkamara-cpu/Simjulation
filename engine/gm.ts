@@ -2,7 +2,7 @@ import { ageOn, dateFromIndex, dayIndex, formatDate, seasonKey } from './calenda
 import { ESCAPE_NEEDS, inService, MERIT_FOR_FREEDOM, PRICE_MON, raidIndexOn, raidOfficerOn } from './campaign';
 import { DuelOutcome, DuelTemplate } from './content';
 import { PLACES } from './data';
-import { commitDrafts, has, li, met, replay, today } from './engine';
+import { commitDrafts, duelStateFor, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
 import { liHandInDeath } from './factcheck';
 import { publicWorldText } from './atlas-public';
@@ -20,6 +20,7 @@ import { betrayalDrafts, crueltyDrafts, loyaltyText, promiseDrafts } from './loy
 import { payDrafts } from './pay';
 import { adoptDrafts, allianceDrafts, foundHouseDrafts, hostageDrafts, houseChangeDrafts, houseTimeDrafts, housesText, successionDrafts, worldDrafts } from './houses';
 import { HIDDEN_PEOPLE } from './world-people';
+import { abilitiesText, abilityDrafts, ABILITIES } from './abilities';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -94,6 +95,7 @@ export type GmChange =
   | { kind: 'hostage'; house: string; npc?: string; harmed?: boolean; released?: boolean }
   | { kind: 'adopt'; house: string }
   | { kind: 'found_house'; name: string }
+  | { kind: 'ability'; id: string; reason: string; upgrade?: boolean }
   | { kind: 'money'; amount: number; reason: string }
   | { kind: 'wound'; level: number; reason: string }
   | { kind: 'fatigue'; level: number }
@@ -359,6 +361,7 @@ export function gmMemoryText(s: GameState): string {
     reputationText(s),
     loyaltyText(s),
     housesText(s),
+    abilitiesText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -596,6 +599,8 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         if (key === GOAL_KEYS.zone && worstWound < 3) { secretNotes.push('SHINKEN NO RYŪ wakes only at a true near-death moment (Li is not badly wounded): not recorded'); break; }
         if (key === GOAL_KEYS.name && !playerSaidName(s, said)) { secretNotes.push('Li says the name Hattori only when the player writes it: not recorded'); break; }
         if (key && !s.knowledge.includes(key)) drafts.push({ type: 'knowledge', fact: `Li learns: ${key}`, visible: false, data: { key } });
+        // The Zone wakes as an ability record too (WB 10.5: C-rank, very low mastery).
+        if (key === GOAL_KEYS.zone && !(c.abilities ?? []).some((a) => a.id === 'zone')) drafts.push({ type: 'ability', fact: 'SHINKEN NO RYŪ', visible: true, data: { char: c.id, ability: { id: 'zone', name: ABILITIES.zone.name, kind: 'combat', rank: 'C', mastery: 1 } } });
         break;
       }
       case 'fact': {
@@ -636,6 +641,9 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         break;
       case 'house':
         drafts.push(...houseChangeDrafts(s, x, notes));
+        break;
+      case 'ability':
+        drafts.push(...abilityDrafts(s, x, notes));
         break;
       case 'alliance':
         drafts.push(...allianceDrafts(s, x, notes));
@@ -838,12 +846,8 @@ function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = [],
       yielded: { fact: 'Li gives up the fight.', journal: `I gave up against ${foe}.`, grow: 0 },
     },
   };
-  const mastery = Math.max(0, ...Object.values(c.styles));
-  const state = {
-    id, round: 0, over: false, surprise: false, prefs: { ...t.prefs }, place: t.place, estimate: t.foe.estimate,
-    li: { id: c.id, name: 'Li', val: c.stats.VAL, mastery, wound: c.wound, fatigue: c.fatigue, observed: 0, history: [] },
-    foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: 0, fatigue: 0, observed: 0, history: [] },
-  };
+  // The same opening as every fight: Li's Zone, techniques, abilities and aura come with him (engine/abilities.ts).
+  const state = duelStateFor(s, id, t);
   return [...facts.flags.map((k): Draft => ({ type: 'flag', fact: `${k} used`, visible: false, data: { key: k, value: 1 } })), { type: 'duel', fact: `fight begins: ${foe}`, visible: false, data: { state, template: t } }];
 }
 

@@ -57,6 +57,26 @@ export interface DuelState {
   place?: string;
   estimate?: string;
   result?: 'won' | 'lost' | 'draw' | 'fled' | 'yielded';
+  /** Li's abilities in this fight (engine/abilities.ts): the Zone, the chosen techniques, aura. */
+  zone?: { rounds: number; left: number; uses: number; used: number };
+  liBonus?: Partial<Record<DuelMove, number>>;
+  liAbilities?: string[];
+  kageUsed?: boolean;
+  /** Rounds the foe hesitates under Li's aura (he only watches). */
+  foeHesitates?: number;
+  /** The foe's abilities (a known person's records). */
+  foeAbilities?: string[];
+}
+
+/** Li can enter the Zone now (he has it, it is not running, uses are left). */
+export const canZone = (d: DuelState) => !!d.zone && d.zone.left === 0 && d.zone.used < d.zone.uses && !d.over;
+
+/** SHINKEN NO RYŪ: the Zone starts; no round passes (the player then picks a move). */
+export function activateZone(prev: DuelState): RoundResult {
+  const d: DuelState = structuredClone(prev);
+  if (!canZone(d)) return { state: d, lines: [] };
+  d.zone = { ...d.zone!, left: d.zone!.rounds, used: d.zone!.used + 1 };
+  return { state: d, lines: [`SHINKEN NO RYŪ. The world goes quiet and slow; Li sees every move before it comes (${d.zone.rounds} round${d.zone.rounds > 1 ? 's' : ''}).`] };
 }
 
 /** Style factor v0.3. */
@@ -118,20 +138,34 @@ export interface RoundResult {
 export function duelRound(prev: DuelState, liMove: DuelMove): RoundResult {
   const d: DuelState = structuredClone(prev);
   const lines: string[] = [];
-  const fm = foeMove(d);
+  // Aura (ch. 12b): a much weaker foe hesitates and only watches.
+  const hesitates = (d.foeHesitates ?? 0) > 0;
+  const fm = hesitates ? 'observe' : foeMove(d);
+  if (hesitates) d.foeHesitates! -= 1;
   d.round += 1;
   d.li.history.push(liMove);
   d.foe.history.push(fm);
   lines.push(`Round ${d.round}: Li ${verb3(liMove)}; ${d.foe.name} ${verb3(fm)}.`);
 
-  const win = clashWinner(liMove, fm);
+  if (hesitates) lines.push(`${d.foe.name} hesitates under Li's presence.`);
+  const has = (id: string) => (d.liAbilities ?? []).includes(id);
+  const zoneOn = !!d.zone && d.zone.left > 0;
+  let win = clashWinner(liMove, fm);
+  // Abilities change the clash, never add hidden strength (Numbers §4).
+  if (zoneOn) win = 'a';
+  else if (has('twin_demon_dance') && liMove === 'feint' && fm === 'attack') { win = 'a'; lines.push('The Twin Demon Dance: the feint turns his attack aside.'); }
+  else if (has('kage_no_yaiba') && !d.kageUsed && liMove === 'attack' && fm === 'counter') { win = 'a'; d.kageUsed = true; lines.push('Kage no Yaiba: the shadow blade goes through his guard.'); }
+  if (zoneOn) {
+    d.zone!.left -= 1;
+    if (d.zone!.left === 0) { d.li.fatigue = Math.min(3, d.li.fatigue + 2); lines.push("The Zone breaks; Li's body pays for it."); }
+  }
   const strike = ['attack', 'feint'].includes(liMove) || ['attack', 'feint'].includes(fm);
-  let liSit = win === 'a' ? 0.25 : win === 'b' ? -0.15 : 0;
+  let liSit = (win === 'a' ? 0.25 : win === 'b' ? -0.15 : 0) + (d.liBonus?.[liMove] ?? 0);
   let foeSit = win === 'b' ? 0.25 : win === 'a' ? -0.15 : 0;
-  const liKnow = Math.min(3, d.li.observed) * 0.05;
+  const liKnow = Math.min(0.15, Math.min(3, d.li.observed) * (has('zanshin') ? 0.1 : 0.05));
   const surprise = d.surprise && d.round === 1 ? 0.3 : 0;
   liSit += Math.max(liKnow, surprise);
-  foeSit += Math.min(3, d.foe.observed) * 0.05;
+  foeSit += Math.min(0.15, Math.min(3, d.foe.observed) * ((d.foeAbilities ?? []).includes('zanshin') ? 0.1 : 0.05));
   if (liMove === 'observe') {
     d.li.observed += 1;
     if (d.li.observed >= 1 && !d.hint) { d.hint = habitHint(d); lines.push(`Li reads him: ${d.hint}`); }
