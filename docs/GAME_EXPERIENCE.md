@@ -538,3 +538,4 @@ Phase 6 block D (`engine/moments.ts`).
 - **Li's banner:** from Hyakunin-gashira his unit may take a name and a sign; battles then use the name.
 - **Nicknames per group:** soldiers, nobles, peasants or enemies name Li only after a deed in the last 60 days and when their regard is 10+.
 - **Title screen** at every opening: Continue (when there is a life) · New life · How to play · Load save.
+- **Signs of hidden changes** (WB 12b #11; live test Oct 17, ⚠ PROVISIONAL): after every scene, a hidden relation change shows one gold line per person, never a number: the code's own words when it wrote them for the player ("Raizen sees through Li's lie"), else a plain line ("Hachi warms to Li", "thinks less of Li") when the change in one scene is 5 or more.

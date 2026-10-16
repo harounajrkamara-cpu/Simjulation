@@ -40,3 +40,18 @@ describe('live test Oct 17: a lie Claude did not record', () => {
     expect(s.relations.raizen.mods.some((m) => /caught lying/.test(m.reason))).toBe(true);
   });
 });
+
+describe('signs of hidden changes (WB 12b #11; live test Oct 17)', () => {
+  it('a caught lie shows its own sign; a big hidden change a plain one; a small one none', async () => {
+    const { gmApply: apply, startGmGame: start } = await import('../engine/gm');
+    const { sparkSnapshot, sparksSince } = await import('../engine/sparks');
+    const s = start();
+    const mark = sparkSnapshot(s);
+    apply(s, { scene: 'Raizen watches him.', summary: 'x', changes: [{ kind: 'relation', npc: 'hachi', field: 'affection', delta: 8, reason: 'shared bread' }, { kind: 'relation', npc: 'sukezo', field: 'trust', delta: 2, reason: 'a nod' }] }, 'I lie to Raizen: I copied the soldiers');
+    const lines = sparksSince(s, mark).join(' | ');
+    expect(lines).toMatch(/Mikumo Raizen sees through Li's lie\./);
+    expect(lines).toMatch(/Hachi warms to Li\./);
+    expect(lines).not.toMatch(/Sukez/);
+    expect(lines).not.toMatch(/\d/);
+  });
+});
