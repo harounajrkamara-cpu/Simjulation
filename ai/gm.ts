@@ -109,7 +109,7 @@ ANSWER WITH JSON ONLY:
     {"kind":"domain","tax":<40..60>,"manager":"<id of who runs the land, or li>","standing":<men under arms>,"relief":true|false,"maintain":true|false},
     {"kind":"battle","name":"the battle's name","place":"where","sector":"left|center|right (where Li's unit stands)","ally":[{"sector":"left|center|right|reserve","name":"unit","commander":"name","lea":<0..100>,"quality":"levy|ashigaru|veteran|elite","men":<number>,"cavalry":<0..1>,"ground":<0..0.6 high ground or walls>}],"enemy":[same shape]}
   ],
-  "fight": null or {"foe":"who","rank":"F|E|D|C|B|A (how strong he looks)","look":"what Li sees","officer":"Gochō|Kogashira|null","deadly":true,"spar":false,"witnessedEnemy":true,"place":"where"},
+  "fight": null or {"foe":"who","rank":"F|E|D|C|B|A (how strong he looks)","look":"what Li sees","officer":"Gochō|Kogashira|null","deadly":true,"spar":false,"witnessedEnemy":true,"place":"where","surprise":false,"foeWound":0,"foeTired":0} (surprise only when Li strikes first unseen; foeWound 1–2 / foeTired 1–3 only when the story has already shown it: drunk, a bad knee, a long march. These are the only way a weak boy beats a far stronger man, and the code counts them),
   "suggestions": ["3 or 4 short things Li could do next, written as 'I ...'"],
   "routine": true when this scene was only routine and the story should go on by itself to the next moment that matters,
   "turns": "what this scene changed, in a few words (Li's danger, someone's trust, what Li knows, where he stands); empty if nothing turned",

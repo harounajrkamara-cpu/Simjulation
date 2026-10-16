@@ -234,3 +234,18 @@ export function autoMove(d: DuelState): DuelMove {
 export function healDaysFor(w: Wound): number {
   return HEAL_DAYS[w];
 }
+
+/** How the fight looks to Li before he moves (owner, Oct 17: warn first), from his guess of the foe, never the true numbers. */
+export function fightOdds(d: DuelState): string {
+  const L = ['F', 'E', 'D', 'C', 'B', 'A', 'S'];
+  const guess = (d.estimate ?? '').match(/Warrior ([FEDCBAS])/)?.[1];
+  const mine = L[Math.min(6, Math.floor(Math.max(0, (d.li.val + d.li.mastery) / 2) / 15))];
+  if (!guess) return '';
+  const gap = L.indexOf(guess) - L.indexOf(mine);
+  const edge = d.surprise || d.foe.wound > 0 || d.foe.fatigue > 0 ? ' Something is on Li\'s side: use it.' : '';
+  if (gap >= 3) return `He is far beyond Li. A fight like this is lost unless something turns it: get out, give up, or survive it.${edge}`;
+  if (gap === 2) return `He is much stronger. Only luck in the reading, a surprise or his weakness could turn it.${edge}`;
+  if (gap === 1) return `He is stronger. Read him well and Li can win.${edge}`;
+  if (gap === 0) return 'An even fight: the choices decide it.';
+  return 'Li is the stronger one here.';
+}

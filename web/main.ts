@@ -5,6 +5,7 @@ import { FactPacket, buildPacket } from '../ai/packet';
 import { commitDrafts, fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
 import { planDrafts, PlanId } from '../engine/plan';
 import { chooseTechniqueDrafts } from '../engine/abilities';
+import { fightOdds } from '../engine/duel';
 import type { CeremonyView } from '../engine/moments';
 import { SparkSnapshot, sparkSnapshot, sparksSince } from '../engine/sparks';
 /** The state after the last painted scene, for sparks; unset until the first scene of this page visit. */
@@ -221,7 +222,8 @@ function renderOptions() {
     const card = (name: string, f: typeof d.li, sub: string) => `<div class="fighter"><span class="name">${esc(name)}</span><span class="sub">${esc(WOUND_LABEL[f.wound])} · fatigue ${f.fatigue} of 3${sub ? ` · ${esc(sub)}` : ''}</span>${track(f.wound)}</div>`;
     // The Zone counted in rounds and uses (VISIE §3): "Zone: 2 rounds left · 1 of 3 uses".
     const zone = d.zone ? `<p class="duel-meta">Zone: ${d.zone.left ? `<b>${d.zone.left} round${d.zone.left > 1 ? 's' : ''} left</b>` : 'ready'} · ${d.zone.used} of ${d.zone.uses} uses</p>` : '';
-    duel.innerHTML = `<strong>Round ${d.round + 1} of 10</strong><div class="fighters">${card('Li', d.li, d.li.observed ? `read him ${Math.min(3, d.li.observed)} of 3` : '')}<span class="vs" aria-hidden="true">対</span>${card(d.foe.name.replace(/^the /, 'The '), d.foe, d.estimate ?? '')}</div>${d.hint ? `<p class="duel-meta">What Li has read: ${esc(d.hint)}</p>` : ''}${zone}${(state.characters[d.foe.id]?.abilities ?? []).length ? '<p class="duel-meta">His abilities: ???</p>' : ''}`;
+    const odds = d.round === 0 ? fightOdds(d) : '';
+    duel.innerHTML = `${odds ? `<p class="duel-meta odds">${esc(odds)}</p>` : ''}<strong>Round ${d.round + 1} of 10</strong><div class="fighters">${card('Li', d.li, d.li.observed ? `read him ${Math.min(3, d.li.observed)} of 3` : '')}<span class="vs" aria-hidden="true">対</span>${card(d.foe.name.replace(/^the /, 'The '), d.foe, d.estimate ?? '')}</div>${d.hint ? `<p class="duel-meta">What Li has read: ${esc(d.hint)}</p>` : ''}${zone}${(state.characters[d.foe.id]?.abilities ?? []).length ? '<p class="duel-meta">His abilities: ???</p>' : ''}`;
   }
   if (gmMode()) {
     $('opts').innerHTML = gmChoices().map((t, k) => `<button type="button" class="opt" data-key="${esc(t)}"${busy ? ' disabled' : ''}><span class="k">${k + 1}</span><span class="l">${esc(t)}</span></button>`).join('');
@@ -1085,8 +1087,8 @@ function loadSettings(): Settings {
   try { return { mode: 'gm', ai: 'claude', guide: 'full', ink: 'fast', ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }; }
   catch { return { mode: 'gm', ai: 'claude', guide: 'full', ink: 'fast' }; }
 }
-let settings = loadSettings();
-aiOn = settings.ai === 'claude';
+let settings: Settings = { ...loadSettings(), mode: 'gm', ai: 'claude' }; // Game Master only (owner, Oct 17)
+aiOn = true;
 
 function openNewLife() {
   const box = $('newlife');
@@ -1105,9 +1107,9 @@ $('nl-back').onclick = () => { $('newlife').hidden = true; };
 $('begin').onclick = () => {
   const box = $('newlife');
   const pick = (name: string) => box.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value;
-  settings = { mode: (pick('mode') ?? 'gm') as Settings['mode'], ai: (pick('ai') ?? 'claude') as Settings['ai'], guide: (pick('guide') ?? 'full') as Settings['guide'], ink: (pick('ink') ?? 'fast') as Settings['ink'] };
+  settings = { mode: 'gm', ai: 'claude', guide: (pick('guide') ?? 'full') as Settings['guide'], ink: (pick('ink') ?? 'fast') as Settings['ink'] };
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* not kept: fine */ }
-  aiOn = settings.ai === 'claude';
+  aiOn = true;
   setStoryteller();
   const life = Number(pick('life'));
   if (SLOTS.includes(life) && life !== slot) { slot = life; try { localStorage.setItem(SLOT_KEY, String(slot)); } catch { /* fine */ } }
@@ -1174,7 +1176,7 @@ async function playPrologue() {
     box.hidden = true;
     box.className = 'overlay prologue';
     // The new life begins here, with the night's memories first.
-    const gm = settings.mode === 'gm' && !!ai;
+    const gm = true; // Game Master only (owner, Oct 17)
     const life = beginLife({ gm, picks, skipped });
     state = life.state;
     seen = look(state);
@@ -1186,7 +1188,7 @@ async function playPrologue() {
     titleCard('Chapter 1', 'The Red Crane').then(() => {
       input.focus({ preventScroll: true });
       if (gmOn(state) && !state.gm?.scenes.length) gmStep(); // Claude opens the story
-      else if (settings.mode === 'gm' && !ai) show('Game Master mode needs Claude, which is only here when the page is opened on claude.ai. The classic chronicle plays instead.');
+      else if (!ai) show('The Game Master needs Claude, which is only here when the page is opened on claude.ai.');
     });
   };
   $('pr-next').onclick = () => {

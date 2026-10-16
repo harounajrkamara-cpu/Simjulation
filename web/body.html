@@ -15,16 +15,8 @@
   <div class="overlay-inner">
     <span class="seal big" aria-hidden="true">兵</span>
     <h1 id="nl-title">How will Li's story be told?</h1>
-    <p class="lead">Everything is already chosen. Change what you like, or just begin.</p>
+    <p class="lead">Claude is the Game Master: write anything, and the story moves scene by scene. Change what you like, or just begin.</p>
     <div class="settings">
-      <fieldset><legend>Story</legend>
-        <label><input type="radio" name="mode" value="gm" checked> <span><b>Game Master</b><br><small>Claude runs the world. Write anything; people follow their own plans; the story moves scene by scene. Needs Claude.</small></span></label>
-        <label><input type="radio" name="mode" value="classic"> <span><b>Classic chronicle</b><br><small>The hand-written first chapter with numbered choices. Works offline.</small></span></label>
-      </fieldset>
-      <fieldset><legend>Storyteller</legend>
-        <label><input type="radio" name="ai" value="claude" checked> <span><b>Claude</b><br><small>Write anything. Uses your own Claude account; asks permission once.</small></span></label>
-        <label><input type="radio" name="ai" value="plain"> <span><b>Plain chronicle</b><br><small>Template text and numbered choices. Works offline.</small></span></label>
-      </fieldset>
       <fieldset><legend>Guidance</legend>
         <label><input type="radio" name="guide" value="full" checked> <span><b>Full hints</b></span></label>
         <label><input type="radio" name="guide" value="light"> <span><b>Light</b></span></label>
@@ -98,7 +90,7 @@
     </dl>
     <div class="file">
       <button id="howto" type="button">How to play</button>
-      <button id="storyteller" type="button" aria-pressed="false">Storyteller: plain</button>
+      <button id="storyteller" type="button" aria-pressed="false" hidden>Storyteller: plain</button>
       <button id="narratorbtn" type="button" aria-pressed="false">Narrator: off</button>
       <button id="savebtn" type="button">Save file</button>
       <button id="new" type="button">New life</button>

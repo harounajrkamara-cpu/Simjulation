@@ -254,7 +254,9 @@ export function options(s: GameState): Option[] {
     const moves: Option[] = (['attack', 'counter', 'feint', 'observe'] as DuelMove[]).map((m, i) => ({ key: String(i + 1), label: MOVE_LABEL[m], action: { kind: 'duel', target: m }, test: '⚔️ VAL' }));
     moves.push({ key: '5', label: 'Let the fight play out (simulate)', action: { kind: 'duel', target: 'auto' } });
     moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: duelTemplate(s.duel.id, s).fleeRisk ?? 'shame' });
-    if (canZone(s.duel)) moves.push({ key: '7', label: `SHINKEN NO RYŪ — enter the Zone (${s.duel.zone!.uses - s.duel.zone!.used} of ${s.duel.zone!.uses} uses left)`, action: { kind: 'duel', target: 'zone' }, risk: 'exhaustion when it ends' });
+    // Always a way out, with a cost (owner, Oct 17): run, or give up.
+    moves.push({ key: '7', label: 'Give up', action: { kind: 'duel', target: 'yield' }, risk: 'he wins, and people see it' });
+    if (canZone(s.duel)) moves.push({ key: '8', label: `SHINKEN NO RYŪ — enter the Zone (${s.duel.zone!.uses - s.duel.zone!.used} of ${s.duel.zone!.uses} uses left)`, action: { kind: 'duel', target: 'zone' }, risk: 'exhaustion when it ends' });
     return moves;
   }
   const part = s.date.part;
@@ -667,6 +669,10 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   // The defeat ladder (WB 12b #10): only a real fight counts (a spar or a scuffle does not).
   if (t.maxWound >= 3 && d.result !== 'won' && d.result !== 'draw') out.push(...defeatDrafts(s, `lost a fight to ${d.foe.name}`));
   if (t.maxWound >= 3 && d.result === 'won') out.push(...victoryDrafts(s));
+  // A small fight run from or given up still costs face (owner, Oct 17: a way out, but with impact).
+  if (t.maxWound < 3 && (d.result === 'fled' || d.result === 'yielded')) out.push({ type: 'flag', fact: 'the camp saw Li back down', visible: true, data: { key: 'rep_soldiers', value: Math.max(0, has(s, 'rep_soldiers') - 2) } });
+  // Losing teaches (Numbers §2): say so, so a beating is not only a loss.
+  if ((d.result === 'lost' || d.result === 'draw') && res.grow > 0) out.push({ type: 'story', fact: 'Li learned something from this fight: he will be harder to beat next time.', visible: true, data: {} });
   out.push({ type: 'story', fact: res.fact, visible: true, journal: res.journal, data: { duelEnd: d.id, result: d.result } });
   if (res.grow > 0) {
     for (const [kind, key] of [['stat', 'VAL'], ['style', 'two_swords']] as const) {

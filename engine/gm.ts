@@ -88,6 +88,11 @@ export interface GmFight {
   /** An enemy of Kurogane, fought in Kurogane service, with witnesses (merit counts). */
   witnessedEnemy?: boolean;
   place?: string;
+  /** Real variables the story has shown (owner, Oct 17: "no way a slave beats a good warrior, unless variables"):
+   * Li strikes first unseen (+30% in round 1), the foe is already hurt (wound 1–2) or tired (fatigue 1–3). The code counts them. */
+  surprise?: boolean;
+  foeWound?: number;
+  foeTired?: number;
 }
 
 export type GmChange =
@@ -897,9 +902,9 @@ function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = [],
     id,
     place: f.place ?? PLACES[c.location] ?? c.location,
     intro: `${foe} — ${f.look}.`,
-    foe: { id: foeId, name: facts.person?.name ?? foe.replace(/^A /, 'the ').replace(/^An /, 'the '), val: facts.strength.val, mastery: facts.strength.mastery, wound: 0, fatigue: 0, estimate: `${f.look} · Warrior ${f.rank}?` },
+    foe: { id: foeId, name: facts.person?.name ?? foe.replace(/^A /, 'the ').replace(/^An /, 'the '), val: facts.strength.val, mastery: facts.strength.mastery, wound: Math.max(0, Math.min(2, Math.round(Number(f.foeWound) || 0))) as 0 | 1 | 2, fatigue: Math.max(0, Math.min(3, Math.round(Number(f.foeTired) || 0))), estimate: `${f.look} · Warrior ${f.rank}?` },
     prefs: [{ attack: 3, counter: 1, feint: 1, observe: 0 }, { attack: 1, counter: 3, feint: 0, observe: 1 }, { attack: 1, counter: 1, feint: 3, observe: 0 }][s.nextSeq % 3],
-    surprise: false,
+    surprise: f.surprise === true,
     maxWound: f.deadly ? 3 : 1,
     fleeRisk: 'shame, and whatever he does next',
     fleeText: 'Li breaks away and runs.',
