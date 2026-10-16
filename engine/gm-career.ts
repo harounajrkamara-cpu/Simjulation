@@ -1,3 +1,4 @@
+import { reputationMerit } from './reputation';
 import { inService } from './campaign';
 import {
   Bond, CombatDeed, CommandDeed, Deed, KingdomId, MeritLedger, PoliticalDeed, RANK_IDS, RankId, ceremonyRewardMon, checkPromotion, meritOf, nextRank,
@@ -75,7 +76,7 @@ export function promotionDrafts(s: GameState, x: Record<string, unknown>, notes:
   const sponsor = typeof x.sponsor === 'string' && s.relations[x.sponsor] ? x.sponsor : undefined;
   const chk = checkPromotion({
     rank: car.rank, merit: car.merit, birth: 'commoner', bond: car.bond, kingdom: car.kingdom, armyMen: ARMY[car.kingdom],
-    vacancy: !!reason, sponsorOpinion: sponsor ? opinion(s.relations[sponsor], today(s)) : undefined,
+    vacancy: !!reason, sponsorOpinion: sponsor ? opinion(s.relations[sponsor], today(s)) : undefined, reputation: reputationMerit(s),
   });
   if (!chk.ok || !chk.target) {
     notes.push(`not promoted${chk.target ? ` to ${rankInfo(chk.target).title}` : ''}: ${chk.blocks.map((b) => (b.code === 'vacancy' ? 'no free position was named' : b.reason)).join('; ')}`);
@@ -107,7 +108,7 @@ export function careerText(s: GameState): string {
     `Merit (whole career): combat ${car.merit.combat}, command ${car.merit.command}, political ${car.merit.political}. Unit size class ${sizeClassOfRank(car.rank)}.`,
   ];
   if (next) {
-    const chk = checkPromotion({ rank: car.rank, merit: car.merit, birth: 'commoner', bond: car.bond, kingdom: car.kingdom, armyMen: ARMY[car.kingdom], vacancy: true });
+    const chk = checkPromotion({ rank: car.rank, merit: car.merit, birth: 'commoner', bond: car.bond, kingdom: car.kingdom, armyMen: ARMY[car.kingdom], vacancy: true, reputation: reputationMerit(s) });
     lines.push(`Next: ${rankLabel(next)}: score ${chk.score} of ${chk.needed}${chk.blocks.length ? ` (blocked now: ${chk.blocks.map((b) => b.reason).join('; ')})` : ' (ready when a post opens)'}.`);
   }
   // The Army tab lists the people who serve under Li by their role (goal Oct 17).

@@ -11,6 +11,7 @@ import { fuseDrafts, fusesText, leverDrafts } from './fuses';
 import { seedDrafts, seedsText } from './seeds';
 import { clockDrafts, clocksText, clockTimeDrafts } from './clocks';
 import { nemesisDrafts } from './drama';
+import { discontentDrafts } from './discontent';
 import { planText } from './plan';
 import { childDrafts, familyText, marryDrafts } from './family';
 import { courtText, factionDrafts } from './court';
@@ -92,7 +93,7 @@ export type GmChange =
   | { kind: 'clock'; id: string; name?: string; doom?: string; size?: number; tick?: number; back?: number; close?: boolean; reason?: string }
   | { kind: 'marry'; npc: string; alliance?: boolean; reason?: string }
   | { kind: 'child'; name: string; son?: boolean }
-  | { kind: 'faction'; faction: string; delta?: number; join?: boolean; leave?: boolean; reason?: string }
+  | { kind: 'faction'; faction: string; delta?: number; join?: boolean; leave?: boolean; discontent?: number; reason?: string }
   | { kind: 'reputation'; group: string; delta: number; reason?: string }
   | { kind: 'skill'; skill: string; delta: number }
   | { kind: 'memory'; npc: string; what: string; weight?: number }
@@ -828,6 +829,8 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   out.push(...fuseDrafts(s, today(s) + n));
   // Open threats come closer by themselves (pacing director, owner Oct 16).
   out.push(...clockTimeDrafts(s, today(s) + n));
+  // The courts move every month (Numbers §9 discontent; ultimatum at 100).
+  out.push(...discontentDrafts(s, today(s), today(s) + n));
   // Everyone Li knows grows with the seasons too.
   out.push(...seasonGrowthDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.

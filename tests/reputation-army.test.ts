@@ -31,3 +31,19 @@ describe('the Army tab', () => {
     expect(page).toMatch(/Kenta/);
   });
 });
+
+describe('reputation in the promotion score (Numbers §6 w₃, PROVISIONAL scale)', () => {
+  it('what soldiers and nobles think of Li raises his score; peasants do not', async () => {
+    const { planSteps } = await import('../engine/plan');
+    const score = (s: ReturnType<typeof startGmGame>) => Number(planSteps(s, 'rank')[0].text.match(/score (\d+)/)![1]);
+    const make = () => { const s = startGmGame(); s.characters[s.liId].status = 'free'; s.flags.rank_level = 4; s.flags.merit_command = 300; return s; };
+    const plain = make();
+    const famous = make();
+    famous.flags.rep_soldiers = 100;
+    famous.flags.rep_nobles = 100;
+    const peasants = make();
+    peasants.flags.rep_peasants = 100;
+    expect(score(famous)).toBeGreaterThan(score(plain));
+    expect(score(peasants)).toBe(score(plain));
+  });
+});

@@ -1,6 +1,7 @@
 import { KingdomId, rankLevel } from './career';
 import { has } from './engine';
 import { careerOf } from './gm-career';
+import { discontent, discontentWord } from './discontent';
 import { Draft, GameState } from './types';
 
 // The court (Stage 4: "court & kingdoms"; World Bible ch. 13 "The seven profiles" factions, World Atlas houses; goal Oct
@@ -46,10 +47,15 @@ export const memberOf = (s: GameState): FactionId | undefined => ALL_FACTIONS[ha
 export const courtOf = (s: GameState) => ALL_FACTIONS.filter((f) => f.kingdom === careerOf(s).kingdom);
 
 /** A faction change: standing moves with any faction (friends and enemies abroad too); Li joins only his own court. */
-export function factionDrafts(s: GameState, x: { faction?: unknown; delta?: unknown; join?: unknown; leave?: unknown; reason?: unknown }, notes: string[]): Draft[] {
+export function factionDrafts(s: GameState, x: { faction?: unknown; delta?: unknown; join?: unknown; leave?: unknown; discontent?: unknown; reason?: unknown }, notes: string[]): Draft[] {
   const k = ALL_FACTIONS.findIndex((f) => f.id === x.faction);
   if (k < 0) { notes.push(`no court faction "${String(x.faction)}"`); return []; }
   const f = ALL_FACTIONS[k];
+  if (x.discontent !== undefined) {
+    // Li stirs a faction up or calms it down (goal Oct 17): at most ±10 a scene, with a reason.
+    const dd = Math.max(-COURT.delta, Math.min(COURT.delta, Math.round(Number(x.discontent) || 0)));
+    return dd ? [{ type: 'flag', fact: `${f.name} discontent ${dd > 0 ? '+' : ''}${dd} (${String(x.reason ?? '').slice(0, 80)})`, visible: false, data: { key: `disc_${f.id}`, value: Math.max(0, Math.min(99, discontent(s, f.id) + dd)) } }] : [];
+  }
   if (x.leave) return memberOf(s) === f.id ? [{ type: 'flag', fact: `Li leaves ${f.name}`, visible: true, data: { key: 'court_member', value: 0 } }] : [];
   if (x.join) {
     if (f.kingdom !== careerOf(s).kingdom) { notes.push(`${f.name} is a faction of another kingdom's court`); return []; }
@@ -81,7 +87,8 @@ export function courtText(s: GameState): string {
   const word = (v: number) => (v >= 60 ? 'trusts him' : v >= 20 ? 'favours him' : v > -20 ? 'watches him' : v > -60 ? 'distrusts him' : 'wants him gone');
   return [
     `THE COURT OF ${KINGDOM(kingdom).toUpperCase()} (factions; change Li's standing with {"kind":"faction","faction":"<id>","delta":<-${COURT.delta}..${COURT.delta}>,"reason":"..."}; from Sennin-shō a general may join one with "join":true):`,
-    ...court.map((f) => `- [${f.id}] ${f.name} (${f.head}; wants ${f.wants}): ${word(standing(s, f.id))} (${standing(s, f.id)})${m === f.id ? ' — LI IS A MEMBER' : ''}.`),
+    ...court.map((f) => `- [${f.id}] ${f.name} (${f.head}; wants ${f.wants}): ${word(standing(s, f.id))} (${standing(s, f.id)}); the faction is ${discontentWord(discontent(s, f.id))} (discontent ${Math.round(discontent(s, f.id))} of 100, ultimatum at 100)${m === f.id ? ' — LI IS A MEMBER' : ''}.`),
+    'What Li does can stir a faction or calm it: {"kind":"faction","faction":"<id>","discontent":<-10..10>,"reason":"..."}.',
   ].join('\n');
 }
 

@@ -1,3 +1,4 @@
+import { reputationMerit } from './reputation';
 import { ESCAPE_NEEDS, inService, MERIT_FOR_FREEDOM, PRICE_MON } from './campaign';
 import { checkPromotion, nextRank, rankLabel, rankLevel } from './career';
 import { has, li, today } from './engine';
@@ -66,7 +67,7 @@ export function planSteps(s: GameState, id: PlanId): PlanStep[] {
     case 'rank': {
       const next = nextRank(car.rank);
       if (!next) return [{ text: `Li holds the highest rank: ${rankLabel(car.rank)}`, done: true }];
-      const chk = checkPromotion({ rank: car.rank, merit: car.merit, birth: 'commoner', bond: car.bond, kingdom: car.kingdom, armyMen: ARMY[car.kingdom], vacancy: true });
+      const chk = checkPromotion({ rank: car.rank, merit: car.merit, birth: 'commoner', bond: car.bond, kingdom: car.kingdom, armyMen: ARMY[car.kingdom], vacancy: true, reputation: reputationMerit(s) });
       return [
         { text: `Merit for ${rankLabel(next)}: score ${pct(Math.floor(chk.score), chk.needed)}`, done: chk.score >= chk.needed },
         ...chk.blocks.filter((b) => b.code !== 'merit').map((b) => ({ text: `Not yet: ${b.reason}`, done: false })),

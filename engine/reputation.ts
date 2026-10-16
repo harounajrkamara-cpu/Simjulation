@@ -33,3 +33,7 @@ export function reputationText(s: GameState): string {
 
 /** For the Li tab: words, never numbers. */
 export const reputationLines = (s: GameState) => GROUPS.filter((g) => reputation(s, g) > 0).map((g) => `${g[0].toUpperCase()}${g.slice(1)} ${word(g, reputation(s, g))}.`);
+
+/** Reputation in the promotion score (Numbers §6 w₃ term; goal Oct 17, PROVISIONAL scale, owner kan terugdraaien): the
+ * average of what soldiers and nobles think of Li, 0–100 merit points. Peasants and enemies do not promote a man. */
+export const reputationMerit = (s: GameState) => Math.round((reputation(s, 'soldiers') + reputation(s, 'nobles')) / 2);

@@ -153,7 +153,8 @@ All four stages are playable through the referee: `tests/whole-life.test.ts` pla
 | 5 | Epilogue (GE ch. 9 decision 2) | `engine/epilogue.ts` | ✅ Oct 17 (retire, or 60+) |
 | all | Li's plan for every stage, milestone films, sparks, pacing director, drama layer | `engine/plan.ts` and others | ✅ Oct 16–17 |
 
-**Not built (honest):** faction *discontent* as its own simulation (the great crises are the fuses instead); reputation feeding the promotion score (owner question on its scale); a Playwright run of the new screens (no Chrome here; checked by hand in the built-in browser).
+**Built after the first status (Oct 17):** faction discontent by the Numbers §9 formula with ultimatums (`engine/discontent.ts`); reputation in the promotion score (PROVISIONAL scale); the courts of all seven kingdoms.
+**Not built (honest):** a Playwright run of the new screens (no Chrome here; checked by hand in the built-in browser).
 **Owner decisions still open:** buying freedom is slow (Phase 2 #2); officers' rhythm (Phase 2 #3); Raizen's share (Phase 2 #5); the battle stall drain; the PROVISIONAL numbers in `domain.ts`, `family.ts`, `court.ts`, `clocks.ts`.
 **Not proven:** none of this has been played with the real Claude on claude.ai.
 
