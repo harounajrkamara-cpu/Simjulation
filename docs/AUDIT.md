@@ -7,6 +7,8 @@ Method: every chapter of the World Bible, the Atlas, the Numbers Sheet, the Game
 
 Legend: ✅ built · 🟡 partly (text for Claude, or a rule with no effect) · ❌ missing.
 
+**Phase 6 status (Oct 17):** every row the owner put in scope (the world, Li and his people, big moments: 1–14, 19–26, 29, 30) is ✅, built in blocks A–G (BUILD_PLAN Phase 6), each with tests; page version 47. Still open by the owner's choice (engine & polish, later/parked): 15–18, 27, 28, 31–35. **Not proven:** none of Phase 6 has been played with the real Claude on claude.ai; all new numbers are PROVISIONAL.
+
 ---
 
 ## Built (works in code, tested)

@@ -305,6 +305,9 @@ export function housesText(s: GameState): string {
   const other = houses(s).filter((h) => h.kingdom !== k && !h.fallen && h.tier !== 'C');
   const people = Object.values(s.characters).filter((c) => c.world && c.alive && !met(s, c.id) && !HIDDEN_PEOPLE.has(c.id)
     && (PEOPLE.find((r) => r[0] === c.id)?.[5] === k || ageOn(c.born, s.date) <= 25));
+  // Li's own kingdom in full; the young elsewhere (his generation) in one compact line, to keep the prompt short.
+  const home = people.filter((c) => PEOPLE.find((r) => r[0] === c.id)?.[5] === k);
+  const away = people.filter((c) => !home.includes(c));
   const placeOf = (c: Character) => WORLD_PLACES[c.location] ?? c.location;
   return [
     `THE HOUSES OF ${k.toUpperCase()} (the code keeps them: land, men, prestige, loyalty to their lord, cohesion; heads and heirs are real people who age and die). Move one with {"kind":"house"}; marriages between houses {"kind":"alliance"}; hostages {"kind":"hostage"}:`,
@@ -312,7 +315,8 @@ export function housesText(s: GameState): string {
     `OTHER KINGDOMS' HOUSES (one line each; full when Li serves there):`,
     ...other.map((h) => houseLine(s, h, false)),
     `PEOPLE OF THE WORLD Li has not met (real people with ids: use the id with "person" when Li meets one; never invent a new name for them):`,
-    ...people.map((c) => `- ${c.name} [${c.id}], ${ageOn(c.born, s.date)}, ${c.role}${c.house ? ` (House ${s.houses?.[c.house]?.name ?? c.house})` : ''}; at ${placeOf(c)}.`),
+    ...home.map((c) => `- ${c.name} [${c.id}], ${ageOn(c.born, s.date)}, ${c.role}; at ${placeOf(c)}.`),
+    away.length ? `Li's generation in other lands: ${away.map((c) => `${c.name} [${c.id}] (${ageOn(c.born, s.date)}, ${PEOPLE.find((r) => r[0] === c.id)?.[5]})`).join(', ')}.` : '',
     has(s, 'adopted') ? `Li is an adopted son of House ${houses(s)[has(s, 'adopted') - 1]?.name}.` : '',
     s.houses.li ? `LI'S OWN HOUSE: ${houseLine(s, s.houses.li, true).slice(2)}` : (s.domain && rankLevel(careerOf(s).rank) >= rankLevel(HOUSE_RULES.foundRank) ? 'Li holds land: he may found his own house ({"kind":"found_house","name":"..."}) when the story gets there.' : ''),
   ].filter(Boolean).join('\n');
