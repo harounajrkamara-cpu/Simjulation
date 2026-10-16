@@ -1,5 +1,8 @@
 import { GameState } from '../engine/types';
 import { has } from '../engine/engine';
+import { visibleOpinion } from '../engine/relations';
+import { RANKS } from '../engine/career';
+import { WORLD_START } from '../engine/world-public';
 import { knownEntries } from './panels';
 
 // Onboarding helpers (Game Experience ch. 8): GUIDE hints, example lines, nested tooltips, How to play.
@@ -38,13 +41,38 @@ const TERMS: Record<string, string> = {
 };
 
 /** Gold-underlined terms with a short explanation, only for what Li has learned (ch. 8 §5). Works on escaped HTML. */
+const escRe = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escHtml = (x: string) => x.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+
+/** Everything a word can explain, only what Li knows (owner, Oct 12): encyclopedia entries, people he has met (as he
+ * sees them), the ranks, and the kingdoms' public facts (goal Oct 17). [word pattern, title, text] */
+function termsFor(s: GameState): [string, string, string][] {
+  const out: [string, string, string][] = [];
+  for (const e of knownEntries(s)) if (TERMS[e.id]) out.push([TERMS[e.id], e.title, e.text]);
+  for (const id of Object.keys(s.relations)) {
+    const p = s.characters[id];
+    if (!p || id === s.liId || !has(s, `met_${id}`)) continue;
+    const short = p.name.replace(/"[^"]*"/g, '').trim().split(/\s+/);
+    const word = short[short.length - 1]; // how people are called: Raizen, Sukezō, Rokubei, Sayo
+    if (word.length >= 3) out.push([escRe(word), p.name, `${p.role}${p.alive ? `. ${visibleOpinion(s, id)}` : '. Dead.'}`]);
+  }
+  for (const r of RANKS) if (r.id !== 'ashigaru') out.push([escRe(r.title), r.title, `${r.english ? `${r.english}: ` : ''}an officer of ${r.men} men.`]);
+  for (const k of WORLD_START.kingdoms) out.push([escRe(k.name), `${k.name}, ${k.epithet}`, `Capital ${k.capital}. ${k.ruler}`]);
+  return out;
+}
+
+/** Gold-underlined words with a short explanation, the first mention only, never inside another tip (tap works too). */
 export function termify(html: string, s: GameState): string {
   let out = html;
-  for (const e of knownEntries(s)) {
-    const word = TERMS[e.id];
-    if (!word) continue;
+  for (const [word, title, text] of termsFor(s)) {
     const re = new RegExp(`(^|[^\\p{L}>])(${word})(?![\\p{L}])`, 'u');
-    out = out.replace(re, (_m, pre, w) => `${pre}<span class="term" tabindex="0">${w}<span class="tip" role="tooltip"><b>${e.title}</b> ${e.text}</span></span>`);
+    // Only in plain text, never inside a tip that is already there.
+    const parts = out.split(/(<span class="term"[\s\S]*?<\/span><\/span>)/);
+    let done = false;
+    out = parts.map((part) => (done || part.startsWith('<span class="term"') ? part : part.replace(re, (m, pre, w) => {
+      done = true;
+      return `${pre}<span class="term" tabindex="0">${w}<span class="tip" role="tooltip"><b>${escHtml(title)}</b> ${escHtml(text)}</span></span>`;
+    }))).join('');
   }
   return out;
 }
