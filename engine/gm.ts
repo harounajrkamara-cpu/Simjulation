@@ -326,7 +326,8 @@ export function gmMemoryText(s: GameState): string {
   const soon = WORLD_CLOCK.filter((w) => w.day >= today(s) - 2 && w.day <= today(s) + 60).map((w) => `- ${formatDate(dateFromIndex(w.day))}: ${w.what}`);
   const freedomRoutes = c.status === 'slave' ? [
     `Merit law: 30 merit in Kurogane service (now ${has(s, 'merit_service')}${inService(s) ? '' : '; Li is NOT in service yet'}) or the head of an enemy Kogashira or higher taken in service (only through a fight the code runs).`,
-    `Buying: Raizen's price is 15 ryō = ${PRICE_MON} mon (Li has ${s.money} mon). Rokubei keeps the papers.`,
+    // Owner decision default (goal Oct 17, Phase 2 #2): buying stays a slow, late route, but real ways to earn exist.
+    `Buying: Raizen's price is 15 ryō = ${PRICE_MON} mon (Li has ${s.money} mon). Rokubei keeps the papers. Li can earn real coin with "money": soldiers' tips on paydays (a few mon), stitching the wounded (tens), selling Sukezō's remedies at the fort (tens), loot from a levy fight (hundreds), dice at the fire (a risk: he can lose too). It is a long road, and it should feel like one.`,
     'Raizen sets him free: needs Raizen\'s trust and respect both 85+.',
     'Escape: to Tatara over the Black Hills (no slavery there); hunted afterwards. Only in winter quarters (Months 10–12), and only when Li is fit and quiet enough (the code checks).',
   ] : ['Li is free.'];
