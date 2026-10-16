@@ -10,6 +10,8 @@ export interface FactProblem { kind: 'dead' | 'name' | 'age' | 'rank' | 'mechani
 /** Command ranks (World Bible ch. 4), so a wrong rank for Li can be caught. */
 export const RANK_TITLES = ['Ashigaru', 'Gochō', 'Kogashira', 'Gojū-gashira', 'Hyakunin-gashira', 'Sanbyakunin-shō', 'Sennin-shō', 'Gosennin-shō', 'Taishō', 'Dai-Shōgun'];
 
+/** Titles in the world's names: words a scene uses freely, never checked as names. */
+const TITLES = /^(Master|Lord|Lady|King|Queen|Prince|Princess|Mother|Chief|Abbot|Regent|Chancellor|Grand|Admiral|Speaker|Crown|Old|Young)$/;
 // "rolls" alone is prose ("rolls his shoulders", live test Oct 17); only a dice roll is a game word.
 const MECHANICS = /\b(VAL|LEA|INT|POL|stats?|dice|roll(?:s|ed)? (?:a|the) (?:die|d\d+)|hit points?|HP|XP|level(?:ed)? up|percent)\b|%/;
 const NUMBER_WORDS: Record<string, number> = {
@@ -63,8 +65,9 @@ export function checkGmScene(s: GameState, text: string, extraNames: string[] = 
 
   // 2. Known names spelled right: a capitalised word one or two letters away from a known name part.
   const known = new Set<string>(['Li', ...extraNames.flatMap((n) => n.split(/\s+/))]);
-  for (const c of Object.values(s.characters)) for (const w of c.name.split(/\s+/)) known.add(w);
-  const parts = [...known].filter((w) => w.length >= 5);
+  // Quote marks belong to nicknames, not to the word ("One-Ear"); titles are words, not names ("Master" vs "Faster").
+  for (const c of Object.values(s.characters)) for (const w of c.name.split(/\s+/)) known.add(w.replace(/^["'“”‘’]+|["'“”‘’]+$/g, ''));
+  const parts = [...known].filter((w) => w.length >= 5 && !TITLES.test(w));
   const flagged = new Set<string>();
   for (const w of new Set(story.match(/(?<![\p{L}-])[A-ZŌŪ][\p{L}-]{3,}(?![\p{L}-])/gu) ?? [])) {
     if (known.has(w) || flagged.has(w)) continue;

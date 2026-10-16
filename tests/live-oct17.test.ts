@@ -65,3 +65,14 @@ describe('live test Oct 17: "rolls" is prose', () => {
     expect(checkGmScene(s, 'Li rolls the dice.').map((p) => p.kind)).toContain('mechanics');
   });
 });
+
+describe('live test Oct 17: no false misspellings', () => {
+  it('"One-Ear" is Gonza\'s name and "Faster" is a word, not "Master"', async () => {
+    const { checkGmScene } = await import('../engine/factcheck');
+    const { startGmGame: start } = await import('../engine/gm');
+    const s = start();
+    const kinds = checkGmScene(s, 'Gonza One-Ear spits. Faster, Li thinks. Faster than the strap.').map((p) => p.text);
+    expect(kinds.filter((t) => /misspelling/.test(t))).toEqual([]);
+    expect(checkGmScene(s, 'Raizzen limps closer.').map((p) => p.kind)).toContain('name');
+  });
+});
