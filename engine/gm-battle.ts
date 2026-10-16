@@ -1,3 +1,4 @@
+import { bannerOf } from './moments';
 import { ABILITIES, auraBattleShock, hasAbility } from './abilities';
 import { BattleState, MAX_PHASES, Order, Quality, Sector, UnitSetup, battleReport, battleView, createBattle, ordersFor, runPhase } from './battle';
 import { meritOf, rankInfo } from './career';
@@ -34,7 +35,8 @@ function liUnit(s: GameState): { men: number; leads: boolean; name: string } {
   if (li(s).status === 'slave') return { men: 50, leads: false, name: 'the levy bearers' };
   if (car.rank === 'ashigaru') return { men: 100, leads: false, name: "Li's company" };
   const r = rankInfo(car.rank);
-  return { men: Math.max(5, r.min), leads: true, name: `Li's ${r.title}` };
+  // His unit's own name, once it has one (engine/moments.ts banner).
+  return { men: Math.max(5, r.min), leads: true, name: bannerOf(s)?.split(' — ')[0] ?? `Li's ${r.title}` };
 }
 
 /** A battle Claude sets up. Refused while a fight or another battle is on, or when either side has nobody. */

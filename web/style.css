@@ -379,3 +379,6 @@ button { cursor: pointer; }
   .file { flex-wrap: wrap; gap: 6px; }
   .file button { white-space: nowrap; min-height: 40px; padding: 0 10px; }
 }
+/* Title screen (GE ch. 3), above every other overlay. */
+.titlescreen { z-index: 12; text-align: center; }
+.titlescreen .ts-row { justify-content: center; flex-wrap: wrap; gap: 8px; }

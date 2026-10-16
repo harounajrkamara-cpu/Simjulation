@@ -50,13 +50,13 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 | # | What the canon says | Code today | Status |
 |---|---|---|---|
 | 19 | **Aura** (WB ch. 5, VISIE §4): a general's aura acts on morale and on the opponent's choices | not in the code anywhere | ✅ Oct 17 |
-| 20 | **Ceremony screen** (GE ch. 3/3b): who stands where, every witness reacts by their own opinion and remembers it | ceremonies happen, but only as story text; no screen, no witness reactions | 🟡 |
-| 21 | **Legend page** in the Journal (GE 3b step 6): date, witnesses, title, kept forever | legend moments show once as an overlay, then are gone | ❌ |
-| 22 | **Nicknames per group** (GE 3b): soldiers, nobles and enemies may call Li different names, earned from deeds | one hand-written nickname (classic) and a GM title; not per group | 🟡 |
+| 20 | **Ceremony screen** (GE ch. 3/3b): who stands where, every witness reacts by their own opinion and remembers it | ceremonies happen, but only as story text; no screen, no witness reactions | ✅ Oct 17 |
+| 21 | **Legend page** in the Journal (GE 3b step 6): date, witnesses, title, kept forever | legend moments show once as an overlay, then are gone | ✅ Oct 17 |
+| 22 | **Nicknames per group** (GE 3b): soldiers, nobles and enemies may call Li different names, earned from deeds | one hand-written nickname (classic) and a GM title; not per group | ✅ Oct 17 |
 | 23 | **Lies caught by a rule** (GE ch. 5): the NPC's INT vs Li's POL and what they know | Claude decides alone; no rule | ❌ |
-| 24 | **Li's own unit name and banner** (GE 3b legend list, like Shin's Hi Shin unit) | missing | ❌ |
-| 25 | **Feasts, funerals, oaths** as ceremonies (GE 3b) | missing (funeral only in the epilogue text) | ❌ |
-| 26 | **Title screen** with Continue / New life / Load (GE ch. 3) | the page opens straight into the game or the New life box | 🟡 |
+| 24 | **Li's own unit name and banner** (GE 3b legend list, like Shin's Hi Shin unit) | missing | ✅ Oct 17 |
+| 25 | **Feasts, funerals, oaths** as ceremonies (GE 3b) | missing (funeral only in the epilogue text) | ✅ Oct 17 |
+| 26 | **Title screen** with Continue / New life / Load (GE ch. 3) | the page opens straight into the game or the New life box | ✅ Oct 17 |
 | 27 | A death needs a `by` field (who killed, from the code's record) — known gap from STATUS Oct 13 | missing | ❌ |
 | 28 | George narrator bundled, not loaded from jsdelivr (STATUS security note) | still loaded at runtime | 🟡 |
 
@@ -64,7 +64,7 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 | # | Where it was said | What | Status |
 |---|---|---|---|
 | 29 | Numbers §11, Free World proposal | **Real fuse decision trees** (who acts, scored choices, visible signs). Today each fuse fires on a fixed day with weights (PROVISIONAL) | 🟡 |
-| 30 | NIGHT_LOG Oct 16, WB ch. 8 | **Rumours about Li** spreading in Game Master mode (rumours exist only in the classic chronicle) | ❌ |
+| 30 | NIGHT_LOG Oct 16, WB ch. 8 | **Rumours about Li** spreading in Game Master mode (rumours exist only in the classic chronicle) | ✅ Oct 17 |
 | 31 | PROPOSAL_PACING | The code opens obvious **threat clocks** itself (a rival who threatened Li); today only after a deadly win | 🟡 |
 | 32 | SENGOKU_SOLDIER_COMPLETE (owner's plan) | Other storytellers on the page (Gemini, DeepSeek, Ollama, OmniRoute); today only Claude or plain | ❌ |
 | 33 | Owner, Oct 9 | **Multiple worlds** later (more than this one land) | ❌ (later) |

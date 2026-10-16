@@ -1,11 +1,12 @@
 import { CLOSE_CSS, closeMapHtml } from './close-map';
-import { ageOn, formatDate } from '../engine/calendar';
+import { ageOn, dateFromIndex, formatDate } from '../engine/calendar';
 import { ENCYCLOPEDIA, STORY } from '../engine/content';
 import { ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PRICE_MON, inService } from '../engine/campaign';
 import { PLACES } from '../engine/data';
 import { has, injuriesOf, li, met, today } from '../engine/engine';
 import { loyaltyLabel, openPromises } from '../engine/loyalty';
 import { knownHouses } from '../engine/houses';
+import { REACH, bannerOf, legendPages, nicknamesByGroup, rumoursOf } from '../engine/moments';
 import { ABILITIES, auraScore, auraWord, chosenTechniques, generalType, hasAbility, liAbilities, pendingTechniques } from '../engine/abilities';
 import { journalArcs, pctToNext, trophies } from '../engine/render';
 import { visibleOpinion } from '../engine/relations';
@@ -143,7 +144,11 @@ export function liPage(s: GameState): string {
   const powerHtml = `<h2 class="label">Abilities</h2>${ab ? `<table class="table">${ab}</table>` : '<p class="empty">None yet. Abilities come through events: near death, a master, an old book.</p>'}
     ${pend}${techs.length ? `<p>Techniques: ${esc(techs.join(', '))}</p>` : ''}
     <p>Aura: ${esc(auraWord(auraScore(li(s), s)))} · General type: ${esc(generalType(li(s)))}</p>`;
-  const threats = [...clockFeelings(s), ...courtFeelings(s).map((x) => `At court: ${x}`), ...reputationLines(s)];
+  // What people say about Li, and what they call him (engine/moments.ts).
+  const talk = rumoursOf(s).filter((r) => r.about === s.liId).slice(-4).map((r) => `People say ${r.text} (heard in ${REACH[r.reach]}).`);
+  const names = Object.entries(nicknamesByGroup(s)).map(([g, t]) => `${g === 'all' ? 'People' : g[0].toUpperCase() + g.slice(1)} call him ${t.map((x) => `"${x}"`).join(', ')}.`);
+  const banner = bannerOf(s) ? [`His unit: ${bannerOf(s)}.`] : [];
+  const threats = [...names, ...banner, ...talk, ...clockFeelings(s), ...courtFeelings(s).map((x) => `At court: ${x}`), ...reputationLines(s)];
   const threatHtml = threats.length ? `<h2 class="label">What Li feels coming</h2><ul class="chronicle">${threats.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
   return `<div class="card">${liCard(s)}</div>${planHtml}${powerHtml}${lifeHtml}${threatHtml}
     <h2 class="label">Condition</h2>
@@ -209,7 +214,10 @@ export function journalPage(s: GameState): string {
     `<section><h3>${esc(d.label)}</h3>${d.lines.map((l) => `<p>${esc(l)}</p>`).join('')}</section>`).join('')}`).join('');
   const chapters = (s.gm?.chapters ?? []).map((c, k) => `<section class="chapter"><h3>Chapter ${k + 1} · ${esc(c.title)}</h3><p>${esc(c.text)}</p></section>`).reverse().join('');
   const chapterHtml = chapters ? `<h2 class="label">Chapters</h2><div class="journal">${chapters}</div>` : '';
-  return `<h1>Journal</h1><p class="lead">In Li's own words. Only what he knows, and he can be wrong.</p>${chapterHtml}${trophyHtml}<div class="journal">${arcs}</div>`;
+  // Legend pages (GE 3b step 6): kept forever, with the date and who saw it.
+  const pages = legendPages(s).map((p) => `<section class="chapter"><h3>${esc(p.title)}</h3><p>${p.meaning ? `${esc(p.meaning)}. ` : ''}${esc(formatDate(dateFromIndex(p.day)))}${p.witnesses ? ` · ${esc(p.witnesses)}` : ''}</p></section>`).join('');
+  const legendHtml = pages ? `<h2 class="label">Legend pages</h2><div class="journal">${pages}</div>` : '';
+  return `<h1>Journal</h1><p class="lead">In Li's own words. Only what he knows, and he can be wrong.</p>${legendHtml}${chapterHtml}${trophyHtml}<div class="journal">${arcs}</div>`;
 }
 
 export function knownEntries(s: GameState) {

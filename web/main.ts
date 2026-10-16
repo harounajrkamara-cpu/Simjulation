@@ -5,6 +5,7 @@ import { FactPacket, buildPacket } from '../ai/packet';
 import { commitDrafts, fromSave, li, liAge, met, options, recordNote, toSave } from '../engine/engine';
 import { planDrafts, PlanId } from '../engine/plan';
 import { chooseTechniqueDrafts } from '../engine/abilities';
+import type { CeremonyView } from '../engine/moments';
 import { SparkSnapshot, sparkSnapshot, sparksSince } from '../engine/sparks';
 /** The state after the last painted scene, for sparks; unset until the first scene of this page visit. */
 let sparkMark: SparkSnapshot | undefined;
@@ -1001,6 +1002,17 @@ function skipScreen(x: SkipSummary): Promise<void> {
   return new Promise((done) => { $('sk-close').onclick = () => { box.hidden = true; done(); }; });
 }
 
+/** A ceremony (GE ch. 3): who stands there and how each reacts, by their own opinion; they remember it. */
+function ceremonyScreen(v: CeremonyView): Promise<void> {
+  $('sk-title').textContent = v.title;
+  $('sk-when').textContent = v.rows.length ? 'Who stands there, and how they take it' : 'No one Li knows is there';
+  $('sk-body').innerHTML = `<ul>${v.rows.map((r) => `<li><b>${esc(r.name)}</b>, ${esc(r.role)}: ${esc(r.reaction)}</li>`).join('')}</ul><p class="lead">They will remember it.</p>`;
+  const box = $('skipbox');
+  box.hidden = false;
+  $('sk-close').focus();
+  return new Promise((done) => { $('sk-close').onclick = () => { box.hidden = true; done(); }; });
+}
+
 /** Full-screen brush title for 2–3 seconds; a click or key ends it (GE ch. 3b "title card"). */
 function titleCard(label: string, title: string, ms = 2600): Promise<void> {
   const box = $('titlecard');
@@ -1026,6 +1038,8 @@ async function bigMoments(events: GameEvent[], seasonBefore: string) {
     const d = e.data as { tier?: string; card?: Card };
     if (d.tier === 'title' && d.card) await titleCard(d.card.label, d.card.title);
     if (d.tier === 'legend' && d.card) await legendScreen(d.card, e.fact, e.day);
+    const cv = (e.data as { ceremonyView?: CeremonyView }).ceremonyView;
+    if (cv) await ceremonyScreen(cv);
   }
   if (state.seasonKey !== seasonBefore) {
     const [year, name] = state.seasonKey.split('-');
@@ -1332,6 +1346,18 @@ $('loadsave').onclick = () => {
 };
 
 start();
+// The title screen first (GE ch. 3): Continue · New life · How to play · Load save.
+{
+  const ts = $('titlescreen');
+  const go = (then?: () => void) => () => { ts.hidden = true; then?.(); };
+  $<HTMLButtonElement>('ts-continue').hidden = !hadSave;
+  $('ts-continue').onclick = go();
+  $('ts-new').onclick = go(() => { if (hadSave) $('new').click(); });
+  $('ts-howto').onclick = go(() => $('howto').click());
+  $('ts-load').onclick = go(() => $('savebtn').click());
+  ts.hidden = false;
+  (hadSave ? $('ts-continue') : $('ts-new')).focus();
+}
 setStoryteller();
 pageAdapter().then((a) => { ai = a; setStoryteller(); }).catch(() => setStoryteller()).finally(() => checkCloud());
 // For checking the films by hand (browser console): __films.Film.play(__films.Scenes.zone())

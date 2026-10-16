@@ -119,6 +119,12 @@ export function apply(state: GameState, ev: GameEvent): void {
       }
       break;
     }
+    case 'talk': {
+      const list = (gmMemOf(state).rumours ??= []);
+      const k = list.findIndex((r) => r.id === d.rumour.id);
+      if (k >= 0) list[k] = { ...d.rumour }; else list.push({ ...d.rumour });
+      break;
+    }
     case 'ability': {
       const c = state.characters[d.char];
       const list = (c.abilities ??= []);

@@ -160,7 +160,9 @@ export type EventType =
   | 'world'
   | 'house'
   // A person gains an ability, or it grows (engine/abilities.ts):
-  | 'ability';
+  | 'ability'
+  // Talk about Li starts or travels in Game Master mode (engine/moments.ts; 'rumour' is the chronicle's own):
+  | 'talk';
 
 /** Append-only event (ch. 11 event sourcing). Every state change is an event. */
 export interface GameEvent {
@@ -227,6 +229,8 @@ export interface GmMemory {
   chapters?: { title: string; text: string; from: number; to: number; scenes: number }[];
   /** Threat clocks (pacing director, owner Oct 16): a threat that comes due unless Li acts. engine/clocks.ts. */
   clocks?: ThreatClock[];
+  /** What people say (engine/moments.ts): rumours that travel a step a month. */
+  rumours?: { id: string; text: string; day: number; about: string; reach: 0 | 1 | 2; true: boolean }[];
 }
 
 export interface ThreatClock {

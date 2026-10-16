@@ -21,6 +21,7 @@ import { payDrafts } from './pay';
 import { adoptDrafts, allianceDrafts, foundHouseDrafts, hostageDrafts, houseChangeDrafts, houseTimeDrafts, housesText, successionDrafts, worldDrafts } from './houses';
 import { HIDDEN_PEOPLE } from './world-people';
 import { abilitiesText, abilityDrafts, ABILITIES } from './abilities';
+import { bannerDrafts, gatheringDrafts, legendDrafts, momentsText, rumourChangeDrafts, rumourTimeDrafts } from './moments';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
@@ -96,6 +97,9 @@ export type GmChange =
   | { kind: 'adopt'; house: string }
   | { kind: 'found_house'; name: string }
   | { kind: 'ability'; id: string; reason: string; upgrade?: boolean }
+  | { kind: 'rumour'; text: string; false?: boolean; about?: string }
+  | { kind: 'gathering'; what: string; npc?: string; reason: string }
+  | { kind: 'banner'; name: string; sign: string }
   | { kind: 'money'; amount: number; reason: string }
   | { kind: 'wound'; level: number; reason: string }
   | { kind: 'fatigue'; level: number }
@@ -362,6 +366,7 @@ export function gmMemoryText(s: GameState): string {
     loyaltyText(s),
     housesText(s),
     abilitiesText(s),
+    momentsText(s),
     fusesText(s),
     seedsText(s),
     clocksText(s),
@@ -645,6 +650,15 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
       case 'ability':
         drafts.push(...abilityDrafts(s, x, notes));
         break;
+      case 'rumour':
+        drafts.push(...rumourChangeDrafts(s, x, notes));
+        break;
+      case 'gathering':
+        drafts.push(...gatheringDrafts(s, x, notes));
+        break;
+      case 'banner':
+        drafts.push(...bannerDrafts(s, x, notes));
+        break;
       case 'alliance':
         drafts.push(...allianceDrafts(s, x, notes));
         break;
@@ -882,6 +896,8 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   out.push(...betrayalDrafts(s, today(s), today(s) + n));
   // People age: deaths of age, heirs take over, genpuku; houses drift, and split when they fall apart (engine/houses.ts).
   out.push(...houseTimeDrafts(s, today(s), today(s) + n));
+  // Talk travels (engine/moments.ts).
+  out.push(...rumourTimeDrafts(s, today(s), today(s) + n));
   // Time never runs backwards: a part earlier than now on the same day is ignored.
   const later = part && PARTS.indexOf(part) > PARTS.indexOf(s.date.part);
   const to = dateFromIndex(today(s) + n, n > 0 ? part ?? 'morning' : later ? part! : s.date.part);
@@ -919,6 +935,8 @@ export function gmApply(s: GameState, t: GmTurn, said?: string): GmResult & { ev
   // No time passes while a battle is being fought: its phases are the clock.
   if (!r.duelId && !(s.battle && !s.battle.over)) events.push(...commitDrafts(s, gmTimeDrafts(s, ...sceneTime(s, t))));
   events.push(...commitDrafts(s, refereeDrafts(r.notes, r.secretNotes ?? [])));
+  // Legend moments the scene brought about: a Journal page, a screen, witnesses, a rumour (GE 3b).
+  events.push(...commitDrafts(s, legendDrafts(s)));
   return { ...r, events };
 }
 

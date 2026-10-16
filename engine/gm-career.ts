@@ -1,4 +1,5 @@
-import { reputationMerit } from './reputation';
+import { Group, reputation, reputationMerit } from './reputation';
+import { NICKNAME_GROUPS, NICKNAME_RULES, ceremonyWitnessDrafts, recentDeed } from './moments';
 import { inService } from './campaign';
 import {
   Bond, CombatDeed, CommandDeed, Deed, KingdomId, MeritLedger, PoliticalDeed, RANK_IDS, RankId, ceremonyRewardMon, checkPromotion, meritOf, nextRank,
@@ -138,6 +139,8 @@ export function ceremonyDrafts(s: GameState, x: Record<string, unknown>, notes: 
     type: 'story', fact: `Reward ceremony: Li's merit in this campaign is ${earned}.${reward ? '' : ' A slave receives no reward.'}`, visible: true,
     journal: `At the reward ceremony my merit was counted: ${earned}.${reward ? ` I was given ${reward} mon.` : ''}`, data: { ceremony: true, earned },
   });
+  // Who stands there and how each reacts, remembered (GE ch. 3 ceremony screen; Phase 6 block D).
+  out.push(...ceremonyWitnessDrafts(s, 'The reward ceremony', 'ceremony', `saw Li's merit counted at the reward ceremony (${earned})`));
   if (reward) out.push({ type: 'money', fact: `Li gets ${reward} mon (ceremony reward, 0.1 ryō per merit)`, visible: true, data: { amount: reward } });
   out.push(...promotionDrafts(s, { reason: 'the reward ceremony fills the posts left open by the campaign', sponsor: x.sponsor }, notes));
   return out;
@@ -150,7 +153,15 @@ export function titleDrafts(s: GameState, x: Record<string, unknown>, notes: str
   if (!title || !reason) { notes.push('a title needs a name and the deed behind it'); return []; }
   const key = `title_${title.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')}`;
   if (s.knowledge.includes(key)) return [];
-  return [{ type: 'knowledge', fact: `People call Li "${title}" (${reason})`, visible: true, journal: `They have started to call me "${title}".`, data: { key, title, reason } }];
+  // Nicknames per group (GE 3b, Phase 6 block D): a group names Li only after a recent deed, and once it has heard of him.
+  const group = typeof x.group === 'string' ? x.group : undefined;
+  if (group) {
+    if (!(NICKNAME_GROUPS as readonly string[]).includes(group)) { notes.push(`no group "${group}" (soldiers, nobles, peasants, enemies)`); return []; }
+    if (!recentDeed(s)) { notes.push(`the ${group} name Li only after a deed they saw or heard of (none in the last ${NICKNAME_RULES.recentDays} days)`); return []; }
+    if (reputation(s, group as Group) < NICKNAME_RULES.regard) { notes.push(`the ${group} have not heard enough of Li to name him`); return []; }
+  }
+  const who = group ? `The ${group}` : 'People';
+  return [{ type: 'knowledge', fact: `${who} call Li "${title}" (${reason})`, visible: true, journal: `${group ? `The ${group} have` : 'They have'} started to call me "${title}".`, data: { key, title, reason, group } }];
 }
 
 /** Titles the world gives Li, oldest first. */
