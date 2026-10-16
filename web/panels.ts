@@ -1,3 +1,4 @@
+import { CLOSE_CSS, closeMapHtml } from './close-map';
 import { ageOn, formatDate } from '../engine/calendar';
 import { ENCYCLOPEDIA, STORY } from '../engine/content';
 import { ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PRICE_MON, inService } from '../engine/campaign';
@@ -247,12 +248,14 @@ export function worldView(s: GameState): string {
 
 /** Two views (owner): Li's eyes (default, fogged, only what Li knows) and the world (public state). CSS switches them, no script. */
 export function mapPage(s: GameState): string {
-  return `<div class="mapviews"><style>${WORLD_CSS}</style>
+  return `<div class="mapviews"><style>${WORLD_CSS}${CLOSE_CSS}</style>
     <h1>The land</h1>
     <fieldset class="mv-switch"><legend>Map view</legend>
+      <label><input type="radio" name="mapview" id="mv-near" value="near">Close up</label>
       <label><input type="radio" name="mapview" id="mv-li" value="li" checked>Li's eyes</label>
       <label><input type="radio" name="mapview" id="mv-world" value="world">The world</label>
     </fieldset>
+    <section class="mv-near" aria-label="Close up">${closeMapHtml(s)}</section>
     <section class="mv-li" aria-label="Li's eyes"><p class="lead">As Li knows it: only Akaishi and the river. The rest of the seven kingdoms is fog until Li learns it.</p>
       <div class="mv-map">${mapSvg(s, true)}</div></section>
     <section class="mv-world" aria-label="The world">${worldView(s)}</section>
