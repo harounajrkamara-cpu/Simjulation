@@ -60,6 +60,21 @@ Duels (attack/counter/feint/observe, simulate) · battles with the Numbers §5 r
 | 27 | A death needs a `by` field (who killed, from the code's record) — known gap from STATUS Oct 13 | missing | ❌ |
 | 28 | George narrator bundled, not loaded from jsdelivr (STATUS security note) | still loaded at runtime | 🟡 |
 
+### E. Third pass (every owner message in all 74 sessions, the proposals, NIGHT_LOG, the Notion briefing)
+| # | Where it was said | What | Status |
+|---|---|---|---|
+| 29 | Numbers §11, Free World proposal | **Real fuse decision trees** (who acts, scored choices, visible signs). Today each fuse fires on a fixed day with weights (PROVISIONAL) | 🟡 |
+| 30 | NIGHT_LOG Oct 16, WB ch. 8 | **Rumours about Li** spreading in Game Master mode (rumours exist only in the classic chronicle) | ❌ |
+| 31 | PROPOSAL_PACING | The code opens obvious **threat clocks** itself (a rival who threatened Li); today only after a deadly win | 🟡 |
+| 32 | SENGOKU_SOLDIER_COMPLETE (owner's plan) | Other storytellers on the page (Gemini, DeepSeek, Ollama, OmniRoute); today only Claude or plain | ❌ |
+| 33 | Owner, Oct 9 | **Multiple worlds** later (more than this one land) | ❌ (later) |
+| 34 | Owner, Oct 10/15 | **Phone play** (owner said: skip for now) | 🟡 parked |
+| 35 | Owner, Oct 11 | Many AI testers playing the whole game (Hermes needs a provider set by the owner) | 🟡 tooling |
+
+Checked and already done from the chats: option click fills the text box · Ask answers about the great houses · the slave's day explained (Li's life sheet) · boring routine plays itself (pacing) · fight tab: real fights in the duel engine, spars simulated, life-or-death asks you · Li may serve any side (also Gōda) · news travels faster · Copilot's 4 + 7 rule holes fixed with tests · rewrites are fact-checked again.
+
+**How sure am I?** Not 100%. Not read word for word: the original ChatGPT chats from Oct 8 (they were turned into the World Bible then) and the raw Gemini/Kimi/Copilot chats (only through the Notion briefing). Everything else was compared.
+
 **Live page (Chrome, Oct 17, read-only, no game action):** all seven tabs open and render (Story, Map with Close up / Li's eyes / The world, Li with the plan cards, Army as the band from outside, People, Journal, Encyclopedia). **Local page (Playwright):** loads with 0 console errors.
 
 ---
