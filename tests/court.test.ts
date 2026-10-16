@@ -28,3 +28,30 @@ describe('the court of Kurogane', () => {
     expect(gmApply(s, scene({ changes: [{ kind: 'faction', faction: 'old_blood', join: true }] })).notes.join(' ')).toMatch(/never take a freed slave/);
   });
 });
+
+describe('the courts of every kingdom (WB ch. 13 seven profiles)', () => {
+  it('a general serving Hayate sees Hayate\'s court and can join the Generals; Tatara has no factions; no joining a foreign court', () => {
+    const s = general(6);
+    gmApply(s, scene({ changes: [{ kind: 'serve', kingdom: 'hayate' }] }));
+    expect(gmMemoryText(s)).toMatch(/THE COURT OF HAYATE/);
+    for (let k = 0; k < 3; k++) gmApply(s, scene({ changes: [{ kind: 'faction', faction: 'hayate_generals', delta: 10 }] }));
+    gmApply(s, scene({ changes: [{ kind: 'faction', faction: 'hayate_generals', join: true }] }));
+    expect(memberOf(s)).toBe('hayate_generals');
+    for (let k = 0; k < 3; k++) gmApply(s, scene({ changes: [{ kind: 'faction', faction: 'kings_men', delta: 10 }] }));
+    expect(gmApply(s, scene({ changes: [{ kind: 'faction', faction: 'kings_men', join: true }] })).notes.join(' ')).toMatch(/another kingdom's court/);
+    gmApply(s, scene({ changes: [{ kind: 'serve', kingdom: 'tatara' }] }));
+    expect(gmMemoryText(s)).toMatch(/THE COURT OF TATARA: no factions/);
+  });
+});
+
+describe('changing sides more than once', () => {
+  it('Li can serve Hayate and come back to Kurogane; the career follows the kingdom he serves now', async () => {
+    const { careerOf } = await import('../engine/gm-career');
+    const s = general(6);
+    gmApply(s, scene({ changes: [{ kind: 'serve', kingdom: 'hayate' }] }));
+    expect(careerOf(s).kingdom).toBe('hayate');
+    gmApply(s, scene({ changes: [{ kind: 'serve', kingdom: 'kurogane' }] }));
+    expect(careerOf(s).kingdom).toBe('kurogane');
+    expect(gmMemoryText(s)).toMatch(/THE COURT OF KUROGANE/);
+  });
+});

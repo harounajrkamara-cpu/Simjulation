@@ -3,7 +3,7 @@ import { rankLabel } from './career';
 import { has, li } from './engine';
 import { careerOf, titlesOf } from './gm-career';
 import { childrenOf, spouseOf } from './family';
-import { FACTIONS, memberOf } from './court';
+import { ALL_FACTIONS, memberOf } from './court';
 import { FUSES } from './fuses';
 import { Draft, GameState } from './types';
 
@@ -33,7 +33,7 @@ export function epilogueFacts(s: GameState): string[] {
     spouse ? `Married to ${s.characters[spouse].name}${s.characters[spouse].alive ? '' : ' (who died before him)'}.` : 'He never married.',
     kids.length ? `Children: ${kids.map((x) => `${x.name} (${x.role.replace("Li's ", '')})`).join(', ')}.` : '',
     has(s, 'land_koku') ? `Land: ${has(s, 'land_koku')} koku.` : '',
-    m ? `At court he stood with ${FACTIONS.find((f) => f.id === m)!.name}.` : '',
+    m ? `At court he stood with ${ALL_FACTIONS.find((f) => f.id === m)!.name}.` : '',
     k('family_found') ? 'He found his mother and sisters.' : k('family_alive') ? 'He learned his family lived, but never reached them.' : k('family_lead') ? 'He followed a lead to his family that went cold.' : 'He never found his family.',
     k('father_killers') ? "He learned who had his father killed." : k('father_truth') ? 'He learned his father was murdered, but not by whom.' : "He never learned the truth of his father's death.",
     k('said_hattori') ? 'He spoke his true name, Hattori, aloud.' : 'He never spoke his true name.',

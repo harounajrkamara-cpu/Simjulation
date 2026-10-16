@@ -29,7 +29,8 @@ export interface Career { rank: RankId; merit: MeritLedger; bond: Bond; kingdom:
 /** Li's career as the code holds it. Li was born a peasant's son and enslaved: low-born, and "freed" once free (ch. 3). */
 export function careerOf(s: GameState): Career {
   const c = li(s);
-  const served = s.knowledge.find((k) => k.startsWith('serves_'))?.slice(7) as KingdomId | undefined;
+  // The kingdom he serves NOW (a 'serving' flag, set on every change of side); older saves: the last 'serves_' key.
+  const served = (KINGDOMS[has(s, 'serving') - 1] ?? s.knowledge.filter((k) => k.startsWith('serves_')).at(-1)?.slice(7)) as KingdomId | undefined;
   return {
     rank: RANK_IDS[Math.max(0, Math.min(9, has(s, 'rank_level')))],
     merit: { combat: has(s, 'merit_combat'), command: has(s, 'merit_command'), political: has(s, 'merit_political') },
@@ -90,8 +91,11 @@ export function promotionDrafts(s: GameState, x: Record<string, unknown>, notes:
 /** Li now serves another kingdom (VISIE: allegiance is free). */
 export function serveDrafts(s: GameState, kingdom: string, notes: string[]): Draft[] {
   if (!KINGDOMS.includes(kingdom as KingdomId)) { notes.push(`unknown kingdom "${kingdom}"`); return []; }
-  if (careerOf(s).kingdom === kingdom && s.knowledge.includes(`serves_${kingdom}`)) return [];
-  return [{ type: 'knowledge', fact: `Li serves ${KINGDOM_NAME[kingdom as KingdomId]}`, visible: true, data: { key: `serves_${kingdom}` } }];
+  if (careerOf(s).kingdom === kingdom && (has(s, 'serving') > 0 || s.knowledge.includes(`serves_${kingdom}`))) return [];
+  return [
+    ...(s.knowledge.includes(`serves_${kingdom}`) ? [] : [{ type: 'knowledge' as const, fact: `Li serves ${KINGDOM_NAME[kingdom as KingdomId]}`, visible: true, data: { key: `serves_${kingdom}` } }]),
+    { type: 'flag', fact: `Li now serves ${KINGDOM_NAME[kingdom as KingdomId]}`, visible: true, data: { key: 'serving', value: KINGDOMS.indexOf(kingdom as KingdomId) + 1 } },
+  ];
 }
 
 /** The career block of Claude's memory: what Li holds and what the next step needs. */
