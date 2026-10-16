@@ -446,6 +446,21 @@ async function filmsFor(events: GameEvent[], said?: string) {
     const m = label.match(/^(.*?) \((.*)\)$/);
     await Film.play(Scenes.promotion({ rank: m?.[1] ?? label, men: m ? `${m[2]} men` : '', line: promo.journal ?? '' }));
   }
+  // Life milestones (goal Oct 17): each big goal reached gets its own card.
+  const flag = (re: RegExp) => events.find((e) => e.type === 'flag' && re.test(String((e.data as { key?: string }).key)) && Number((e.data as { value?: number }).value) > 0);
+  const marks: { kicker: string; title: string; line: string; seal: string }[] = [];
+  const wed = flag(/^spouse_/);
+  if (wed) marks.push({ kicker: 'A marriage', title: wed.fact.replace(/ \(.*\)$/, ''), line: wed.journal ?? '', seal: '縁' });
+  for (const e of events.filter((x) => x.type === 'person' && String((x.data as { id?: string }).id).startsWith('child_'))) marks.push({ kicker: 'A child is born', title: String((e.data as { name?: string }).name), line: e.journal ?? '', seal: '子' });
+  const land = flag(/^land_koku$/);
+  if (land) marks.push({ kicker: 'Land of his own', title: state.domain?.name ?? 'Li\'s land', line: `About ${Number((land.data as { value: number }).value).toLocaleString('en-US')} koku a year.`, seal: '地' });
+  if (knows('family_found')) marks.push({ kicker: 'Home', title: 'He found them', line: 'His mother and sisters, alive.', seal: '家' });
+  else if (knows('family_alive')) marks.push({ kicker: 'A lead', title: 'They are alive', line: 'Somewhere, his family lives.', seal: '家' });
+  if (knows('father_killers')) marks.push({ kicker: 'The truth', title: 'Who killed his father', line: 'Now he knows the names.', seal: '真' });
+  else if (knows('father_truth')) marks.push({ kicker: 'The truth', title: 'It was murder', line: 'His father did not fall in battle.', seal: '真' });
+  const side = flag(/^court_member$/);
+  if (side) marks.push({ kicker: 'At court', title: side.fact.replace(/^Li joins /, ''), line: side.journal ?? '', seal: '朝' });
+  for (const m of marks) await Film.play(Scenes.milestone(m));
   const start = events.find((e) => e.type === 'battle' && (e.data as { battle?: { phase?: number } }).battle?.phase === 0);
   if (start) {
     const b = (start.data as { battle: { name: string; units: { side: string; start: number }[] } }).battle;

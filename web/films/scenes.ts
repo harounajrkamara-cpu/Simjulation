@@ -187,6 +187,17 @@ export function promotion(d: { rank: string; men: string; line: string }): FilmS
   };
 }
 
+// ---------- 5b. A life milestone (goal Oct 17: big goals are milestones with their own film) ----------
+// Marriage, a child, land, the family found, the truth about his father, a side at court: the promotion card's style.
+
+export function milestone(d: { kicker: string; title: string; line: string; seal: string }): FilmSpec {
+  return {
+    id: 'card', svg: `${defs}<rect width="1600" height="900" fill="#0E1014"/>`, waitAtEnd: true,
+    html: `<div class="fl-paper sh1"><p class="fl-kicker">${esc(d.kicker)}</p>${brushTitle(d.title, 'fl-brush--rank', 0.2)}<p class="fl-line">${esc(d.line)}</p>${seal(d.seal, 1.1)}</div>`,
+    shots: [{ dur: 2800, speak: `${d.kicker}. ${d.title}. ${d.line}`, cues: [{ at: 1100, fn: () => taiko(false) }] }],
+  };
+}
+
 // ---------- 6. A death (static panel, near stillness, no sound) ----------
 
 export function death(d: { name: string; line: string }): FilmSpec {
