@@ -95,9 +95,9 @@ describe("Li's eyes stays the default view", () => {
     expect(WORLD_CSS).toMatch(/\.mapviews \.mv-world \{ display: none; \}/);
   });
 
-  it('the switch is two radios in labels: keyboard arrows move between them, targets are at least 44px', () => {
+  it('the switch is three radios in labels (close up added Oct 17): keyboard arrows move between them, targets are at least 44px', () => {
     const radios = page.match(/<label><input type="radio" name="mapview"[^>]*>[^<]+<\/label>/g) ?? [];
-    expect(radios.map((r) => r.replace(/<[^>]+>/g, ''))).toEqual(["Li's eyes", 'The world']);
+    expect(radios.map((r) => r.replace(/<[^>]+>/g, ''))).toEqual(['Close up', "Li's eyes", 'The world']);
     expect(page).toContain('<legend>Map view</legend>');
     expect(WORLD_CSS).toMatch(/\.mv-switch label \{[^}]*min-height: 44px/);
   });
