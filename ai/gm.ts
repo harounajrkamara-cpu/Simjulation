@@ -2,7 +2,7 @@ import { AiAdapter, ModelTier } from './adapter';
 import { GmFixProposal, GmResult, GmTurn, gmApply, gmDayCap, gmMemoryText, gmRecentScenes, lastFightResult, parseGmFix, parseGmTurn, skipDaysLeft, splitWishes } from '../engine/gm';
 import { commitDrafts, today } from '../engine/engine';
 import { chapterDraft, chapterDue, chapterPrompt } from '../engine/recaps';
-import { checkGmDeaths, checkGmInjuries, checkGmLies, checkGmScene, checkGmSuggestions, factFixPrompt } from '../engine/factcheck';
+import { checkGmDeaths, checkGmInjuries, checkGmScene, checkGmSuggestions, factFixPrompt } from '../engine/factcheck';
 import { checkPacing, pacingText } from '../engine/pacing';
 import { checkClocks } from '../engine/clocks';
 import { dramaText } from '../engine/drama';
@@ -180,7 +180,7 @@ async function play(ai: AiAdapter, s: GameState, said: string | undefined, signa
     const newNames = (turn.changes ?? []).flatMap((c) => (c.kind === 'person' && typeof c.name === 'string' ? [c.name] : []));
     // The title is checked like a quoted line: names and the dead count, but "you" does not (Oct 16 night: the canon opening's
     // natural title "Who Taught You" made every opening fail the "no you outside dialogue" rule, rewrite included).
-    const all = [...checkGmScene(s, `"${turn.title ?? ''}." ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn), ...checkGmDeaths(s, turn, said), ...checkPacing(s, turn, said), ...checkClocks(s, turn), ...checkGmInjuries(s, turn), ...checkGmLies(turn, said)];
+    const all = [...checkGmScene(s, `"${turn.title ?? ''}." ${turn.scene}`, newNames), ...checkGmSuggestions(s, turn), ...checkGmDeaths(s, turn, said), ...checkPacing(s, turn, said), ...checkClocks(s, turn), ...checkGmInjuries(s, turn)];
     // Pacing is soft: it asks for one rewrite, but a rewrite that still lingers is shown, never lost (owner, Oct 16).
     const found = first ? all.filter((p) => p.kind !== 'pacing') : all;
     if (found.length) {

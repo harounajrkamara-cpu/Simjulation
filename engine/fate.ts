@@ -161,3 +161,13 @@ export function fateText(s: GameState): string {
     liesText(s),
   ].filter(Boolean).join('\n');
 }
+
+/** Who Li lied to: someone he knows named in the player's words, else the one the scene names most (fixed order). */
+export function liarTarget(s: GameState, said: string, scene: string): string | undefined {
+  const known = Object.keys(s.relations).filter((id) => id !== s.liId && met(s, id) && s.characters[id]?.alive);
+  const word = (id: string) => s.characters[id].name.split(/\s+/).filter((w) => w.length >= 3 && !/^(the|old|lord|lady|king)$/i.test(w));
+  const named = known.find((id) => word(id).some((w) => said.includes(w)));
+  if (named) return named;
+  const count = (id: string) => word(id).reduce((n, w) => n + (scene.split(w).length - 1), 0);
+  return known.map((id) => [id, count(id)] as const).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
+}

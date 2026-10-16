@@ -31,3 +31,12 @@ describe('live test Oct 17', () => {
     expect(checkGmLies({ changes: [] }, 'I lie down on the straw and sleep')).toEqual([]);
   });
 });
+
+describe('live test Oct 17: a lie Claude did not record', () => {
+  it('the code judges it itself, against the one Li spoke to', async () => {
+    const { gmApply: apply, startGmGame: start } = await import('../engine/gm');
+    const s = start();
+    apply(s, { scene: 'Raizen watches him. "The drill yard," Raizen says. Raizen waits.', summary: 'x' }, 'I lie again: I watched soldiers in the drill yard');
+    expect(s.relations.raizen.mods.some((m) => /caught lying/.test(m.reason))).toBe(true);
+  });
+});

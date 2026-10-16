@@ -1095,9 +1095,11 @@ function openNewLife() {
   }
   // Which life (save slot) this new life goes into (Oct 17).
   $('nl-lives').innerHTML = SLOTS.map((n) => `<label><input type="radio" name="life" value="${n}"${n === slot ? ' checked' : ''}> <span><b>Life ${n}</b><br><small>${esc(slotLine(n))}</small></span></label>`).join('');
+  $<HTMLButtonElement>('nl-back').hidden = !hadSave;
   box.hidden = false;
   $('begin').focus();
 }
+$('nl-back').onclick = () => { $('newlife').hidden = true; };
 
 $('begin').onclick = () => {
   const box = $('newlife');
@@ -1360,6 +1362,6 @@ start();
   (hadSave ? $('ts-continue') : $('ts-new')).focus();
 }
 setStoryteller();
-pageAdapter().then((a) => { ai = a; setStoryteller(); }).catch(() => setStoryteller()).finally(() => checkCloud());
+pageAdapter().then((a) => { ai = a; setStoryteller(); refresh(); }).catch(() => setStoryteller()).finally(() => checkCloud());
 // For checking the films by hand (browser console): __films.Film.play(__films.Scenes.zone())
 (window as unknown as { __films: unknown }).__films = { Film, Scenes };

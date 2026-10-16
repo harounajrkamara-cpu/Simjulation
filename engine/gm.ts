@@ -4,7 +4,7 @@ import { DuelOutcome, DuelTemplate } from './content';
 import { PLACES } from './data';
 import { commitDrafts, duelStateFor, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
-import { liHandInDeath } from './factcheck';
+import { checkGmLies, liHandInDeath } from './factcheck';
 import { publicWorldText } from './atlas-public';
 import { liLifeText } from './life';
 import { fuseDrafts, fusesText, leverDrafts } from './fuses';
@@ -23,7 +23,7 @@ import { HIDDEN_PEOPLE } from './world-people';
 import { abilitiesText, abilityDrafts, ABILITIES } from './abilities';
 import { kingdomYearDrafts, kingdomsText } from './kingdoms';
 import { debtClockDrafts, embargoDrafts, examDrafts, festivalDrafts, governorDrafts, hireDrafts, loanDrafts, shinobiDrafts, shogenDrafts, textureText, treasureDrafts, worldYearDrafts } from './texture';
-import { captivityTimeDrafts, captivityDrafts, defeatDrafts, fateText, lieDrafts } from './fate';
+import { captivityTimeDrafts, captivityDrafts, defeatDrafts, fateText, liarTarget, lieDrafts } from './fate';
 import { bannerDrafts, gatheringDrafts, legendDrafts, momentsText, rumourChangeDrafts, rumourTimeDrafts } from './moments';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
@@ -488,6 +488,11 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null, ...(t.routine ? { routine: true } : {}), ...(t.turns !== undefined ? { turns: t.turns } : {}) } });
   if (t.place) drafts.push({ type: 'place', fact: `Li is at ${t.place}`, visible: false, data: { char: c.id, place: t.place } });
   drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false, `${t.title ?? ''}. ${t.scene}`));
+  // The player's Li lies and the scene recorded no "lie": the code judges it itself (live test Oct 17: twice unrecorded).
+  if (checkGmLies(t, said).length) {
+    const npc = liarTarget(s, said ?? '', t.scene);
+    if (npc) drafts.push(...lieDrafts(s, { npc, about: (said ?? '').replace(/^i lie(?: again)?:?\s*/i, '').slice(0, 100) }, notes, secretNotes));
+  }
 
   let duelId: string | undefined;
   if (t.fight) {
