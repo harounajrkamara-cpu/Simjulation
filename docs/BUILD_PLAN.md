@@ -155,7 +155,7 @@ All four stages are playable through the referee: `tests/whole-life.test.ts` pla
 
 **Built after the first status (Oct 17):** faction discontent by the Numbers §9 formula with ultimatums (`engine/discontent.ts`); reputation in the promotion score (PROVISIONAL scale); the courts of all seven kingdoms.
 **Not built (honest):** a Playwright run of the new screens (no Chrome here; checked by hand in the built-in browser).
-**Owner decisions: defaults taken (goal Oct 17, owner kan terugdraaien).** The owner asked to finish everything; where a decision was open, the built behaviour is kept as the default, with the reason, until he says otherwise:
+**Owner decisions: defaults taken (goal Oct 17) — ✅ APPROVED by the owner (Oct 17: "Goedgekeurd zo").** The owner asked to finish everything; where a decision was open, the built behaviour is kept as the default, with the reason, until he says otherwise:
 1. **Buying freedom is slow** (Phase 2 #2): kept as a slow, late route (15 ryō), but the Game Master now knows the real ways to earn (tips, stitching the wounded, Sukezō's remedies, levy loot, dice with risk). Reason: freedom by money should feel earned; merit and Raizen stay the main roads.
 2. **Officers' rhythm** (Phase 2 #3): kept (a Gochō and a Kogashira once a year each in the classic chronicle; in Game Master mode officers come only through raids and battles the code records). Reason: the GM mode already follows Numbers §6.
 3. **Raizen's share** (Phase 2 #5): kept (respect > 50, half of 0.1 ryō per merit). Reason: small, and it makes Raizen's goodwill matter.
