@@ -777,7 +777,11 @@ function persist() {
 let cloudTimer: number | undefined;
 let cloudNote = 'Saved in this browser only (your account save works on the claude.ai page).';
 /** The account copy follows the browser copy a moment later (many quick turns make one write). */
+// Never write to the account before the account was read (Oct 17: a fresh page on a new device wrote an empty new game
+// over the account's longer life 2 s after opening, before checkCloud could load it).
+let cloudReady = false;
 function scheduleCloud() {
+  if (!cloudReady) return;
   clearTimeout(cloudTimer);
   const s = state;
   const n = slot;
@@ -789,7 +793,8 @@ function scheduleCloud() {
 }
 /** At start: when the account holds a longer version of this life (played on another device), continue from it. */
 async function checkCloud() {
-  const c = await loadFromCloud(slot);
+  let c: Awaited<ReturnType<typeof loadFromCloud>>;
+  try { c = await loadFromCloud(slot); } finally { cloudReady = true; }
   if (!c || busy || c.save.events.length <= state.events.length) return;
   try {
     state = fromSave(c.save);
@@ -896,7 +901,7 @@ function start(fresh = false) {
   recent.length = 0;
   show(note ? `${note}\n\n${g.text}` : g.text);
   note = '';
-  persist();
+  // Saved only when the player presses Begin, in the life the player chose (Oct 17), never over another life before that.
   if (fresh || !hadSave) resetGuide();
   openNewLife(); // a new life starts with the settings and the prologue (GE ch. 8)
 }
@@ -1061,6 +1066,8 @@ function openNewLife() {
     const r = box.querySelector<HTMLInputElement>(`input[name="${name}"][value="${value}"]`);
     if (r) r.checked = true;
   }
+  // Which life (save slot) this new life goes into (Oct 17).
+  $('nl-lives').innerHTML = SLOTS.map((n) => `<label><input type="radio" name="life" value="${n}"${n === slot ? ' checked' : ''}> <span><b>Life ${n}</b><br><small>${esc(slotLine(n))}</small></span></label>`).join('');
   box.hidden = false;
   $('begin').focus();
 }
@@ -1072,7 +1079,10 @@ $('begin').onclick = () => {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* not kept: fine */ }
   aiOn = settings.ai === 'claude';
   setStoryteller();
+  const life = Number(pick('life'));
+  if (SLOTS.includes(life) && life !== slot) { slot = life; try { localStorage.setItem(SLOT_KEY, String(slot)); } catch { /* fine */ } }
   box.hidden = true;
+  persist();
   playPrologue();
 };
 
