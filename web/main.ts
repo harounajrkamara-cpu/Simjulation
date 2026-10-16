@@ -317,6 +317,7 @@ function setBusy(on: boolean) {
 /** One Game Master turn (owner decision Oct 7): Claude writes the scene, the code checks and records it. */
 async function gmStep(text?: string, said = text) {
   if (ended(state)) return; // the life is complete after the epilogue (review Oct 17)
+  sparkMark ??= sparkSnapshot(state); // the first scene after a reload shows its signs too (live test Oct 17)
   if (!ai) {
     show('Game Master mode needs Claude, and Claude is only here when this page is opened on claude.ai. Start a New life and pick "Classic chronicle" to play without it.', said);
     return;
