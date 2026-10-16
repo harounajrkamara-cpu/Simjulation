@@ -705,7 +705,8 @@ async function finish(reply: Reply, turn: HTMLElement, said: string | undefined,
   if (reply.summary) await skipScreen(reply.summary);
   const story = parts.paras.filter((p) => !p.kind);
   const notes = parts.paras.filter((p) => p.kind);
-  if (ai && aiOn && reply.acted && shouldNarrate(events, free)) {
+  // In Game Master mode the code's own lines (a fight's rounds) show as they are; Claude tells the aftermath next.
+  if (ai && aiOn && reply.acted && shouldNarrate(events, free) && !gmOn(state)) {
     const packet = buildPacket(state, events, free ? said : undefined, recent);
     turn.insertAdjacentHTML('beforeend', `<p class="text ink wet">The ink is still wet…</p>${notes.map(paraHtml).join('')}${chipsHtml(parts.chips)}`);
     refresh();
@@ -1352,7 +1353,7 @@ start();
   const go = (then?: () => void) => () => { ts.hidden = true; then?.(); };
   $<HTMLButtonElement>('ts-continue').hidden = !hadSave;
   $('ts-continue').onclick = go();
-  $('ts-new').onclick = go(() => { if (hadSave) $('new').click(); });
+  $('ts-new').onclick = go(() => { if (hadSave) openNewLife(); });
   $('ts-howto').onclick = go(() => $('howto').click());
   $('ts-load').onclick = go(() => $('savebtn').click());
   ts.hidden = false;

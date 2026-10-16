@@ -382,3 +382,4 @@ button { cursor: pointer; }
 /* Title screen (GE ch. 3), above every other overlay. */
 .titlescreen { z-index: 12; text-align: center; }
 .titlescreen .ts-row { justify-content: center; flex-wrap: wrap; gap: 8px; }
+.titlescreen .seal { margin: 0 auto 16px; }

@@ -14,7 +14,7 @@ export interface Hint { id: string; text: string; screen?: boolean; when: (s: Ga
 /** One short line, once per life, never more than one at a time (ch. 8 §4). "screen" hints also show on Light. */
 export const HINTS: Hint[] = [
   { id: 'duel', screen: true, text: 'A fight. Each round, pick a move: counter beats attack, attack beats feint and observe, feint beats counter. Observe to read him first.', when: (s) => !!s.duel && !s.duel.over },
-  { id: 'options', text: 'Pick a numbered choice. Each one shows the skill it tests and any risk.', when: () => true },
+  { id: 'options', text: 'Pick a numbered choice, or write what Li does. In a chronicle choice the tested skill and any risk are shown.', when: () => true },
   { id: 'write', text: 'You can also write what Li does, in your own words. Start with "I".', when: (s) => has(s, 'story_cook_tent') > 0 },
   { id: 'wait', screen: true, text: 'Quiet days can be skipped: write "wait 7" (or "wait 7 train" to train at night). It stops when something happens.', when: (s) => has(s, 'story_wait_lesson') > 0 },
   { id: 'rumour', text: 'Word spreads. People hear what Li does, and it changes how they see him.', when: (s) => s.events.some((e) => e.type === 'rumour') },

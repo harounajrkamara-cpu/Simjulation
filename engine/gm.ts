@@ -458,11 +458,12 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
 function trainDrafts(s: GameState, focus: string, days: number): { drafts: Draft[]; note?: string } {
   const c = li(s);
   const isStat = STAT_KEYS.includes(focus as StatKey);
-  const isStyle = !isStat && (focus in c.styles || /^[a-z_]{3,20}$/.test(focus));
-  if (!isStat && !isStyle) return { drafts: [], note: `training "${focus}" is not a stat or a fighting style` };
-  const kind = isStat ? 'stat' : 'style';
+  const isSkill = !isStat && !(focus in c.styles) && focus in c.skills; // e.g. endurance: a skill, never a fighting style
+  const isStyle = !isStat && !isSkill && (focus in c.styles || /^[a-z_]{3,20}$/.test(focus));
+  if (!isStat && !isStyle && !isSkill) return { drafts: [], note: `training "${focus}" is not a stat or a fighting style` };
+  const kind = isStat ? 'stat' : isSkill ? 'skill' : 'style';
   const capKey = `${kind}:${focus}`;
-  const current = isStat ? c.stats[focus as StatKey] : c.styles[focus] ?? 0;
+  const current = isStat ? c.stats[focus as StatKey] : isSkill ? c.skills[focus] : c.styles[focus] ?? 0;
   const potential = isStat ? c.potential[focus as StatKey] : c.potential.VAL;
   const age = ageOn(c.born, s.date);
   let gain = 0;
@@ -472,7 +473,7 @@ function trainDrafts(s: GameState, focus: string, days: number): { drafts: Draft
   const amount = r3(capped);
   const note = capped < gain ? `training ${focus} hit the season cap (${SEASON_TRAINING_CAP} per season)` : undefined;
   if (amount <= 0) return { drafts: [], note };
-  const data: Record<string, unknown> = isStat ? { char: c.id, stat: focus, amount, capKey } : { char: c.id, style: focus, amount, capKey };
+  const data: Record<string, unknown> = isStat ? { char: c.id, stat: focus, amount, capKey } : isSkill ? { char: c.id, skill: focus, amount } : { char: c.id, style: focus, amount, capKey };
   return { drafts: [{ type: kind, fact: `training ${focus} +${amount} over ${days} days`, visible: false, data }], note };
 }
 

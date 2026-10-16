@@ -189,3 +189,19 @@ export function checkGmDeaths(s: GameState, t: { scene: string; title?: string; 
 export function factFixPrompt(problems: FactProblem[]): string {
   return `Your last scene broke facts the memory holds. Write the same scene again (same events, same changes), fixing exactly these:\n${problems.map((p) => `- ${p.text}`).join('\n')}`;
 }
+
+/** A lasting injury is the code's alone (a Badly wounded hit from a gap above 100%, Numbers §4): a scene may not claim
+ * one the code did not record since the last scene (live test Oct 17: "something in him has been broken that will not mend"). */
+const LASTING = /\b(will not mend|won't mend|never (?:fully )?(?:heal|mend)s?|crippled for life|maimed|lame for life|a lasting injury|a wound that never heals)\b/i;
+export function checkGmInjuries(s: GameState, t: { scene: string }): FactProblem[] {
+  if (!LASTING.test(outsideQuotes(t.scene))) return [];
+  const lastScene = Math.max(-1, ...s.events.filter((e) => e.type === 'scene').map((e) => e.seq));
+  const recorded = s.events.some((e) => e.seq > lastScene && e.type === 'flag' && String((e.data as { key?: string }).key).startsWith('injury_'));
+  return recorded ? [] : [{ kind: 'mechanics', text: 'The scene claims a lasting injury, but the code recorded none: only a fight the code runs can leave one. Tell a hurt that heals.' }];
+}
+
+/** The player's Li lies, and the scene records no "lie" change: a soft reminder (the code must judge it, GE ch. 5). */
+export function checkGmLies(t: { changes?: { kind: string }[] }, said?: string): FactProblem[] {
+  if (!said || !/\b(?:i|li) (?:lie|lies)\b(?!\s+(?:down|still|awake|low|back|in|on|there|beside|flat|quiet|asleep))|\btell (?:him|her|them) a lie\b|\blie to\b/i.test(said)) return [];
+  return (t.changes ?? []).some((c) => c.kind === 'lie') ? [] : [{ kind: 'pacing', text: 'Li lied: record it with {"kind":"lie","npc":"<id>","about":"...","believed":true|false} so the code judges it (see IF LI LIES NOW).' }];
+}
