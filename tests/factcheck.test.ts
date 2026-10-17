@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { gmTurn } from '../ai/gm';
-import { checkGmScene, factFixPrompt } from '../engine/factcheck';
+import { checkGmScene, checkGmSuggestions, factFixPrompt } from '../engine/factcheck';
 import { startGmGame } from '../engine/gm';
 
 // The Game Master's fact-check (owner vision Oct 10): errors are prevented before the player sees them.
@@ -70,17 +70,57 @@ describe('the Game Master turn uses it', () => {
     expect(r.turn.scene).toBe('Li bows to Raizen.');
   });
 
-  it('keeps the first scene when the rewrite still breaks the facts (never loops)', async () => {
+  it('never shows a rewrite that still breaks the facts, and never loops (AI Lab issue #2)', async () => {
     const { ai, prompts } = fakeAi([bad, { ...bad, scene: 'Li bows to Raizan again.' }]);
-    const r = await gmTurn(ai, startGmGame());
+    const s = startGmGame();
+    const before = s.events.length;
+    await expect(gmTurn(ai, s)).rejects.toMatchObject({ code: 'bad_answer' });
     expect(prompts).toHaveLength(2);
-    expect(r.turn.scene).toBe('Li bows to Raizan again.');
+    expect(s.events.length).toBe(before); // nothing recorded
   });
 
-  it('keeps the first scene when the rewrite fails', async () => {
+  it('never falls back to the first, broken scene when the rewrite fails', async () => {
     let k = 0;
     const ai = { name: 'fake', ask: async () => { if (k++ === 0) return JSON.stringify(bad); throw Object.assign(new Error('down'), { code: 'upstream_error' }); } };
-    const r = await gmTurn(ai, startGmGame());
-    expect(r.turn.scene).toBe('Li bows to Raizan.');
+    const s = startGmGame();
+    const before = s.events.length;
+    await expect(gmTurn(ai, s)).rejects.toMatchObject({ code: 'bad_answer' });
+    expect(s.events.length).toBe(before);
+  });
+
+  it('a scene where Li beats a known person without a fight is sent back', () => {
+    const s = startGmGame();
+    expect(checkGmScene(s, 'Li steps in low and beats Gonza in front of the whole band.').map((p) => p.kind)).toContain('fight');
+    expect(checkGmScene(s, 'Gonza beats the mule. Li watches.').map((p) => p.kind)).not.toContain('fight');
+  });
+
+  it('choices that offer blows against a known person must start the fight; training alone stays story', () => {
+    const s = startGmGame();
+    expect(checkGmSuggestions(s, { suggestions: ['I strike at Gonza\'s bad knee', 'I yield'] })).toHaveLength(1);
+    expect(checkGmSuggestions(s, { suggestions: ['I strike at Gonza\'s bad knee'], fight: {} })).toHaveLength(0);
+    expect(checkGmSuggestions(s, { suggestions: ['I practise strikes alone behind the horse lines'] })).toHaveLength(0);
+    // Owner playtest v30: Li slipping Gonza's strap in story text is a fight the code must run; a punishment he takes is story.
+    const strap = "Gonza swings the strap at Li's knees. Li slips the first lash and the second.";
+    expect(checkGmSuggestions(s, { scene: strap })).toHaveLength(1);
+    expect(checkGmSuggestions(s, { scene: strap, fight: {} })).toHaveLength(0);
+    expect(checkGmSuggestions(s, { scene: 'Gonza lashes Li twice across the back. Li keeps his head down and takes it.' })).toHaveLength(0);
+    expect(checkGmSuggestions(s, { scene: 'Li ducks under the tent flap and slips the rope off the post while Gonza snores.' })).toHaveLength(0);
+  });
+});
+
+describe('the world facts reach the Game Master (owner, Oct 12: "the Lord" without a name)', () => {
+  it('the memory names the houses and lords of Kurogane, without their secrets', async () => {
+    const { gmMemoryText } = await import('../engine/gm');
+    const m = gmMemoryText(startGmGame());
+    expect(m).toContain('Lord Hagiwara Munenori (49)');
+    expect(m).toMatch(/Hagiwara Sayo \(1[23]\)/); // 13 this year (Atlas); her birthday is in Month 3
+    expect(m).not.toMatch(/smuggles rice/); // the Hagiwara secret stays in the Atlas
+  });
+
+  it('a wrong age for a known person is caught; a guess that is close is fine', () => {
+    const s = startGmGame();
+    expect(checkGmScene(s, 'Hagiwara Sayo is fifteen years old and very sure of herself.').map((p) => p.kind)).toContain('age');
+    expect(checkGmScene(s, 'Hagiwara Sayo looks perhaps fourteen.').map((p) => p.kind)).not.toContain('age');
+    expect(checkGmScene(s, 'Hagiwara Sayo is thirteen years old.').map((p) => p.kind)).not.toContain('age');
   });
 });

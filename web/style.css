@@ -358,3 +358,28 @@ button { cursor: pointer; }
 .narratorbox select { min-height: 40px; max-width: 320px; padding: 0 10px; background: var(--ink); border: 1px solid var(--line-2); border-radius: 4px; color: var(--paper); }
 .narratorbox input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--seal); }
 #narratorbtn[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+
+/* Battle map (goal Oct 17): sectors as Li knows them; colour = morale. */
+.battlemap { width: 100%; max-width: 520px; height: auto; display: block; margin: 8px 0; background: var(--ink); border: 1px solid var(--line); border-radius: 4px; }
+.battlemap text { font-family: var(--body); font-size: 12px; fill: var(--paper-2); }
+.battlemap .bm-n { font-size: 11px; fill: var(--faded); }
+.battlemap .bm-side { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; fill: var(--gold); }
+.battlemap .bm-front { stroke: var(--line-2); stroke-dasharray: 4 4; }
+.battlemap .bm-unit rect { stroke-width: 2; }
+.battlemap .ours rect { fill: #1B2420; stroke: var(--up); }
+.battlemap .theirs rect { fill: #2A1614; stroke: var(--risk); }
+.battlemap .wavering rect { stroke: var(--gold); }
+.battlemap .routing rect { stroke: var(--seal); stroke-dasharray: 5 3; }
+.battlemap .shattered rect { stroke: var(--line-2); opacity: .5; }
+.battlemap .bm-li circle { fill: var(--seal); }
+.battlemap .bm-li text { fill: var(--paper); font-weight: 600; }
+
+/* Phone header (goal Oct 17): the file buttons wrap as whole buttons, never word by word. */
+@media (max-width: 640px) {
+  .file { flex-wrap: wrap; gap: 6px; }
+  .file button { white-space: nowrap; min-height: 40px; padding: 0 10px; }
+}
+/* Title screen (GE ch. 3), above every other overlay. */
+.titlescreen { z-index: 12; text-align: center; }
+.titlescreen .ts-row { justify-content: center; flex-wrap: wrap; gap: 8px; }
+.titlescreen .seal { margin: 0 auto 16px; }

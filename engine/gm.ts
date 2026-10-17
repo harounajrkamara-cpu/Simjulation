@@ -1,16 +1,37 @@
 import { ageOn, dateFromIndex, dayIndex, formatDate, seasonKey } from './calendar';
-import { ESCAPE_NEEDS, inService, MERIT_FOR_FREEDOM, PRICE_MON } from './campaign';
+import { ESCAPE_NEEDS, inService, MERIT_FOR_FREEDOM, PRICE_MON, raidIndexOn, raidOfficerOn } from './campaign';
 import { DuelOutcome, DuelTemplate } from './content';
 import { PLACES } from './data';
-import { commitDrafts, has, li, met, replay, today } from './engine';
+import { commitDrafts, duelStateFor, has, li, met, replay, today } from './engine';
 import { createWorld } from './data';
+import { checkGmLies, liHandInDeath } from './factcheck';
+import { publicWorldText } from './atlas-public';
+import { liLifeText } from './life';
+import { fuseDrafts, fusesText, leverDrafts } from './fuses';
+import { seedDrafts, seedsText } from './seeds';
+import { clockDrafts, clocksText, clockTimeDrafts } from './clocks';
+import { nemesisDrafts } from './drama';
+import { discontentDrafts } from './discontent';
+import { planText } from './plan';
+import { childDrafts, familyText, marryDrafts } from './family';
+import { courtText, factionDrafts } from './court';
+import { reputationDrafts, reputationText } from './reputation';
+import { betrayalDrafts, crueltyDrafts, loyaltyText, promiseDrafts } from './loyalty';
+import { payDrafts } from './pay';
+import { adoptDrafts, allianceDrafts, foundHouseDrafts, hostageDrafts, houseChangeDrafts, houseTimeDrafts, housesText, successionDrafts, worldDrafts } from './houses';
+import { HIDDEN_PEOPLE } from './world-people';
+import { abilitiesText, abilityDrafts, ABILITIES } from './abilities';
+import { kingdomYearDrafts, kingdomsText } from './kingdoms';
+import { debtClockDrafts, embargoDrafts, examDrafts, festivalDrafts, governorDrafts, hireDrafts, loanDrafts, shinobiDrafts, shogenDrafts, textureText, treasureDrafts, worldYearDrafts } from './texture';
+import { captivityTimeDrafts, captivityDrafts, defeatDrafts, fateText, liarTarget, lieDrafts } from './fate';
+import { bannerDrafts, gatheringDrafts, legendDrafts, momentsText, rumourChangeDrafts, rumourTimeDrafts } from './moments';
 import { storyWindow } from './recaps';
 import { careerText, ceremonyDrafts, deedDrafts, promotionDrafts, serveDrafts, titleDrafts } from './gm-career';
 import { stageDayCap, stageText } from './stages';
 import { battleClearDrafts, battleStartDrafts, battleText } from './gm-battle';
 import { domainMonthDrafts, domainOrderDrafts, domainText, landDrafts, projectDrafts } from './gm-domain';
 import { growDrafts, roleDrafts, seasonGrowthDrafts } from './growth';
-import { opinion, opinionLabel, relSnapshot } from './relations';
+import { FADE, opinion, opinionLabel, relSnapshot } from './relations';
 import { HEAL_DAYS, SEASON_TRAINING_CAP, WOUND_LABEL, growthGain, r3, rankLetter, rankScores } from './rules';
 import { Draft, GameEvent, GameState, GmMemory, Part, PARTS, REL_FIELDS, RelField, STAT_KEYS, StatKey, Wound } from './types';
 
@@ -33,6 +54,8 @@ export interface GmTurn {
   days?: number;
   /** Part of the day the scene ends in. */
   part?: Part;
+  /** Li goes to sleep at the end of the scene: the next scene is the next morning (the code sets it, not the prose). */
+  sleeps?: boolean;
   /** Where Li is now (short place name). */
   place?: string;
   changes?: GmChange[];
@@ -42,6 +65,10 @@ export interface GmTurn {
   suggestions?: string[];
   /** Time skip: something important happened or the target is reached, so the skip stops here. */
   stop?: boolean;
+  /** Only routine happened: the story goes on by itself to the next moment that matters (pacing, owner Oct 12). */
+  routine?: boolean;
+  /** What this scene changed (McKee: every scene turns). Empty = nothing turned: it plays as routine (owner, Oct 16). */
+  turns?: string;
   /** One short out-of-character line to the player (e.g. why a wish could not be granted). Shown apart from the scene. */
   gmNote?: string;
 }
@@ -56,17 +83,53 @@ export interface GmFight {
   officer?: 'Gochō' | 'Kogashira' | 'Gojū-gashira' | 'Hyakunin-gashira';
   /** Sticks and fists (worst: Hurt) or real weapons (worst: Badly wounded). */
   deadly: boolean;
+  /** A spar or drill: the page simulates it unless the player takes over (owner, Oct 15). Never deadly. */
+  spar?: boolean;
   /** An enemy of Kurogane, fought in Kurogane service, with witnesses (merit counts). */
   witnessedEnemy?: boolean;
   place?: string;
+  /** Real variables the story has shown (owner, Oct 17: "no way a slave beats a good warrior, unless variables"):
+   * Li strikes first unseen (+30% in round 1), the foe is already hurt (wound 1–2) or tired (fatigue 1–3). The code counts them. */
+  surprise?: boolean;
+  foeWound?: number;
+  foeTired?: number;
 }
 
 export type GmChange =
-  | { kind: 'relation'; npc: string; field: RelField; delta: number; reason: string }
+  | { kind: 'relation'; npc: string; field: RelField; delta: number; reason: string; fades?: string }
+  | { kind: 'promise'; npc: string; text?: string; outcome?: 'made' | 'kept' | 'broken' }
+  | { kind: 'cruelty'; reason: string }
+  | { kind: 'house'; house: string; prestige?: number; loyalty?: number; cohesion?: number; troops?: number; reason: string }
+  | { kind: 'alliance'; a: string; b: string; reason?: string }
+  | { kind: 'hostage'; house: string; npc?: string; harmed?: boolean; released?: boolean }
+  | { kind: 'adopt'; house: string }
+  | { kind: 'found_house'; name: string }
+  | { kind: 'ability'; id: string; reason: string; upgrade?: boolean }
+  | { kind: 'rumour'; text: string; false?: boolean; about?: string }
+  | { kind: 'gathering'; what: string; npc?: string; reason: string }
+  | { kind: 'banner'; name: string; sign: string }
+  | { kind: 'lie'; npc: string; about?: string; truthKnown?: boolean; believed?: boolean; discovered?: boolean }
+  | { kind: 'captivity'; end: string; reason?: string }
+  | { kind: 'embargo'; from: string; to: string; end?: boolean }
+  | { kind: 'loan'; ryo?: number; repay?: number | boolean }
+  | { kind: 'hire'; men: number; months: number }
+  | { kind: 'shinobi'; target: string }
+  | { kind: 'shogen'; gift?: number }
+  | { kind: 'exam' }
+  | { kind: 'treasure'; id: string; holder: string; reason?: string }
+  | { kind: 'governor'; state: string }
   | { kind: 'money'; amount: number; reason: string }
   | { kind: 'wound'; level: number; reason: string }
   | { kind: 'fatigue'; level: number }
   | { kind: 'train'; focus: string; days: number }
+  | { kind: 'time'; days: number; part?: Part; reason: string }
+  | { kind: 'lever'; fuse: string; toward: string; reason: string }
+  | { kind: 'seed'; id: string; state: 'planted' | 'grown' | 'dead'; note?: string }
+  | { kind: 'clock'; id: string; name?: string; doom?: string; size?: number; tick?: number; back?: number; close?: boolean; reason?: string }
+  | { kind: 'marry'; npc: string; alliance?: boolean; reason?: string }
+  | { kind: 'child'; name: string; son?: boolean }
+  | { kind: 'faction'; faction: string; delta?: number; join?: boolean; leave?: boolean; discontent?: number; reason?: string }
+  | { kind: 'reputation'; group: string; delta: number; reason?: string }
   | { kind: 'skill'; skill: string; delta: number }
   | { kind: 'memory'; npc: string; what: string; weight?: number }
   | { kind: 'person'; id: string; name: string; role: string; desc: string; goal: string; secret?: string; trust?: number; respect?: number; affection?: number; rivalry?: number }
@@ -291,14 +354,16 @@ export function gmMemoryText(s: GameState): string {
       ...s.memories.filter((m) => m.npc === id).slice(-3).map((m) => `  Remembers: ${m.what}`),
     ].filter(Boolean).join('\n');
   }).join('\n');
-  const unmet = Object.keys(s.characters).filter((id) => id !== s.liId && !met(s, id) && s.characters[id].alive).map((id) => `- ${s.characters[id].name} [id: ${id}] — ${s.characters[id].role}. ${s.characters[id].desc}`).join('\n');
+  // The world's people are listed apart (housesText); here only those truly near Li, never the hidden family.
+  const unmet = Object.keys(s.characters).filter((id) => id !== s.liId && !met(s, id) && s.characters[id].alive && !HIDDEN_PEOPLE.has(id) && (!s.characters[id].world || s.characters[id].location === c.location)).map((id) => `- ${s.characters[id].name} [id: ${id}] — ${s.characters[id].role}. ${s.characters[id].desc}`).join('\n');
   // All chapter recaps, then the scenes after them in full (engine/recaps.ts): nothing falls out of Claude's view.
   const window = storyWindow(s);
   const story = window.scenes;
   const soon = WORLD_CLOCK.filter((w) => w.day >= today(s) - 2 && w.day <= today(s) + 60).map((w) => `- ${formatDate(dateFromIndex(w.day))}: ${w.what}`);
   const freedomRoutes = c.status === 'slave' ? [
     `Merit law: 30 merit in Kurogane service (now ${has(s, 'merit_service')}${inService(s) ? '' : '; Li is NOT in service yet'}) or the head of an enemy Kogashira or higher taken in service (only through a fight the code runs).`,
-    `Buying: Raizen's price is 15 ryō = ${PRICE_MON} mon (Li has ${s.money} mon). Rokubei keeps the papers.`,
+    // Owner decision default (goal Oct 17, Phase 2 #2): buying stays a slow, late route, but real ways to earn exist.
+    `Buying: Raizen's price is 15 ryō = ${PRICE_MON} mon (Li has ${s.money} mon). Rokubei keeps the papers. Li can earn real coin with "money": soldiers' tips on paydays (a few mon), stitching the wounded (tens), selling Sukezō's remedies at the fort (tens), loot from a levy fight (hundreds), dice at the fire (a risk: he can lose too). It is a long road, and it should feel like one.`,
     'Raizen sets him free: needs Raizen\'s trust and respect both 85+.',
     'Escape: to Tatara over the Black Hills (no slavery there); hunted afterwards. Only in winter quarters (Months 10–12), and only when Li is fit and quiet enough (the code checks).',
   ] : ['Li is free.'];
@@ -310,6 +375,22 @@ export function gmMemoryText(s: GameState): string {
     `Merit: combat ${has(s, 'merit_combat')}, in Kurogane service ${has(s, 'merit_service')} of ${MERIT_FOR_FREEDOM}. In the Hagiwara levy: ${inService(s) ? 'yes' : 'no'}.`,
     careerText(s),
     stageText(s),
+    publicWorldText(s),
+    liLifeText(s),
+    planText(s),
+    familyText(s),
+    courtText(s),
+    reputationText(s),
+    loyaltyText(s),
+    housesText(s),
+    abilitiesText(s),
+    momentsText(s),
+    fateText(s),
+    kingdomsText(s),
+    textureText(s),
+    fusesText(s),
+    seedsText(s),
+    clocksText(s),
     domainText(s),
     battleText(s),
     `What Li knows (keys): ${s.knowledge.join(', ')}.`,
@@ -362,15 +443,18 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
     journal: str(o.journal, 300) || undefined,
     days: num(o.days, 0),
     part,
+    sleeps: o.sleeps === true || undefined,
     place: str(o.place, 80) || undefined,
     changes: Array.isArray(o.changes) ? (o.changes.filter((x) => x && typeof x === 'object') as GmChange[]).slice(0, 20) : [],
     fight: f && str(f.foe) ? {
       foe: str(f.foe, 80), rank: (ranks.includes(String(f.rank)) ? f.rank : 'E') as GmFight['rank'], look: str(f.look, 120) || str(f.foe, 80),
       officer: officers.includes(String(f.officer)) ? (f.officer as GmFight['officer']) : undefined,
-      deadly: f.deadly !== false, witnessedEnemy: f.witnessedEnemy === true, place: str(f.place, 80) || undefined,
+      deadly: f.deadly !== false, spar: f.spar === true && f.deadly === false, witnessedEnemy: f.witnessedEnemy === true, place: str(f.place, 80) || undefined,
     } : undefined,
     suggestions: Array.isArray(o.suggestions) ? o.suggestions.map((x) => str(x, 120)).filter(Boolean).slice(0, 4) : [],
     stop: o.stop === true,
+    routine: o.routine === true || undefined,
+    turns: typeof o.turns === 'string' ? str(o.turns, 160) : undefined, // '' = Claude says nothing turned; missing = unknown
     gmNote: str(o.gmNote, 240) || undefined,
   };
 }
@@ -379,11 +463,12 @@ export function parseGmTurn(raw: unknown): GmTurn | undefined {
 function trainDrafts(s: GameState, focus: string, days: number): { drafts: Draft[]; note?: string } {
   const c = li(s);
   const isStat = STAT_KEYS.includes(focus as StatKey);
-  const isStyle = !isStat && (focus in c.styles || /^[a-z_]{3,20}$/.test(focus));
-  if (!isStat && !isStyle) return { drafts: [], note: `training "${focus}" is not a stat or a fighting style` };
-  const kind = isStat ? 'stat' : 'style';
+  const isSkill = !isStat && !(focus in c.styles) && focus in c.skills; // e.g. endurance: a skill, never a fighting style
+  const isStyle = !isStat && !isSkill && (focus in c.styles || /^[a-z_]{3,20}$/.test(focus));
+  if (!isStat && !isStyle && !isSkill) return { drafts: [], note: `training "${focus}" is not a stat or a fighting style` };
+  const kind = isStat ? 'stat' : isSkill ? 'skill' : 'style';
   const capKey = `${kind}:${focus}`;
-  const current = isStat ? c.stats[focus as StatKey] : c.styles[focus] ?? 0;
+  const current = isStat ? c.stats[focus as StatKey] : isSkill ? c.skills[focus] : c.styles[focus] ?? 0;
   const potential = isStat ? c.potential[focus as StatKey] : c.potential.VAL;
   const age = ageOn(c.born, s.date);
   let gain = 0;
@@ -393,7 +478,7 @@ function trainDrafts(s: GameState, focus: string, days: number): { drafts: Draft
   const amount = r3(capped);
   const note = capped < gain ? `training ${focus} hit the season cap (${SEASON_TRAINING_CAP} per season)` : undefined;
   if (amount <= 0) return { drafts: [], note };
-  const data: Record<string, unknown> = isStat ? { char: c.id, stat: focus, amount, capKey } : { char: c.id, style: focus, amount, capKey };
+  const data: Record<string, unknown> = isStat ? { char: c.id, stat: focus, amount, capKey } : isSkill ? { char: c.id, skill: focus, amount } : { char: c.id, style: focus, amount, capKey };
   return { drafts: [{ type: kind, fact: `training ${focus} +${amount} over ${days} days`, visible: false, data }], note };
 }
 
@@ -404,14 +489,20 @@ export function checkGmTurn(s: GameState, t: GmTurn, said?: string): GmResult {
   const secretNotes: string[] = [];
   const drafts: Draft[] = [];
   drafts.push(...battleClearDrafts(s)); // the aftermath has been told: clear the field
-  drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null } });
+  drafts.push(...nemesisDrafts(s)); // a known person Li beat wants it back (Nemesis system, owner Oct 16)
+  drafts.push({ type: 'scene', fact: t.scene, visible: true, journal: t.journal, data: { summary: t.summary, title: t.title ?? null, suggestions: t.suggestions ?? [], said: said ?? null, gmNote: t.gmNote ?? null, ...(t.routine ? { routine: true } : {}), ...(t.turns !== undefined ? { turns: t.turns } : {}) } });
   if (t.place) drafts.push({ type: 'place', fact: `Li is at ${t.place}`, visible: false, data: { char: c.id, place: t.place } });
-  drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false));
+  drafts.push(...checkChanges(s, t.changes ?? [], notes, secretNotes, said, false, `${t.title ?? ''}. ${t.scene}`));
+  // The player's Li lies and the scene recorded no "lie": the code judges it itself (live test Oct 17: twice unrecorded).
+  if (checkGmLies(t, said).length) {
+    const npc = liarTarget(s, said ?? '', t.scene);
+    if (npc) drafts.push(...lieDrafts(s, { npc, about: (said ?? '').replace(/^i lie(?: again)?:?\s*/i, '').slice(0, 100) }, notes, secretNotes));
+  }
 
   let duelId: string | undefined;
   if (t.fight) {
     duelId = `gm_${s.nextSeq}`;
-    drafts.push(...gmDuelStart(s, duelId, t.fight));
+    drafts.push(...gmDuelStart(s, duelId, t.fight, secretNotes, t.place));
   }
   return { drafts, notes, secretNotes, duelId };
 }
@@ -440,7 +531,7 @@ export function splitWishes(said: string): { action: string; wishes: string[] } 
 }
 
 /** The referee for a list of changes (a scene's, or a fix's when `facts` is true). */
-function checkChanges(s: GameState, changes: GmChange[], notes: string[], secretNotes: string[], said: string | undefined, facts: boolean): Draft[] {
+function checkChanges(s: GameState, changes: GmChange[], notes: string[], secretNotes: string[], said: string | undefined, facts: boolean, scene = ''): Draft[] {
   const c = li(s);
   const g = gmMem(s);
   const drafts: Draft[] = [];
@@ -462,7 +553,9 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         if (!id || known(id) || newPeople.has(id)) { if (id && known(id) && !met(s, id)) drafts.push({ type: 'flag', fact: `met ${id}`, visible: false, data: { key: `met_${id}`, value: 1 } }); break; }
         newPeople.add(id);
         const base = { trust: clamp(num(x.trust, 40), 0, 80), respect: clamp(num(x.respect, 40), 0, 80), affection: clamp(num(x.affection, 40), 0, 80), fear: 0, rivalry: clamp(num(x.rivalry, 0), 0, 60) };
-        drafts.push({ type: 'person', fact: `Li meets ${str(x.name, 60)}`, visible: true, data: { id, name: str(x.name, 60), role: str(x.role, 80), desc: str(x.desc, 300), goal: str(x.goal, 300), secret: str(x.secret, 300) || undefined, base, day: today(s) } });
+        // A person always has a name (one without blanked the People tab); fall back to the id, readable.
+        const name = str(x.name, 60) || id.replace(/_/g, ' ').replace(/^\w/, (ch) => ch.toUpperCase());
+        drafts.push({ type: 'person', fact: `Li meets ${name}`, visible: true, data: { id, name, role: str(x.role, 80), desc: str(x.desc, 300), goal: str(x.goal, 300), secret: str(x.secret, 300) || undefined, base, day: today(s) } });
         break;
       }
       case 'relation': {
@@ -473,7 +566,10 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         if (d !== Math.round(num(x.delta))) notes.push(`${npc} ${String(x.field)} change cut to ${d} (limit ±${GM_LIMITS.relationDelta} per scene)`);
         if (!d) break;
         const reason = str(x.reason, 120) || 'Something Li did';
-        drafts.push({ type: 'relation', fact: `${npc}: ${String(x.field)} ${d > 0 ? '+' : ''}${d} (${reason})`, visible: false, data: { npc, field: x.field, value: d, reason, fade: 1095 } });
+        // Numbers §8 decay by kind, "fades" (slight, rumour, humiliation, hardship, permanent); default: shared hardship.
+        const kind = String(x.fades ?? '') as keyof typeof FADE;
+        const fade = Object.prototype.hasOwnProperty.call(FADE, kind) ? FADE[kind] : FADE.hardship;
+        drafts.push({ type: 'relation', fact: `${npc}: ${String(x.field)} ${d > 0 ? '+' : ''}${d} (${reason})`, visible: false, data: { npc, field: x.field, value: d, reason, fade } });
         break;
       }
       case 'money': {
@@ -535,6 +631,8 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         if (key === GOAL_KEYS.zone && worstWound < 3) { secretNotes.push('SHINKEN NO RYŪ wakes only at a true near-death moment (Li is not badly wounded): not recorded'); break; }
         if (key === GOAL_KEYS.name && !playerSaidName(s, said)) { secretNotes.push('Li says the name Hattori only when the player writes it: not recorded'); break; }
         if (key && !s.knowledge.includes(key)) drafts.push({ type: 'knowledge', fact: `Li learns: ${key}`, visible: false, data: { key } });
+        // The Zone wakes as an ability record too (WB 10.5: C-rank, very low mastery).
+        if (key === GOAL_KEYS.zone && !(c.abilities ?? []).some((a) => a.id === 'zone')) drafts.push({ type: 'ability', fact: 'SHINKEN NO RYŪ', visible: true, data: { char: c.id, ability: { id: 'zone', name: ABILITIES.zone.name, kind: 'combat', rank: 'C', mastery: 1 } } });
         break;
       }
       case 'fact': {
@@ -544,6 +642,98 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         else if (what && text) drafts.push({ type: 'correction', fact: `Correction: ${what}: ${text}`, visible: false, data: { what, text } });
         break;
       }
+      case 'time': {
+        // Only "Something's wrong" moves the clock this way ("Li slept but the day did not change"): forward only, never in a fight.
+        if (!facts) { secretNotes.push('time moves with "days", "part" and "sleeps", not with a change'); break; }
+        if ((s.duel && !s.duel.over) || (s.battle && !s.battle.over)) { notes.push('time cannot move during a fight'); break; }
+        const part = PARTS.includes(x.part as Part) ? (x.part as Part) : undefined;
+        drafts.push(...gmTimeDrafts(s, ...sceneTime(s, { days: clamp(Math.round(num(x.days)), 0, stageDayCap(s)), part })));
+        break;
+      }
+      case 'lever':
+        drafts.push(...leverDrafts(s, x, notes));
+        break;
+      case 'reputation':
+        drafts.push(...reputationDrafts(s, x, notes));
+        break;
+      case 'faction':
+        drafts.push(...factionDrafts(s, x, notes));
+        break;
+      case 'marry':
+        drafts.push(...marryDrafts(s, x, notes));
+        break;
+      case 'child':
+        drafts.push(...childDrafts(s, x, notes));
+        break;
+      case 'clock':
+        drafts.push(...clockDrafts(s, x, notes));
+        break;
+      case 'promise':
+        drafts.push(...promiseDrafts(s, x, notes));
+        break;
+      case 'house':
+        drafts.push(...houseChangeDrafts(s, x, notes));
+        break;
+      case 'ability':
+        drafts.push(...abilityDrafts(s, x, notes));
+        break;
+      case 'rumour':
+        drafts.push(...rumourChangeDrafts(s, x, notes));
+        break;
+      case 'gathering':
+        drafts.push(...gatheringDrafts(s, x, notes));
+        break;
+      case 'banner':
+        drafts.push(...bannerDrafts(s, x, notes));
+        break;
+      case 'embargo':
+        drafts.push(...embargoDrafts(s, x, notes));
+        break;
+      case 'loan':
+        drafts.push(...loanDrafts(s, x, notes));
+        break;
+      case 'hire':
+        drafts.push(...hireDrafts(s, x, notes));
+        break;
+      case 'shinobi':
+        drafts.push(...shinobiDrafts(s, x, notes));
+        break;
+      case 'shogen':
+        drafts.push(...shogenDrafts(s, x, notes));
+        break;
+      case 'exam':
+        drafts.push(...examDrafts(s, notes));
+        break;
+      case 'treasure':
+        drafts.push(...treasureDrafts(s, x, notes));
+        break;
+      case 'governor':
+        drafts.push(...governorDrafts(s, x, notes));
+        break;
+      case 'lie':
+        drafts.push(...lieDrafts(s, x, notes, secretNotes));
+        break;
+      case 'captivity':
+        drafts.push(...captivityDrafts(s, x, notes));
+        break;
+      case 'alliance':
+        drafts.push(...allianceDrafts(s, x, notes));
+        break;
+      case 'hostage':
+        drafts.push(...hostageDrafts(s, x, notes));
+        break;
+      case 'adopt':
+        drafts.push(...adoptDrafts(s, x, notes));
+        break;
+      case 'found_house':
+        drafts.push(...foundHouseDrafts(s, x, notes));
+        break;
+      case 'cruelty':
+        drafts.push(...crueltyDrafts(s, x, notes));
+        break;
+      case 'seed':
+        drafts.push(...seedDrafts(s, x, notes));
+        break;
       case 'service': {
         if (!inService(s)) drafts.push({ type: 'flag', fact: 'Li joins Kurogane service (the Hagiwara levy)', visible: true, data: { key: 'levy_service', value: 1 } });
         break;
@@ -552,14 +742,21 @@ function checkChanges(s: GameState, changes: GmChange[], notes: string[], secret
         const npc = str(x.npc, 40);
         if (npc === s.liId) { notes.push('Li does not die'); break; }
         if (!known(npc) || !s.characters[npc].alive) break;
+        // A death Li causes is a fight the code runs (it can end in a kill), never a story claim. Default deny
+        // (engine/factcheck.ts liHandInDeath): Li in the scene or the reason, or the dead named in the player's words.
+        if (liHandInDeath(s, npc, `${scene} ${str(x.reason, 100)}`, said ?? '')) {
+          secretNotes.push(`${s.characters[npc].name} does not die by Li's hand in story text: a fight between them must be started with "fight" and decided by the code`);
+          break;
+        }
         drafts.push({ type: 'status', fact: `${s.characters[npc].name} dies (${str(x.reason, 100)})`, visible: true, data: { char: npc, status: s.characters[npc].status, role: s.characters[npc].role, alive: false } });
+        drafts.push(...successionDrafts(s, npc));
         break;
       }
       case 'freedom':
         drafts.push(...freedomCheck(s, String(x.route), notes));
         break;
       case 'deed':
-        { const d = deedDrafts(s, x, deeds, notes, pendingMerit); if (d.length) deeds++; drafts.push(...d); }
+        { const d = deedDrafts(s, x, deeds, notes, pendingMerit); if (d.length) deeds++; drafts.push(...d); if (d.length && x.deed === 'disobeyed_failed') drafts.push(...defeatDrafts(s, 'an order disobeyed, and it failed')); }
         break;
       case 'promotion':
         drafts.push(...promotionDrafts(s, x, notes));
@@ -644,47 +841,85 @@ function freedomCheck(s: GameState, route: string, notes: string[]): Draft[] {
   }
 }
 
+const OFFICER_MEN: Record<NonNullable<GmFight['officer']>, number> = { 'Gochō': 5, 'Kogashira': 10, 'Gojū-gashira': 50, 'Hyakunin-gashira': 100 };
+
+/**
+ * What the code itself knows about a fight Claude starts (owner, Oct 12: "impossible things really cannot happen").
+ * Claude's labels are only Li's guess: the foe's strength comes from the person's real numbers when he is someone the
+ * code knows; officer rank, an enemy and witnesses count only where the code records a war (a raid on the ford today,
+ * or a battle in progress) and the officer is on that record. Anything else is fought, but earns no merit or head.
+ */
+export function fightFacts(s: GameState, f: GmFight, scenePlace?: string) {
+  const name = f.foe.toLowerCase();
+  const person = Object.values(s.characters).find((p) => p.id !== s.liId && p.alive && (name.includes(p.name.toLowerCase()) || name.includes(p.id)));
+  // A raid is at the ford: it counts only if Li is there (his recorded place, or this scene's place). Copilot QA, PR #5.
+  const atFord = [PLACES[li(s).location] ?? li(s).location, scenePlace ?? ''].some((p) => /\b(ford|Kurose)\b/i.test(p));
+  const raid = atFord ? raidIndexOn(today(s)) : undefined;
+  const raidOfficer = raidOfficerOn(today(s));
+  const battle = s.battle && !s.battle.over ? s.battle : undefined;
+  const flags: string[] = []; // what this fight uses up (a raid has one officer and one fight that counts)
+  let officer: GmFight['officer'];
+  let foeName = f.foe;
+  if (f.officer && !person && raid !== undefined && raidOfficer?.rank === f.officer && !has(s, `raid_officer_${raid}`)) {
+    // Copilot review of PR #5: a label alone made a "farmhand" the raid's Kogashira. Now the fight IS against the
+    // officer on the record (his name, his strength), and only once per raid.
+    officer = f.officer;
+    foeName = raidOfficer.name;
+    flags.push(`raid_officer_${raid}`);
+  } else if (f.officer && !person && battle?.units.some((u) => u.side === 'enemy' && !!u.commander && name.includes(u.commander.toLowerCase()) && u.men >= OFFICER_MEN[f.officer!])) officer = f.officer;
+  const raidFight = raid !== undefined && !battle && !has(s, `raid_fight_${raid}`);
+  const enemy = !!f.witnessedEnemy && !person && (!!battle || raidFight);
+  if (enemy && raidFight) flags.push(`raid_fight_${raid}`);
+  const strength = person ? { val: person.stats.VAL, mastery: Math.max(0, ...Object.values(person.styles)) }
+    : officer && raidOfficer && foeName === raidOfficer.name ? { val: raidOfficer.val, mastery: raidOfficer.mastery }
+    : { val: RANK_SCORE[f.rank] + 1, mastery: RANK_SCORE[f.rank] - 1 };
+  const notes: string[] = [];
+  if (f.officer && !officer) notes.push(`"${f.foe}" fights, but is not a ${f.officer} on the code's record (no raid or battle names him, or his fight is over): no officer merit or head`);
+  else if (officer && foeName !== f.foe) notes.push(`the officer at the ford today is ${foeName}: the fight is against him`);
+  if (f.witnessedEnemy && !enemy) notes.push(`"${f.foe}" is not an enemy in a war the code records now (or today's one fight that counts is over): no merit for this fight`);
+  return { person, officer, foeName, strength, enemy, flags, notes };
+}
+
 /** A fight the Game Master starts: the duel engine decides it, never Claude. */
-function gmDuelStart(s: GameState, id: string, f: GmFight): Draft[] {
+function gmDuelStart(s: GameState, id: string, f: GmFight, notes: string[] = [], scenePlace?: string): Draft[] {
   const c = li(s);
-  const score = RANK_SCORE[f.rank];
-  const foeId = `gmfoe_${slug(f.foe)}`;
-  const officerMerit = f.officer && f.witnessedEnemy && inService(s) ? OFFICER_MERIT[f.officer] : 0;
-  const plainMerit = f.witnessedEnemy && f.deadly ? 1 : 0;
-  const head = f.officer && f.officer !== 'Gochō' && f.witnessedEnemy && inService(s);
+  const facts = fightFacts(s, f, scenePlace);
+  notes.push(...facts.notes);
+  const foe = facts.foeName;
+  const foeId = facts.person?.id ?? `gmfoe_${slug(foe)}`;
+  // An officer's merit and head come only from a fight to the death (Copilot QA, PR #5: a practice win freed Li).
+  const officerMerit = facts.officer && facts.enemy && f.deadly && inService(s) ? OFFICER_MERIT[facts.officer] : 0;
+  const plainMerit = facts.enemy && f.deadly ? 1 : 0;
+  const head = facts.officer && facts.officer !== 'Gochō' && facts.enemy && f.deadly && inService(s);
   const won: DuelOutcome = {
-    fact: `${f.foe} goes down.`,
-    journal: `I beat ${f.foe}.`,
+    fact: `${foe} goes down.`,
+    journal: `I beat ${foe}.`,
     grow: 1.0,
-    merit: officerMerit || plainMerit ? { amount: officerMerit || plainMerit, why: f.officer ? `enemy ${f.officer} head` : 'witnessed kill of an enemy' } : undefined,
+    merit: officerMerit || plainMerit ? { amount: officerMerit || plainMerit, why: officerMerit ? `enemy ${facts.officer} head` : 'witnessed kill of an enemy' } : undefined,
     flag: head ? ['kogashira_head', 1] : undefined,
   };
   const t: DuelTemplate = {
     id,
     place: f.place ?? PLACES[c.location] ?? c.location,
-    intro: `${f.foe} — ${f.look}.`,
-    foe: { id: foeId, name: f.foe.replace(/^A /, 'the ').replace(/^An /, 'the '), val: score + 1, mastery: score - 1, wound: 0, fatigue: 0, estimate: `${f.look} · Warrior ${f.rank}?` },
+    intro: `${foe} — ${f.look}.`,
+    foe: { id: foeId, name: facts.person?.name ?? foe.replace(/^A /, 'the ').replace(/^An /, 'the '), val: facts.strength.val, mastery: facts.strength.mastery, wound: Math.max(0, Math.min(2, Math.round(Number(f.foeWound) || 0))) as 0 | 1 | 2, fatigue: Math.max(0, Math.min(3, Math.round(Number(f.foeTired) || 0))), estimate: `${f.look} · Warrior ${f.rank}?` },
     prefs: [{ attack: 3, counter: 1, feint: 1, observe: 0 }, { attack: 1, counter: 3, feint: 0, observe: 1 }, { attack: 1, counter: 1, feint: 3, observe: 0 }][s.nextSeq % 3],
-    surprise: false,
+    surprise: f.surprise === true,
     maxWound: f.deadly ? 3 : 1,
     fleeRisk: 'shame, and whatever he does next',
     fleeText: 'Li breaks away and runs.',
     yieldText: 'Li lowers his weapon.',
     outcomes: {
       won,
-      lost: { fact: `${f.foe} beats Li.`, journal: `${f.foe} beat me.`, grow: 0.5 },
-      draw: { fact: 'Neither of them can finish it.', journal: `My fight with ${f.foe} ended with no winner.`, grow: 0.5 },
-      fled: { fact: 'Li runs from the fight.', journal: `I ran from ${f.foe}.`, grow: 0 },
-      yielded: { fact: 'Li gives up the fight.', journal: `I gave up against ${f.foe}.`, grow: 0 },
+      lost: { fact: `${foe} beats Li.`, journal: `${foe} beat me.`, grow: 0.5 },
+      draw: { fact: 'Neither of them can finish it.', journal: `My fight with ${foe} ended with no winner.`, grow: 0.5 },
+      fled: { fact: 'Li runs from the fight.', journal: `I ran from ${foe}.`, grow: 0 },
+      yielded: { fact: 'Li gives up the fight.', journal: `I gave up against ${foe}.`, grow: 0 },
     },
   };
-  const mastery = Math.max(0, ...Object.values(c.styles));
-  const state = {
-    id, round: 0, over: false, surprise: false, prefs: { ...t.prefs }, place: t.place, estimate: t.foe.estimate,
-    li: { id: c.id, name: 'Li', val: c.stats.VAL, mastery, wound: c.wound, fatigue: c.fatigue, observed: 0, history: [] },
-    foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: 0, fatigue: 0, observed: 0, history: [] },
-  };
-  return [{ type: 'duel', fact: `fight begins: ${f.foe}`, visible: false, data: { state, template: t } }];
+  // The same opening as every fight: Li's Zone, techniques, abilities and aura come with him (engine/abilities.ts).
+  const state = duelStateFor(s, id, t);
+  return [...facts.flags.map((k): Draft => ({ type: 'flag', fact: `${k} used`, visible: false, data: { key: k, value: 1 } })), { type: 'duel', fact: `fight begins: ${foe}`, visible: false, data: { state, template: t } }];
 }
 
 /** Time passes between scenes: healing, rest, the season (same healing as playing the days). */
@@ -705,8 +940,28 @@ export function gmTimeDrafts(s: GameState, days: number, part?: Part): Draft[] {
   }
   // Li's land runs on by itself through every month that ends in these days.
   out.push(...domainMonthDrafts(s, today(s), today(s) + n));
+  // The world moves on (World Bible 13d): fuses fire on their days, and their news reaches Li by distance.
+  out.push(...fuseDrafts(s, today(s) + n));
+  // Open threats come closer by themselves (pacing director, owner Oct 16).
+  out.push(...clockTimeDrafts(s, today(s) + n));
+  // The courts move every month (Numbers §9 discontent; ultimatum at 100).
+  out.push(...discontentDrafts(s, today(s), today(s) + n));
   // Everyone Li knows grows with the seasons too.
   out.push(...seasonGrowthDrafts(s, today(s), today(s) + n));
+  // Pay day for a free man in service, and men who would betray Li start to turn (Numbers §7, §8).
+  out.push(...payDrafts(s, today(s), today(s) + n));
+  out.push(...betrayalDrafts(s, today(s), today(s) + n));
+  // People age: deaths of age, heirs take over, genpuku; houses drift, and split when they fall apart (engine/houses.ts).
+  out.push(...houseTimeDrafts(s, today(s), today(s) + n));
+  // Talk travels (engine/moments.ts).
+  out.push(...rumourTimeDrafts(s, today(s), today(s) + n));
+  // The kingdoms' treasuries move with the years; a captive may be freed by the law of his captors.
+  out.push(...kingdomYearDrafts(s, today(s), today(s) + n));
+  out.push(...captivityTimeDrafts(s, today(s) + n));
+  // The world's texture: weather and uprisings by the year, festivals, the Kinza debt (engine/texture.ts).
+  out.push(...worldYearDrafts(s, today(s), today(s) + n));
+  out.push(...festivalDrafts(s, today(s), today(s) + n));
+  out.push(...debtClockDrafts(s));
   // Time never runs backwards: a part earlier than now on the same day is ignored.
   const later = part && PARTS.indexOf(part) > PARTS.indexOf(s.date.part);
   const to = dateFromIndex(today(s) + n, n > 0 ? part ?? 'morning' : later ? part! : s.date.part);
@@ -737,12 +992,29 @@ export function skipDaysLeft(s: GameState, until: string, startDay: number): num
 
 /** Record one scene: checked changes as events, then the time that passes (unless a fight starts now). */
 export function gmApply(s: GameState, t: GmTurn, said?: string): GmResult & { events: import('./types').GameEvent[] } {
+  // The world's houses and people arrive once: a new life, or an old save on its next scene (engine/houses.ts).
+  const world = commitDrafts(s, worldDrafts(s));
   const r = checkGmTurn(s, t, said);
-  const events = commitDrafts(s, r.drafts);
+  const events = [...world, ...commitDrafts(s, r.drafts)];
   // No time passes while a battle is being fought: its phases are the clock.
-  if (!r.duelId && !(s.battle && !s.battle.over)) events.push(...commitDrafts(s, gmTimeDrafts(s, t.days ?? 0, t.part)));
+  if (!r.duelId && !(s.battle && !s.battle.over)) events.push(...commitDrafts(s, gmTimeDrafts(s, ...sceneTime(s, t))));
   events.push(...commitDrafts(s, refereeDrafts(r.notes, r.secretNotes ?? [])));
+  // Legend moments the scene brought about: a Journal page, a screen, witnesses, a rumour (GE 3b).
+  events.push(...commitDrafts(s, legendDrafts(s)));
   return { ...r, events };
+}
+
+/**
+ * When the next scene starts, from what Claude says explicitly (owner, Oct 11: "I went to sleep and it stayed day 1"): Li
+ * sleeps, or the scene ends in a part of the day that is already past ("morning" after an evening): the next day. Never
+ * guessed from the prose.
+ */
+export function sceneTime(s: GameState, t: Pick<GmTurn, 'days' | 'part' | 'sleeps'>): [number, Part | undefined] {
+  const days = Math.max(0, Math.round(t.days ?? 0));
+  if (days > 0) return [days, t.part];
+  if (t.sleeps) return [1, 'morning'];
+  if (t.part && PARTS.indexOf(t.part) < PARTS.indexOf(s.date.part)) return [1, t.part];
+  return [0, t.part];
 }
 
 /** The referee's notes as one hidden alert (the secret ones only in data, for Claude). */
@@ -846,6 +1118,7 @@ export function gmRecentScenes(s: GameState, n = 3): string {
 export function startGmGame(worldNumber = 1): GameState {
   const s = createWorld(worldNumber);
   commitDrafts(s, [{ type: 'flag', fact: 'Game Master mode', visible: false, data: { key: 'gm_mode', value: 1 } }]);
+  commitDrafts(s, worldDrafts(s));
   return s;
 }
 

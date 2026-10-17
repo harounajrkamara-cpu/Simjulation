@@ -1,3 +1,7 @@
+import { mercsNow } from './texture';
+import { defeatDrafts, victoryDrafts } from './fate';
+import { bannerOf } from './moments';
+import { ABILITIES, auraBattleShock, hasAbility } from './abilities';
 import { BattleState, MAX_PHASES, Order, Quality, Sector, UnitSetup, battleReport, battleView, createBattle, ordersFor, runPhase } from './battle';
 import { meritOf, rankInfo } from './career';
 import { careerOf } from './gm-career';
@@ -33,7 +37,9 @@ function liUnit(s: GameState): { men: number; leads: boolean; name: string } {
   if (li(s).status === 'slave') return { men: 50, leads: false, name: 'the levy bearers' };
   if (car.rank === 'ashigaru') return { men: 100, leads: false, name: "Li's company" };
   const r = rankInfo(car.rank);
-  return { men: Math.max(5, r.min), leads: true, name: `Li's ${r.title}` };
+  // His unit's own name, once it has one (engine/moments.ts banner).
+  // Hired Kinza swords march with him (engine/texture.ts).
+  return { men: Math.max(5, r.min) + mercsNow(s), leads: true, name: bannerOf(s)?.split(' — ')[0] ?? `Li's ${r.title}` };
 }
 
 /** A battle Claude sets up. Refused while a fight or another battle is on, or when either side has nobody. */
@@ -47,7 +53,9 @@ export function battleStartDrafts(s: GameState, x: Record<string, unknown>, note
   const b = createBattle({
     id: `battle_${s.nextSeq}`, name: str(x.name, 80) || 'A battle', place: str(x.place, 80) || li(s).location,
     ally, enemy, liSector: SECTOR_SET.includes(x.sector as Sector) && x.sector !== 'reserve' ? (x.sector as Sector) : 'center',
-    liMen: u.men, liLeads: u.leads, liInt: li(s).stats.INT, liRank: has(s, 'rank_level'), liUnitName: u.name,
+    liMen: u.men, liLeads: u.leads, liInt: li(s).stats.INT, liRank: has(s, 'rank_level'), liUnitName: u.name, liLea: li(s).stats.LEA,
+    liAbilities: Object.keys(ABILITIES).filter((id) => ABILITIES[id].kind === 'command' && hasAbility(s, id)),
+    liAuraShock: u.leads ? auraBattleShock(s, Math.max(0, ...units(x.enemy).map((e) => e.lea ?? 40))) : 0,
   });
   return [{ type: 'battle', fact: `Battle: ${b.name}`, visible: true, data: { battle: b } }];
 }
@@ -85,6 +93,9 @@ function battleEndDrafts(s: GameState, b: BattleState): Draft[] {
     const merit = deeds.reduce((sum, d) => sum + meritOf({ kind: 'command', deed: d, unit: car.rank }).amount, 0);
     if (merit) out.push({ type: 'flag', fact: `command merit +${merit} (${b.name}: ${deeds.join(', ').replace('steady_morale', 'the unit never broke')})`, visible: true, data: { key: 'merit_command', value: has(s, 'merit_command') + merit } });
   }
+  // The defeat ladder (WB 12b #10): a lost battle costs Li a step; a won one steadies him.
+  if (b.over!.winner === 'enemy') out.push(...defeatDrafts(s, `${b.name} was lost`));
+  if (won) out.push(...victoryDrafts(s));
   return out;
 }
 

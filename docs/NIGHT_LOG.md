@@ -1,0 +1,47 @@
+# Night log (Oct 16–17): Claude builds on its own, owner asleep
+
+## Voor Harouna (samenvatting)
+- **Het verhaal start weer (v37).** Oorzaak: Claude noemt de openingsscène "Who Taught You", en de regel "geen *you* buiten dialoog" las de titel mee. Elke opening werd geweigerd. Gerepareerd, met tests.
+- **Li's plan (v38):** in het tabblad Li kies je wat Li najaagt (vrijheid verdienen, een officiershoofd, Raizen winnen, vrijkopen, ontsnappen). De code toont de echte stappen en Claude bouwt kansen richting de volgende stap.
+- **Review van al het werk van vandaag (v39):** 10 fouten gevonden en gerepareerd. De belangrijkste: een echte keuze kon automatisch overgeslagen worden als Claude het nieuwe veld "turns" vergat, en een gewonnen oefengevecht maakte iemand wraakzuchtig.
+- **Sparks (v40):** na elke scène tot 3 gouden regels met wat er veranderde: iemand denkt anders over Li, een vaardigheid groeit, een stap van je plan is af, een dreiging broeit.
+- **Niet gelukt:** live spelen (de ingebouwde browser is niet ingelogd op claude.ai, en inloggen mag ik niet voor je doen) en Hermes (geen AI-provider ingesteld). De diff voor Hermes staat klaar in WSL: `/tmp/hermes-review-oct16/today.diff`.
+- **Alles terugdraaien kan per commit:** "Li's plan" en "Sparks" hebben elk een eigen commit.
+- **Wat jij nu doet:** speel 30 minuten op versie 40. Let op: start het verhaal, zie je gouden ◆ regels, en voelen saaie stukken sneller aan? Bij een geweigerde scène staat de reden er nu direct onder ("Reason:"). Stuur me die.
+- 359 tests groen, typecheck schoon, balans onveranderd (14,7%). Niets is getest met de echte Claude.
+
+Owner's permission (Oct 16, /loop): build on `build/stage-1`; new features allowed if they fit the World Bible and the end goal; each new feature its own commit; each design choice in the World Bible marked "(nacht Oct 16, owner kan terugdraaien)"; tests, typecheck and balance green before every commit; never main; PR #5 not merged.
+
+## 1. Why the opening was refused live: FOUND and FIXED (page v37)
+- **Live testing was not possible:** the built-in browser is not signed in to claude.ai, and Claude may not sign in for the owner. No API key in the repo either.
+- **What I did instead:** dumped the exact prompt the page sends for the opening (26 KB) and answered it the way Claude answers it, then ran the answers through the real `gmTurn`.
+- **The cause:** Claude titles the opening scene **"Who Taught You"** (Raizen's canon line). The checks read the title together with the scene, and the rule "no *you* outside dialogue" counted the title as story text. The one rewrite kept the title, so the scene was thrown away. Every opening, every time.
+- **The fix:** the title is checked like a quoted line (names and the dead still count, "you" does not). Also: dialogue in single curly quotes ‘…’ and thoughts in *italics* count as quoted, so "you" there no longer refuses a scene.
+- **Tests:** `tests/opening-live.test.ts` (3 openings written the way Claude writes them + quote rules). 350 tests.
+- **Lesson kept in memory:** before shipping a refusal rule, check the GM prompt for what it asks Claude to write, and run Claude-style openings.
+
+## 2. The first stretch, played offline (live play was not possible: no claude.ai sign-in)
+- Played the opening and five turns through the real Game Master flow with scenes written the way Claude writes them (a lie to Raizen, quiet work, the soldiers' fire with Gonza's coins, waiting twice). **No false refusals.** The waiting rule fired on the second "I wait", as designed; the Gonza threat showed up under "stories in motion".
+- **Bug found and fixed:** the "already said" list told Claude to avoid "the horse lines" (a place, not a tic), and phrases ran across sentences. Places are now cut out before counting, and phrases stay within one sentence. Test added (351 tests).
+- **Not measurable offline:** the Game Experience Bible targets (first real choice within 2 minutes; a spark about every 10 minutes). Offline, the opening ends on Raizen's question with 2–4 choices, so the first choice comes in the first scene. The spark rhythm needs the owner's real play.
+
+## 3. Li's plan: BUILT (page v38)
+- Li tab: "Li's plan" with five ambitions from the freedom routes (earn freedom in service · an enemy officer's head · win Raizen over · buy freedom · escape to Tatara). Choosing one is an event (journal line), and the steps come straight from the referee's own numbers (`engine/plan.ts`, same rules as `freedomCheck`). Claude's memory gets the plan, its steps and the next step to build chances toward. Nothing is granted by the plan itself.
+- Checked in the browser: the five buttons, choosing "Escape" shows stealth 15 of 25, endurance 25 of 40, fit ✓, winter quarters ○.
+- Canon: World Bible ch. 11 "(nacht Oct 16, owner kan terugdraaien)". Tests: `tests/plan.test.ts`. To undo: revert the commit "Li's plan".
+- Later idea (not built): plans beyond freedom (family lead, first battle, a rank) once Li is free.
+
+## 4. Hermes review: NOT POSSIBLE tonight
+- `hermes -z` answered: "No LLM provider configured. Run `hermes model`…". Setting a provider needs the owner's account or key, so I left it. The diff for Hermes is ready in WSL at `/tmp/hermes-review-oct16/today.diff` if the owner wants to run it later.
+- Instead: my own review of all of today's code with the code-review skill (below).
+- **Review of all of today's code (code-review skill, high): 10 findings, all fixed with tests (357 tests).** The important ones:
+  1. A scene where Claude left out the new "turns" field was treated as "nothing turned" and auto-skipped by the montage, so a real decision could be lost. Now only an explicit `"turns": ""` counts; missing = unknown = shown.
+  2. Winning a friendly spar opened a revenge threat ("Hisame wants it back"). Now only a won fight to the death does.
+  3. A due threat that Claude never closed doubled every Claude call (one rewrite per scene). Now it asks once; the memory keeps saying DUE NOW.
+  4. Seeds that had already grown stayed listed as "waiting for a payoff"; long-goal storylines were pushed to close. Both fixed.
+  5. Smaller: "push after 5 quiet days" could fire every scene if Claude never fills "turns"; a second win reopened revenge later without a new fight; **bold** text hid a win from the checks; the "big moment" weight lingered for several scenes after a fight; the plan's ford step never showed progress.
+
+## 5. What matters most for the first hours: progress you can feel (page v40)
+- **Why this one:** the Game Experience Bible promises a "spark" about every 10 minutes (a bond that turns, a skill, a rumour), and ChatGPT's review and the owner both said progress must be felt. The classic chronicle had sparks (◆ lines); **Game Master mode showed none**, so even real progress was invisible.
+- **Built:** after each Game Master scene (also inside a montage) up to 3 gold ◆ lines: a person's view of Li changes ("Hisame now likes Li"), a skill reaches a new level, a fighting style grows, a step of Li's plan is done, a threat starts to brew. Read from the state before and after; nothing invented. `engine/sparks.ts`, `tests/sparks.test.ts`. Canon WB ch. 11 "(nacht Oct 16, owner kan terugdraaien)".
+- **Not built on purpose:** rumours about Li as sparks (needs a rumour system in GM mode first), and more new systems. As agreed in the evening: the first 30 minutes must be played for real before more is added.

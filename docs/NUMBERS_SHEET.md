@@ -318,3 +318,32 @@ Expected pace for a **strong** player in Kurogane (owner's choice: fast progress
 - Head-hunting may not beat command merit after Hyakunin-gashira (checked with the §6 weights).
 - A normal battle (no rout) costs each side under ~10% of its men in total.
 - No career may get stuck for more than 3 years without any route forward.
+
+### 11b. Fuse dates and weights (Oct 15, ⚠ PROVISIONAL — owner may change)
+Until the decision trees of build stage 4, each fuse fires on a fixed day (after its "not before") and picks its outcome by **weights**: a base weight per outcome plus Li's levers (+2 per lever toward an outcome; each listed lever counts once per fuse, owner decision Oct 15); highest wins, a tie goes to the side Li pushed (owner, Oct 15), otherwise to the first listed. Days count from Year 100, Month 1, Day 1 (360 per year).
+| Fuse | Fires (day) | Outcomes (base weight) |
+|---|---|---|
+| Gōda's coup | Y101 M2 D25 (414) | crushed (3) · purge of the Chancellor (2) · the king killed (1) |
+| Hostage prince's revenge | Y101 M6 D15 (524) | discovered early (2) · fails, war of revenge (3) · succeeds, Kurogane in chaos (1) |
+| Bribed slander (Hayate) | Y101 M9 D1 (600) | plot exposed (2) · Kagami rebels (1) · Kagami executed (3) |
+| Pass revolt (Takane) | Y101 M10 D1 (630) | no revolt (3) · revolt, the pass opens (2) · revolt crushed (1) |
+| Great canal | Y102 M6 D1 (870) | finished, the land grows green (2) · exposed (1) · bankrupts the treasury (3) |
+| Hostage heir (Suiren) | Y102 M8 D1 (930) | stays a hostage (3) · breaks away (2) · crushed (1) |
+| Slow usurpation (Ushio) | Y103 M6 D1 (1230) | smooth (3) · civil war (2) · the child king murdered (1) |
+| King's death (Tatara) | Y103 M10 D1 (1350) | heir crowned, the prince loyal (3) · the prince rules (2) |
+
+## 13. Phase 6 additions (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+**Block A (audit gaps 11, 12, 13, 20, 22):**
+- **Pay:** a free man in service gets the middle of his rank's yearly pay (ch. 7) in twelve monthly parts, at the end of each month (Ashigaru 2.5 ryō → 208 mon a month). From Sanbyakunin-shō the land pays him instead.
+- **Obedience inputs:** Li's authority over his own people = 20 + 8 × his command rank level (Ashigaru 20 … Dai-Shōgun 92). Enforcement = 40, +20 when Li holds land, + half his dread.
+- **Loyalty modifiers** (§8): blood (spouse, child) +15 · oath +10 · passed over −15 · unpaid (his land left men unpaid) −20.
+- **Opportunity score** (betrayal): 30, +20 if Li lost his last fight, +20 if he is Wounded or worse, +20 if his kingdom is in civil war, +20 if his men went unpaid. When loyalty < 40, obedience < 50 and opportunity ≥ 60, a threat clock "X is thinking of leaving Li" opens at the end of the month; when full, the betrayal happens.
+- **Dread:** each act of cruelty Li becomes known for: +5 (max 100).
+- **Promises:** kept → Trust +10 (fades like shared hardship); broken → Trust −25: −12.5 permanent scar, −12.5 heals over 2 years.
+- **Permanent injury cost** (§4 area by attack): sword arm −2 VAL · shoulder −1.5 · leg −1 · side −1. Recorded once per area.
+- **Overload** (§3): the commander factor is divided by (1 + 0.1 × log₂ o); morale shocks from losses × (1 + 0.5 × log₂ o); a new order reaches the unit after floor(log₂ o) phases. Li's own unit now uses his real LEA (was a fixed 40).
+
+**Block F (audit gaps 10, 11, 29) — kingdoms, laws, fuse decision trees** (`engine/kingdoms.ts`, `engine/fuses.ts`):
+- **Kingdom values:** treasury 0–100 (start: Kurogane 55 · Suiren 70 · Hayate 45 · Ushio 85 · Takane 30 · Tatara 60 · Kitakaze 35); each year −3 at war, Kurogane −5 more until the canal is decided, otherwise +3 toward 60. **Unity** = 100 − the average discontent of the court's factions (Tatara 95). **Succession:** a grown royal heir = secure, a child heir or none = not. **Crown land share** from Atlas §3 (Kurogane 55% … Tatara 80%). A treasury below 25 pays soldiers half.
+- **Laws (Atlas §12):** a captive's ransom (2 ryō per rank step) × the captors' law: Suiren ×2 (law for sale), Ushio ×½ (a contract), Tatara keeps no man (let go within 30 days), Kitakaze lets a captive go after a year of work; Li is held by the kingdom his own is at war with.
+- **Fuse decision trees** (replace the fixed weights alone): each fuse names the people who must act; if one of them is dead when the day comes, **it never happens**. The living world adds small "mood" scores (0.2 each: e.g. the Kamio loyal and Ōtori alive for a crushed coup), so Li's one push still wins a tie (owner, Oct 15); only what makes an outcome impossible (−3) or what Li caused (+2, e.g. the Okitsu hostage freed) weighs more. **Outcomes change the world:** a crushed coup kills Gōda, a purge the Chancellor, a murder the king; heirs then take over. **Signs:** 30 days before a fuse fires, Li hears the talk if he is in its kingdom.

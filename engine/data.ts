@@ -1,4 +1,5 @@
 import { Character, GameState, Relation, RelField, StatKey } from './types';
+import { WORLD_PLACES } from './world-people';
 
 // Start data for stage 1, taken from WORLD_ATLAS.md §4 and WORLD_BIBLE.md ch. 10.
 // Exact stats follow the Atlas ranks via Numbers §1.
@@ -11,6 +12,7 @@ export const PLACES: Record<string, string> = {
   kori_camp: 'Red Crane camp, below Kōri fort (Akaishi province, Kurogane)',
   sasabe: 'Sasabe village',
   akaishi: 'Akaishi castle town',
+  ...WORLD_PLACES,
 };
 
 const SEEDS: CharSeed[] = [

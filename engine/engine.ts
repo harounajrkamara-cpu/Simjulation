@@ -3,7 +3,9 @@ import { BEATS, DUELS, DuelTemplate, Effect, RUMOURS, STORY as BASE_STORY, Story
 import { ARC, ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PAYDAY_TIP, PRICE_MON, SHARE_MIN_RESPECT, SHARE_PER_MERIT, STITCH_TIP, fordStory, inService, officerOf, officerTemplate, raidIndexOn, setRelField, skirmishTemplate } from './campaign';
 import { relValue } from './relations';
 import { restDone } from './director';
-import { DuelMove, DuelState, MOVE_LABEL, autoMove, duelRound } from './duel';
+import { DuelMove, DuelState, MOVE_LABEL, INJURY_VAL, activateZone, autoMove, canZone, duelRound } from './duel';
+import { duelExtras, zoneGrowthDrafts } from './abilities';
+import { defeatDrafts, victoryDrafts } from './fate';
 import { challengeFactor, rankLetter, rankScores, RANK_BANDS } from './rules';
 import { createWorld } from './data';
 import { hashValue } from './hash';
@@ -90,7 +92,7 @@ export function apply(state: GameState, ev: GameEvent): void {
     }
     case 'person': {
       state.characters[d.id] = {
-        id: d.id, name: d.name, born: { year: 80, month: 1, day: 1 }, role: d.role, status: 'free', stats: { LEA: 20, VAL: 20, INT: 20, POL: 20 },
+        id: d.id, name: d.name, born: d.born ?? { year: 80, month: 1, day: 1 }, role: d.role, status: 'free', stats: d.child ? { LEA: 2, VAL: 2, INT: 2, POL: 2 } : { LEA: 20, VAL: 20, INT: 20, POL: 20 },
         potential: { LEA: 30, VAL: 30, INT: 30, POL: 30 }, styles: {}, skills: {}, wound: 0, healDays: 0, fatigue: 0, traits: [],
         location: state.characters[state.liId].location, alive: true, desc: d.desc, publicRank: '?',
       };
@@ -102,9 +104,46 @@ export function apply(state: GameState, ev: GameEvent): void {
     case 'place':
       state.characters[d.char].location = d.place;
       break;
+    case 'world': {
+      // The world's houses and people (engine/houses.ts), once.
+      state.houses = {};
+      for (const h of d.houses) state.houses[h.id] = structuredClone(h);
+      for (const p of d.people) {
+        state.characters[p.id] = structuredClone(p);
+        state.relations[p.id] ??= { base: { trust: 40, respect: 30, affection: 40, fear: 0, rivalry: 0 }, mods: [], heard: [], lastTalkDay: -1 };
+      }
+      for (const [id, a] of Object.entries(d.agendas as Record<string, { goal: string; secret?: string }>)) gmMemOf(state).agendas[id] ??= { goal: a.goal, secret: a.secret };
+      for (const [id, m] of Object.entries(d.members as Record<string, { house?: string; lifespan?: number }>)) {
+        if (!state.characters[id]) continue;
+        if (m.house) state.characters[id].house = m.house;
+        if (m.lifespan !== undefined) state.characters[id].lifespan = m.lifespan;
+      }
+      break;
+    }
+    case 'talk': {
+      const list = (gmMemOf(state).rumours ??= []);
+      const k = list.findIndex((r) => r.id === d.rumour.id);
+      if (k >= 0) list[k] = { ...d.rumour }; else list.push({ ...d.rumour });
+      break;
+    }
+    case 'ability': {
+      const c = state.characters[d.char];
+      const list = (c.abilities ??= []);
+      const k = list.findIndex((a) => a.id === d.ability.id);
+      if (k >= 0) list[k] = { ...d.ability }; else list.push({ ...d.ability });
+      break;
+    }
+    case 'house':
+      (state.houses ??= {})[d.house.id] = structuredClone(d.house);
+      if (d.person) {
+        state.characters[d.person.id] = structuredClone(d.person);
+        state.relations[d.person.id] ??= { base: { trust: 40, respect: 30, affection: 40, fear: 0, rivalry: 0 }, mods: [], heard: [], lastTalkDay: -1 };
+      }
+      break;
     case 'thread': {
       const g = gmMemOf(state);
       if (d.agenda) { g.agendas[d.agenda.npc] = { goal: d.agenda.goal, secret: d.agenda.secret }; break; }
+      if (d.clock) { const cl = (g.clocks ??= []); const k = cl.findIndex((x) => x.id === d.clock.id); if (k >= 0) cl[k] = { ...d.clock }; else cl.push({ ...d.clock }); break; }
       const t = g.threads.find((x) => x.id === d.id);
       if (t) { t.open = d.open; t.text = d.text || t.text; } else g.threads.push({ id: d.id, text: d.text, open: d.open, day: ev.day });
       break;
@@ -215,6 +254,9 @@ export function options(s: GameState): Option[] {
     const moves: Option[] = (['attack', 'counter', 'feint', 'observe'] as DuelMove[]).map((m, i) => ({ key: String(i + 1), label: MOVE_LABEL[m], action: { kind: 'duel', target: m }, test: '⚔️ VAL' }));
     moves.push({ key: '5', label: 'Let the fight play out (simulate)', action: { kind: 'duel', target: 'auto' } });
     moves.push({ key: '6', label: 'Run', action: { kind: 'duel', target: 'flee' }, risk: duelTemplate(s.duel.id, s).fleeRisk ?? 'shame' });
+    // Always a way out, with a cost (owner, Oct 17): run, or give up.
+    moves.push({ key: '7', label: 'Give up', action: { kind: 'duel', target: 'yield' }, risk: 'he wins, and people see it' });
+    if (canZone(s.duel)) moves.push({ key: '8', label: `SHINKEN NO RYŪ — enter the Zone (${s.duel.zone!.uses - s.duel.zone!.used} of ${s.duel.zone!.uses} uses left)`, action: { kind: 'duel', target: 'zone' }, risk: 'exhaustion when it ends' });
     return moves;
   }
   const part = s.date.part;
@@ -552,17 +594,27 @@ const rankIndex = (score: number) => RANK_BANDS.length - 1 - RANK_BANDS.findInde
 
 function startDuel(s: GameState, id: string): Draft[] {
   const t = duelTemplate(id, s);
-  const c = li(s);
-  const mastery = Math.max(0, ...Object.values(c.styles));
-  const state: DuelState = {
-    id, round: 0, over: false, surprise: t.surprise, prefs: { ...t.prefs }, place: t.place, estimate: t.foe.estimate,
-    li: { id: c.id, name: 'Li', val: c.stats.VAL, mastery, wound: c.wound, fatigue: c.fatigue, observed: 0, history: [] },
-    foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: t.foe.wound, fatigue: t.foe.fatigue, observed: 0, history: [] },
-  };
+  const state = duelStateFor(s, id, t);
   return [
     { type: 'story', fact: `${t.intro}\n\nOpponent (Li\'s estimate): ${t.foe.estimate}.`, visible: true, data: { duel: id } },
     { type: 'duel', fact: `duel ${id} begins`, visible: false, data: { state } },
   ];
+}
+
+/** A fight's opening state, for the chronicle's duels and the Game Master's fights alike. */
+export function duelStateFor(s: GameState, id: string, t: DuelTemplate): DuelState {
+  const c = li(s);
+  const mastery = Math.max(0, ...Object.values(c.styles));
+  // Li fights with his best style; its chosen techniques, his abilities and his aura come with him (engine/abilities.ts).
+  const style = Object.entries(c.styles).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? 'two_swords';
+  const extra = duelExtras(s, style, t.foe.val, t.foe.mastery);
+  const state: DuelState = {
+    id, round: 0, over: false, surprise: t.surprise, prefs: { ...t.prefs }, place: t.place, estimate: t.foe.estimate,
+    li: { id: c.id, name: 'Li', val: c.stats.VAL, mastery, wound: c.wound, fatigue: Math.min(3, c.fatigue + extra.liFatigue), observed: 0, history: [] },
+    foe: { id: t.foe.id, name: t.foe.name, val: t.foe.val, mastery: t.foe.mastery, wound: t.foe.wound, fatigue: t.foe.fatigue, observed: 0, history: [] },
+    zone: extra.zone, liBonus: extra.liBonus, liAbilities: extra.liAbilities, foeHesitates: extra.foeHesitates, foeAbilities: (s.characters[t.foe.id]?.abilities ?? []).map((a) => a.id),
+  };
+  return state;
 }
 
 function duelTurn(s: GameState, choice: string): Draft[] {
@@ -575,10 +627,17 @@ function duelTurn(s: GameState, choice: string): Draft[] {
   } else if (choice === 'yield') {
     d = { ...structuredClone(d), over: true, result: 'yielded' };
     out.push({ type: 'work', fact: duelTemplate(d.id, s).yieldText, visible: true, data: {} });
+  } else if (choice === 'zone') {
+    const r = activateZone(d);
+    if (!r.lines.length) return [{ type: 'alert', fact: 'The Zone will not come now.', visible: true, data: {} }];
+    d = r.state;
+    out.push({ type: 'work', fact: r.lines.join(' '), visible: true, data: { round: d.round, zone: true } });
   } else {
     const auto = choice === 'auto';
     let guard = 0;
     do {
+      // Simulated: Li reaches for the Zone once he is hurt and it is there (a fixed rule, no chance).
+      if (auto && canZone(d) && d.li.wound >= 2) { const z = activateZone(d); d = z.state; out.push({ type: 'work', fact: z.lines.join(' '), visible: true, data: { round: d.round, zone: true } }); }
       const move = (auto ? autoMove(d) : choice) as DuelMove;
       const r = duelRound(d, move);
       d = r.state;
@@ -604,6 +663,16 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   if (liWound !== c.wound) out.push({ type: 'wound', fact: `Li is ${liWound >= 3 ? 'badly wounded' : liWound === 2 ? 'wounded' : liWound === 1 ? 'hurt' : 'unhurt'}`, visible: true, data: { char: c.id, wound: liWound, healDays: HEAL_DAYS[liWound] } });
   out.push(...fatigue(s, Math.min(3, d.li.fatigue + 1)));
   if (liWound >= 3) out.push({ type: 'flag', fact: 'near-death', visible: false, data: { key: 'near_death', value: has(s, 'near_death') + 1 } });
+  out.push(...injuryDrafts(s, c.id, liWound >= 3 ? d.li.injury : undefined));
+  if (s.characters[d.foe.id]) out.push(...injuryDrafts(s, d.foe.id, d.foe.injury));
+  out.push(...zoneGrowthDrafts(s, d.zone?.used ?? 0, t.maxWound >= 3));
+  // The defeat ladder (WB 12b #10): only a real fight counts (a spar or a scuffle does not).
+  if (t.maxWound >= 3 && d.result !== 'won' && d.result !== 'draw') out.push(...defeatDrafts(s, `lost a fight to ${d.foe.name}`));
+  if (t.maxWound >= 3 && d.result === 'won') out.push(...victoryDrafts(s));
+  // A small fight run from or given up still costs face (owner, Oct 17: a way out, but with impact).
+  if (t.maxWound < 3 && (d.result === 'fled' || d.result === 'yielded')) out.push({ type: 'flag', fact: 'the camp saw Li back down', visible: true, data: { key: 'rep_soldiers', value: Math.max(0, has(s, 'rep_soldiers') - 2) } });
+  // Losing teaches (Numbers §2): say so, so a beating is not only a loss.
+  if ((d.result === 'lost' || d.result === 'draw') && res.grow > 0) out.push({ type: 'story', fact: 'Li learned something from this fight: he will be harder to beat next time.', visible: true, data: {} });
   out.push({ type: 'story', fact: res.fact, visible: true, journal: res.journal, data: { duelEnd: d.id, result: d.result } });
   if (res.grow > 0) {
     for (const [kind, key] of [['stat', 'VAL'], ['style', 'two_swords']] as const) {
@@ -623,6 +692,22 @@ function duelEnd(s: GameState, d: DuelState): Draft[] {
   out.push({ type: 'duel', fact: 'duel over', visible: false, data: { state: null } });
   return out;
 }
+
+/** A permanent injury: it never heals, costs VAL (Numbers §4, PROVISIONAL cost) and is remembered by its key. */
+export function injuryDrafts(s: GameState, char: string, area: string | undefined): Draft[] {
+  if (!area) return [];
+  const p = s.characters[char];
+  const key = `injury_${char}_${area.replace(/\s+/g, '_')}`;
+  if (has(s, key)) return [];
+  const name = char === s.liId ? 'Li' : p.name;
+  return [
+    { type: 'flag', fact: `${name} carries a lasting injury: the ${area}`, visible: true, journal: char === s.liId ? `My ${area} will never be what it was.` : undefined, data: { key, value: 1 } },
+    { type: 'stat', fact: `the injured ${area} costs strength`, visible: false, data: { char, stat: 'VAL', amount: INJURY_VAL[area] ?? -1 } },
+  ];
+}
+
+/** Every lasting injury of a person, by area. */
+export const injuriesOf = (s: GameState, char: string) => Object.keys(s.flags).filter((k) => k.startsWith(`injury_${char}_`) && s.flags[k] > 0).map((k) => k.slice(`injury_${char}_`.length).replace(/_/g, ' '));
 
 function heal(s: GameState): Draft[] {
   const c = li(s);

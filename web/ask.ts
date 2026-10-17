@@ -11,6 +11,7 @@ import { opinion, opinionLabel } from '../engine/relations';
 import { shortDashboard } from '../engine/render';
 import type { GameState } from '../engine/types';
 import { knownEntries, goalsHtml } from './panels';
+import { KUROGANE_HOUSES } from '../engine/atlas-public';
 
 export const isQuestion = (text: string) => /^\s*\?/.test(text);
 export const questionOf = (text: string) => text.replace(/^\s*\?+\s*/, '').trim();
@@ -45,6 +46,7 @@ export function askSheet(s: GameState, recentStory = ''): string {
     scenes && `THE STORY SO FAR (latest last):\n${scenes}`,
     journal && `LI'S JOURNAL:\n${journal}`,
     recentStory && `THE LAST SCENE ON SCREEN:\n${recentStory.slice(-1800)}`,
+    `GREAT HOUSES OF KUROGANE (known to everyone):\n${KUROGANE_HOUSES.map((h) => `- ${h.name}: ${h.land}. Head: ${h.head}.${h.family ? ` ${h.family}.` : ''}`).join('\n')}`,
     lore && `WHAT LI HAS LEARNED ABOUT THE WORLD:\n${lore.slice(0, 3000)}`,
   ].filter(Boolean).join('\n\n');
 }
@@ -72,12 +74,12 @@ Answer:`;
 /** Problems with an answer: wrong names, people Li has not met, money that is not Li's. Empty = fine. */
 export function checkAnswer(s: GameState, answer: string): string[] {
   const out = checkGmScene(s, answer).filter((p) => p.kind === 'name' || p.kind === 'dead').map((p) => p.text);
-  const knownNames = new Set(knownPeople(s).flatMap((p) => p.name.toLowerCase().split(/\s+/)));
   for (const c of Object.values(s.characters)) {
     if (c.id === s.liId || met(s, c.id)) continue;
-    for (const part of c.name.split(/\s+/).filter((w) => w.length >= 4 && !knownNames.has(w.toLowerCase()))) {
-      if (new RegExp(`\\b${part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'u').test(answer)) out.push(`${c.name} is someone Li has not met.`);
-    }
+    if (KUROGANE_HOUSES.some((h) => `${h.head} ${h.family}`.includes(c.name))) continue; // publicly known: not a spoiler
+    // Only the given name (last word): family names like "Hagiwara" are houses Li may well know about.
+    const given = c.name.split(/\s+/).pop()!;
+    if (given.length >= 4 && new RegExp(`(?<!\\p{L})${given.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?!\\p{L})`, 'u').test(answer)) out.push(`${c.name} is someone Li has not met.`);
   }
   const sheetMoney = new Set([s.money, PRICE_MON]);
   for (const m of answer.matchAll(/([\d][\d,.]*)\s*mon\b/g)) {
@@ -87,8 +89,16 @@ export function checkAnswer(s: GameState, answer: string): string[] {
   return out;
 }
 
-/** The code's own answer: goals and what Li can do now. Always right, never a spoiler. */
-export function localAnswer(s: GameState): string {
+/** The code's own answer: what Li knows about the words in the question, else goals and choices. Never a spoiler. */
+export function localAnswer(s: GameState, question = ''): string {
+  const words = question.toLowerCase().match(/\p{L}{4,}/gu) ?? [];
+  const hit = (t: string) => words.some((w) => t.toLowerCase().includes(w));
+  const facts = [
+    ...knownEntries(s).filter((e) => hit(e.title)).map((e) => `${e.title}: ${e.text}`),
+    ...knownPeople(s).filter((p) => hit(p.name)).map((p) => p.line),
+  ];
+  if (facts.length) return `What Li knows:\n${facts.slice(0, 4).join('\n')}`;
+  if (words.length && !/\b(what|should|do|now|next|lost|help)\b/i.test(question)) return `Li does not know anything about that yet. Ask someone in the camp, or look in the Encyclopedia and People tabs.`;
   const goals = plainHtml(goalsHtml(s)).replace(/^Goals\n?/, '').split('\n').filter(Boolean).slice(0, 4).join(' · ');
   const now = nowChoices(s).slice(0, 4).join(' · ');
   return `Your goals: ${goals}.\nWhat Li can do now: ${now}.\nYou can also write anything Li does in your own words, "skip" quiet days, or open the People and Journal tabs to remember who is who.`;
@@ -96,11 +106,11 @@ export function localAnswer(s: GameState): string {
 
 /** Ask the guide. Returns the answer and whether it came from Claude (checked) or from the code. */
 export async function ask(ai: AiAdapter | null, s: GameState, question: string, recentStory = ''): Promise<{ text: string; from: 'claude' | 'game' }> {
-  if (!ai || !question) return { text: localAnswer(s), from: 'game' };
+  if (!ai || !question) return { text: localAnswer(s, question), from: 'game' };
   const sheet = askSheet(s, recentStory);
   for (let attempt = 0; attempt < 2; attempt++) {
     const raw = (await ai.ask(askPrompt(sheet, question) + (attempt ? '\n(Your last answer named things that are not on the sheet. Use only the sheet.)' : ''), { tier: 'quick' })).trim();
     if (raw && checkAnswer(s, raw).length === 0) return { text: raw, from: 'claude' };
   }
-  return { text: localAnswer(s), from: 'game' };
+  return { text: localAnswer(s, question), from: 'game' };
 }

@@ -1,16 +1,27 @@
-import { ageOn, formatDate } from '../engine/calendar';
+import { CLOSE_CSS, closeMapHtml } from './close-map';
+import { ageOn, dateFromIndex, formatDate } from '../engine/calendar';
 import { ENCYCLOPEDIA, STORY } from '../engine/content';
 import { ESCAPE_NEEDS, MERIT_FOR_FREEDOM, PRICE_MON, inService } from '../engine/campaign';
 import { PLACES } from '../engine/data';
-import { has, li, met, today } from '../engine/engine';
+import { has, injuriesOf, li, met, today } from '../engine/engine';
+import { loyaltyLabel, openPromises } from '../engine/loyalty';
+import { knownHouses } from '../engine/houses';
+import { REACH, bannerOf, legendPages, nicknamesByGroup, rumoursOf } from '../engine/moments';
+import { ABILITIES, auraScore, auraWord, chosenTechniques, generalType, hasAbility, liAbilities, pendingTechniques } from '../engine/abilities';
 import { journalArcs, pctToNext, trophies } from '../engine/render';
 import { visibleOpinion } from '../engine/relations';
 import { STAT_NAMES, WOUND_LABEL, masteryLabel, rankLetter, rankScores } from '../engine/rules';
 import { GameState, STAT_KEYS } from '../engine/types';
 import { STANCE_LABEL, Stance, publicWorld } from '../engine/world-public';
 import { domainLines } from '../engine/gm-domain';
-import { titlesOf } from '../engine/gm-career';
+import { careerOf, titlesOf } from '../engine/gm-career';
+import { rankInfo, rankLabel, rankLevel } from '../engine/career';
 import { WORLD_CSS, liPoint, worldSvg } from './world-map';
+import { liLife } from '../engine/life';
+import { clockFeelings } from '../engine/clocks';
+import { courtFeelings } from '../engine/court';
+import { reputationLines } from '../engine/reputation';
+import { currentPlan, plansFor, planSteps } from '../engine/plan';
 
 // The war chronicle's tabs and side panel (Game Experience ch. 3, 6). Only what Li can know is shown.
 
@@ -119,9 +130,31 @@ export function liPage(s: GameState): string {
   const styles = Object.entries(c.styles).map(([k, v]) => `<tr><th>${esc(k.replace('_', ' '))}</th><td>${v.toFixed(1)} · ${masteryLabel(v)}</td></tr>`).join('');
   const skills = Object.entries(c.skills).map(([k, v]) => `<tr><th>${esc(k.replace('_', ' '))}</th><td>${Math.floor(v)}${bar(v)}</td></tr>`).join('');
   const season = Object.entries(s.seasonGains).map(([k, v]) => `${k.split(':')[1].replace('_', ' ')} +${v.toFixed(2)} of 2`).join(' · ') || 'none yet';
-  return `<div class="card">${liCard(s)}</div>
+  const life = liLife(s);
+  const lifeHtml = life.length ? `<h2 class="label">Li's life</h2><table class="table life">${life.map((l) => `<tr><th>${esc(l.label)}</th><td>${esc(l.text)}</td></tr>`).join('')}</table>` : '';
+  // Li's plan (night Oct 16): the player chooses an ambition; the steps come from the rules that decide it.
+  const chosen = currentPlan(s);
+  const planHtml = `<h2 class="label">Li's plan</h2>
+    <div class="slots">${plansFor(s).map((p) => `<button type="button" class="slot${p.id === chosen ? ' on' : ''}" data-plan="${p.id}" title="${esc(p.why)}"><b>${esc(p.label)}</b>${esc(p.why)}</button>`).join('')}</div>
+    ${chosen ? `<ul class="chronicle">${planSteps(s, chosen).map((x) => `<li>${x.done ? '✓' : '○'} ${esc(x.text)}</li>`).join('')}</ul>` : '<p class="empty">Choose what Li is working toward. The story will bring chances toward the next step; the rules still decide.</p>'}`;
+  // Abilities, techniques, aura and general type (WB ch. 5; Phase 6 block C). A waiting technique is Li's choice of two.
+  const ab = liAbilities(s).map((a) => `<tr><th>${esc(a.name)}</th><td>rank ${esc(a.rank)} · mastery ${Math.floor(a.mastery)} · ${esc(ABILITIES[a.id]?.effect ?? '')}${hasAbility(s, a.id) ? '' : ' · <b>blocked by an injury</b>'}</td></tr>`).join('');
+  const pend = pendingTechniques(s).map((p) => `<p class="lead">${esc(p.style.replace('_', ' '))} reached ${p.level}: choose a technique</p><div class="slots">${p.options.map((o, k) => `<button type="button" class="slot" data-tech="${esc(p.style)}:${p.level}:${k + 1}"><b>${esc(o.name)}</b>+${Math.round(o.bonus * 100)}% when Li chooses to ${o.move}</button>`).join('')}</div>`).join('');
+  const techs = chosenTechniques(s);
+  const powerHtml = `<h2 class="label">Abilities</h2>${ab ? `<table class="table">${ab}</table>` : '<p class="empty">None yet. Abilities come through events: near death, a master, an old book.</p>'}
+    ${pend}${techs.length ? `<p>Techniques: ${esc(techs.join(', '))}</p>` : ''}
+    <p>Aura: ${esc(auraWord(auraScore(li(s), s)))} · General type: ${esc(generalType(li(s)))}</p>`;
+  // What people say about Li, and what they call him (engine/moments.ts).
+  const talk = rumoursOf(s).filter((r) => r.about === s.liId).slice(-4).map((r) => `People say ${r.text} (heard in ${REACH[r.reach]}).`);
+  const names = Object.entries(nicknamesByGroup(s)).map(([g, t]) => `${g === 'all' ? 'People' : g[0].toUpperCase() + g.slice(1)} call him ${t.map((x) => `"${x}"`).join(', ')}.`);
+  const banner = bannerOf(s) ? [`His unit: ${bannerOf(s)}.`] : [];
+  const threats = [...names, ...banner, ...talk, ...clockFeelings(s), ...courtFeelings(s).map((x) => `At court: ${x}`), ...reputationLines(s)];
+  const threatHtml = threats.length ? `<h2 class="label">What Li feels coming</h2><ul class="chronicle">${threats.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+  return `<div class="card">${liCard(s)}</div>${planHtml}${powerHtml}${lifeHtml}${threatHtml}
     <h2 class="label">Condition</h2>
     <table class="table"><tr><th>Wounds</th><td>${WOUND_LABEL[c.wound]}${c.wound ? ` · ${c.healDays} days to heal a step` : ''}</td></tr>
+      ${injuriesOf(s, c.id).length ? `<tr><th>Lasting injuries</th><td>${esc(injuriesOf(s, c.id).join(', '))}</td></tr>` : ''}
+      ${openPromises(s).length ? `<tr><th>His word given</th><td>${openPromises(s).map((x) => esc(x.text)).join('<br>')}</td></tr>` : ''}
       <tr><th>Fatigue</th><td>${c.fatigue} of 3</td></tr><tr><th>Money</th><td>${s.money} mon</td></tr>
       <tr><th>Rank</th><td>Overall ${rankLetter(r.overall)} · Warrior ${r.warrior.toFixed(1)} · Commander ${r.commander.toFixed(1)} · Statesman ${r.statesman.toFixed(1)}</td></tr></table>
     <h2 class="label">Stats</h2><table class="table">${stats}</table>
@@ -135,20 +168,40 @@ export function liPage(s: GameState): string {
 
 function personCard(s: GameState, id: string): string {
   const p = s.characters[id];
-  return `<article class="person"><div class="top"><div class="crest small" aria-hidden="true">${esc(p.name[0])}</div>
-    <div class="who"><span class="name">${esc(p.name)}</span><span class="sub">${esc(p.role)}</span></div></div>
-    <p>${esc(p.desc)}</p><p>Strength (Li's guess): ${esc(p.publicRank ?? '?')}</p>
-    <p class="op">Toward Li: ${esc(visibleOpinion(s, id))}</p></article>`;
+  // Owner playtest (Oct 12): one person with no name (added by the Game Master with only an id) blanked the whole People tab.
+  const name = p.name || id.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+  return `<article class="person"><div class="top"><div class="crest small" aria-hidden="true">${esc(name[0] ?? '?')}</div>
+    <div class="who"><span class="name">${esc(name)}</span><span class="sub">${esc(p.role ?? '')}</span></div></div>
+    <p>${esc(p.desc ?? '')}</p><p>Strength (Li's guess): ${esc(p.publicRank ?? '?')}</p>
+    <p class="op">Toward Li: ${esc(visibleOpinion(s, id))}</p>${loyaltyLabel(s, id) ? `<p class="op">Loyalty: ${loyaltyLabel(s, id)}</p>` : ''}</article>`;
 }
 
 export function peoplePage(s: GameState): string {
-  const ids = Object.keys(s.relations).filter((id) => met(s, id));
+  const ids = Object.keys(s.relations).filter((id) => met(s, id) && s.characters[id]);
   return `<h1>People</h1><p class="lead">Everyone Li knows, and how they seem to see him. Close friends are easy to read; others are a guess.</p>
     <div class="grid">${ids.map((id) => personCard(s, id)).join('')}</div>`;
 }
 
 export function armyPage(s: GameState): string {
-  const ids = BAND.filter((id) => met(s, id));
+  const ids = BAND.filter((id) => met(s, id) && s.characters[id]);
+  const car = careerOf(s);
+  // The roster opens when Li leads men of his own (goal Oct 17): his unit by rank, his land's troops, the people he leads.
+  if (rankLevel(car.rank) >= rankLevel('gocho')) {
+    const info = rankInfo(car.rank);
+    const d = s.domain;
+    const under = Object.keys(s.characters).filter((id) => id !== s.liId && s.characters[id].alive && met(s, id) && /\b(?:under Li|Li's (?:men|unit|army|officer|lieutenant|retainer|vassal))\b/i.test(s.characters[id].role));
+    const rows = [
+      `<tr><th>Rank</th><td>${esc(rankLabel(car.rank))}</td></tr>`,
+      `<tr><th>Men by rank</th><td>${esc(info.men)}</td></tr>`,
+      `<tr><th>Serves</th><td>${esc(car.kingdom[0].toUpperCase() + car.kingdom.slice(1))}</td></tr>`,
+      d ? `<tr><th>His land</th><td>${esc(d.name)} · ${d.koku.toLocaleString('en-US')} koku · ${d.standing} standing troops${d.levies ? ` · ${d.levies} levies under arms` : ''}</td></tr>` : '',
+      s.battle && !s.battle.over ? `<tr><th>In the field</th><td>${esc(s.battle.name ?? 'a battle')}</td></tr>` : '',
+    ].join('');
+    return `<h1>Li's command</h1><p class="lead">The men Li leads now, and the people who serve under him.</p>
+      <table class="table">${rows}</table>
+      ${under.length ? `<h2 class="label">Under his command</h2><div class="grid">${under.map((id) => personCard(s, id)).join('')}</div>` : '<p class="empty">No officer of his own yet. When someone comes to serve under Li, the story names them.</p>'}
+      ${ids.length ? `<h2 class="label">The Red Crane band</h2><div class="grid">${ids.map((id) => personCard(s, id)).join('')}</div>` : ''}`;
+  }
   return `<h1>The Red Crane band</h1><p class="lead">Seen from the baggage line. About 120 hired swords; Li carries their gear but is not one of them. The full roster opens when Li leads men of his own.</p>
     <div class="grid">${ids.map((id) => personCard(s, id)).join('')}</div>`;
 }
@@ -161,7 +214,10 @@ export function journalPage(s: GameState): string {
     `<section><h3>${esc(d.label)}</h3>${d.lines.map((l) => `<p>${esc(l)}</p>`).join('')}</section>`).join('')}`).join('');
   const chapters = (s.gm?.chapters ?? []).map((c, k) => `<section class="chapter"><h3>Chapter ${k + 1} · ${esc(c.title)}</h3><p>${esc(c.text)}</p></section>`).reverse().join('');
   const chapterHtml = chapters ? `<h2 class="label">Chapters</h2><div class="journal">${chapters}</div>` : '';
-  return `<h1>Journal</h1><p class="lead">In Li's own words. Only what he knows, and he can be wrong.</p>${chapterHtml}${trophyHtml}<div class="journal">${arcs}</div>`;
+  // Legend pages (GE 3b step 6): kept forever, with the date and who saw it.
+  const pages = legendPages(s).map((p) => `<section class="chapter"><h3>${esc(p.title)}</h3><p>${p.meaning ? `${esc(p.meaning)}. ` : ''}${esc(formatDate(dateFromIndex(p.day)))}${p.witnesses ? ` · ${esc(p.witnesses)}` : ''}</p></section>`).join('');
+  const legendHtml = pages ? `<h2 class="label">Legend pages</h2><div class="journal">${pages}</div>` : '';
+  return `<h1>Journal</h1><p class="lead">In Li's own words. Only what he knows, and he can be wrong.</p>${legendHtml}${chapterHtml}${trophyHtml}<div class="journal">${arcs}</div>`;
 }
 
 export function knownEntries(s: GameState) {
@@ -171,7 +227,10 @@ export function knownEntries(s: GameState) {
 
 export function encyclopediaPage(s: GameState): string {
   const list = knownEntries(s).map((e) => `<article class="entry"><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join('');
-  return `<h1>Encyclopedia</h1><p class="lead">What Li has learned about the world. It grows as he learns more.</p>${list}`;
+  // The houses Li can know (engine/houses.ts): his kingdom's, those of people he has met, his own. Never a secret.
+  const hs = knownHouses(s);
+  const houses = hs.length ? `<h2 class="label">The great houses</h2>${hs.map((h) => `<article class="entry"><h3>House ${esc(h.name)}</h3><p>${esc(h.land)}. Head: ${esc(h.head)}; heir: ${esc(h.heir)}. ${esc(h.men)}; ${esc(h.standing)}.</p></article>`).join('')}` : '';
+  return `<h1>Encyclopedia</h1><p class="lead">What Li has learned about the world. It grows as he learns more.</p>${list}${houses}`;
 }
 
 const KEY_SVG: Record<string, string> = {
@@ -212,12 +271,14 @@ export function worldView(s: GameState): string {
 
 /** Two views (owner): Li's eyes (default, fogged, only what Li knows) and the world (public state). CSS switches them, no script. */
 export function mapPage(s: GameState): string {
-  return `<div class="mapviews"><style>${WORLD_CSS}</style>
+  return `<div class="mapviews"><style>${WORLD_CSS}${CLOSE_CSS}</style>
     <h1>The land</h1>
     <fieldset class="mv-switch"><legend>Map view</legend>
+      <label><input type="radio" name="mapview" id="mv-near" value="near">Close up</label>
       <label><input type="radio" name="mapview" id="mv-li" value="li" checked>Li's eyes</label>
       <label><input type="radio" name="mapview" id="mv-world" value="world">The world</label>
     </fieldset>
+    <section class="mv-near" aria-label="Close up">${closeMapHtml(s)}</section>
     <section class="mv-li" aria-label="Li's eyes"><p class="lead">As Li knows it: only Akaishi and the river. The rest of the seven kingdoms is fog until Li learns it.</p>
       <div class="mv-map">${mapSvg(s, true)}</div></section>
     <section class="mv-world" aria-label="The world">${worldView(s)}</section>

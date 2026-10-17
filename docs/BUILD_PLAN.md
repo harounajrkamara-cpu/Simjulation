@@ -132,5 +132,57 @@ Wishes in (brackets), five long goals, early family lead, chained Skip ahead, So
 ## Phase 3 – Stage 2: soldier life · Phase 4 – Stage 3: land & family · Phase 5 – Stage 4: court & kingdoms + epilogue
 Each phase gets its own milestone table at its start (spec → plan → tasks). Details: GE ch. 10 Part B.
 
+### Status (Oct 17, owner goal "finish the whole game, all stages") ✅ built in code, Game Master mode
+All four stages are playable through the referee: `tests/whole-life.test.ts` plays one life from slave to freedom, every rank to Sennin-shō with a sponsor, land, marriage and a child, the court, retirement and the epilogue, and the save replays it exactly. A probe run reaches Dai-Shōgun at 60 with only two deeds per two months.
+
+| Phase | Milestone (GE Part B) | Where | Status |
+|---|---|---|---|
+| 3 | Units and battles (WB 6b) | `engine/battle.ts`, `engine/gm-battle.ts` | ✅ (Oct 10) |
+| 3 | The battle map | `web/main.ts` battleMap | ✅ Oct 17 (Li's view, fog kept) |
+| 3 | Merit, promotion, reward ceremonies, titles | `engine/career.ts`, `engine/gm-career.ts` | ✅ (Oct 10) |
+| 3 | Army roster | `web/panels.ts` armyPage | ✅ Oct 17 (from Gochō: his command, land troops, people under him) |
+| 3 | Time zoom to days | `engine/stages.ts` | ✅ (soldier 90 days per scene max) |
+| 3 | The runaway road (Phase 2 question 4) | serve Tatara after escape | ✅ works in code (test) |
+| 4 | Land, economy, domain | `engine/domain.ts`, `engine/gm-domain.ts` | ✅ (Oct 10; PROVISIONAL numbers) |
+| 4 | Family: marriage and children | `engine/family.ts` | ✅ Oct 17 (PROVISIONAL numbers) |
+| 4 | Close-up map of the camp and Li's land | `web/close-map.ts` | ✅ Oct 17 |
+| 4 | Time zoom to weeks | `engine/stages.ts` | ✅ (officer/general 360 days per scene max) |
+| 5 | Fuses and the free world | `engine/fuses.ts`, `engine/seeds.ts` | ✅ (Oct 15) |
+| 5 | Factions: Li at court | `engine/court.ts` | ✅ Oct 17 (the court of the kingdom he serves; all seven profiles) |
+| 5 | Reputation per group (WB ch. 8) | `engine/reputation.ts` | ✅ Oct 17 |
+| 5 | Epilogue (GE ch. 9 decision 2) | `engine/epilogue.ts` | ✅ Oct 17 (retire, or 60+) |
+| all | Li's plan for every stage, milestone films, sparks, pacing director, drama layer | `engine/plan.ts` and others | ✅ Oct 16–17 |
+
+**Built after the first status (Oct 17):** faction discontent by the Numbers §9 formula with ultimatums (`engine/discontent.ts`); reputation in the promotion score (PROVISIONAL scale); the courts of all seven kingdoms.
+**Not built (honest):** a Playwright run of the new screens (no Chrome here; checked by hand in the built-in browser).
+**Owner decisions: defaults taken (goal Oct 17) — ✅ APPROVED by the owner (Oct 17: "Goedgekeurd zo").** The owner asked to finish everything; where a decision was open, the built behaviour is kept as the default, with the reason, until he says otherwise:
+1. **Buying freedom is slow** (Phase 2 #2): kept as a slow, late route (15 ryō), but the Game Master now knows the real ways to earn (tips, stitching the wounded, Sukezō's remedies, levy loot, dice with risk). Reason: freedom by money should feel earned; merit and Raizen stay the main roads.
+2. **Officers' rhythm** (Phase 2 #3): kept (a Gochō and a Kogashira once a year each in the classic chronicle; in Game Master mode officers come only through raids and battles the code records). Reason: the GM mode already follows Numbers §6.
+3. **Raizen's share** (Phase 2 #5): kept (respect > 50, half of 0.1 ryō per merit). Reason: small, and it makes Raizen's goodwill matter.
+4. **Battle stall drain** −3 per phase (sheet −5): kept. Reason: equal armies then pull back at night instead of breaking together, which reads better; `scripts/battle-sim.ts` shows it.
+5. **PROVISIONAL numbers** in `domain.ts`, `family.ts`, `court.ts`, `discontent.ts`, `clocks.ts`, `reputation.ts`: kept as defaults; each is marked in the code and the World Bible.
+**Not proven:** none of this has been played with the real Claude on claude.ai.
+
+## Phase 6 – The world, Li's people, big moments (owner, Oct 17, from `docs/AUDIT.md`)
+Scope (numbers as in docs/AUDIT.md): gaps 1–14, 19–26, 29, 30. **Skipped for now (owner):** engine & polish (15–18, 27, 28, 31) and later/parked (32–35).
+**"Done" rule:** a block is done only when its AUDIT rows are ✅, it has tests, and it is playable on the page. Nothing is called finished before every row is ✅ or parked by the owner.
+
+**How every block runs:** canon check (WB, Atlas, Numbers) → if the canon has no numbers or rules: a short design chapter with research, **owner approves** → write it into the World Bible / Numbers Sheet → build in small commits (tests + typecheck + balance green) → push `build/stage-1`, publish the page → AUDIT row ✅ → STATUS.
+**Canon ready** = the rules and numbers already exist, so it can be built straight away. **Design first** = the canon says *what*, not *how much*; the owner approves before building.
+
+| Block | Gaps | What | Canon | Depends on |
+|---|---|---|---|---|
+| **A. Quick rules** | 3, 4, 6, 7 | soldier pay · loyalty, obedience, betrayal · promises (+10 / −25, trust scar) · permanent injury · command overload in battle | ready (Numbers §3, §4, §7, §8) | – |
+| **B. Houses and people** | 1, 2, 8 | house records for every Tier A house of the 7 kingdoms (land, wealth, troops, prestige, Crown loyalty, cohesion, head, heir, branches) · the Atlas people as real records (stats, age, goals, secrets) who age, grow, die of age, and are replaced by heirs · genpuku · house marriages, hostages, adoption, succession, gekokujō | design first: WB ch. 2–3 and 13c say what is tracked, not how it changes (prestige, cohesion → split, lifespans, succession) | – |
+| **C. Abilities** | 5, 19 | abilities as records (rank, mastery, type, limit, cost, trigger, weakness) · the Zone with rounds and uses in the duel ("Zone: 2 of 3"), collapse after · Kage no Yaiba, Twin Demon Dance · style choice at 30/50/70/100 · aura on morale and the opponent's hesitation | mostly ready (WB ch. 5, 10.5); design first for the exact Zone effect, aura size and the style unlock pairs | A (injuries can block abilities) |
+| **D. Big moments** | 20–22, 24–26, 30 | ceremony screen with witnesses reacting by opinion · legend pages in the Journal · rumours about Li in GM mode · nicknames per group from deeds and witnesses · Li's own unit name and banner · feasts, funerals, oaths · title screen (Continue / New life / Load) | mostly ready (GE ch. 3, 3b); design first for rumour spread and nickname rules | B (witnesses are real people) |
+| **E. Li's fate** | 9, 23 | lies caught by a rule (NPC INT + knowledge vs Li POL) · the defeat ladder: beaten, chained, sold, branded, hunted, captured, ransom, rank loss | design first: WB ch. 12b names the ladder, no numbers | B |
+| **F. Kingdoms** | 10, 11, 29 | kingdom values (treasury, unity, succession, Crown share) · laws and slavery per kingdom with real effects · fuse decision trees (who acts, scored choices, visible signs) replacing the fixed days | design first (Numbers §11 leaves the trees to "stage 4") | B |
+| **G. World texture** | 12, 13, 14 | neutral powers you can deal with (Shōgen, Mist Valley shinobi, Kinza market and loans, Single Path, Seiran exams) · trade and embargoes (Atlas §8) · weather and hidden causes · festivals · the Imperial treasures as objects · governors | design first | F |
+
+**Order:** A → B → C → D → E → F → G. Reason: A is felt in the first hour and needs no design; B is the owner's first ask and what D, E and F build on; C and D are the hype of the soldier years; E, F and G matter most in the officer and general years.
+**While a block is being built, the next block's design chapter is written** so the owner never waits.
+**Size (honest guess):** A ≈ 1 session · B ≈ 2–3 · C ≈ 1–2 · D ≈ 2 · E ≈ 1 · F ≈ 2 · G ≈ 2. Wrong guesses get corrected in STATUS, not hidden.
+
 ## Testing (every phase)
 Unit · determinism replay · Monte Carlo balance (Numbers §12) · narrator golden set · Playwright UI (1440 / 390 px) · owner playtest at the end of the slice and of each phase.

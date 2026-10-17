@@ -10,6 +10,9 @@ import { Draft, GameState, STAT_KEYS, StatKey } from './types';
 /** What a person's life trains, read from their role. */
 export function lifeStat(role: string): StatKey {
   const r = role.toLowerCase();
+  // A fighter's craft first (a "son of" a house who is a sword prodigy trains the sword, not court manners).
+  if (/(sword|blade|duelist|archer|berserker|swordsman|naginata|spear)/.test(r)) return 'VAL';
+  if (/(strategist|admiral)/.test(r)) return 'LEA';
   if (/(lord|lady|daughter|son of|noble|steward|merchant|official|chancellor|regent|minister|headman)/.test(r)) return 'POL';
   if (/(commander|general|captain|officer|gashira|shō|taishō|leader)/.test(r)) return 'LEA';
   if (/(scholar|monk|medic|cook|quartermaster|scribe|teacher|engineer)/.test(r)) return 'INT';
@@ -27,7 +30,8 @@ export function seasonGrowthDrafts(s: GameState, from: number, to: number): Draf
     if (k % 90 !== 0) continue; // the first day of a season
     const date = dateFromIndex(k);
     for (const c of Object.values(s.characters)) {
-      if (c.id === s.liId || !c.alive || !met(s, c.id)) continue;
+      // Li's generation (Atlas §10) grows before Li ever meets them: they rise like he does.
+      if (c.id === s.liId || !c.alive || (!met(s, c.id) && !(c.world && ageOn(c.born, date) <= 25))) continue;
       const age = ageOn(c.born, date);
       const stat = lifeStat(c.role);
       const gain = r3(Math.min(SEASON_TRAINING_CAP, growthGain(DAILY * SEASON_PRACTICE_DAYS, age, c.stats[stat], c.potential[stat])));

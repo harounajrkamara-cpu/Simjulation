@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chapterEnd, death, firstBattle, nameReveal, opening, promotion, zone } from '../web/films/scenes';
+import { chapterEnd, death, firstBattle, milestone, nameReveal, opening, promotion, zone } from '../web/films/scenes';
 
 // The short films (docs/FILMS.md): every film has shots, ends in a known time, escapes the game's text, and the opening
 // keeps the owner's mystery (Oct 10: nothing ties the boy to the Twin Demon).
@@ -7,6 +7,7 @@ import { chapterEnd, death, firstBattle, nameReveal, opening, promotion, zone } 
 const all = [
   opening(), firstBattle({ name: 'The ford <b>', numbers: 'About 6,300' }), zone(), nameReveal({ words: 'I am Li Hattori <script>' }),
   promotion({ rank: 'Gochō', men: '5 men', line: 'x' }), death({ name: 'Hachi', line: 'Hachi died.' }), chapterEnd({ n: 2, title: 'The Ford', text: 'One. Two. Three.' }),
+  milestone({ kicker: 'A marriage', title: 'Li marries Aiko', line: 'I married <i>Aiko</i>.', seal: '縁' }),
 ];
 
 describe('films', () => {

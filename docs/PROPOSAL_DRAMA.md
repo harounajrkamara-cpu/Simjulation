@@ -1,0 +1,15 @@
+# ✅ The drama layer (Oct 16; built on the owner's advance OK: "find ways to make it more interesting, and build it")
+
+Three ideas from games and storytellers that fit our engine (the code reads its own record; Claude tells):
+
+| Idea | Source | What we built |
+|---|---|---|
+| **K. Rivals who remember** | Shadow of Mordor's **Nemesis system**: an enemy who survives remembers the fight, taunts, carries scars, and comes back. | The code keeps the score of every fight it ran against a known person (fights, wins, losses, last result) and gives it to Claude ("a loser carries the shame and wants it back, a winner taunts; never the same taunt twice"). A known person Li **beat** and left alive opens a **revenge threat** by itself ("Gonza wants it back", 6 steps, so it comes due in about 12 days unless Li acts). |
+| **L. People react; setups pay off** | **Hades** (Supergiant, Greg Kasavin): characters react to what the player just did, and each talk is short so it stays fresh. **Chekhov's gun**: what is set up must pay off. | The last things that **turned** (the "turns" field) are given to Claude as "what people talk about", for one person to react to. Storylines open for 14+ days and seeds planted 10+ days ago are listed as "setups waiting for a payoff". |
+| **M. Always an open question; chapters end on a hook** | **J.J. Abrams, "The mystery box"** (TED 2007): "maybe there are times when mystery is more important than knowledge". **Dickens'** serials ended each part at the highest tension (the Zeigarnik effect, evidence mixed). | When no storyline is open, Claude is told to give the player something to wonder about and record it as a thread. The last scene of a chapter (every 20 scenes) ends on a hook. |
+
+Code: `engine/drama.ts` (`fightRecords`, `nemesisDrafts`, `dramaText`), wired in `engine/gm.ts` (checkGmTurn) and `ai/gm.ts` (the prompt). Tests: `tests/drama.test.ts`. Canon: World Bible ch. 11.
+
+**Honest limits:** the score only counts fights the code ran (a fight Claude only told is not a fight); "what people talk about" needs Claude to fill "turns"; the Zeigarnik effect is weaker in research than in marketing blogs, so the open-question rule is a nudge, not a law. Not tried with the real Claude yet.
+
+Sources: [Nemesis system (PC World)](https://www.pcworld.com/article/406012/middle-earth-shadow-of-wars-unqiue-nemesis-system-makes-battles-even-more-personal.html) · [Unity forum: how the Nemesis system works](https://discussions.unity.com/t/how-does-shadow-of-mordors-nemesis-system-work/663842) · [ScreenHub: Greg Kasavin on Hades' narrative](https://www.screenhub.com.au/news-article/features/digital/jini-maxwell/hades-greg-kasavin-breaks-down-supergiants-unique-approach-to-narrative-262459) · [Gnome Stew: Chekhov's +1 longsword](https://gnomestew.com/chekovs-1-longsword/) · [Britannica: Chekhov's gun](https://www.britannica.com/topic/Chekhovs-gun) · [TED: J.J. Abrams, The mystery box](https://www.ted.com/talks/j_j_abrams_mystery_box) · [Mystery box show (Wikipedia)](https://en.wikipedia.org/wiki/Mystery_box_show) · [ModelThinkers: Zeigarnik effect](https://modelthinkers.com/mental-model/zeigarnik-effect)

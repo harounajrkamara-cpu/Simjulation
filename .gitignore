@@ -3,3 +3,4 @@ dist-web/
 saves/*.json
 .env*
 saves/ai-players/
+.playwright-mcp/

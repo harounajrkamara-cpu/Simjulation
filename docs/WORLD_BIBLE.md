@@ -235,6 +235,7 @@ Rules:
 ### 6a – Duels ✅
 - **Fully deterministic**: same situation → same outcome. Unpredictability comes only from hidden information (fog of war, hidden abilities) and the opponent's own choices (personality, general type, learning).
 - Only important opponents (officers, commanders, named characters) trigger a duel; before each duel the player chooses: play it or auto-simulate.
+- ✅ **Which moments are fights (owner, Oct 15):** someone attacking Li when he resists (dodges, blocks, hits back) is a fight; a punishment Li takes without resisting stays story. A **spar** (practice, never deadly) simulates by itself unless the player takes over ("Fight it yourself"); any other fight offers "fight or simulate"; a fight to the death always waits for the player.
 - Flow: size up → exchanges → decision → aftermath.
 - Choices per round (numbered + free text): attack · defend/counter · feint · observe · use ability · use environment · talk/taunt.
 - **Choice clash**: counter beats reckless attack · attack beats observing · feint beats defense · observing gives info and a later bonus. Combined with stats, so the stronger fighter usually still wins.
@@ -393,12 +394,14 @@ The normal 200–250 per 10,000 koku are mostly standing troops; total war adds 
 
 ### Reputation
 - Separate per group: soldiers · nobles · peasants · enemies. Titles/nicknames come from deeds and spread as rumours.
+- ✅ **In the code** (goal Oct 17, owner kan terugdraaien; `engine/reputation.ts`): each group 0–100, moved by what Li does (at most ±10 a scene, with a reason); Claude sees it, the Li tab shows it in words ("soldiers speak well of him", "enemies fear his name"). It feeds the promotion score (Numbers §6 w₃): the average of soldiers' and nobles' reputation as 0–100 merit points (goal Oct 17, PROVISIONAL scale).
 
 ### What the player sees
 - Close friends: fairly accurate. Others: estimates ("seems to respect you, trust unclear"). Spies, conversations, POL/INT make it sharper.
 
 ### Romance & marriage
 - Marriage for love, alliance, or both (links ch. 2 extra 3). Status matters: low-born + noble is very hard. Jealousy and rivals in love possible.
+- ✅ **How the code checks it** (goal Oct 17, owner kan terugdraaien; numbers PROVISIONAL, `engine/family.ts`): Li must be free and 16+, the other 15+, alive and known. **Love** = affection 70+ and trust 50+; **alliance** = Li is Sanbyakunin-shō or higher. A **noble house** gives its child to a low-born man only from **Sennin-shō** up. One spouse at a time (a widower may marry again). **Children**: only to a married Li with a living wife, the first after about 9 months, then about one a year at most, six at most; each child is a real person in the world who grows up (an heir comes of age at 15).
 
 ## Chapter 9 – Time ✅
 
@@ -524,6 +527,25 @@ Discovery triggers (any one): Li says the name Hattori · someone who saw Takesh
 Possible outcomes: an ally reaches out · a Kurogane veteran turns hostile · word reaches Suiren and the Three Families send killers (Li cannot die; people around him can).
 
 ## Chapter 11 – Turn, dashboard & session rules ✅
+
+### The pacing director ✅ (owner, Oct 16; from `docs/PROPOSAL_PACING.md`)
+- **Waiting rule:** when the player waits or obeys twice, the world acts (an order played through, time moves, the threat comes); a slave or soldier gets orders, not questions he cannot answer.
+- **Stall counter:** after **2** scenes in a row without time passing the Game Master is told to make a hard move; a 3rd still scene goes back once (soft: a rewrite is shown, never lost).
+- **Threat clocks:** a threat has a clock (3–8 steps, usually 4) that the code fills by itself, **one step per 2 days**; Claude may move it one step per scene; max 3 open. A full clock is due in the next scene. Li feels them in the Li tab ("something is brewing" · "it is getting close" · "it is coming now"), never as numbers.
+- **Already said:** phrases repeated in the last scenes are listed for the Game Master so it stops repeating them.
+
+### Interesting scenes ✅ (owner, Oct 16; from `docs/PROPOSAL_INTERESTING.md`)
+- **How much Li's life is shown** (a player setting, like Football Manager's highlights): *Key moments* (quiet time passes at once) · **Normal** (default: quiet time passes after 1.5 s; **one calm scene after a big moment**: a fight, a battle, a death, a promotion) · *Everything* (scene by scene).
+- **Montage:** quiet time is told in one go (hours or days in a few lines) with the player's last plan, and stops at the next story in motion or at danger.
+- **Every scene turns** (McKee): a scene that hands control back names what it changed; a scene that changes nothing plays as routine.
+- **Detail by importance:** an ordinary scene 120–200 words, a big moment 200–300, routine 60–150. Enter late, leave early; end on the decision.
+- **Stories in motion** (story sifting): the code lists open threats, grudges, strong bonds, seeds in play and world events near Li.
+- **The drama layer** (owner's OK, Oct 16; `docs/PROPOSAL_DRAMA.md`): people remember their fights with Li (score kept by the code); a known person Li beat and left alive opens a revenge threat by itself (Nemesis); people react to what Li did; old setups get their payoff; there is always an open question; a chapter ends on a hook.
+- **Li's plan** (nacht Oct 16; every stage: goal Oct 17, owner kan terugdraaien): in the Li tab the player chooses what Li works toward. As a slave: earn freedom in service · take an enemy officer's head · win Raizen over · buy his freedom · escape to Tatara. Once free: the next rank · land of his own · find his mother and sisters · the truth about his father · a seat among the Six Pillars · a wife and a house. The code shows the real steps from the rules that decide it (merit 0 of 30, Raizen's trust and respect to 85, 15 ryō, stealth 25, endurance 40, winter quarters) and Claude builds chances toward the next step. A plan grants nothing by itself; the plan can be changed at any time.
+- **Sparks in Game Master mode** (nacht Oct 16, owner kan terugdraaien): after each scene, up to 3 short gold lines say what turned, read from the state: a person's view of Li changes, a skill reaches a new level, a fighting style grows, a step of Li's plan is done, a threat starts to brew. Never numbers, never invented.
+- **Close-up map** (owner wish Oct 11; built goal Oct 17, owner kan terugdraaien): the Map tab has a "Close up" view: the Red Crane camp with its places (Raizen's tent, cook fire, soldiers' fire, horse lines, fodder store, drill field, gate, the ford) and "Li is here" from his recorded place; once Li holds land, his land with his hall and each project (built, being built, not yet).
+- **The epilogue** (GE ch. 9 decision 2; built goal Oct 17, `engine/epilogue.ts`): once Li is free the player may **Retire**; at **60** the page offers the epilogue by itself. Claude tells what became of Li, his people and the kingdoms from the record only (rank, titles, house, court, family and father goals, the world news he heard), never his death; without Claude the plain chronicle of facts closes the life. Written once; then the life is complete and a New life starts.
+- **A push after a calm:** after **5** quiet game days the code picks one thing for the next scene (a fitting seed, a threat showing itself, a person acting on their own plan); not while Li is wounded or right after a big moment.
 
 ### Turn loop (code decides, AI narrates)
 1. **Player** picks a numbered option or types freely.
@@ -672,6 +694,7 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 **Factions** (deterministic version of the Crusader Kings 3 system): each faction has a leader, members, troops, a goal and **Discontent** (0–100).
 - ✅ (ch. 12b) Discontent builds **gradually** from: military power vs the Crown (≈80% = strong push) · leader legitimacy · faction unity · treasury & supply · foreign support · Crown authority & dread · a trigger grievance. No on/off switch.
 - At 100 → **ultimatum**. Accepted = the Crown loses authority. Refused = civil war.
+- ✅ **Li at court** (goal Oct 17, owner kan terugdraaien; `engine/court.ts`, numbers PROVISIONAL): the court of the kingdom Li serves, with the factions of the seven profiles below (Tatara: none). In Kurogane: Li has a standing with each faction (the Old Blood · the King's Men · the Favourite's faction · the Chancellor's House), moved by what he does (at most ±10 a scene, with a reason); Claude sees the court from Hyakunin-gashira up. From **Sennin-shō** a general may join one faction (standing 30+); the Old Blood never takes a freed slave. The Li tab shows it as feeling (his side · friendly · watching · hostile). ✅ **Discontent** (goal Oct 17, `engine/discontent.ts`): every month by the Numbers §9 formula, with the per-faction inputs PROVISIONAL and Crown authority from the profiles; at 100 an ultimatum (the stronger faction is given way to: the Crown loses 10 authority; the weaker is refused: civil war); then it starts again. Li can stir or calm a faction (±10 a scene). The great crises stay the fuses (ch. 13d).
 - Same logic as ch. 8 betrayal: low loyalty + opportunity (power ratio) + not too much fear.
 
 **Hidden fuses:** each kingdom starts with 1–2 crises already building when Li is 12.
@@ -712,3 +735,57 @@ Hidden values per kingdom (0–100), never shown; Li only learns them through ru
 - **Tier A:** 3–5 key great families per kingdom, fully designed (head, heir, general, branches, goals, secrets).
 - **Tier B:** the other great families: named, with head and values.
 - **Tier C:** lesser families and branches, generated only when Li gets close, then saved permanently in the name registry.
+
+## Chapter 13d – The free world ✅ (owner, Oct 15; from `docs/PROPOSAL_FREE_WORLD.md`)
+Three layers: the **fixed core** (ch. 13b fuses, Atlas, Numbers §11) · the **living layer** (news, Li's levers) · the **free space** (story seeds, people Claude invents and the code records).
+
+**News travels — fast, for drama** (owner choice). A fired fuse becomes public news that reaches Li by distance:
+| Where Li is | He learns it | How exact |
+|---|---|---|
+| where it happens | at once (he sees it) | true |
+| elsewhere in the same kingdom | after 3 days | the official version |
+| in another kingdom | after 10 days | the public version, partly changed |
+Claude only ever gets what has reached Li; the coming fuses near Li are given to Claude as hidden foreshadowing (rule 11: a visible sign before a big hidden change).
+
+**Li's levers.** Li can push any fuse **on either side** (owner: "he should be able to do anything he wants"): warn or betray, protect or kill, expose or carry the bribe. A lever counts only when Li is where the fuse plays out. The outcome stays one of the canon outcomes (ch. 13b) and is decided by the code; without Li the fuse runs on its own.
+
+**Story seeds** (the 15 of the proposal, owner: keep all): situations, never scripts. Claude plants one when Li's place and life stage fit; the code records planted / grown / dead, so nothing is repeated or forgotten. A missed seed may return in another form.
+
+### Chapter 3 addendum – Houses and the world's people in the code (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+Phase 6 block B (`engine/houses.ts`, `engine/world-people.ts`). Every house of the Atlas (royal and Tier A of all seven kingdoms, plus the Ishizue) is a record with what ch. 3 tracks: land (koku), troops, **prestige**, **loyalty to its lord**, **cohesion**, head, heir, branches, allies, a hostage. Every named person of Atlas §3–§5 and §10 is a real person with stats read from their ranks, an age, a goal and a secret (Claude sees a secret only once Li has met the person; Li's mother and sisters stay hidden until found).
+- **Age and death:** each person has a hidden lifespan of 60–79, fixed by their name (no chance), never sooner than 4 years from Year 100; the King of Tatara's death stays his fuse. Li never dies of age.
+- **Succession** (ch. 13c rule 4): when a head dies, the heir leads; without one, the oldest of the blood; without blood, a cousin of a side branch. Succession costs cohesion −10, and −15 more when the new head is a child (the elders rule) or a cousin.
+- **The house's year:** cohesion −5 when the head is 65 or older, −5 without a grown heir, otherwise +3 (up to 80). **Gekokujō:** below 25 at the turn of a year, the biggest branch breaks away with its land, or (no branch) a retainer seizes the house; cohesion is then 50.
+- **Claude's changes** (checked): a house moves ±10 prestige, loyalty or cohesion a scene with a reason (troops ±10%); a marriage alliance gives both houses +5 prestige and +5 cohesion; a hostage held gives +15 loyalty, harmed −30.
+- **Adoption** (ch. 2 extra 4): a house with no grown heir may adopt Li when he is free, a Hyakunin-gashira or higher, and the head knows him with an opinion of +60 or more. Li becomes noble and the house's heir.
+- **Li's own house:** from Sanbyakunin-shō with land, Li may found a house with its own name.
+- **Genpuku** at 15 (ch. 4): for the world's young and Li's children; for Li only when he is free (a legend moment).
+- Li's generation (Atlas §10) grows with the seasons whether Li has met them or not.
+
+### Chapter 5 addendum – Abilities, techniques and aura in the code (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+Phase 6 block C (`engine/abilities.ts`). Abilities are data records (rank, mastery, kind); limits, the ability count per overall rank and the rank+1 rule are enforced; bloodline abilities and Li's unique Zone use the prodigy exception. Every effect changes the clash of choices (Numbers §4), never adds hidden strength.
+- **Zone – SHINKEN NO RYŪ:** wakes only at a true near-death moment, C-rank, mastery 1. In a fight it is a move of its own; while it lasts, Li's choice beats his opponent's every round. **Rounds** 1 + mastery ÷ 25 (1–5), **uses** per fight 3 + mastery ÷ 50 (3–5); when it ends, +2 fatigue (Li's body pays). Mastery +2 for each use in a real fight. A simulated fight enters it once Li is Wounded.
+- **Twin Demon Dance** (bloodline): needs two-sword mastery 30 and a teacher who saw Takeshi fight and trusts Li (60+: Raizen, Tōno, Shiraiwa Yasutoki, Akabane) or the notes kept with Hikari. Li's feint also beats an attack. Blocked by a sword-arm or shoulder injury.
+- **Kage no Yaiba** (bloodline): needs the blade Kage; once a fight, an attack goes through a counter.
+- **Common abilities:** Zanshin (watching counts double, +10% a round, max +15%) · Iron Wall (command: half the morale shock from losses) · Gale March (command: a push +30% instead of +15%) · Silver Tongue (political: court and house standing ±15 a scene instead of ±10). The world's great carry theirs (Garyū, Kagami, Ōtori, Lady Kinugasa, …).
+- **Style techniques:** at mastery 30 / 50 / 70 / 100 the player chooses one of two in the Li tab: +10% (30, 50) or +15% (70, 100) to one move (attack, counter, feint or observe), inside the ±50% cap. A sword-arm injury blocks two-sword techniques.
+- **Aura** = overall rank score + a fifth of soldiers' and nobles' regard. In a duel a foe two bands below hesitates (only watches) one round, three bands below two rounds; a foe two bands above weighs on Li (+1 fatigue). In battle, when Li leads, the enemy in his sector loses 10 morale in the first phase (15 at three bands).
+- **General type:** Intellectual when INT is 10+ above LEA, Instinctual when LEA is 10+ above INT, otherwise Balanced (shown; its effect on command abilities comes later).
+
+### Chapter 12b addendum – Lies and the defeat ladder in the code (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+Phase 6 block E (`engine/fate.ts`).
+- **Lies** (GE ch. 5): the listener sees through Li when INT + half his observation beats Li's POL + 15 (+15 more when he trusts Li, 60+); someone who knows the truth always does. Caught: trust −8 (fades like a humiliation) and he remembers it. Believed: the lie stays an open thread; found out later: trust −15, half of it a permanent scar. Claude is told beforehand who near Li would see through a lie; if its scene says otherwise, the code's outcome stands.
+- **Defeat ladder** (#10): a defeat is a real fight lost, fled or given up, a battle lost, or an order disobeyed that failed. Each defeat within a year climbs one step; each win steps one down. The costs, step by step: 1 setback · 2 wound and recovery (the fight's own) · 3 a lost chance (no promotion for 90 days) · 4 public humiliation (soldiers −5; witnesses' respect −5) · 5 a disappointed sponsor (superiors who liked Li: respect −10) · 6 rank loss (one rank; a man without rank: soldiers −10) · 7 capture (no service or promotion; it ends by ransom of 2 ryō per rank step, by release, or by an escape that is a fight Li wins) · 8 a follower dies because of Li's failure (one of his own people) · 9 permanent political damage (nobles −15, every faction of his court −10).
+
+### Chapter 13d addendum – The world's texture in the code (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+Phase 6 block G (`engine/texture.ts`).
+- **Kinza:** loans up to 10 ryō per rank step (a slave gets none), 20% a year; at twice the loan a threat clock opens ("Kinza wants its money"). Mercenaries at 250 mon a man a month, paid up front; they march in Li's unit until the contract ends.
+- **The Mist Valley:** for 2 ryō the shinobi find one person's secret (it becomes a report Li reads); never twice against the same target in a year.
+- **Mount Shōgen:** sanctuary (no one seizes a man inside the temple walls); gifts to the temples raise the peasants' regard (+1 per 2 ryō, max +10 a gift).
+- **The Seiran Academy:** the exam in Kaisei, once a year; INT 50 passes: political merit +10, nobles +5.
+- **The Single Path:** each year Suiren's treasury is below 40, the poor rise; it costs Suiren 5 more.
+- **Weather** is fixed by the world number, the year and the kingdom: drought (−25% harvest), floods (−15%), a harsh winter in the north (−5%; the Horo raid), a good year (+10%). A drought in Suiren starves Tatara. Li's own harvest follows the weather where he serves.
+- **Trade (Atlas §8):** an embargo (pushed only from inside the court Li serves) costs the target 5 treasury a year, 8 when it cuts what the target lacks. Prices rise by half when the seller is at war with Li's kingdom or holds back its goods.
+- **Festivals:** New Year, the festival of the dead (M7 D15), the harvest festival (M9 D15), the opening of the Mirror (M4 D8), and each kingdom's own (Hayate's horses, Suiren's lotus, Tatara's fire, Kitakaze's wolf moon).
+- **The Imperial treasures** are tracked: the Jade Seal (Suiren), the Mirror Masumi (Mount Shōgen), the Sword Amenokiri (lost; it can only be found in the ruins of Amatsu-kyō). Li holding one: nobles +20.
+- **Governors:** from Sennin-shō with a place at court, the king may name Li governor of one of Kurogane's six states; governing gives political merit +20 a year.

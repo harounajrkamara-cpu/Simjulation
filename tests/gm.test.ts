@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { gmTurn } from '../ai/gm';
 import { fromSave, li, stateHash, toSave, today } from '../engine/engine';
 import { handleInput } from '../engine/game';
-import { GM_LIMITS, gmApply, gmMemoryText, lastFightResult, parseGmTurn, startGmGame } from '../engine/gm';
+import { GM_LIMITS, gmApply, gmApplyFix, gmMemoryText, lastFightResult, parseGmTurn, startGmGame } from '../engine/gm';
 
 // Game Master mode (owner decision Oct 7): Claude runs the world; the code remembers and referees.
 
@@ -96,24 +96,76 @@ describe('Game Master mode: the code referees', () => {
     expect(lastFightResult(s)).toBeUndefined();
   });
 
-  it('an officer head in Kurogane service can free Li, but only through a won fight', () => {
+  it('an invented officer earns nothing: a farmhand called "Kogashira" cannot free Li (AI Lab issue #3)', () => {
     const s = startGmGame();
     gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
-    gmApply(s, scene({ fight: { foe: 'A Suiren Kogashira', rank: 'F', look: 'an old officer, half dead', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
-    for (let g = 0; s.duel && g < 12; g++) handleInput(s, 'feint'); // this foe falls to feints (fixed, no dice)
-    expect(s.flags[`duel_${Object.keys(s.gm!.duels)[0]}_won`]).toBe(1);
-    expect(s.flags.kogashira_head).toBe(1);
+    const r = gmApply(s, scene({ fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant with a staff', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/not a Kogashira on the code's record/);
+    for (let g = 0; s.duel && g < 12; g++) handleInput(s, 'feint');
+    expect(s.flags.kogashira_head ?? 0).toBe(0);
+    expect(s.flags.merit_service ?? 0).toBe(0);
     gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'head' }] }));
-    expect(li(s).status).toBe('free');
+    expect(li(s).status).toBe('slave');
   });
 
-  it('time never runs backwards and a slave scene skips at most a month', () => {
+  it('the real officer at the ford on his raid day does count, and fights at his real strength', () => {
     const s = startGmGame();
+    gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
+    while (today(s) < 261) gmApply(s, scene({ days: Math.min(30, 261 - today(s)) })); // Year 100, Month 9, Day 22: the Kogashira's raid
+    const r = gmApply(s, scene({ place: 'the ford on the Kurose', fight: { foe: 'A Suiren Kogashira', rank: 'F', look: 'an officer under a blue banner', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect((r.secretNotes ?? []).join(' ')).not.toMatch(/not a Kogashira|no merit/);
+    expect(s.duel!.foe.val).toBe(38); // the record's Kogashira, not Claude's "F"
+  });
+
+  it('on the raid day a "farmhand" called Kogashira is not the officer: the fight is against the recorded officer, once (Copilot review, PR #5)', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ changes: [{ kind: 'service', reason: 'levy' }] }));
+    while (today(s) < 261) gmApply(s, scene({ days: Math.min(30, 261 - today(s)) }));
+    gmApply(s, scene({ place: 'the ford on the Kurose', fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant with a staff', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect(s.duel!.foe.name).toMatch(/Suiren Kogashira/); // the record's officer, at his strength
+    expect(s.duel!.foe.val).toBe(38);
+    s.duel = undefined; // leave the first fight (its result does not matter here)
+    const r = gmApply(s, scene({ place: 'the ford on the Kurose', fight: { foe: 'Another Suiren Kogashira', rank: 'C', look: 'a second officer', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/not a Kogashira on the code's record/);
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/one fight that counts is over/);
+  });
+
+  it('a known person fights with his own numbers, whatever rank Claude guesses', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ fight: { foe: 'Gonza', rank: 'F', look: 'one-eared and angry', deadly: false } }));
+    expect(s.duel!.foe.val).toBe(s.characters.gonza.stats.VAL);
+  });
+
+  it('time never runs backwards: "morning" after an evening is the next morning; a slave scene skips at most a month', () => {
+    const s = startGmGame();
+    const d0 = today(s);
     gmApply(s, scene({ days: 0, part: 'evening' }));
     gmApply(s, scene({ days: 0, part: 'morning' }));
-    expect(s.date.part).toBe('evening');
+    expect(today(s)).toBe(d0 + 1);
+    expect(s.date.part).toBe('morning');
     gmApply(s, scene({ days: 400 }));
-    expect(today(s)).toBe(30);
+    expect(today(s)).toBe(d0 + 31);
+  });
+
+  it('when Li sleeps the next scene is the next morning, even if Claude wrote days 0 (owner, Oct 11)', () => {
+    const s = startGmGame();
+    gmApply(s, scene({ days: 0, part: 'night' }));
+    const d = today(s);
+    gmApply(s, scene({ days: 0, sleeps: true }));
+    expect(today(s)).toBe(d + 1);
+    expect(s.date.part).toBe('morning');
+  });
+
+  it('"Something\'s wrong" can move time forward (never in a scene, never back)', () => {
+    const s = startGmGame();
+    const d = today(s);
+    const r = gmApply(s, scene({ changes: [{ kind: 'time', days: 1, part: 'morning', reason: 'sneaky' }] }));
+    expect(today(s)).toBe(d);
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/time moves with/);
+    gmApplyFix(s, { explanation: 'Li slept; the day should have changed.', changes: [{ kind: 'time', days: 1, part: 'morning', reason: 'Li slept' }], rewindScenes: 0 }, 'the day did not change after I slept');
+    expect(today(s)).toBe(d + 1);
+    gmApplyFix(s, { explanation: 'x', changes: [{ kind: 'time', days: -5, reason: 'back' }], rewindScenes: 0 }, 'go back');
+    expect(today(s)).toBe(d + 1);
   });
 });
 
@@ -125,5 +177,72 @@ describe('the Game Master loop with a fake Claude', () => {
     const r = await gmTurn(ai, s, 'I look at the river');
     expect(r.turn.scene).toBe('Rain on the river.');
     expect(s.gm!.suggestions).toEqual(['I wait', 'I hide']);
+  });
+});
+
+describe('pacing: routine plays itself (owner, Oct 12)', () => {
+  it('Claude can mark a scene as routine; nothing is routine unless Claude says so', () => {
+    expect(parseGmTurn({ scene: 'Li waters the mare.', routine: true })?.routine).toBe(true);
+    expect(parseGmTurn({ scene: 'Bells at dawn: raiders at the ford.' })?.routine).toBeUndefined();
+  });
+});
+
+describe('Copilot QA of PR #5 (6dfcc42): the four reproduced exploits stay closed', () => {
+  const toRaidDay = (s: ReturnType<typeof startGmGame>, place: string) => {
+    gmApply(s, scene({ place, changes: [{ kind: 'service', reason: 'levy' }] }));
+    while (today(s) < 261) gmApply(s, scene({ place, days: Math.min(30, 261 - today(s)) }));
+  };
+  const winDuel = (s: ReturnType<typeof startGmGame>) => {
+    s.characters[s.liId].stats.VAL = 100; s.duel!.li.val = 100; s.duel!.li.mastery = 100;
+    for (let g = 0; s.duel && !s.duel.over && g < 12; g++) handleInput(s, 'feint');
+  };
+
+  it('1. a non-lethal (practice) win against the raid officer gives no head, no officer merit, no freedom', () => {
+    const s = startGmGame();
+    toRaidDay(s, 'the ford on the Kurose');
+    gmApply(s, scene({ place: 'the ford on the Kurose', fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant', officer: 'Kogashira', deadly: false, witnessedEnemy: true } }));
+    winDuel(s);
+    expect(s.flags.kogashira_head ?? 0).toBe(0);
+    expect(s.flags.merit_service ?? 0).toBe(0);
+    gmApply(s, scene({ changes: [{ kind: 'freedom', route: 'head' }] }));
+    expect(li(s).status).toBe('slave');
+  });
+
+  it('2. "Li poisons Raizen at dinner" does not kill Raizen', () => {
+    const s = startGmGame();
+    const r = gmApply(s, scene({ changes: [{ kind: 'dies', npc: 'raizen', reason: 'Li poisons Raizen at dinner' }] }));
+    expect(s.characters.raizen.alive).toBe(true);
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/does not die by Li's hand/);
+  });
+
+  it('3. away from the ford (the rice fields), the raid officer and raid rewards do not count', () => {
+    const s = startGmGame();
+    toRaidDay(s, 'the rice fields');
+    const r = gmApply(s, scene({ place: 'the rice fields', fight: { foe: 'A random farmhand', rank: 'F', look: 'a peasant', officer: 'Kogashira', deadly: true, witnessedEnemy: true } }));
+    expect(s.duel!.foe.name).not.toMatch(/Kogashira/);
+    expect((r.secretNotes ?? []).join(' ')).toMatch(/not a Kogashira on the code's record/);
+  });
+
+  it('4. other wordings of an unearned win are sent back', async () => {
+    const { checkGmScene } = await import('../engine/factcheck');
+    const s = startGmGame();
+    for (const t of ['Li won the spar against Gonza.', 'Li punches Gonza to the ground.', 'Li leaves Gonza unable to rise.',
+      'Li takes the head of Gonza.', 'Li sends Hachi a look and defeats Gonza.', 'Li poisons Gonza at dinner.'])
+      expect(checkGmScene(s, t).map((p) => p.kind)).toContain('fight');
+    // Owner playtest v30: calm horse-scene sentences refused a harmless scene.
+    for (const t of ['Li puts the bucket down near Gonza.', "Li leaves Gonza's tent.", 'Li sends Hachi to fetch water.',
+      "Li puts a hand on Hachi's shoulder and sits him down on a bucket.", 'Li beats the dust out of the blanket while Gonza watches.',
+      'Li wins a smile from Hachi.', 'Li drops beside Hachi in the straw, flat on his back.', 'Li puts Hachi to bed and lies down.'])
+      expect(checkGmScene(s, t).map((p) => p.kind)).not.toContain('fight');
+  });
+});
+
+describe('spars (owner, Oct 15)', () => {
+  it('a spar is never deadly: only a non-deadly fight can be simulated by itself', async () => {
+    const { parseGmTurn } = await import('../engine/gm');
+    const f = (fight: object) => parseGmTurn({ scene: 'x', summary: 'x', fight: { foe: 'Daisuke', rank: 'E', ...fight } })!.fight!;
+    expect(f({ deadly: false, spar: true }).spar).toBe(true);
+    expect(f({ deadly: true, spar: true }).spar).toBe(false);
+    expect(f({ spar: true }).spar).toBe(false); // deadly by default
   });
 });

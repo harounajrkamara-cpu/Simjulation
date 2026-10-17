@@ -1,29 +1,35 @@
+<div id="titlescreen" class="overlay titlescreen" hidden role="dialog" aria-modal="true" aria-labelledby="ts-title">
+  <div class="overlay-inner">
+    <span class="seal big" aria-hidden="true">兵</span>
+    <h1 id="ts-title">Sengoku Soldier</h1>
+    <p class="lead">One boy. Seven kingdoms at war. A father's name he must not say.</p>
+    <div class="row ts-row">
+      <button id="ts-continue" type="button" class="primary">Continue</button>
+      <button id="ts-new" type="button" class="quiet">New life</button>
+      <button id="ts-howto" type="button" class="quiet">How to play</button>
+      <button id="ts-load" type="button" class="quiet">Load save</button>
+    </div>
+  </div>
+</div>
 <div id="newlife" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="nl-title">
   <div class="overlay-inner">
     <span class="seal big" aria-hidden="true">兵</span>
     <h1 id="nl-title">How will Li's story be told?</h1>
-    <p class="lead">Everything is already chosen. Change what you like, or just begin.</p>
+    <p class="lead">Claude is the Game Master: write anything, and the story moves scene by scene. Change what you like, or just begin.</p>
     <div class="settings">
-      <fieldset><legend>Story</legend>
-        <label><input type="radio" name="mode" value="gm" checked> <span><b>Game Master</b><br><small>Claude runs the world. Write anything; people follow their own plans; the story moves scene by scene. Needs Claude.</small></span></label>
-        <label><input type="radio" name="mode" value="classic"> <span><b>Classic chronicle</b><br><small>The hand-written first chapter with numbered choices. Works offline.</small></span></label>
-      </fieldset>
-      <fieldset><legend>Storyteller</legend>
-        <label><input type="radio" name="ai" value="claude" checked> <span><b>Claude</b><br><small>Write anything. Uses your own Claude account; asks permission once.</small></span></label>
-        <label><input type="radio" name="ai" value="plain"> <span><b>Plain chronicle</b><br><small>Template text and numbered choices. Works offline.</small></span></label>
-      </fieldset>
       <fieldset><legend>Guidance</legend>
         <label><input type="radio" name="guide" value="full" checked> <span><b>Full hints</b></span></label>
         <label><input type="radio" name="guide" value="light"> <span><b>Light</b></span></label>
         <label><input type="radio" name="guide" value="off"> <span><b>Off</b></span></label>
       </fieldset>
+      <fieldset><legend>Which life</legend><div id="nl-lives" class="nl-lives"></div></fieldset>
       <fieldset><legend>Ink speed</legend>
         <label><input type="radio" name="ink" value="slow"> <span><b>Slow ink</b></span></label>
         <label><input type="radio" name="ink" value="fast" checked> <span><b>Fast</b></span></label>
         <label><input type="radio" name="ink" value="instant"> <span><b>Instant</b></span></label>
       </fieldset>
     </div>
-    <div class="row"><button id="begin" type="button" class="primary">Begin</button><button id="nl-howto" type="button" class="quiet">How to play</button></div>
+    <div class="row"><button id="begin" type="button" class="primary">Begin</button><button id="nl-howto" type="button" class="quiet">How to play</button><button id="nl-back" type="button" class="quiet" hidden>Back to the chronicle</button></div>
   </div>
 </div>
 <div id="prologue" class="overlay prologue" hidden role="dialog" aria-modal="true" aria-label="Prologue">
@@ -84,7 +90,7 @@
     </dl>
     <div class="file">
       <button id="howto" type="button">How to play</button>
-      <button id="storyteller" type="button" aria-pressed="false">Storyteller: plain</button>
+      <button id="storyteller" type="button" aria-pressed="false" hidden>Storyteller: plain</button>
       <button id="narratorbtn" type="button" aria-pressed="false">Narrator: off</button>
       <button id="savebtn" type="button">Save file</button>
       <button id="new" type="button">New life</button>
@@ -151,6 +157,8 @@
           <button id="wishbtn" type="button" title="A wish to the storyteller about the story, in brackets">( ) Wish</button>
           <button id="waitbtn" type="button" title="Let a quiet week pass. Stops when something happens.">Wait a week</button>
           <button id="skipbtn" type="button">Skip ahead</button>
+          <button id="retirebtn" type="button" class="quiet-tool" hidden title="Li lays down his command: the chronicle ends with an epilogue">Retire</button>
+          <button id="detailbtn" type="button" class="quiet-tool" title="How much of Li's life you see: key moments only, normal, or everything">Show: normal</button>
           <button id="wrongbtn" type="button" class="quiet-tool">Something's wrong</button>
           <button id="helpbtn" type="button" class="quiet-tool">Help</button>
         </div>

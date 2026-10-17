@@ -150,6 +150,8 @@ export interface Wallets { li: number; unit: number; treasury: number }
 export interface Domain {
   id: string; name: string;
   koku: number; // assessed yield, koku per year
+  /** Share of this year's harvest lost to the weather (engine/texture.ts; negative = a good year). */
+  weather?: number;
   taxRate: number; // 0.40–0.60
   population: number;
   peasantLoyalty: number; // 0–100
@@ -320,7 +322,8 @@ export function harvestOf(d: Domain): { harvest: number; war: number; flood: num
   const war = Math.round(d.koku * Math.min(1, d.warMonths * warRate));
   const flood = d.neglectYears >= PROVISIONAL.floodNeglectYears ? Math.round(d.koku * PROVISIONAL.floodLoss) : 0;
   const levies = Math.round(d.levyManMonths * PROVISIONAL.levyLossKoku);
-  return { harvest: Math.max(0, d.koku - war - flood - levies), war, flood, levies };
+  const weather = Math.round(d.koku * (d.weather ?? 0));
+  return { harvest: Math.max(0, d.koku - war - flood - levies - weather), war, flood, levies };
 }
 
 export type Unrest = 'calm' | 'restless' | 'unrest' | 'uprising';

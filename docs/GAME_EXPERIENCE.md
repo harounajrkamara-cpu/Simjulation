@@ -529,3 +529,13 @@ Each phase starts with its own detailed milestone table, written at the start of
 - **Plugins:** frontend-design, Design, code-review, playwright installed by the owner.
 - **Not used:** Blender (3D, not our style), paid map tools.
 - **Publishing elsewhere (itch.io) only on the owner's go.**
+
+### Chapter 3b addendum – Big moments in the code (Oct 17 build, ⚠ PROVISIONAL — owner kan terugdraaien)
+Phase 6 block D (`engine/moments.ts`).
+- **Legend moments** are detected by the code after every scene, once each: the Zone, the first nickname, freedom, the first officer's head, genpuku, first command (Gochō), his own banner, first land, the father's truth, the family found, a Pillar seat, S rank, meeting a living S-rank, meeting a rival of his generation, the death of a close friend. Each writes a **legend page** in the Journal (date, who saw it), makes every witness remember it, and starts a rumour. The big ones get the legend screen; those with their own film (freedom, land, family, father) only the page.
+- **Rumours in Game Master mode** travel one step a month: the camp → the kingdom → the whole land. A true rumour about Li's deeds raises soldiers' regard +3 when it reaches the kingdom and nobles' +2 at the whole land. Claude may start talk, true or false (a lie is marked for Claude).
+- **Ceremonies** (the reward ceremony) and **gatherings** (feast, funeral, oath, wedding) show who stands there and how each reacts by their own opinion; each witness remembers it. An **oath** binds the man to Li (loyalty +10). A funeral is only for the dead; a feast needs men of his own (Kogashira) or a hall; a feast lifts soldiers' regard +2.
+- **Li's banner:** from Hyakunin-gashira his unit may take a name and a sign; battles then use the name.
+- **Nicknames per group:** soldiers, nobles, peasants or enemies name Li only after a deed in the last 60 days and when their regard is 10+.
+- **Title screen** at every opening: Continue (when there is a life) · New life · How to play · Load save.
+- **Signs of hidden changes** (WB 12b #11; live test Oct 17, ⚠ PROVISIONAL): after every scene, a hidden relation change shows one gold line per person, never a number: the code's own words when it wrote them for the player ("Raizen sees through Li's lie"), else a plain line ("Hachi warms to Li", "thinks less of Li") when the change in one scene is 5 or more.

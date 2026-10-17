@@ -16,6 +16,26 @@ export const good: Policy = (d) => (d.round === 0 ? 'observe' : autoMove(d));
 /** Bad choices: the same move every round. */
 export const bad: Policy = () => 'attack';
 
+const ANSWER: Record<DuelMove, DuelMove[]> = { attack: ['feint', 'observe'], counter: ['attack'], feint: ['counter', 'observe'], observe: ['counter'] };
+/**
+ * Skilled choices (Oct 15): a player who uses only what the game tells him. After one observe he knows the foe's
+ * favourite habit and that the foe answers Li's repeats (the hint text), so he predicts the NEXT move and beats it.
+ * This is what Numbers §12 means by "good choices"; `good` above (answer the LAST move) is a simple player whom the
+ * foe learns to punish.
+ */
+export const skilled: Policy = (d) => {
+  if (d.round === 0) return 'observe';
+  const top = [...DUEL_MOVES].sort((a, b) => d.prefs[b] - d.prefs[a])[0];
+  const score: Record<DuelMove, number> = { attack: 0, counter: 0, feint: 0, observe: 0 };
+  score[top] = 2;
+  for (const m of d.li.history.slice(-3)) for (const a of DUEL_MOVES) if (ANSWER[a].includes(m)) score[a] += 1.5;
+  const last2 = d.foe.history.slice(-2);
+  if (last2.length === 2 && last2[0] === last2[1]) score[last2[0]] -= 2;
+  let next: DuelMove = 'attack';
+  for (const m of DUEL_MOVES) if (score[m] > score[next]) next = m;
+  return DUEL_MOVES.find((m) => ANSWER[m].includes(next)) ?? 'attack';
+};
+
 function fight(liScore: number, foeScore: number, prefs: DuelState['prefs'], policy: Policy): string {
   let d: DuelState = {
     id: 'b', round: 0, over: false, surprise: false, prefs,
@@ -36,7 +56,8 @@ export function upsetRate(lo: [number, number], hi: [number, number], policy: Po
 
 if (process.argv[1]?.endsWith('balance.ts')) {
   const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
-  console.log('C vs B, good choices:', pct(upsetRate([45, 59], [60, 74], good)));
+  console.log('C vs B, skilled choices (target 10–20%):', pct(upsetRate([45, 59], [60, 74], skilled)));
+  console.log('C vs B, simple choices:', pct(upsetRate([45, 59], [60, 74], good)));
   console.log('C vs B, bad choices :', pct(upsetRate([45, 59], [60, 74], bad)));
   console.log('same rank (C vs C), good:', pct(upsetRate([45, 59], [45, 59], good)));
   console.log('D vs B, good choices:', pct(upsetRate([30, 44], [60, 74], good)));

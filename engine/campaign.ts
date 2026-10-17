@@ -48,6 +48,13 @@ export function officerOf(n: number): OfficerKind | undefined {
   return n % 12 === 5 ? 'gocho' : n % 12 === 11 ? 'kogashira' : undefined;
 }
 
+/** The enemy officer who really leads today's raid at the ford (the code's record), if any. */
+export function raidOfficerOn(dayIndex: number) {
+  const n = raidIndexOn(dayIndex);
+  const kind = n === undefined ? undefined : officerOf(n);
+  return kind ? OFFICERS[kind] : undefined;
+}
+
 const skirmishOutcomes = (foe: string, loot: number): Record<'won' | 'lost' | 'draw' | 'fled' | 'yielded', DuelOutcome> => ({
   won: {
     fact: `At the ford the levy line holds, and Li brings down ${foe}. The Hagiwara sergeant marks it with a notch on his tally stick. The levy keeps what the fallen carry: ${loot} mon for Li.`,

@@ -37,6 +37,8 @@ export interface DuelFighter {
   /** Rounds spent observing the other (max 3 → +15%). */
   observed: number;
   history: DuelMove[];
+  /** A permanent injury taken in this fight (Numbers §4: a Badly wounded hit with a gap above 100%). */
+  injury?: string;
 }
 
 export interface DuelState {
@@ -55,6 +57,26 @@ export interface DuelState {
   place?: string;
   estimate?: string;
   result?: 'won' | 'lost' | 'draw' | 'fled' | 'yielded';
+  /** Li's abilities in this fight (engine/abilities.ts): the Zone, the chosen techniques, aura. */
+  zone?: { rounds: number; left: number; uses: number; used: number };
+  liBonus?: Partial<Record<DuelMove, number>>;
+  liAbilities?: string[];
+  kageUsed?: boolean;
+  /** Rounds the foe hesitates under Li's aura (he only watches). */
+  foeHesitates?: number;
+  /** The foe's abilities (a known person's records). */
+  foeAbilities?: string[];
+}
+
+/** Li can enter the Zone now (he has it, it is not running, uses are left). */
+export const canZone = (d: DuelState) => !!d.zone && d.zone.left === 0 && d.zone.used < d.zone.uses && !d.over;
+
+/** SHINKEN NO RYŪ: the Zone starts; no round passes (the player then picks a move). */
+export function activateZone(prev: DuelState): RoundResult {
+  const d: DuelState = structuredClone(prev);
+  if (!canZone(d)) return { state: d, lines: [] };
+  d.zone = { ...d.zone!, left: d.zone!.rounds, used: d.zone!.used + 1 };
+  return { state: d, lines: [`SHINKEN NO RYŪ. The world goes quiet and slow; Li sees every move before it comes (${d.zone.rounds} round${d.zone.rounds > 1 ? 's' : ''}).`] };
 }
 
 /** Style factor v0.3. */
@@ -116,20 +138,34 @@ export interface RoundResult {
 export function duelRound(prev: DuelState, liMove: DuelMove): RoundResult {
   const d: DuelState = structuredClone(prev);
   const lines: string[] = [];
-  const fm = foeMove(d);
+  // Aura (ch. 12b): a much weaker foe hesitates and only watches.
+  const hesitates = (d.foeHesitates ?? 0) > 0;
+  const fm = hesitates ? 'observe' : foeMove(d);
+  if (hesitates) d.foeHesitates! -= 1;
   d.round += 1;
   d.li.history.push(liMove);
   d.foe.history.push(fm);
   lines.push(`Round ${d.round}: Li ${verb3(liMove)}; ${d.foe.name} ${verb3(fm)}.`);
 
-  const win = clashWinner(liMove, fm);
+  if (hesitates) lines.push(`${d.foe.name} hesitates under Li's presence.`);
+  const has = (id: string) => (d.liAbilities ?? []).includes(id);
+  const zoneOn = !!d.zone && d.zone.left > 0;
+  let win = clashWinner(liMove, fm);
+  // Abilities change the clash, never add hidden strength (Numbers §4).
+  if (zoneOn) win = 'a';
+  else if (has('twin_demon_dance') && liMove === 'feint' && fm === 'attack') { win = 'a'; lines.push('The Twin Demon Dance: the feint turns his attack aside.'); }
+  else if (has('kage_no_yaiba') && !d.kageUsed && liMove === 'attack' && fm === 'counter') { win = 'a'; d.kageUsed = true; lines.push('Kage no Yaiba: the shadow blade goes through his guard.'); }
+  if (zoneOn) {
+    d.zone!.left -= 1;
+    if (d.zone!.left === 0) { d.li.fatigue = Math.min(3, d.li.fatigue + 2); lines.push("The Zone breaks; Li's body pays for it."); }
+  }
   const strike = ['attack', 'feint'].includes(liMove) || ['attack', 'feint'].includes(fm);
-  let liSit = win === 'a' ? 0.25 : win === 'b' ? -0.15 : 0;
+  let liSit = (win === 'a' ? 0.25 : win === 'b' ? -0.15 : 0) + (d.liBonus?.[liMove] ?? 0);
   let foeSit = win === 'b' ? 0.25 : win === 'a' ? -0.15 : 0;
-  const liKnow = Math.min(3, d.li.observed) * 0.05;
+  const liKnow = Math.min(0.15, Math.min(3, d.li.observed) * (has('zanshin') ? 0.1 : 0.05));
   const surprise = d.surprise && d.round === 1 ? 0.3 : 0;
   liSit += Math.max(liKnow, surprise);
-  foeSit += Math.min(3, d.foe.observed) * 0.05;
+  foeSit += Math.min(0.15, Math.min(3, d.foe.observed) * ((d.foeAbilities ?? []).includes('zanshin') ? 0.1 : 0.05));
   if (liMove === 'observe') {
     d.li.observed += 1;
     if (d.li.observed >= 1 && !d.hint) { d.hint = habitHint(d); lines.push(`Li reads him: ${d.hint}`); }
@@ -162,8 +198,18 @@ export function duelRound(prev: DuelState, liMove: DuelMove): RoundResult {
   const who = liWins ? d.foe.name : 'Li';
   if (steps === 0) lines.push(`${who} is pushed back and tires.`);
   else lines.push(`${who} is hit → ${WOUND_LABEL[loser.wound]}.`);
+  // Numbers §4: only a Badly wounded result from a gap above 100% leaves a permanent injury; the area follows the attack.
+  if (loser.wound >= 3 && g > 1 && !loser.injury) {
+    loser.injury = INJURY_AREA[liWins ? liMove : fm];
+    lines.push(`The blow goes deep: ${who === 'Li' ? 'Li\'s' : `${who}'s`} ${loser.injury} will never be the same.`);
+  }
   return finish(d, lines);
 }
+
+/** Numbers §4 "the engine picks the body area from the attack type, in a fixed order". */
+export const INJURY_AREA: Record<DuelMove, string> = { attack: 'sword arm', feint: 'leg', counter: 'side', observe: 'shoulder' };
+/** PROVISIONAL (Oct 17, owner kan terugdraaien): what a permanent injury costs, in VAL. */
+export const INJURY_VAL: Record<string, number> = { 'sword arm': -2, leg: -1, side: -1, shoulder: -1.5 };
 
 function finish(d: DuelState, lines: string[]): RoundResult {
   if (d.foe.wound >= 4) { d.over = true; d.result = 'won'; }
@@ -187,4 +233,19 @@ export function autoMove(d: DuelState): DuelMove {
 /** Healing days for Li's wound after a duel. */
 export function healDaysFor(w: Wound): number {
   return HEAL_DAYS[w];
+}
+
+/** How the fight looks to Li before he moves (owner, Oct 17: warn first), from his guess of the foe, never the true numbers. */
+export function fightOdds(d: DuelState): string {
+  const L = ['F', 'E', 'D', 'C', 'B', 'A', 'S'];
+  const guess = (d.estimate ?? '').match(/Warrior ([FEDCBAS])/)?.[1];
+  const mine = L[Math.min(6, Math.floor(Math.max(0, (d.li.val + d.li.mastery) / 2) / 15))];
+  if (!guess) return '';
+  const gap = L.indexOf(guess) - L.indexOf(mine);
+  const edge = d.surprise || d.foe.wound > 0 || d.foe.fatigue > 0 ? ' Something is on Li\'s side: use it.' : '';
+  if (gap >= 3) return `He is far beyond Li. A fight like this is lost unless something turns it: get out, give up, or survive it.${edge}`;
+  if (gap === 2) return `He is much stronger. Only luck in the reading, a surprise or his weakness could turn it.${edge}`;
+  if (gap === 1) return `He is stronger. Read him well and Li can win.${edge}`;
+  if (gap === 0) return 'An even fight: the choices decide it.';
+  return 'Li is the stronger one here.';
 }

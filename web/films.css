@@ -227,3 +227,31 @@
   .film *, .film { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition: none !important; }
   .fl-p { display: none; }
 }
+
+/* 8. First victory */
+.film--victory[data-shot="2"] .fv-li { animation: fv-rush-r .7s cubic-bezier(.6, 0, .9, .4) forwards; }
+.film--victory[data-shot="2"] .fv-foe { animation: fv-rush-l .7s cubic-bezier(.6, 0, .9, .4) forwards; }
+@keyframes fv-rush-r { to { transform: translateX(380px); } }
+@keyframes fv-rush-l { to { transform: translateX(-380px); } }
+.fv-cut { fill: none; stroke: #C9A44C; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 1300; stroke-dashoffset: 1300; filter: drop-shadow(0 0 14px #C9A44C); }
+.fv-cut--thin { stroke: var(--paper); stroke-width: 3; }
+.film--victory[data-shot="3"] .fv-cut { animation: fl-draw .22s ease-out forwards; }
+.film--victory[data-shot="3"] .fv-cut--thin { animation-delay: .08s; }
+.fv-stand, .fv-fall, .fv-li, .fv-foe { stroke: #3A3F49; stroke-width: .6; }
+.fv-fall { transform-box: view-box; transform-origin: 915px 820px; }
+.film--victory[data-shot="4"] .fv-fall { animation: fv-fall 1.1s cubic-bezier(.5, 0, .9, .5) .2s forwards; }
+@keyframes fv-fall { to { transform: rotate(84deg); opacity: .8; } }
+.fv-title { justify-content: flex-start; padding-top: 9vh; gap: 10px; }
+.fv-title .fl-men { color: var(--paper-2); font-size: clamp(16px, 1.6vw, 22px); }
+
+/* 9. Freedom */
+.fv-link { fill: none; stroke: #6B6F78; stroke-width: 10; transform-box: fill-box; transform-origin: center; }
+.fv-link--side { fill: #4A4E57; stroke: #7D828C; stroke-width: 4; }
+.film--freedom[data-shot="1"] .fv-link { animation: fv-strain .45s ease-in-out infinite alternate; }
+@keyframes fv-strain { to { transform: translateY(-4px); stroke: #8A8F99; } }
+.film--freedom[data-shot="2"] .fv-link { animation: fv-fly .9s cubic-bezier(.2, .8, .3, 1) forwards; }
+@keyframes fv-fly { to { transform: translate(var(--tx), var(--ty)) rotate(var(--r)); opacity: 0; } }
+.fv-dawn { opacity: 0; }
+.film--freedom[data-shot="3"] .fv-dawn, .film--freedom[data-shot="4"] .fv-dawn { animation: fl-in 2.2s ease-out forwards; }
+.film--freedom[data-shot="3"] .fv-alone { animation: fv-rise 2.4s ease-out forwards; }
+@keyframes fv-rise { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
